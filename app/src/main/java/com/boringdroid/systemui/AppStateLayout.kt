@@ -242,6 +242,15 @@ class AppStateLayout @JvmOverloads constructor(
             holder.iconIV.tag = taskInfo.id
             holder.iconIV.tooltipText = label
             holder.iconIV.setOnClickListener {
+                Log.e(TAG, "taskInfo ${taskInfo.id}")
+                val runningTasks = systemUIActivityManager.getRunningTasks(1)
+                for (task in runningTasks) {
+                    Log.e(TAG, "runningTask ${task.id}")
+                    if (task.id == taskInfo.id) {
+                        systemUIActivityManager.moveTaskToBack(true, task.id)
+                        return@setOnClickListener
+                    }
+                }
                 systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
                 context.sendBroadcast(
                     Intent("com.boringdroid.systemui.CLOSE_RECENTS")

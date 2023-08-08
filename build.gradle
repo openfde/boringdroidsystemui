@@ -18,4 +18,10 @@ allprojects {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs.add("-Xbootclasspath/p:${project.rootDir}/app/libs/framework.jar")
+        }
+    }
 }
