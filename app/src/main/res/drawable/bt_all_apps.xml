@@ -3,7 +3,8 @@
     android:viewportWidth="92"
     android:viewportHeight="92"
     android:width="@dimen/nav_button_size"
-    android:height="@dimen/nav_button_size">
+    android:height="@dimen/nav_button_size"
+    >
     <group
         android:scaleX="0.01471554"
         android:scaleY="0.01471554"

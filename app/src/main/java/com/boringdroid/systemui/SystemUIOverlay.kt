@@ -76,7 +76,12 @@ class SystemUIOverlay : OverlayPlugin {
                 // The first item is all apps group.
                 // The next three item is back button, home button, recents button.
                 // So we should add app state layout to the 5th, index 4.
-                buttonGroup.addView(appStateLayout, 4, layoutParams)
+                val stateLayoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                stateLayoutParams.marginStart = 50;
+                buttonGroup.addView(appStateLayout, 3, stateLayoutParams)
                 appStateLayout!!.initTasks()
             }
         }
@@ -95,7 +100,7 @@ class SystemUIOverlay : OverlayPlugin {
         this.pluginContext = pluginContext
         navBarButtonGroupId = sysUIContext
             .resources
-            .getIdentifier("ends_group", "id", "com.android.systemui")
+            .getIdentifier("dpad_group", "id", "com.android.systemui")
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         appStateLayout!!.reloadActivityManager(systemUIContext)
