@@ -11,7 +11,8 @@
     <dimen name="app_info_name_text_size">13sp</dimen>
     <dimen name="app_info_icon_width">30dp</dimen>
     <dimen name="app_info_icon_height">30dp</dimen>
-    <dimen name="all_apps_margin_vertical">20dp</dimen>
+    <dimen name="all_apps_margin_vertical">95dp</dimen>
+    <dimen name="all_apps_margin_vertical_bottom">20dp</dimen>
     <dimen name="all_apps_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_vertical">10dp</dimen>
@@ -24,4 +25,5 @@
     <dimen name="task_info_item_padding_horizontal">5dp</dimen>
     <dimen name="all_apps_padding_vertical">5dp</dimen>
     <dimen name="all_apps_padding_horizontal">5dp</dimen>
+    <dimen name="control_bt_size">50dp</dimen>
 </resources>

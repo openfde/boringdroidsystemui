@@ -15,15 +15,24 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
+import android.widget.ImageButton
+import android.widget.ImageView
 import java.lang.ref.WeakReference
 
 class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val windowManager: WindowManager
     private var windowContentView: View? = null
+    private var powerEntry: View? = null
+    private var powerBtn: ImageView? = null
+    private var powerOffBtn: ImageButton? = null
+    private var restartBtn: ImageButton? = null
+    private var lockBtn: ImageButton? = null
     private var allAppsLayout: AllAppsLayout? = null
     private var shown = false
     private val appLoaderTask: AppLoaderTask
     private val handler = H(this)
+    private var powerMenuVisible = false
+
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
@@ -33,6 +42,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
+        powerBtn = windowContentView!!.findViewById(R.id.power_btn)
+        powerEntry = windowContentView!!.findViewById(R.id.power_entry)
+        powerOffBtn = windowContentView!!.findViewById(R.id.power_off_btn)
+        restartBtn = windowContentView!!.findViewById(R.id.restart_btn)
+        lockBtn = windowContentView!!.findViewById(R.id.lock_btn)
         allAppsLayout!!.handler = handler
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
@@ -52,6 +66,37 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         windowManager.addView(windowContentView, layoutParams)
         appLoaderTask.start()
         shown = true
+        powerMenuVisible = false
+        powerEntry!!.visibility = View.GONE
+        powerBtn!!.setOnClickListener(View.OnClickListener {
+            if (powerMenuVisible) {
+                hidePowerMenu()
+            } else {
+                showPowerMenu()
+            }
+        })
+    }
+
+    private fun showPowerMenu() {
+        powerMenuVisible = true
+        powerEntry!!.visibility = View.VISIBLE
+        powerOffBtn!!.setOnClickListener {
+            DeviceUtils.poweroff()
+            hidePowerMenu()
+        }
+        restartBtn!!.setOnClickListener {
+            DeviceUtils.restart()
+            hidePowerMenu()
+        }
+        lockBtn!!.setOnClickListener {
+            DeviceUtils.logout()
+            hidePowerMenu()
+        }
+    }
+
+    private fun hidePowerMenu() {
+        powerMenuVisible = false
+        powerEntry!!.visibility = View.GONE
     }
 
     private fun generateLayoutParams(
@@ -90,7 +135,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun dismiss() {
         try {
-            windowManager.removeViewImmediate(windowContentView)
+            if (windowContentView != null) {
+                windowManager.removeViewImmediate(windowContentView)
+            }
         } catch (e: IllegalArgumentException) {
             Log.e(TAG, "Catch exception when remove all apps window", e)
         }

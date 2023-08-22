@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin {
     private var pluginContext: Context? = null
-    private var systemUIContext: Context? = null
+    public var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var appStateLayout: AppStateLayout? = null
@@ -80,7 +80,7 @@ class SystemUIOverlay : OverlayPlugin {
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
-                stateLayoutParams.marginStart = 50;
+                stateLayoutParams.marginStart = 50
                 buttonGroup.addView(appStateLayout, 3, stateLayoutParams)
                 appStateLayout!!.initTasks()
             }

@@ -4,6 +4,82 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
+    <RelativeLayout
+        android:layout_height="56dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/search_bar_background"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:layout_height="36dp"
+            android:layout_width="36dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:src="@drawable/ic_user"
+            android:id="@+id/avatar_iv"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/user"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/avatar_iv"
+            android:id="@+id/user_name_tv"
+            android:textColor="#FFFFFFFF"
+            android:layout_marginRight="10dp"
+            android:maxEms="10"
+            android:singleLine="true"/>
+        <ImageView
+            android:background="@drawable/circle"
+            android:padding="5dp"
+            android:layout_height="35dp"
+            android:layout_width="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_power"
+            android:id="@+id/power_btn"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="10dp"/>
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical"
+            android:layout_toLeftOf="@+id/power_btn"
+            android:background="#aaa"
+            android:visibility="gone"
+            android:id="@+id/power_entry">
+
+            <!--            <TextView-->
+            <!--                android:imeOptions="actionGo"-->
+            <!--                android:textColorHint="@android:color/white"-->
+            <!--                android:hint="@string/search"-->
+            <!--                android:textColor="@android:color/white"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_gravity="center_vertical"-->
+            <!--                android:background="@null"-->
+            <!--                android:id="@+id/menu_et"-->
+            <!--                android:layout_marginRight="80dp"-->
+            <!--                android:textSize="17sp"-->
+            <!--                android:singleLine="true"/>-->
+
+            <include layout="@layout/power_menu"
+                android:id="@+id/power_panel"/>
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
     <com.boringdroid.systemui.AllAppsLayout
         android:id="@+id/all_apps_layout"
         android:layout_width="match_parent"
@@ -11,6 +87,6 @@
         android:layout_marginStart="@dimen/all_apps_margin_horizontal"
         android:layout_marginTop="@dimen/all_apps_margin_vertical"
         android:layout_marginEnd="@dimen/all_apps_margin_horizontal"
-        android:layout_marginBottom="@dimen/all_apps_margin_vertical"
+        android:layout_marginBottom="@dimen/all_apps_margin_vertical_bottom"
         android:scrollbars="vertical" />
 </RelativeLayout>

@@ -2,4 +2,10 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="system_ui_overlay_name" translatable="false">Boringdroid SystemUI overlay</string>
     <string name="system_ui_debug_name">BoringdroidSystemUIDebug</string>
+    <string name="user">User</string>
+    <string name="search">Search...</string>
+    <string name="power_off">Power off</string>
+    <string name="restart">Restart</string>
+    <string name="soft_restart">Soft restart</string>
+    <string name="lock">Log Out</string>
 </resources>
