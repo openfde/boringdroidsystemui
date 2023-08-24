@@ -95,7 +95,7 @@
             android:layout_height="30dp"
             android:scaleType="fitXY"
             android:background="@drawable/circle"
-            android:src="@drawable/ic_lock" />
+            android:src="@drawable/logout" />
 
 <!--        <TextView-->
 <!--            android:layout_width="wrap_content"-->
