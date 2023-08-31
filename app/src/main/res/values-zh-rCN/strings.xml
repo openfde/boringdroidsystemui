@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<!--    <string name="system_ui_overlay_name" translatable="false">Boringdroid SystemUI overlay</string>-->
+<!--    <string name="system_ui_debug_name">BoringdroidSystemUIDebug</string>-->
+<!--    <string name="user">User</string>-->
+<!--    <string name="search">Search...</string>-->
+<!--    <string name="power_off">Power off</string>-->
+<!--    <string name="restart">Restart</string>-->
+<!--    <string name="soft_restart">Soft restart</string>-->
+<!--    <string name="lock">Log Out</string>-->
+<!--    <string name="pin">Pin</string>-->
+<!--    <string name="move">Move</string>-->
+<!--    &lt;!&ndash;User context menu&ndash;&gt;-->
+<!--    <string name="users">Users</string>-->
+<!--    <string name="files">Files</string>-->
+<!--    <string name="settings">Settings</string>-->
+<!--    <string name="dock_settings">Settings</string>-->
+    <string name="open">打开</string>
+    <string name="todesk">快捷方式</string>
+    <string name="uninstall">卸载</string>
+</resources>

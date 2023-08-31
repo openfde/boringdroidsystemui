@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +32,7 @@ class SystemUIOverlay : OverlayPlugin {
     private var btAllAppsGroup: ViewGroup? = null
     private var appStateLayout: AppStateLayout? = null
     private var btAllApps: View? = null
+    private var systemStateLayout: SystemStateLayout? = null
     private var allAppsWindow: AllAppsWindow? = null
     private var navBarButtonGroupId = -1
     private var resolver: ContentResolver? = null
@@ -83,6 +85,23 @@ class SystemUIOverlay : OverlayPlugin {
                 stateLayoutParams.marginStart = 50
                 buttonGroup.addView(appStateLayout, 3, stateLayoutParams)
                 appStateLayout!!.initTasks()
+
+                val oldSystemStateLayout = buttonGroup.findViewWithTag<View>(TAG_SYSTEM_STATE_LAYOUT)
+                if (oldAppStateLayout != null) {
+                    buttonGroup.removeView(oldSystemStateLayout)
+                }
+                systemStateLayout!!.tag = TAG_APP_STATE_LAYOUT
+                // The first item is all apps group.
+                // The next three item is back button, home button, recents button.
+                // So we should add app state layout to the 5th, index 4.
+                val systemStateLayoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                systemStateLayoutParams.gravity = Gravity.RIGHT
+                buttonGroup.addView(systemStateLayout, 4, systemStateLayoutParams)
+                systemStateLayout!!.initState()
+
             }
         }
     }
@@ -103,6 +122,7 @@ class SystemUIOverlay : OverlayPlugin {
             .getIdentifier("dpad_group", "id", "com.android.systemui")
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        systemStateLayout = initializeSystemStateLayout(this.pluginContext, systemStateLayout)
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
@@ -131,6 +151,7 @@ class SystemUIOverlay : OverlayPlugin {
             if (navBarButtonGroup is ViewGroup) {
                 (navBarButtonGroup as ViewGroup).removeView(btAllAppsGroup)
                 (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
+                (navBarButtonGroup as ViewGroup).removeView(systemStateLayout)
             }
         }
         pluginContext = null
@@ -186,6 +207,16 @@ class SystemUIOverlay : OverlayPlugin {
                 .inflate(R.layout.layout_app_state, null) as AppStateLayout
     }
 
+    @SuppressLint("InflateParams")
+    private fun initializeSystemStateLayout(
+        context: Context?,
+        systemStateLayout: SystemStateLayout?
+    ): SystemStateLayout {
+        return systemStateLayout
+            ?: LayoutInflater.from(context)
+                .inflate(R.layout.layout_nav_panel, null) as SystemStateLayout
+    }
+
     private fun onTunerChange(uri: Uri) {
         val keyName = uri.lastPathSegment
         val value = Settings.Secure.getString(resolver, keyName)
@@ -211,5 +242,7 @@ class SystemUIOverlay : OverlayPlugin {
         private const val ACTION_PLUGIN_CHANGED = "com.android.systemui.action.PLUGIN_CHANGED"
         private const val TAG_ALL_APPS_GROUP = "tag-bt-all-apps-group"
         private const val TAG_APP_STATE_LAYOUT = "tag-app-state-layout"
+        private const val TAG_SYSTEM_STATE_LAYOUT = "tag-system-state-layout"
+
     }
 }

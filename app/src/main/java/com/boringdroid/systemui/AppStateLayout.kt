@@ -40,6 +40,7 @@ class AppStateLayout @JvmOverloads constructor(
     private val userManager: UserManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
     private val taskAdapter: TaskAdapter?
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         AM_WRAPPER.registerTaskStackListener(appStateListener)
@@ -103,6 +104,11 @@ class AppStateLayout @JvmOverloads constructor(
     }
 
     private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
+
+        if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
+            return
+        }
+
         val packageName = getRunningTaskInfoPackageName(runningTaskInfo)
         if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
             taskAdapter!!.setTopTaskId(-1)
@@ -374,6 +380,8 @@ class AppStateLayout @JvmOverloads constructor(
         private const val TAG = "AppStateLayout"
         private val AM_WRAPPER = ActivityManagerWrapper.getInstance()
         private const val MAX_RUNNING_TASKS = 50
+        private const val FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 0x00800000
+
     }
 
     init {

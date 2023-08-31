@@ -1,12 +1,21 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
+import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Handler
 import android.os.Message
+import android.preference.PreferenceManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
@@ -15,9 +24,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
+import android.widget.AdapterView
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ListView
 import java.lang.ref.WeakReference
+
 
 class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val windowManager: WindowManager
@@ -32,13 +44,14 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val appLoaderTask: AppLoaderTask
     private val handler = H(this)
     private var powerMenuVisible = false
-
+    private var sp: SharedPreferences? = null
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
             dismiss()
             return
         }
+        sp = PreferenceManager.getDefaultSharedPreferences(mContext)
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
@@ -75,6 +88,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 showPowerMenu()
             }
         })
+        allAppsLayout?.setWindow(this)
     }
 
     private fun showPowerMenu() {
@@ -147,6 +161,86 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     private fun notifyLoadSucceed() {
         allAppsLayout!!.setData(appLoaderTask.allApps)
+    }
+
+    fun showUserContextMenu(anchor: View, appData: AppData) {
+        val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
+        ColorUtils.applyMainColor(mContext, sp, view)
+        lp?.gravity = Gravity.TOP or Gravity.LEFT
+        lp?.flags =
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        val location = IntArray(2)
+        anchor.getLocationOnScreen(location)
+        lp?.x = location[0]
+        lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
+        view.setOnTouchListener { p1: View?, p2: MotionEvent ->
+            if (p2.action == MotionEvent.ACTION_OUTSIDE) {
+                windowManager.removeView(view)
+            }
+            false
+        }
+        val applicationInfo = mContext.packageManager.getApplicationInfo(appData.packageName!!, 0)
+        val isSystem = applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+        val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
+        val actions = ArrayList<Action?>()
+        actions.add(Action(R.drawable.ic_users, mContext.getString(R.string.open)))
+        actions.add(Action(R.drawable.ic_shortcuts, mContext.getString(R.string.todesk)))
+        if(!isSystem){
+            actions.add(Action(R.drawable.ic_uninstall, mContext.getString(R.string.uninstall)))
+        }
+        actionsLv.adapter = AppActionsAdapter(mContext, actions)
+        actionsLv.onItemClickListener =
+            AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
+                val action = p1.getItemAtPosition(p3) as Action
+                if (action.text.equals(mContext.getString(R.string.open))) {
+                    val intent = Intent()
+                    intent.component = appData.componentName
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    mContext.startActivity(intent)
+                    if (handler != null) {
+                        handler!!.sendEmptyMessage(HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
+                    } else {
+                        Log.e(TAG, "Won't send dismiss event because of handler is null")
+                    }
+                } else if (action.text.equals(mContext.getString(R.string.todesk))) {
+                    createShortcut(appData)
+                } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
+                    uninstallApp(appData)
+                }
+                windowManager.removeView(view)
+            }
+        windowManager.addView(view, lp)
+    }
+
+    private fun uninstallApp(appData: AppData) {
+        Log.d(TAG, "uninstallApp() called with: appData = $appData")
+        val packageUri = Uri.parse("package:${appData.packageName}")
+        val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
+        mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+
+    private fun createShortcut(app: AppData) {
+        Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
+        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+        val shortcutManager: ShortcutManager? = mContext?.getSystemService(ShortcutManager::class.java)
+        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+            val launchIntentForPackage: Intent = mContext?.getPackageManager()?.getLaunchIntentForPackage(app.packageName!!) as Intent
+            launchIntentForPackage.action = Intent.ACTION_MAIN
+            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
+                .setLongLabel(app.name!!)
+                .setShortLabel(app.name!!)
+                .setIcon(icon)
+                .setIntent(launchIntentForPackage)
+                .build()
+            val pinnedShortcutCallbackIntent =
+                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+            val successCallback = PendingIntent.getBroadcast(
+                mContext, 0,
+                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+            )
+            shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
+        }
     }
 
     private class H(allAppsWindow: AllAppsWindow?) : Handler() {
