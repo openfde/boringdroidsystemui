@@ -142,7 +142,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         // TODO: Looks like the heightPixels is incorrect, so we use multi margin to
         //  achieve looks-fine vertical margin of window. Figure out the real reason
         //  of this problem, and fix it.
-        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 3
+        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
         Log.d(TAG, "All apps window location (" + layoutParams.x + ", " + layoutParams.y + ")")
         return layoutParams
     }
@@ -166,7 +166,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     fun showUserContextMenu(anchor: View, appData: AppData) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
-        ColorUtils.applyMainColor(mContext, sp, view)
+        SystemuiColorUtils.applyMainColor(mContext, sp, view)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         lp?.flags =
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH

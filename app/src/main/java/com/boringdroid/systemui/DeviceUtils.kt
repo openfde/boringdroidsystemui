@@ -25,6 +25,18 @@ import java.io.IOException
 import java.io.InputStreamReader
 
 object DeviceUtils {
+
+
+    const val BASIP = "192.168.240.1"
+    const val BASEURL = "http://$BASIP:18080"
+    const val URL_GETALLAPP = "/api/v1/apps"
+    const val URL_STARTAPP = "/api/v1/vnc"
+    const val URL_STOPAPP = "/api/v1/vnc"
+
+    const val URL_LOGOUT = "/api/v1/power/logout"
+    const val URL_POWOFF = "/api/v1/power/off"
+    const val URL_RESTART = "/api/v1/power/restart"
+
     fun lockScreen(context: Context): Boolean {
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         try {
@@ -35,7 +47,7 @@ object DeviceUtils {
         return true
     }
 
-    fun sendKeyEvent(keycode: Int) {
+    @JvmStatic fun sendKeyEvent(keycode: Int) {
         runAsRoot("input keyevent $keycode")
     }
 
@@ -140,7 +152,7 @@ object DeviceUtils {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun playEventSound(context: Context?, event: String?) {
+    @JvmStatic fun playEventSound(context: Context?, event: String?) {
         val soundUri =
             PreferenceManager.getDefaultSharedPreferences(context).getString(event, "default")
         if (soundUri == "default") {
@@ -172,12 +184,12 @@ object DeviceUtils {
         return metrics
     }
 
-    fun getDisplayContext(context: Context, secondary: Boolean): Context {
+    @JvmStatic fun getDisplayContext(context: Context, secondary: Boolean): Context {
         return if (secondary) context.createDisplayContext(getSecondaryDisplay(context)) else context
     }
 
     fun logout() {
-        QuietOkHttp.post(Constants.BASEURL + Constants.URL_LOGOUT)
+        QuietOkHttp.post(BASEURL + URL_LOGOUT)
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
@@ -193,8 +205,8 @@ object DeviceUtils {
             })
     }
 
-    fun poweroff() {
-        QuietOkHttp.post(Constants.BASEURL + Constants.URL_POWOFF)
+    @JvmStatic fun poweroff() {
+        QuietOkHttp.post(BASEURL + URL_POWOFF)
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
@@ -211,7 +223,7 @@ object DeviceUtils {
     }
 
     fun restart() {
-        QuietOkHttp.post(Constants.BASEURL + Constants.URL_RESTART)
+        QuietOkHttp.post(BASEURL + URL_RESTART)
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {

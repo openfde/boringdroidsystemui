@@ -3,7 +3,6 @@ package com.boringdroid.systemui;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,7 +14,7 @@ import android.view.View;
 
 import java.util.ArrayList;
 
-public class ColorUtils {
+public class SystemuiColorUtils {
 
 	public static ArrayList<String> getWallpaperColors(Context context) {
 
@@ -117,24 +116,28 @@ public class ColorUtils {
 	}
 
 	public static int[] getMainColors(SharedPreferences sp, Context context) {
-		String theme = sp.getString("theme", "dark");
+		String theme = sp.getString("theme", "transparent");
 		int color = 0;
 		int alpha = 255;
 		int color2 = 0;
 		int[] colors = new int[5];
 		switch (theme) {
+		case "white":
+				color = Color.parseColor("#ffffff");
+				color2 = SystemuiColorUtils.manipulateColor(color, 1.0f);
+				break;
 		case "dark":
 			color = Color.parseColor("#212121");
-			color2 = ColorUtils.manipulateColor(color, 1.35f);
+			color2 = SystemuiColorUtils.manipulateColor(color, 1.35f);
 			break;
 		case "black":
 			color = Color.parseColor("#060606");
-			color2 = ColorUtils.manipulateColor(color, 2.2f);
+			color2 = SystemuiColorUtils.manipulateColor(color, 2.2f);
 			break;
 		case "transparent":
 			color = Color.parseColor("#050505");
-			color2 = ColorUtils.manipulateColor(color, 2f);
-			alpha = 225;
+			color2 = SystemuiColorUtils.manipulateColor(color, 2f);
+			alpha = 125;
 			break;
 		case "material_u":
 				color = Color.parseColor(getWallpaperColors(context).get(4));
@@ -142,7 +145,7 @@ public class ColorUtils {
 			break;
 		case "custom":
 			color = Color.parseColor(sp.getString("theme_main_color", "#212121"));
-			color2 = ColorUtils.manipulateColor(color, 1.2f);
+			color2 = SystemuiColorUtils.manipulateColor(color, 1.2f);
 			alpha = sp.getInt("theme_main_alpha", 255);
 		}
 		//main color
@@ -156,7 +159,7 @@ public class ColorUtils {
 		//secondary color alpha
 		colors[3] = alpha;
 		//separator color
-		colors[4] = theme.equals("black") ? colors[2] : ColorUtils.manipulateColor(colors[0], 0.8f);
+		colors[4] = theme.equals("black") ? colors[2] : SystemuiColorUtils.manipulateColor(colors[0], 0.8f);
 		return colors;
 	}
 

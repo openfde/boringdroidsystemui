@@ -18,13 +18,23 @@
 <!--        android:padding="8dp"-->
 <!--        android:src="@drawable/ic_unpin" />-->
 
-    <ImageView
-        android:id="@+id/bluetooth_btn"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_margin="5dp"
-        android:padding="5dp"
-        android:src="@drawable/ic_bluetooth_off" />
+    <TextView
+        android:id="@+id/notifications_btn"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/circle_white"
+        android:gravity="center"
+        android:padding="2dp"
+        android:textSize="12sp" />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/bluetooth_btn"-->
+<!--        android:layout_width="35dp"-->
+<!--        android:layout_height="35dp"-->
+<!--        android:layout_margin="5dp"-->
+<!--        android:padding="5dp"-->
+<!--        android:src="@drawable/ic_bluetooth_off" />-->
 
     <ImageView
         android:id="@+id/wifi_btn"

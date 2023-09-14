@@ -1,0 +1,7 @@
+Executable : C:\Users\huyan\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
+arguments : 
+-C
+D:\code\waydroid\vendor_packages_apps_BoringdroidSystemUI_git\restrictionbypass\.cxx\cmake\debug\x86
+nrb
+jvmArgs : 
+

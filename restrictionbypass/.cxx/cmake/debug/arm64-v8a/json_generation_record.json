@@ -1,0 +1,23 @@
+[
+  {
+    "level": "INFO",
+    "message": "Start JSON generation. Platform version: 19 min SDK version: arm64-v8a",
+    "file": "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\CMakeLists.txt",
+    "tag": "debug|arm64-v8a",
+    "diagnosticCode": "UNKNOWN"
+  },
+  {
+    "level": "INFO",
+    "message": "JSON \u0027D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\.cxx\\cmake\\debug\\arm64-v8a\\android_gradle_build.json\u0027 was up-to-date",
+    "file": "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\CMakeLists.txt",
+    "tag": "debug|arm64-v8a",
+    "diagnosticCode": "UNKNOWN"
+  },
+  {
+    "level": "INFO",
+    "message": "JSON generation completed without problems",
+    "file": "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\CMakeLists.txt",
+    "tag": "debug|arm64-v8a",
+    "diagnosticCode": "UNKNOWN"
+  }
+]

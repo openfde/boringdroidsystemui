@@ -1,0 +1,3 @@
+ninja: Entering directory `D:\code\waydroid\vendor_packages_apps_BoringdroidSystemUI_git\restrictionbypass\.cxx\cmake\debug\x86_64'
+[1/2] Building CXX object CMakeFiles/nrb.dir/src/main/cpp/RestrictionBypass.cpp.o
+[2/2] Linking CXX shared library ..\..\..\..\build\intermediates\cmake\debug\obj\x86_64\libnrb.so

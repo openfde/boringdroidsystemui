@@ -1,0 +1,33 @@
+{
+  "buildFiles": [
+    "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\huyan\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe",
+      "-C",
+      "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\.cxx\\cmake\\debug\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\huyan\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe",
+    "-C",
+    "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\.cxx\\cmake\\debug\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "nrb-Debug-x86": {
+      "artifactName": "nrb",
+      "buildCommandComponents": [
+        "C:\\Users\\huyan\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe",
+        "-C",
+        "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\.cxx\\cmake\\debug\\x86",
+        "nrb"
+      ],
+      "abi": "x86",
+      "output": "D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\build\\intermediates\\cmake\\debug\\obj\\x86\\libnrb.so",
+      "runtimeFiles": []
+    }
+  }
+}

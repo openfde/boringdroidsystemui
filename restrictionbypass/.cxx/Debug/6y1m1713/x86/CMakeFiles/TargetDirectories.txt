@@ -1,0 +1,3 @@
+D:/code/waydroid/RestrictionBypass-master/RestrictionBypass-master/restrictionbypass/.cxx/Debug/6y1m1713/x86/CMakeFiles/nrb.dir
+D:/code/waydroid/RestrictionBypass-master/RestrictionBypass-master/restrictionbypass/.cxx/Debug/6y1m1713/x86/CMakeFiles/edit_cache.dir
+D:/code/waydroid/RestrictionBypass-master/RestrictionBypass-master/restrictionbypass/.cxx/Debug/6y1m1713/x86/CMakeFiles/rebuild_cache.dir

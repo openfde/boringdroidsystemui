@@ -1,6 +1,7 @@
 package com.boringdroid.systemui
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
@@ -9,7 +10,11 @@ import android.os.Build
 import android.view.WindowManager
 
 object Utils {
-    fun makeWindowParams(
+
+    @JvmField var notificationPanelVisible = false
+    @JvmField var shouldPlayChargeComplete = false
+
+    @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
         preferLastDisplay: Boolean
     ): WindowManager.LayoutParams? {
@@ -25,7 +30,26 @@ object Utils {
         return layoutParams
     }
 
-    fun dpToPx(context: Context, dp: Int): Int {
+    @JvmStatic fun makeWindowParams(width: Int, height: Int): WindowManager.LayoutParams? {
+        val layoutParams = WindowManager.LayoutParams()
+        layoutParams.format = PixelFormat.TRANSLUCENT
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        layoutParams.type =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
+        layoutParams.width = width
+        layoutParams.height = height
+        return layoutParams
+    }
+
+
+    @JvmStatic fun toggleBuiltinNavigation(editor: SharedPreferences.Editor, value: Boolean) {
+        editor.putBoolean("enable_nav_back", value)
+        editor.putBoolean("enable_nav_home", value)
+        editor.putBoolean("enable_nav_recents", value)
+        editor.commit()
+    }
+
+    @JvmStatic fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
     }
 

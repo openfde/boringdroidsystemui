@@ -20,7 +20,7 @@ class AppActionsAdapter(private val context: Context, actions: ArrayList<Action?
             LayoutInflater.from(context).inflate(R.layout.pin_entry, null)
         val icon = convertView!!.findViewById<ImageView>(R.id.pin_entry_iv)
         val text = convertView.findViewById<TextView>(R.id.pin_entry_tv)
-        ColorUtils.applySecondaryColor(
+        SystemuiColorUtils.applySecondaryColor(
             context, PreferenceManager.getDefaultSharedPreferences(
                 context
             ), icon

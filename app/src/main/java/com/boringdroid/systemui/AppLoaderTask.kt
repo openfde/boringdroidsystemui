@@ -41,7 +41,9 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
             appData.componentName = info.componentName
             appData.packageName = info.applicationInfo.packageName
             appData.icon = info.getIcon(0)
-            loaderAllApps.add(appData)
+            if(!appData.packageName.equals("com.boringdroid.systemui")){
+                loaderAllApps.add(appData)
+            }
         }
         loaderAllApps.sortWith { appDataOne: AppData, appDataTwo: AppData ->
             appDataOne.name!!.compareTo(

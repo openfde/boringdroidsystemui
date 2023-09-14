@@ -18,4 +18,6 @@
     <string name="open">打开</string>
     <string name="todesk">快捷方式</string>
     <string name="uninstall">卸载</string>
+    <string name="notifications">通知</string>
+
 </resources>

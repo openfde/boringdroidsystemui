@@ -20,4 +20,9 @@
     <string name="todesk">create a shortcut</string>
     <string name="uninstall">uninstall</string>
 
+    <string name="tablet_mode_on">Tablet mode on</string>
+    <string name="tablet_mode_off">Tablet mode off</string>
+    <string name="silenced_notifications">Silenced notifications for this app</string>
+    <string name="notifications">Notifications</string>
+
 </resources>

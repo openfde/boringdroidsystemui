@@ -1,7 +1,9 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -17,12 +19,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.DynamicReceiver.Companion.SERVICE_ACTION
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin {
@@ -34,10 +37,14 @@ class SystemUIOverlay : OverlayPlugin {
     private var btAllApps: View? = null
     private var systemStateLayout: SystemStateLayout? = null
     private var allAppsWindow: AllAppsWindow? = null
+    private var notificationWindow: NotificationWindow? = null
     private var navBarButtonGroupId = -1
     private var resolver: ContentResolver? = null
     private val tunerKeys: MutableList<String> = ArrayList()
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
+    private var mNm: NotificationManager? = null
+    private var dynamicReceiver: DynamicReceiver? = null
+
     private val closeSystemDialogsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(TAG, "receive intent $intent")
@@ -117,12 +124,15 @@ class SystemUIOverlay : OverlayPlugin {
     override fun onCreate(sysUIContext: Context, pluginContext: Context) {
         systemUIContext = sysUIContext
         this.pluginContext = pluginContext
+        mNm = sysUIContext.getSystemService(NotificationManager::class.java)
         navBarButtonGroupId = sysUIContext
             .resources
             .getIdentifier("dpad_group", "id", "com.android.systemui")
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         systemStateLayout = initializeSystemStateLayout(this.pluginContext, systemStateLayout)
+        notificationWindow = NotificationWindow(this.pluginContext, this.systemUIContext!!)
+        systemStateLayout?.listener = notificationWindow
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
@@ -132,7 +142,22 @@ class SystemUIOverlay : OverlayPlugin {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter)
+        grantNmnPermission()
+        val notificationServiceEnable = isNotificationServiceEnable()
+        Log.d(TAG,"onCreate() called with: sysUIContext = $sysUIContext, notificationServiceEnable = $notificationServiceEnable")
+        dynamicReceiver = DynamicReceiver(notificationWindow, systemStateLayout)
+        var intentFilter  = IntentFilter()
+        intentFilter.addAction(SERVICE_ACTION)
+        pluginContext.registerReceiver(dynamicReceiver, intentFilter);
     }
+
+    private fun grantNmnPermission() {
+        val method = "setNotificationListenerAccessGranted"
+        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
+        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
+        M.invoke(mNm, component, true)
+    }
+
 
     override fun onDestroy() {
         if (systemUIContext != null) {
@@ -144,6 +169,9 @@ class SystemUIOverlay : OverlayPlugin {
         }
         if (resolver != null) {
             resolver!!.unregisterContentObserver(tunerKeyObserver)
+        }
+        if(dynamicReceiver != null){
+            pluginContext?.unregisterReceiver(dynamicReceiver)
         }
         btAllAppsGroup!!.post {
             btAllAppsGroup!!.setOnClickListener(null)
@@ -233,6 +261,10 @@ class SystemUIOverlay : OverlayPlugin {
             Log.d(TAG, "TunerKeyChanged $uri, self changed $selfChange")
             onTunerChange(uri!!)
         }
+    }
+
+    private fun isNotificationServiceEnable(): Boolean {
+        return NotificationManagerCompat.getEnabledListenerPackages(systemUIContext!!.applicationContext).contains(systemUIContext!!.getPackageName())
     }
 
     companion object {
