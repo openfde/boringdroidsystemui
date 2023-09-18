@@ -25,7 +25,7 @@ android {
 
 	defaultConfig {
 		applicationId "com.boringdroid.systemui"
-		minSdkVersion 26
+		minSdkVersion 29
 		targetSdkVersion 30
 		versionCode 100
 		versionName "100"
@@ -117,6 +117,13 @@ dependencies {
 	androidTestImplementation 'androidx.test.ext:junit:1.1.2'
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 	androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+
+	// 协程核心库
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3"
+	// 协程Android支持库
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3"
+	// 协程Java8支持库
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.4.3"
 
 }
 repositories {

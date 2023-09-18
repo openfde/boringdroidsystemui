@@ -68,7 +68,7 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
         val lp = Utils.makeWindowParams(dpToPx(mContext!!, 300), -2)
         lp!!.x = 5
         lp.gravity = Gravity.BOTTOM or Gravity.RIGHT
-        lp.y = dpToPx(mContext, 2)
+        lp.y = dpToPx(mContext, 10)
         notificationLayout =
             LayoutInflater.from(mContext).inflate(R.layout.notification, null) as HoverInterceptorLayout
         notificationLayout!!.visibility = View.GONE
@@ -286,7 +286,7 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
         val width = dpToPx(mContext!!, 400)
         val lp = Utils.makeWindowParams(width, -2)
         lp!!.gravity = Gravity.BOTTOM or Gravity.RIGHT
-        lp.y = dpToPx(mContext, 2)
+        lp.y = dpToPx(mContext, 10)
         lp.x = dpToPx(mContext, 2)
         lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         notificationPanel = LayoutInflater.from(mContext).inflate(R.layout.notification_panel, null)

@@ -53,6 +53,7 @@
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:orientation="horizontal"
+		android:visibility="gone"
 		android:layout_marginTop="2dp"
 		android:padding="10dp"
 		android:background="@drawable/round_rect"

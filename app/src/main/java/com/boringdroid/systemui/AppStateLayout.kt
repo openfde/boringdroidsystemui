@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.UserManager
@@ -26,8 +27,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.function.Consumer
 import kotlin.math.abs
+
 
 class AppStateLayout @JvmOverloads constructor(
     context: Context,
@@ -40,7 +49,7 @@ class AppStateLayout @JvmOverloads constructor(
     private val userManager: UserManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
     private val taskAdapter: TaskAdapter?
-
+    private val mScope = MainScope()
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         AM_WRAPPER.registerTaskStackListener(appStateListener)
@@ -112,6 +121,10 @@ class AppStateLayout @JvmOverloads constructor(
         val packageName = getRunningTaskInfoPackageName(runningTaskInfo)
         if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
             taskAdapter!!.setTopTaskId(-1)
+            Log.d(
+                "huyang",
+                "notifyDataSetChanged: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
+            )
             taskAdapter.notifyDataSetChanged()
             return
         }
@@ -123,8 +136,18 @@ class AppStateLayout @JvmOverloads constructor(
         val userHandles = userManager.userProfiles
         for (userHandle in userHandles) {
             val infoList = launchApps.getActivityList(packageName, userHandle)
-            if (infoList.size > 0 && infoList[0] != null) {
+            if(runningTaskInfo.taskDescription != null && "vnc_activity_icon".equals(runningTaskInfo.taskDescription.label)){
+                taskInfo.icon = BitmapDrawable(runningTaskInfo.taskDescription.icon)
+                Log.d(
+                    "huyang",
+                    "taskDescription: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
+                )
+            }
+            if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
                 taskInfo.icon = infoList[0]!!.getIcon(0)
+                val shortcutConfigActivityIntent =
+                    launchApps.getShortcutConfigActivityList(packageName, userHandle)
+
                 break
             }
         }
@@ -142,6 +165,10 @@ class AppStateLayout @JvmOverloads constructor(
         taskAdapter!!.setData(tasks)
         taskAdapter.setTopTaskId(taskInfo.id)
         Log.d(TAG, "Top task $taskInfo")
+        Log.d(
+            "huyang",
+            "notifyDataSetChanged first: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
+        )
         taskAdapter.notifyDataSetChanged()
     }
 
@@ -203,9 +230,12 @@ class AppStateLayout @JvmOverloads constructor(
 
         override fun onTaskStackChanged() {
             super.onTaskStackChanged()
-            val info = AM_WRAPPER.getRunningTask(false)
-            Log.d(TAG, "onTaskStackChanged $info")
-            info?.let { topTask(it) }
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(300L)
+                val info = AM_WRAPPER.getRunningTask(false)
+                Log.d(TAG, "onTaskStackChanged $info")
+                info?.let { topTask(it) }
+            }
         }
 
         override fun onTaskRemoved(taskId: Int) {
