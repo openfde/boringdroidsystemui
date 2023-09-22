@@ -9,6 +9,7 @@ class TaskInfo {
     private var realActivityComponentName: ComponentName? = null
     var packageName: String? = null
     var icon: Drawable? = null
+    var label:String ? = null
     fun setBaseActivityComponentName(baseActivityComponentName: ComponentName?) {
         this.baseActivityComponentName = baseActivityComponentName
     }
@@ -37,6 +38,9 @@ class TaskInfo {
                 ", real " +
                 realActivityComponentName +
                 ", package " +
-                packageName)
+                packageName +
+                ", label " +
+                label
+                )
     }
 }

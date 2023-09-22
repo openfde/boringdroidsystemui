@@ -136,7 +136,11 @@ class AppStateLayout @JvmOverloads constructor(
         val userHandles = userManager.userProfiles
         for (userHandle in userHandles) {
             val infoList = launchApps.getActivityList(packageName, userHandle)
-            if(runningTaskInfo.taskDescription != null && "vnc_activity_icon".equals(runningTaskInfo.taskDescription.label)){
+            if(runningTaskInfo.taskDescription != null
+                && runningTaskInfo.taskDescription.label != null
+                && runningTaskInfo.taskDescription.label.contains("Fusion")
+            ){
+                taskInfo.label = runningTaskInfo.taskDescription.label
                 taskInfo.icon = BitmapDrawable(runningTaskInfo.taskDescription.icon)
                 Log.d(
                     "huyang",
@@ -274,6 +278,9 @@ class AppStateLayout @JvmOverloads constructor(
                 )
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(TAG, "Failed to get label for $packageName")
+            }
+            if(taskInfo.label != null){
+                label = taskInfo.label
             }
             holder.iconIV.tag = taskInfo.id
             holder.iconIV.tooltipText = label
