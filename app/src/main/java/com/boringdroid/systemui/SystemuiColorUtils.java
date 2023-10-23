@@ -116,7 +116,7 @@ public class SystemuiColorUtils {
 	}
 
 	public static int[] getMainColors(SharedPreferences sp, Context context) {
-		String theme = sp.getString("theme", "transparent");
+		String theme = "transparent"; //sp.getString("theme", "transparent");
 		int color = 0;
 		int alpha = 255;
 		int color2 = 0;
@@ -144,9 +144,9 @@ public class SystemuiColorUtils {
 				color2 = Color.parseColor(getWallpaperColors(context).get(3));
 			break;
 		case "custom":
-			color = Color.parseColor(sp.getString("theme_main_color", "#212121"));
-			color2 = SystemuiColorUtils.manipulateColor(color, 1.2f);
-			alpha = sp.getInt("theme_main_alpha", 255);
+//			color = Color.parseColor(sp.getString("theme_main_color", "#212121"));
+//			color2 = SystemuiColorUtils.manipulateColor(color, 1.2f);
+//			alpha = sp.getInt("theme_main_alpha", 255);
 		}
 		//main color
 		colors[0] = color;

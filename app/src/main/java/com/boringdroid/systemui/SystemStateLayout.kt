@@ -40,15 +40,9 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         }
 //        bluetoothBtn?.setOnClickListener { this }
 //        wifiBtn?.setOnClickListener { this }
-//        volumeBtn?.setOnClickListener { this }
+        volumeBtn?.setOnClickListener { toggleVolume() }
 //        batteryBtn?.setOnClickListener { this }
 //        volumeBtn?.setOnClickListener { toggleVolume() }
-    }
-
-    override fun onClick(v: View?) {
-        if(v == volumeBtn){
-            toggleVolume()
-        }
     }
 
     private fun toggleVolume() {
@@ -69,5 +63,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         notificationBtn?.visibility = VISIBLE
         notificationBtn?.setBackgroundResource(R.drawable.circle_white)
         notificationBtn?.setText(count.toString() + "")
+    }
+
+    override fun onClick(v: View?) {
     }
 }

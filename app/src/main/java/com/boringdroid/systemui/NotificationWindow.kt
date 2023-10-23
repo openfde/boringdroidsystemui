@@ -368,6 +368,8 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
             }
         })
         cancelAllBtn!!.setOnClickListener(View.OnClickListener { p1: View? ->
+            notificationsLv!!.adapter
+            notificationList?.clear()
             cancelAllNotifications()
             hideNotificationPanel()
         })
@@ -480,8 +482,8 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
                 holder.notifTitle!!.visibility = View.VISIBLE
                 holder.notifText!!.visibility = View.VISIBLE
                 holder.notifCancelBtn!!.visibility = View.VISIBLE
-                val notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE).toString()
-                val notificationText = extras.getCharSequence(Notification.EXTRA_TEXT).toString()
+                val notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
+                val notificationText = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
                 val progress = extras.getInt(Notification.EXTRA_PROGRESS)
                 val p = if (progress != 0) " $progress%" else ""
                 holder.notifTitle!!.text = notificationTitle + p
@@ -546,13 +548,13 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
                 )
             } catch (e: PackageManager.NameNotFoundException) {
             }
-            if (sbn.isClearable) {
+//            if (sbn.isClearable) {
                 holder.notifCancelBtn!!.alpha = 1f
                 holder.notifCancelBtn!!.setOnClickListener { p1: View? ->
 //                    if (sbn.isClearable)
                         this@NotificationWindow.cancelNotification(sbn.key)
                 }
-            } else holder.notifCancelBtn!!.alpha = 0.5f
+//            } else holder.notifCancelBtn!!.alpha = 0.5f
             return convertView!!
         }
 

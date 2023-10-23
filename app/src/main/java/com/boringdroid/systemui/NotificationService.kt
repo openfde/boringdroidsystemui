@@ -1,10 +1,10 @@
 package com.boringdroid.systemui
 
-import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Parcel
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -81,6 +81,15 @@ class NotificationService() : NotificationListenerService() {
         sendBroadcast(intent);
     }
 
+
+    fun calculateParcelSize(obj: StatusBarNotification): Int {
+        val parcel = Parcel.obtain()
+        obj.writeToParcel(parcel, 0)
+        val size = parcel.dataSize()
+        parcel.recycle()
+        return size
+    }
+
     private fun updateNotificationCount() {
         if (!listenerConnected) {
             return
@@ -89,17 +98,20 @@ class NotificationService() : NotificationListenerService() {
         var cancelableCount = 0
         val notifications = activeNotifications
         var notificatiionList = ArrayList<StatusBarNotification>()
+        var dataSize = 0
         Log.d("NotificationService", "updateNotificationCount() called size =  ${notifications.size}" )
         for (notification in notifications) {
 //            if (notification != null && notification.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0) {
                 notificatiionList.add(notification)
+                dataSize += calculateParcelSize(notification)
                 count++
                 if (notification.isClearable) cancelableCount++
 //            }
 //            if (Utils.notificationPanelVisible) cancelAllBtn.setVisibility(if (cancelableCount > 0) View.VISIBLE else View.INVISIBLE)
         }
-        if(notificatiionList.size != 0){
-            sendBroadcastNotificationList(TYEP_UPDATE_NOTIFY, notificatiionList)
+        Log.d("NotificationService", "updateNotificationCount() called dataSize =  ${dataSize}" )
+        if(notificatiionList.size != 0 && dataSize < 500*1024 ){
+                sendBroadcastNotificationList(TYEP_UPDATE_NOTIFY, notificatiionList)
         }
         sendBroadcastCount(TYEP_COUNT_NOTIFY, count)
     }

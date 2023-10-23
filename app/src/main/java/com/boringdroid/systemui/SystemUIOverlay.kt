@@ -19,10 +19,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.DynamicReceiver.Companion.SERVICE_ACTION
+import com.bumptech.glide.Glide
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
@@ -34,7 +36,7 @@ class SystemUIOverlay : OverlayPlugin {
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var appStateLayout: AppStateLayout? = null
-    private var btAllApps: View? = null
+    private var btAllApps: ImageButton? = null
     private var systemStateLayout: SystemStateLayout? = null
     private var allAppsWindow: AllAppsWindow? = null
     private var notificationWindow: NotificationWindow? = null

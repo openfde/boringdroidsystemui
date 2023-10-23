@@ -17,7 +17,7 @@ class DynamicReceiver (private val notifyWindow: NotificationWindow?,
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive() called with: context = $context, type = ${intent.getIntExtra("type", -1)}")
+        Log.d(TAG, "onReceive() called with: type = ${intent.getIntExtra("type", -1)}")
         val msg = intent.getStringExtra("msg")
         when (intent.getIntExtra("type", -1)) {
             TYEP_CREATE_NOTIFY -> notifyWindow?.onNotifyCreate(msg)

@@ -34,6 +34,7 @@ public class RightClickView extends LinearLayout {
                 listener.onRightClick(false);
             }
         }
+
         Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
         return super.dispatchTouchEvent(event);
     }

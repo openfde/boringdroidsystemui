@@ -11,7 +11,7 @@
         android:layout_height="@dimen/nav_button_size"
         android:layout_gravity="center_vertical"
         android:background="@drawable/bg_dock"
-        android:scaleType="fitXY"
-        android:src="@drawable/dock"
+        android:scaleType="center"
+        android:src="@drawable/icon"
         tools:ignore="ContentDescription" />
 </FrameLayout>

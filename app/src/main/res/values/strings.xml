@@ -19,6 +19,8 @@
     <string name="open">open</string>
     <string name="todesk">create a shortcut</string>
     <string name="uninstall">uninstall</string>
+    <string name="close">close</string>
+    <string name="hide">hide</string>
 
     <string name="tablet_mode_on">Tablet mode on</string>
     <string name="tablet_mode_off">Tablet mode off</string>
