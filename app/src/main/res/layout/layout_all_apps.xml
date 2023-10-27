@@ -42,6 +42,16 @@
             android:layout_height="35dp"
             android:layout_width="35dp"
             android:layout_centerVertical="true"
+            android:layout_alignRight="@+id/power_btn"
+            android:src="@drawable/ic_screenrecord"
+            android:id="@+id/screen_recording_btn"
+            android:layout_marginRight="40dp" />
+        <ImageView
+            android:background="@drawable/circle"
+            android:padding="5dp"
+            android:layout_height="35dp"
+            android:layout_width="35dp"
+            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_power"
             android:id="@+id/power_btn"

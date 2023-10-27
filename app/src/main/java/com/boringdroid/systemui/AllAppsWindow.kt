@@ -2,6 +2,7 @@ package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -36,6 +37,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var windowContentView: View? = null
     private var powerEntry: View? = null
     private var powerBtn: ImageView? = null
+    private var screenRecordBtn: ImageView? = null
     private var powerOffBtn: ImageButton? = null
     private var restartBtn: ImageButton? = null
     private var lockBtn: ImageButton? = null
@@ -45,6 +47,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val handler = H(this)
     private var powerMenuVisible = false
     private var sp: SharedPreferences? = null
+    private val SYSUI_PACKAGE = "com.android.systemui"
+    private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
@@ -56,6 +60,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
         powerBtn = windowContentView!!.findViewById(R.id.power_btn)
+        screenRecordBtn = windowContentView!!.findViewById(R.id.screen_recording_btn)
         powerEntry = windowContentView!!.findViewById(R.id.power_entry)
         powerOffBtn = windowContentView!!.findViewById(R.id.power_off_btn)
         restartBtn = windowContentView!!.findViewById(R.id.restart_btn)
@@ -88,6 +93,16 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 showPowerMenu()
             }
         })
+        screenRecordBtn!!.setOnClickListener{
+            val launcherComponent: ComponentName = ComponentName(
+                SYSUI_PACKAGE,
+                SYSUI_SCREENRECORD_LAUNCHER
+            )
+            val intent = Intent()
+            intent.component = launcherComponent
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            screenRecordBtn!!.context.startActivity(intent)
+        }
         allAppsLayout?.setWindow(this)
     }
 
