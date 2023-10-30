@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.preference.PreferenceManager
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -95,6 +96,7 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
             false
         })
     }
+
 
     fun onNotifyPosted(sbn: StatusBarNotification) {
         if(!initialized){
@@ -254,6 +256,24 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
             initialize()
         }
         notificationList = sbn
+    }
+
+    fun onNotifyAdd(sbn: StatusBarNotification) {
+        if(!initialized){
+            initialize()
+        }
+        Log.d("onNotifyAdd", "onNotifyAdd() called with: sbn = $sbn")
+        if(notificationList != null){
+            for (notify in notificationList!!){
+                if(notify.id == sbn.id){
+                    return
+                }
+            }
+            notificationList?.add(sbn)
+        } else {
+            notificationList = ArrayList()
+            notificationList?.add(sbn)
+        }
     }
 
     override fun onClick(v: View?) {
@@ -442,6 +462,7 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
         val ignoredPackages = sp!!.getString("blocked_notifications", "android")
         return ignoredPackages!!.contains(packageName!!)
     }
+
 
     inner class NotificationAdapter(
         private val context: Context,

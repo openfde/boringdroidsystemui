@@ -31,6 +31,13 @@ class DynamicReceiver (private val notifyWindow: NotificationWindow?,
                     notifyWindow?.onNotifyPosted(sbn)
                 }
             }
+            TYEP_ADD_NOTIFY -> {
+                val sbn: StatusBarNotification? = intent.getParcelableExtra("sbn")
+                if (sbn != null) {
+                    notifyWindow?.onNotifyAdd(sbn)
+                }
+            }
+
             TYEP_CONNECT_NOTIFY -> notifyWindow?.onNotifyConnected(msg)
             TYEP_REMOVED_NOTIFY -> notifyWindow?.onNotifyRemoved(msg)
             TYEP_COUNT_NOTIFY -> {
@@ -45,6 +52,7 @@ class DynamicReceiver (private val notifyWindow: NotificationWindow?,
         val SERVICE_ACTION = "notify_action"
         val TYEP_CREATE_NOTIFY = 1
         val TYEP_UPDATE_NOTIFY = 2
+        val TYEP_ADD_NOTIFY = 21
         val TYEP_POSTED_NOTIFY = 3
         val TYEP_CONNECT_NOTIFY = 4
         val TYEP_REMOVED_NOTIFY = 5
