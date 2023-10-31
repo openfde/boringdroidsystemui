@@ -33,8 +33,9 @@ class DynamicReceiver (private val notifyWindow: NotificationWindow?,
             }
             TYEP_ADD_NOTIFY -> {
                 val sbn: StatusBarNotification? = intent.getParcelableExtra("sbn")
+                val index = intent.getIntExtra("index", -1)
                 if (sbn != null) {
-                    notifyWindow?.onNotifyAdd(sbn)
+                    notifyWindow?.onNotifyAdd(sbn, index)
                 }
             }
 

@@ -37,6 +37,7 @@ import android.widget.Toast
 import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_CLEAR_NOTIFIES_ACTION
 import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_CLEAR_NOTIFY_ACTION
 import com.boringdroid.systemui.Utils.dpToPx
+import java.lang.Exception
 
 class NotificationWindow(private val mContext: Context?, private val systemUIContext: Context) : View.OnClickListener,
     SystemStateLayout.NotificationListener {
@@ -258,12 +259,15 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
         notificationList = sbn
     }
 
-    fun onNotifyAdd(sbn: StatusBarNotification) {
+    fun onNotifyAdd(sbn: StatusBarNotification, index: Int) {
         if(!initialized){
             initialize()
         }
         Log.d("onNotifyAdd", "onNotifyAdd() called with: sbn = $sbn")
         if(notificationList != null){
+            if(index == 0){
+                notificationList?.clear()
+            }
             for (notify in notificationList!!){
                 if(notify.id == sbn.id){
                     return
@@ -494,8 +498,12 @@ class NotificationWindow(private val mContext: Context?, private val systemUICon
             val contentView = notification.contentView
             holder.notifActionsLayout!!.removeAllViews()
             if(contentView != null){
-                val apply = contentView.apply(context, holder.notifActionsLayout) as View
-                holder.notifActionsLayout!!.addView(apply)
+                try {
+                    val apply = contentView.apply(context, holder.notifActionsLayout) as View
+                    holder.notifActionsLayout!!.addView(apply)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 holder.notifTitle!!.visibility = View.GONE
                 holder.notifText!!.visibility = View.GONE
                 holder.notifCancelBtn!!.visibility = View.GONE
