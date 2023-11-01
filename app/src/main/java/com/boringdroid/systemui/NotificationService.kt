@@ -15,6 +15,7 @@ import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_CREATE_NOTIFY
 import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_POSTED_NOTIFY
 import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_REMOVED_NOTIFY
+import java.lang.Exception
 
 
 class NotificationService() : NotificationListenerService() {
@@ -83,6 +84,7 @@ class NotificationService() : NotificationListenerService() {
 
 
     private fun sendBroadcastNotification(sbn: StatusBarNotification, index: Int) {
+        Log.d("NotificationService", "sendBroadcastNotification() called with: sbn = $sbn, index = $index")
         val intent = Intent(SERVICE_ACTION)
         intent.putExtra("type", TYEP_ADD_NOTIFY)
         intent.putExtra("sbn", sbn)
@@ -121,7 +123,11 @@ class NotificationService() : NotificationListenerService() {
         if(notificatiionList.size != 0 && dataSize < 500*1024 ){
 //                sendBroadcastNotificationList(TYEP_UPDATE_NOTIFY, notificatiionList)
             notificatiionList.forEachIndexed { index, sbn ->
-                sendBroadcastNotification(sbn, index)
+                try {
+                    sendBroadcastNotification(sbn, index)
+                } catch (e:Exception){
+                    e.printStackTrace()
+                }
             }
         }
         sendBroadcastCount(TYEP_COUNT_NOTIFY, count)
