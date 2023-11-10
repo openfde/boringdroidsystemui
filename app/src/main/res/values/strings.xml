@@ -26,5 +26,5 @@
     <string name="tablet_mode_off">Tablet mode off</string>
     <string name="silenced_notifications">Silenced notifications for this app</string>
     <string name="notifications">Notifications</string>
-
+    <string name="popups_disabled">Notification pop-ups disabled</string>
 </resources>

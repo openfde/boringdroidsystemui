@@ -30,7 +30,7 @@ import java.util.Arrays
 import java.util.stream.Collectors
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin {
+class SystemUIOverlay : OverlayPlugin ,SystemStateLayout.NotificationListener{
     private var pluginContext: Context? = null
     public var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
@@ -39,7 +39,7 @@ class SystemUIOverlay : OverlayPlugin {
     private var btAllApps: ImageButton? = null
     private var systemStateLayout: SystemStateLayout? = null
     private var allAppsWindow: AllAppsWindow? = null
-    private var notificationWindow: NotificationWindow? = null
+    //private var notificationWindow: NotificationWindow? = null
     private var navBarButtonGroupId = -1
     private var resolver: ContentResolver? = null
     private val tunerKeys: MutableList<String> = ArrayList()
@@ -133,8 +133,8 @@ class SystemUIOverlay : OverlayPlugin {
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         systemStateLayout = initializeSystemStateLayout(this.pluginContext, systemStateLayout)
-        notificationWindow = NotificationWindow(this.pluginContext, this.systemUIContext!!)
-        systemStateLayout?.listener = notificationWindow
+        //notificationWindow = NotificationWindow(this.pluginContext, this.systemUIContext!!)
+        systemStateLayout?.listener = this
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
@@ -147,7 +147,7 @@ class SystemUIOverlay : OverlayPlugin {
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
         Log.d(TAG,"onCreate() called with: sysUIContext = $sysUIContext, notificationServiceEnable = $notificationServiceEnable")
-        dynamicReceiver = DynamicReceiver(notificationWindow, systemStateLayout)
+        dynamicReceiver = DynamicReceiver(systemStateLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         pluginContext.registerReceiver(dynamicReceiver, intentFilter);
@@ -278,5 +278,25 @@ class SystemUIOverlay : OverlayPlugin {
         private const val TAG_APP_STATE_LAYOUT = "tag-app-state-layout"
         private const val TAG_SYSTEM_STATE_LAYOUT = "tag-system-state-layout"
 
+    }
+
+    override fun showNotification() {
+        Log.w("SysteUIOverlay","showNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "SHOW_NOTIF_PANEL"
+            )
+        )
+    }
+
+    override fun hideNotification() {
+        Log.w("SysteUIOverlay","hideNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "HIDE_NOTIF_PANEL"
+            )
+        )
     }
 }

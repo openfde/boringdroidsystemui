@@ -27,7 +27,7 @@ import java.io.InputStreamReader
 object DeviceUtils {
 
 
-    const val BASIP = "192.168.240.1"
+    const val BASIP = "127.0.0.1"
     const val BASEURL = "http://$BASIP:18080"
     const val URL_GETALLAPP = "/api/v1/apps"
     const val URL_STARTAPP = "/api/v1/vnc"
@@ -193,12 +193,12 @@ object DeviceUtils {
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
-                    Log.d("huyang", "onFailure() called with: call = [$call], e = [$e]")
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
                 }
 
                 override fun onSuccess(call: Call, response: String) {
                     Log.d(
-                        "huyang",
+                        "fde",
                         "onSuccess() called with: call = [$call], response = [$response]"
                     )
                 }
@@ -210,12 +210,12 @@ object DeviceUtils {
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
-                    Log.d("huyang", "onFailure() called with: call = [$call], e = [$e]")
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
                 }
 
                 override fun onSuccess(call: Call, response: String) {
                     Log.d(
-                        "huyang",
+                        "fde",
                         "onSuccess() called with: call = [$call], response = [$response]"
                     )
                 }
@@ -227,15 +227,25 @@ object DeviceUtils {
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
-                    Log.d("huyang", "onFailure() called with: call = [$call], e = [$e]")
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
                 }
 
                 override fun onSuccess(call: Call, response: String) {
                     Log.d(
-                        "huyang",
+                        "fde",
                         "onSuccess() called with: call = [$call], response = [$response]"
                     )
                 }
             })
+    }
+
+    fun getNavBarHeight(context: Context?): Int {
+        var result = 0
+        val resourceId =
+            context!!.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = context.resources.getDimensionPixelSize(resourceId)
+        }
+        return result
     }
 }

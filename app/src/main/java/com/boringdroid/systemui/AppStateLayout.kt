@@ -125,7 +125,7 @@ class AppStateLayout @JvmOverloads constructor(
         if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
             taskAdapter!!.setTopTaskId(-1)
             Log.d(
-                "huyang",
+                "fde",
                 "notifyDataSetChanged: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
             )
             taskAdapter.notifyDataSetChanged()
@@ -146,7 +146,7 @@ class AppStateLayout @JvmOverloads constructor(
                 taskInfo.label = runningTaskInfo.taskDescription.label
                 taskInfo.icon = BitmapDrawable(runningTaskInfo.taskDescription.icon)
                 Log.d(
-                    "huyang",
+                    "fde",
                     "taskDescription: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
                 )
             }
@@ -173,7 +173,7 @@ class AppStateLayout @JvmOverloads constructor(
         taskAdapter.setTopTaskId(taskInfo.id)
         Log.d(TAG, "Top task $taskInfo")
         Log.d(
-            "huyang",
+            "fde",
             "notifyDataSetChanged first: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
         )
         taskAdapter.notifyDataSetChanged()
