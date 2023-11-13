@@ -72,6 +72,23 @@ class NotificationAdapter(
         val actions = notification.actions
         val extras = notification.extras
         viewHolder.notifActionsLayout.removeAllViews()
+        val contentView = notification.contentView
+        Log.w("fde","NotificationAdapter onBindViewHolder contentView: $contentView")
+        if(contentView != null){
+            try {
+                val apply = contentView.apply(context, viewHolder.notifActionsLayout) as View
+                viewHolder.notifActionsLayout!!.addView(apply)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            viewHolder.notifTitle!!.visibility = View.GONE
+            viewHolder.notifText!!.visibility = View.GONE
+            viewHolder.notifCancelBtn!!.visibility = View.GONE
+        }else{
+            viewHolder.notifTitle!!.visibility = View.VISIBLE
+            viewHolder.notifText!!.visibility = View.VISIBLE
+            viewHolder.notifCancelBtn!!.visibility = View.VISIBLE
+        }
         if (actions != null) {
             val lp = LinearLayout.LayoutParams(-2, -2)
             lp.weight = 1f
