@@ -7,6 +7,7 @@ import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+;
 
 public class BypassProvider extends ContentProvider {
     public BypassProvider() {

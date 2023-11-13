@@ -10,7 +10,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.SystemClock
-import android.util.Log
+
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileNotFoundException

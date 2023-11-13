@@ -7,7 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.service.notification.StatusBarNotification
-import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

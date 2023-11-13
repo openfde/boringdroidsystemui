@@ -19,7 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
+
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater

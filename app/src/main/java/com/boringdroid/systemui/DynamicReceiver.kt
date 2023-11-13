@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.service.notification.StatusBarNotification
-import android.util.Log
+
 
 class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : BroadcastReceiver(){
 

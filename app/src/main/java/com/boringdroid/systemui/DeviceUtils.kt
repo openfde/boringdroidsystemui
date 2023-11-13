@@ -12,7 +12,7 @@ import android.os.Build
 import android.os.UserManager
 import android.preference.PreferenceManager
 import android.util.DisplayMetrics
-import android.util.Log
+
 import android.view.Display
 import androidx.core.content.ContextCompat
 import com.xwdz.http.QuietOkHttp

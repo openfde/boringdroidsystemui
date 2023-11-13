@@ -18,7 +18,7 @@ import android.os.Handler
 import android.os.Message
 import android.preference.PreferenceManager
 import android.util.DisplayMetrics
-import android.util.Log
+
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -168,7 +168,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 windowManager.removeViewImmediate(windowContentView)
             }
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Catch exception when remove all apps window", e)
+            Log.e(TAG, "Catch exception when remove all apps window：" + e)
         }
         windowContentView = null
         shown = false
