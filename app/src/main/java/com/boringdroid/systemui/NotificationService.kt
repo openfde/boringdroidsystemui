@@ -1,3 +1,6 @@
+/**
+ * show notification in right bottom to replace status bar
+ */
 package com.boringdroid.systemui
 
 import android.animation.Animator

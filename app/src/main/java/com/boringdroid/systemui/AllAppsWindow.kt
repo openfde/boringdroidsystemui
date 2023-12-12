@@ -1,3 +1,9 @@
+/**
+ * 1. show all app in this layout
+ * 2. right click to more action(uninstall/open/shortcut)
+ * 3. lock/restart/logout/poweroff computer
+ * 4. search app
+ */
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
