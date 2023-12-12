@@ -1,3 +1,8 @@
+/*
+1. Maximize/Minimize a application when user click app icon in botton
+2. ignore application which not show in recent
+3. set special label for each activity stack
+ */
 package com.boringdroid.systemui
 
 import android.app.ActivityManager
