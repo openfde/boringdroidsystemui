@@ -46,6 +46,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var screenRecordBtn: ImageView? = null
     private var powerOffBtn: ImageButton? = null
     private var restartBtn: ImageButton? = null
+    private var logoutBtn: ImageButton? = null
     private var lockBtn: ImageButton? = null
     private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
@@ -71,6 +72,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         powerEntry = windowContentView!!.findViewById(R.id.power_entry)
         powerOffBtn = windowContentView!!.findViewById(R.id.power_off_btn)
         restartBtn = windowContentView!!.findViewById(R.id.restart_btn)
+        logoutBtn = windowContentView!!.findViewById(R.id.logout_btn)
         lockBtn = windowContentView!!.findViewById(R.id.lock_btn)
         searchEt = windowContentView!!.findViewById(R.id.search_et)
         allAppsLayout!!.handler = handler
@@ -144,8 +146,12 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             DeviceUtils.restart()
             hidePowerMenu()
         }
-        lockBtn!!.setOnClickListener {
+        logoutBtn!!.setOnClickListener {
             DeviceUtils.logout()
+            hidePowerMenu()
+        }
+        lockBtn!!.setOnClickListener {
+            DeviceUtils.lock()
             hidePowerMenu()
         }
     }

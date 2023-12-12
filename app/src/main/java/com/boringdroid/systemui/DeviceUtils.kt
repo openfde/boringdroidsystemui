@@ -36,6 +36,8 @@ object DeviceUtils {
     const val URL_LOGOUT = "/api/v1/power/logout"
     const val URL_POWOFF = "/api/v1/power/off"
     const val URL_RESTART = "/api/v1/power/restart"
+    const val URL_LOCK = "/api/v1/power/lock"
+
 
     fun lockScreen(context: Context): Boolean {
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -224,6 +226,23 @@ object DeviceUtils {
 
     fun restart() {
         QuietOkHttp.post(BASEURL + URL_RESTART)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                    Log.d(
+                        "fde",
+                        "onSuccess() called with: call = [$call], response = [$response]"
+                    )
+                }
+            })
+    }
+
+    fun lock() {
+        QuietOkHttp.post(BASEURL + URL_LOCK)
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {
                 override fun onFailure(call: Call, e: Exception) {
