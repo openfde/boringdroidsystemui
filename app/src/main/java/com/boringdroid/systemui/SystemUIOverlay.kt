@@ -1,7 +1,6 @@
 /**
- *
+ * locate right place for systemstatelayout
  */
-
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
