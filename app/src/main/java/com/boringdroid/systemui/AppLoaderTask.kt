@@ -6,6 +6,7 @@ import android.content.pm.LauncherApps
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.UserManager
+import android.text.TextUtils
 import java.lang.ref.WeakReference
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
@@ -22,6 +23,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     private val loaderTarget: WeakReference<Handler?>?
     private val loaderAllApps: MutableList<AppData> = ArrayList()
     private var stopped = false
+    private var filterName:String = ""
     override fun run() {
         if (stopped) {
             return
@@ -50,6 +52,13 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
                 appDataTwo.name!!
             )
         }
+
+        if(!TextUtils.isEmpty(filterName)){
+            val filteredApps = loaderAllApps.filter { it.name!!.contains(filterName, ignoreCase = true) }
+            loaderAllApps.clear()
+            loaderAllApps.addAll(filteredApps)
+        }
+
         val target = target
         target?.sendEmptyMessage(HandlerConstant.H_LOAD_SUCCEED)
     }
@@ -58,6 +67,12 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     fun start() {
         stopped = false
         handler.post(this)
+    }
+
+    @Synchronized
+    fun start(filter:String) {
+        filterName = filter
+        start()
     }
 
     @Synchronized
