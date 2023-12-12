@@ -1,3 +1,7 @@
+/**
+ *  1.system function button(volumn/wifi/bluetooth/battery)
+ *  2.notification Entrance
+ */
 package com.boringdroid.systemui
 
 import android.content.Context
