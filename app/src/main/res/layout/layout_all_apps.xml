@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:layout_centerVertical="true"
-            android:layout_marginRight="200dp"
+            android:layout_marginRight="240dp"
             android:gravity="center_vertical"
             android:layout_toRightOf="@+id/user_name_tv"
             android:background="#aaa"
@@ -130,26 +130,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
+                android:padding="5dp"
                 android:gravity="center"
-                android:visibility="gone"
                 android:orientation="vertical" >
 
                 <ImageButton
-                    android:id="@+id/soft_restart_btn"
+                    android:id="@+id/logout_btn"
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:scaleType="fitXY"
                     android:background="@drawable/circle"
-                    android:src="@drawable/ic_soft_restart" />
+                    android:src="@drawable/logout" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:text="@string/soft_restart"
-                    android:textColor="#FFFFFFFF" />
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -163,12 +157,12 @@
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:padding="3dp"
                     android:scaleType="fitXY"
                     android:background="@drawable/circle"
-                    android:src="@drawable/logout" />
+                    android:src="@drawable/ic_lock" />
 
             </LinearLayout>
-
 
         </LinearLayout>
 
