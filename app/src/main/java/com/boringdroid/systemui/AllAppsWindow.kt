@@ -17,6 +17,9 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Message
 import android.preference.PreferenceManager
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.DisplayMetrics
 
 import android.view.Gravity
@@ -26,9 +29,12 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.widget.AdapterView
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ListView
+import androidx.core.widget.addTextChangedListener
+import java.io.Console
 import java.lang.ref.WeakReference
 
 
@@ -41,6 +47,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var powerOffBtn: ImageButton? = null
     private var restartBtn: ImageButton? = null
     private var lockBtn: ImageButton? = null
+    private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
     private var shown = false
     private val appLoaderTask: AppLoaderTask
@@ -65,6 +72,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         powerOffBtn = windowContentView!!.findViewById(R.id.power_off_btn)
         restartBtn = windowContentView!!.findViewById(R.id.restart_btn)
         lockBtn = windowContentView!!.findViewById(R.id.lock_btn)
+        searchEt = windowContentView!!.findViewById(R.id.search_et)
         allAppsLayout!!.handler = handler
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
@@ -104,9 +112,28 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             screenRecordBtn!!.context.startActivity(intent)
         }
         allAppsLayout?.setWindow(this)
+        searchEt?.setText("")
+        searchEt?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if(!TextUtils.isEmpty(s.toString())){
+                    appLoaderTask.start(s.toString())
+                } else{
+                    appLoaderTask.start("")
+                }
+                Log.d(TAG, "afterTextChanged() called with: " + s.toString());
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                Log.d(TAG, "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after")
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                Log.d(TAG, "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count")
+            }
+        })
     }
 
     private fun showPowerMenu() {
+        searchEt?.setText("")
+        appLoaderTask.start("")
         powerMenuVisible = true
         powerEntry!!.visibility = View.VISIBLE
         powerOffBtn!!.setOnClickListener {
@@ -124,6 +151,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     }
 
     private fun hidePowerMenu() {
+        searchEt?.setText("")
         powerMenuVisible = false
         powerEntry!!.visibility = View.GONE
     }
