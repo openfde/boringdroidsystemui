@@ -98,7 +98,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
-        appLoaderTask.start()
+        appLoaderTask.start("")
         shown = true
         powerMenuVisible = false
         powerEntry!!.visibility = View.GONE
