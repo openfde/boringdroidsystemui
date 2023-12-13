@@ -1,1 +1,48 @@
 /build
+app/release/
+restrictionbypass/.cxx/
+*.apk
+*.ap_
+# files for the dex VM
+*.dex
+# Java class files
+*.class
+# generated files
+bin/
+gen/
+# Local configuration file (sdk path, etc)
+local.properties
+# Windows thumbnail db
+Thumbs.db
+# OSX files
+.DS_Store
+# Eclipse project files
+.classpath
+.project
+# Android Studio
+*.iml
+.idea
+*.a
+*.o
+*.ninja_log
+/*/*/release/
+/*/*/debug/
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+.gradle
+build/
+/*/*/.cxx/
+/*/.cxx/
+/*/*/privateStreamDebug/
+build-outputs
+out/
+/*/*/build
+/*/*/production
+*.iws
+*.ipr
+*~
+*.swp
+*.trace
+androidTest/
+test/
+.externalNativeBuild
+class_files.txt
