@@ -4,7 +4,9 @@
  */
 package com.boringdroid.systemui
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.util.AttributeSet
 
@@ -24,6 +26,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var audioPanelVisible:Boolean = false
     var listener:NotificationListener ?= null
     private val TAG:String = "SystemStateLayout"
+    private var isShowWifiDlg = false;
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -50,11 +53,72 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             }
         }
 //        bluetoothBtn?.setOnClickListener { this }
-//        wifiBtn?.setOnClickListener { this }
+        wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener { toggleVolume() }
-//        batteryBtn?.setOnClickListener { this }
+        batteryBtn?.setOnClickListener { batteryClick() }
+
 //        volumeBtn?.setOnClickListener { toggleVolume() }
     }
+
+    /**
+     * 状态栏网络点击事件
+     */
+    private fun wifiClick(){
+        isShowWifiDlg =!isShowWifiDlg;
+
+
+//        if(isShowWifiDlg){
+//            val windowWidth = resources.getDimension(R.dimen.wifi_status_window_width).toInt()
+//            val windowHeight = resources.getDimension(R.dimen.wifi_status_window_width).toInt()
+//            val layoutParams = WindowManager.LayoutParams(
+//                windowWidth,
+//                windowHeight,
+//                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+//                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+//                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+//                        or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+//                PixelFormat.RGB_565
+//            )
+//            layoutParams.gravity = Gravity.BOTTOM or Gravity.RIGHT
+//            layoutParams.horizontalMargin = 0.01f
+//            layoutParams.verticalMargin = 0.01f
+//            windowContentView = LayoutInflater.from(context).inflate(R.layout.dialog_wifi_info, null)
+//            windowManager?.addView(windowContentView,layoutParams)
+//        }else{
+//            try {
+//                if (windowContentView != null) {
+//                    windowManager?.removeViewImmediate(windowContentView)
+//                }
+//            } catch (e: IllegalArgumentException) {
+//            }
+//            windowContentView = null
+//        }
+
+//          val net = Net.getInstance(context);
+        val intent = Intent()
+//        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$NetworkDashboardActivity")
+        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
+        intent.component = cn;
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+    }
+
+    /**
+     * 状态栏电池点击事件
+     */
+    private  fun batteryClick(){
+//        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager;
+//        val isCharging = if (batteryManager.isCharging ) "正在充电" else "未充电"
+//        val currentLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
+//        Toast.makeText(context,"batteryClick "+currentLevel + " , "+isCharging,Toast.LENGTH_SHORT).show();
+
+        val intent = Intent()
+        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+        intent.component = cn;
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+    }
+
 
     private fun toggleVolume() {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
