@@ -96,8 +96,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 //          val net = Net.getInstance(context);
         val intent = Intent()
-//        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$NetworkDashboardActivity")
-        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
+        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
+//        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
         intent.component = cn;
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
