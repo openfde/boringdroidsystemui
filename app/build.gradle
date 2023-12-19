@@ -33,6 +33,14 @@ android {
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 	}
 
+	packagingOptions {
+			//排除法
+			exclude 'META-INF/*.kotlin_module'
+			//指定法
+//			pickFirst '指定你想用的那个路径'
+		}
+
+
 	buildTypes {
 		release {
 			minifyEnabled false
@@ -87,6 +95,7 @@ android {
 }
 
 dependencies {
+//	implementation files('libs\\lineage-sdk.jar')
 	compileOnly fileTree(include: ['*.jar'], dir: 'libs/compile')
 	implementation fileTree(include: ['*.jar'], dir: 'libs/impl')
 	compileOnly files('libs/framework.jar')
