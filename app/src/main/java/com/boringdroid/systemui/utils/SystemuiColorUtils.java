@@ -1,4 +1,4 @@
-package com.boringdroid.systemui;
+package com.boringdroid.systemui.utils;
 
 import android.app.WallpaperManager;
 import android.content.Context;

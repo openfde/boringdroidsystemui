@@ -1,14 +1,16 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.service.notification.StatusBarNotification
+import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.NotificationService
+import com.boringdroid.systemui.view.SystemStateLayout
 
 
 class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : BroadcastReceiver(){
 
-    public var service:NotificationService ?= null
+    public var service: NotificationService?= null
 
     constructor ( service: NotificationService):this( null){
         this.service = service
@@ -26,6 +28,7 @@ class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : Broa
             TYEP_PANEL_CHANGE_NOTIFY ->{
                 systemStateLayout?.onNotificationPanelVisibleChanged(intent.getBooleanExtra("panel_visible",false))
             }
+
         }
 
     }
@@ -43,6 +46,7 @@ class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : Broa
         val TYEP_CLEAR_NOTIFY_ACTION = 7
         val TYEP_CLEAR_NOTIFIES_ACTION = 8
         val TYEP_UPDATE_NOTIFY = 9
+        val WIFI_STATUS = 80
     }
 
 }

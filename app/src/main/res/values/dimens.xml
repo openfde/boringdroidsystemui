@@ -26,4 +26,7 @@
     <dimen name="all_apps_padding_vertical">5dp</dimen>
     <dimen name="all_apps_padding_horizontal">5dp</dimen>
     <dimen name="control_bt_size">50dp</dimen>
+
+    <dimen name="wifi_status_window_width">100dp</dimen>
+    <dimen name="wifi_status_window_height">36dp</dimen>
 </resources>

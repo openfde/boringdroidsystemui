@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.utils
 
 import android.app.ActivityManager
 import android.app.usage.UsageStats
@@ -10,6 +10,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.SystemClock
+import com.boringdroid.systemui.App
+import com.boringdroid.systemui.AppTask
+import com.boringdroid.systemui.Log
 
 import java.io.BufferedReader
 import java.io.File

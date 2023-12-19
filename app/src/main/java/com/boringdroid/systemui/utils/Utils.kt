@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.utils
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -8,6 +8,7 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.WindowManager
+import com.boringdroid.systemui.utils.DeviceUtils
 
 object Utils {
 

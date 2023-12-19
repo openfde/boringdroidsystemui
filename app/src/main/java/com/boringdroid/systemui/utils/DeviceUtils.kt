@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.utils
 
 import android.Manifest
 import android.app.admin.DevicePolicyManager
@@ -15,6 +15,7 @@ import android.util.DisplayMetrics
 
 import android.view.Display
 import androidx.core.content.ContextCompat
+import com.boringdroid.systemui.Log
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call

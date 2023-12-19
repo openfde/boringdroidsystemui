@@ -3,7 +3,7 @@
 2. ignore application which not show in recent
 3. set special label for each activity stack
  */
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
@@ -37,6 +37,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
+import com.boringdroid.systemui.Action
+import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.R
+import com.boringdroid.systemui.TaskInfo
+import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.utils.SystemuiColorUtils
+import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope

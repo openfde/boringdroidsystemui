@@ -1,4 +1,4 @@
-package com.boringdroid.systemui;
+package com.boringdroid.systemui.utils;
 
 import android.content.Context;
 import android.util.DisplayMetrics;

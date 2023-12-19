@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.UserManager
 import android.text.TextUtils
+import com.boringdroid.systemui.constant.HandlerConstant
 import java.lang.ref.WeakReference
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {

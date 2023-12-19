@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.constant
 
 object HandlerConstant {
     const val H_LOAD_SUCCEED = 1000

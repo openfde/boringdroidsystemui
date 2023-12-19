@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.adapter
 
 import android.app.Notification
 import android.app.PendingIntent.CanceledException
@@ -16,11 +16,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.utils.IconParserUtilities
+import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.IconParserUtilities
-import com.boringdroid.systemui.AppUtils
-import com.boringdroid.systemui.ColorUtils
-import com.boringdroid.systemui.Utils
+import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.ColorUtils
+import com.boringdroid.systemui.utils.Utils
 import java.lang.Exception
 
 class NotificationAdapter(
@@ -66,14 +67,14 @@ class NotificationAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        Log.w("NotificationAdapter","onBindViewHolder")
+        Log.w("NotificationAdapter", "onBindViewHolder")
         val sbn = notifications[position]
         val notification = sbn.notification
         val actions = notification.actions
         val extras = notification.extras
         viewHolder.notifActionsLayout.removeAllViews()
         val contentView = notification.contentView
-        Log.w("fde","NotificationAdapter onBindViewHolder contentView: $contentView")
+        Log.w("fde", "NotificationAdapter onBindViewHolder contentView: $contentView")
         if(contentView != null){
             try {
                 val apply = contentView.apply(context, viewHolder.notifActionsLayout) as View

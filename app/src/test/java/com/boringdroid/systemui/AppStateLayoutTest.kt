@@ -3,6 +3,7 @@ package com.boringdroid.systemui
 import android.content.ComponentName
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.boringdroid.systemui.view.AppStateLayout
 import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.Ignore
