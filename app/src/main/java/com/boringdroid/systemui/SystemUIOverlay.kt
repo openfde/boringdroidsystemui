@@ -26,14 +26,16 @@ import android.widget.ImageButton
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
-import com.boringdroid.systemui.DynamicReceiver.Companion.SERVICE_ACTION
-import com.bumptech.glide.Glide
+import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.view.AppStateLayout
+import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin ,SystemStateLayout.NotificationListener{
+class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
     private var pluginContext: Context? = null
     public var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null

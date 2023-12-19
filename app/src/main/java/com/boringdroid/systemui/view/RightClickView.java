@@ -1,4 +1,4 @@
-package com.boringdroid.systemui;
+package com.boringdroid.systemui.view;
 
 import android.content.Context;
 import android.util.AttributeSet;

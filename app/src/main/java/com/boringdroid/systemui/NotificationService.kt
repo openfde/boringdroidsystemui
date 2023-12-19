@@ -40,8 +40,12 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.DynamicReceiver.Companion.SERVICE_ACTION
-import com.boringdroid.systemui.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
+import com.boringdroid.systemui.adapter.NotificationAdapter
+import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.utils.*
+import com.boringdroid.systemui.view.HoverInterceptorLayout
 import com.google.android.material.divider.MaterialDividerItemDecoration
 
 class NotificationService : NotificationListenerService(),
@@ -67,6 +71,8 @@ class NotificationService : NotificationListenerService(),
     private val TAG: String = "NotificationService"
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
+
+    private var windowContentView: View? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -104,6 +110,7 @@ class NotificationService : NotificationListenerService(),
         notifActionsLayout = notificationLayout!!.findViewById(R.id.notif_actions_container2)
         wm!!.addView(notificationLayout, lp)
         handler = Handler(Looper.getMainLooper())
+
         notificationLayout!!.alpha = 0f
         notificationLayout!!.setOnHoverListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_HOVER_ENTER) {
@@ -509,6 +516,8 @@ class NotificationService : NotificationListenerService(),
         cancelAllBtn = null
     }
 
+
+
     fun updateNotificationPanel() {
         val adapter = NotificationAdapter(
             context, iconParserUtilities, activeNotifications,
@@ -528,7 +537,22 @@ class NotificationService : NotificationListenerService(),
         override fun onReceive(p1: Context, p2: Intent) {
             val action = p2.getStringExtra("action")
             Log.w("DockServiceReceiver","onReceive action: $action")
-            if (action == "SHOW_NOTIF_PANEL") showNotificationPanel() else hideNotificationPanel()
+            if (action.equals("SHOW_NOTIF_PANEL")) showNotificationPanel()  else if(action.equals("com.fde.action.NOTIFICATION_PANEL_CHANG")){
+                val status = p2.getIntExtra("status",-1)
+                var tipText = "";
+                if(status == 1){
+                    tipText = "wifi已连接"
+                }else if(status == 0){
+                    tipText = "wifi已断开"
+                }else{
+                    tipText = "缺少wifi模块"
+                }
+//                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
+
+            }else {
+                hideNotificationPanel()
+//                hideTipsDialog()
+            }
         }
     }
 

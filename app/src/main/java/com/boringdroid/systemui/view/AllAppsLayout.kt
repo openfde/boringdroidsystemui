@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.content.Intent
@@ -11,7 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.RightClickView.RightClickListener
+import com.boringdroid.systemui.*
+import com.boringdroid.systemui.view.RightClickView.RightClickListener
+import com.boringdroid.systemui.constant.HandlerConstant
 
 class AllAppsLayout @JvmOverloads constructor(
     context: Context,
@@ -38,7 +40,7 @@ class AllAppsLayout @JvmOverloads constructor(
         Adapter<AppListAdapter.ViewHolder>() {
         private val apps: MutableList<AppData?> = ArrayList()
         private var handler: Handler? = null
-        private var appsWindow: AllAppsWindow ?= null
+        private var appsWindow: AllAppsWindow?= null
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val appInfoLayout = LayoutInflater.from(context)
                 .inflate(R.layout.layout_app_info, parent, false) as ViewGroup

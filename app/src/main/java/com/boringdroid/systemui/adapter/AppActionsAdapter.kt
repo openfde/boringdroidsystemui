@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.adapter
 
 import android.content.Context
 import android.preference.PreferenceManager
@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.boringdroid.systemui.Action
+import com.boringdroid.systemui.R
+import com.boringdroid.systemui.utils.SystemuiColorUtils
 
 class AppActionsAdapter(private val context: Context, actions: ArrayList<Action?>?) :
     ArrayAdapter<Action?>(

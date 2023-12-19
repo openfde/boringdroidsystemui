@@ -39,8 +39,12 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ListView
-import androidx.core.widget.addTextChangedListener
-import java.io.Console
+import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.SystemuiColorUtils
+import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AllAppsLayout
 import java.lang.ref.WeakReference
 
 

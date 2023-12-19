@@ -1,9 +1,10 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.utils
 
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import com.boringdroid.systemui.IconPackHelper
 
 class IconParserUtilities( /*
      Small utility for handling icon pack changes for apps
@@ -33,7 +34,7 @@ class IconParserUtilities( /*
     }
 
     fun getPackageThemedIcon(packageName: String?): Drawable? {
-        val iconPackHelper: IconPackHelper = IconPackHelper.Companion.getInstance(context)!!
+        val iconPackHelper: IconPackHelper = IconPackHelper.getInstance(context)!!
         val activityInfo = ActivityInfo()
         activityInfo.packageName = packageName
         if (iconPackHelper.isIconPackLoaded) {
