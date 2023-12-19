@@ -8,12 +8,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.Instrumentation
 import android.app.Notification
 import android.app.PendingIntent.CanceledException
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -22,28 +17,18 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.View.OnTouchListener
-import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.adapter.NotificationAdapter
 import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.HoverInterceptorLayout
 import com.google.android.material.divider.MaterialDividerItemDecoration
@@ -126,7 +111,10 @@ class NotificationService : NotificationListenerService(),
             false
         }
         val dockReceiver = DockServiceReceiver()
-        registerReceiver(dockReceiver, IntentFilter("com.fde.action.NOTIFICATION_PANEL_CHANG"))
+        val filter = IntentFilter()
+        filter.addAction("com.fde.action.NOTIFICATION_PANEL_CHANG")
+        filter.addAction("com.fde.action.NETWORK_PANEL_CHANG")
+        registerReceiver(dockReceiver, filter)
     }
 
     override fun onListenerConnected() {
@@ -536,8 +524,10 @@ class NotificationService : NotificationListenerService(),
     internal inner class DockServiceReceiver : BroadcastReceiver() {
         override fun onReceive(p1: Context, p2: Intent) {
             val action = p2.getStringExtra("action")
+            android.util.Log.i("sanycrm","onReceive  "+action)
             Log.w("DockServiceReceiver","onReceive action: $action")
-            if (action.equals("SHOW_NOTIF_PANEL")) showNotificationPanel()  else if(action.equals("com.fde.action.NOTIFICATION_PANEL_CHANG")){
+            if (action.equals("SHOW_NOTIF_PANEL")) showNotificationPanel()
+            else if(action.equals("com.fde.action.NETWORK_PANEL_CHANG")){
                 val status = p2.getIntExtra("status",-1)
                 var tipText = "";
                 if(status == 1){
@@ -546,8 +536,9 @@ class NotificationService : NotificationListenerService(),
                     tipText = "wifi已断开"
                 }else{
                     tipText = "缺少wifi模块"
+
                 }
-//                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
 
             }else {
                 hideNotificationPanel()

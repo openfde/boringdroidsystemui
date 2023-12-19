@@ -38,6 +38,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     var mCountDownTimerUtils: CountDownTimerUtils? = null;
 
+    var isShowDlg :Boolean? =false;
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
     }
@@ -75,7 +77,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         wifiBtn?.setOnHoverListener(object : View.OnHoverListener{
             override fun onHover(v: View?, event: MotionEvent?): Boolean {
                 val what  = event?.action
-                android.util.Log.i("bella","----what--"+what);
                 when(what){
                     MotionEvent.ACTION_HOVER_ENTER -> {
                         showTips("网络设置",0.07f)
@@ -127,14 +128,32 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             }
         })
 
+
+        notificationBtn?.setOnHoverListener(object : View.OnHoverListener{
+            override fun onHover(v: View?, event: MotionEvent?): Boolean {
+                val what  = event?.action
+                when(what){
+                    MotionEvent.ACTION_HOVER_ENTER -> {
+                        showTips("通知管理",0.1f)
+                    }
+                    MotionEvent.ACTION_HOVER_EXIT -> {
+                        showTips("",0.06f)
+                    }
+                }
+                return false
+            }
+        })
+
     }
 
 
     private fun showTips( content:String,right: Float){
-        android.util.Log.i("bella","----showTips--"+content);
         if(!"".equals(content)){
 //            mCountDownTimerUtils = CountDownTimerUtils(this, 3000, 1000)
 //            mCountDownTimerUtils?.start()
+            if(isShowDlg == true){
+                return;
+            }
             val windowWidth = resources.getDimension(R.dimen.wifi_status_window_width).toInt()
             val windowHeight = resources.getDimension(R.dimen.wifi_status_window_height).toInt()
             val layoutParams = WindowManager.LayoutParams(
@@ -154,6 +173,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
             txtName.setText(content)
             windowManager?.addView(windowContentView,layoutParams)
+            isShowDlg = true ;
         }else{
             try {
                 if (windowContentView != null) {
@@ -162,6 +182,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             } catch (e: IllegalArgumentException) {
             }
             windowContentView = null
+            isShowDlg = false ;
 //            mCountDownTimerUtils?.cancel()
         }
     }
@@ -170,11 +191,10 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * 状态栏网络点击事件
      */
     private fun wifiClick(){
-        Log.i("BELLA", "----wifiClick--");
         showTips("",0.05f)
 
         val intent = Intent()
-        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
+        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
 //        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
         intent.component = cn;
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
