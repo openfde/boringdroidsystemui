@@ -188,7 +188,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     /**
-     * 状态栏网络点击事件
+     * network wifi click
      */
     private fun wifiClick(){
         showTips("",0.05f)
@@ -202,7 +202,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     /**
-     * 状态栏电池点击事件
+     * network battery click
      */
     private  fun batteryClick(){
 //        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager;
