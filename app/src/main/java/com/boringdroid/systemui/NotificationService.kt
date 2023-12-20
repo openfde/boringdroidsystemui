@@ -531,15 +531,14 @@ class NotificationService : NotificationListenerService(),
                 val status = p2.getIntExtra("status",-1)
                 var tipText = "";
                 if(status == 1){
-                    tipText = "wifi已连接"
+                    tipText = "wifi"+getString(R.string.fde_has_connected)
                 }else if(status == 0){
-                    tipText = "wifi已断开"
+                    tipText = "wifi"+getString(R.string.fde_unconnect)
                 }else{
-                    tipText = "缺少wifi模块"
+                    tipText = getString(R.string.fde_no_wifi_module);
 
                 }
-                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
-
+//                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
             }else {
                 hideNotificationPanel()
 //                hideTipsDialog()

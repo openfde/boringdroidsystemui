@@ -28,12 +28,31 @@
     <string name="notifications">Notifications</string>
     <string name="popups_disabled">Notification pop-ups disabled</string>
 
+    <string name="fde_wifi_name">"Network SSID"</string>
+    <string name="fde_wifi_password">"password"</string>
+    <string name="fde_enter_wifi_name">"Enter Network SSID"</string>
+    <string name="fde_enter_wifi_password">"Enter password"</string>
     <string name="fde_wifi">WIFI</string>
-    <string name="fde_add_wifi">添加网络</string>
-    <string name="fde_manuals_add_wifi">手动添加网络</string>
-    <string name="fde_choose_nearby_wifi">请选择附近的WIFI</string>
-    <string name="fde_btn_cancel">取消</string>
-    <string name="fde_btn_confirm">确定</string>
-    <string name="fde_enter_wifi_name">"请输入网络名称"</string>
-    <string name="fde_enter_wifi_password">"请输入密码"</string>
+    <string name="fde_ethernet">Ethernet</string>
+    <string name="fde_ethernet_and_wifi">Ethernet and WIFI</string>
+    <string name="fde_add_wifi">ADD NETWORK</string>
+    <string name="fde_manuals_add_wifi">ADD NETWORK...</string>
+    <string name="fde_choose_nearby_wifi">AVAILABLE NETWORKS</string>
+    <string name="fde_btn_cancel">Cancel</string>
+    <string name="fde_btn_confirm">OK</string>
+    <string name="fde_btn_operating_error">You are operating too fast</string>
+    <string name="fde_scanning">Scanning</string>
+    <string name="fde_connecting">Connecting</string>
+    <string name="fde_forget">Forget</string>
+    <string name="fde_del_network">delete network</string>
+    <string name="fde_unconnect">disconnect network</string>
+    <string name="fde_no_save">Do not save</string>
+    <string name="fde_has_connected">connected</string>
+    <string name="fde_has_saved">saved</string>
+    <string name="fde_no_wifi_module">no wifi module</string>
+
+    <string name="fde_notification_battery">"battery management"</string>
+    <string name="fde_notification_volume">"volume management"</string>
+    <string name="fde_notification_network">"network management"</string>
+    <string name="fde_notification_message">"notice management"</string>
 </resources>

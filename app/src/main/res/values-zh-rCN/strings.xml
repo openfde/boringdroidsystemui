@@ -23,4 +23,32 @@
     <string name="show">显示</string>
     <string name="hide">隐藏</string>
 
+    <string name="fde_wifi_name">"网络名称"</string>
+    <string name="fde_wifi_password">"密码"</string>
+    <string name="fde_enter_wifi_name">"请输入网络名称"</string>
+    <string name="fde_enter_wifi_password">"请输入密码"</string>
+    <string name="fde_wifi">WIFI</string>
+    <string name="fde_ethernet">以太网</string>
+    <string name="fde_ethernet_and_wifi">以太网和WIFI</string>
+    <string name="fde_add_wifi">添加网络</string>
+    <string name="fde_manuals_add_wifi">手动添加网络</string>
+    <string name="fde_choose_nearby_wifi">请选择附近的WIFI</string>
+    <string name="fde_btn_cancel">取消</string>
+    <string name="fde_btn_confirm">确定</string>
+    <string name="fde_btn_operating_error">您操作太快</string>
+    <string name="fde_scanning">正在扫描...</string>
+    <string name="fde_connecting">正在连接...</string>
+    <string name="fde_forget">忘记</string>
+    <string name="fde_del_network">删除网络</string>
+    <string name="fde_unconnect">断开连接</string>
+    <string name="fde_no_save">不保存</string>
+    <string name="fde_has_connected">已连接</string>
+    <string name="fde_has_saved">已保存</string>
+    <string name="fde_no_wifi_module">无网卡，无法操作</string>
+
+    <string name="fde_notification_battery">"电池管理"</string>
+    <string name="fde_notification_volume">"音量管理"</string>
+    <string name="fde_notification_network">"网络设置"</string>
+    <string name="fde_notification_message">"通知管理"</string>
+
 </resources>
