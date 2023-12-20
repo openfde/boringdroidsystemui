@@ -79,7 +79,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 val what  = event?.action
                 when(what){
                     MotionEvent.ACTION_HOVER_ENTER -> {
-                        showTips("网络设置",0.07f)
+                        showTips(context.getString(R.string.fde_notification_network),0.07f)
 //                        context?.sendBroadcast(
 //                            Intent(  "GET_WIFI_STATUS").putExtra(
 //                                "action",
@@ -103,7 +103,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 val what  = event?.action
                 when(what){
                     MotionEvent.ACTION_HOVER_ENTER -> {
-                        showTips("音量调节",0.06f)
+                        showTips(context.getString(R.string.fde_notification_volume),0.06f)
                     }
                     MotionEvent.ACTION_HOVER_EXIT -> {
                         showTips("",0.06f)
@@ -118,7 +118,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 val what  = event?.action
                 when(what){
                     MotionEvent.ACTION_HOVER_ENTER -> {
-                        showTips("电池查看",0.05f)
+                        showTips(context.getString(R.string.fde_notification_battery),0.05f)
                     }
                     MotionEvent.ACTION_HOVER_EXIT -> {
                         showTips("",0.06f)
@@ -134,7 +134,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 val what  = event?.action
                 when(what){
                     MotionEvent.ACTION_HOVER_ENTER -> {
-                        showTips("通知管理",0.1f)
+                        showTips(context.getString(R.string.fde_notification_message),0.1f)
                     }
                     MotionEvent.ACTION_HOVER_EXIT -> {
                         showTips("",0.06f)
