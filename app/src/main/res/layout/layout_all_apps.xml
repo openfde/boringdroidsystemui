@@ -21,6 +21,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="15dp"
             android:src="@drawable/ic_user"
+            android:visibility="gone"
             android:id="@+id/avatar_iv"/>
 
         <TextView
@@ -35,6 +36,7 @@
             android:textColor="#FFFFFFFF"
             android:layout_marginRight="10dp"
             android:maxEms="10"
+            android:visibility="gone"
             android:singleLine="true"/>
         <ImageView
             android:background="@drawable/circle"
@@ -63,6 +65,7 @@
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
             android:layout_marginRight="240dp"
             android:gravity="center_vertical"
             android:layout_toRightOf="@+id/user_name_tv"
