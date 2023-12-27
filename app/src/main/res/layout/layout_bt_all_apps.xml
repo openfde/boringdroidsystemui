@@ -12,6 +12,6 @@
         android:layout_gravity="center_vertical"
         android:background="@drawable/bg_dock"
         android:scaleType="center"
-        android:src="@drawable/icon"
+        android:src="@drawable/icon_all_apps"
         tools:ignore="ContentDescription" />
 </FrameLayout>
