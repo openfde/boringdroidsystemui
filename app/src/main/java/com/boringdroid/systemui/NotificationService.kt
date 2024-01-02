@@ -8,7 +8,12 @@ import android.animation.AnimatorListenerAdapter
 import android.app.Instrumentation
 import android.app.Notification
 import android.app.PendingIntent.CanceledException
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -17,10 +22,19 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.view.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
 import android.view.View.OnTouchListener
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.*
+import android.widget.TextView
+import android.widget.ImageView
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,7 +43,12 @@ import com.boringdroid.systemui.adapter.NotificationAdapter
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
-import com.boringdroid.systemui.utils.*
+import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.utils.IconParserUtilities
+import com.boringdroid.systemui.utils.ColorUtils
+import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.AppUtils
+
 import com.boringdroid.systemui.view.HoverInterceptorLayout
 import com.google.android.material.divider.MaterialDividerItemDecoration
 
