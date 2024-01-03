@@ -14,19 +14,21 @@ buildscript {
         google()
         // noinspection JcenterRepositoryObsolete
         //jcenter()
-//        google()
+        google()
 //        mavenCentral()
         gradlePluginPortal()
     }
     dependencies {
         //classpath 'com.android.tools.build:gradle:4.2.1'
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:4.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 allprojects {
     repositories {
+        google()
+        jcenter()
         // 阿里云云效仓库：https://maven.aliyun.com/mvn/guide
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://maven.aliyun.com/repository/google' }
@@ -36,9 +38,7 @@ allprojects {
         maven { url 'https://jitpack.io' }
         // MavenCentral 远程仓库：https://mvnrepository.com
         mavenCentral()
-        google()
         // noinspection JcenterRepositoryObsolete
-        jcenter()
 //        google()
 //        mavenCentral()
         gradlePluginPortal()
