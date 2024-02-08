@@ -27,20 +27,11 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.DisplayMetrics
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewOutlineProvider
-import android.view.WindowManager
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ListView
+import android.view.*
+import android.widget.*
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.ui.CompatibleListActivity
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 import com.boringdroid.systemui.utils.Utils
@@ -67,6 +58,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var sp: SharedPreferences? = null
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
+
+
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
@@ -113,7 +106,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 showPowerMenu()
             }
         })
-        screenRecordBtn!!.setOnClickListener{
+        screenRecordBtn!!.setOnClickListener {
             val launcherComponent: ComponentName = ComponentName(
                 SYSUI_PACKAGE,
                 SYSUI_SCREENRECORD_LAUNCHER
@@ -127,18 +120,26 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         searchEt?.setText("")
         searchEt?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if(!TextUtils.isEmpty(s.toString())){
+                if (!TextUtils.isEmpty(s.toString())) {
                     appLoaderTask.start(s.toString())
-                } else{
+                } else {
                     appLoaderTask.start("")
                 }
                 Log.d(TAG, "afterTextChanged() called with: " + s.toString());
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                Log.d(TAG, "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after")
+                Log.d(
+                    TAG,
+                    "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after"
+                )
             }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                Log.d(TAG, "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count")
+                Log.d(
+                    TAG,
+                    "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count"
+                )
             }
         })
     }
@@ -240,12 +241,14 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             false
         }
         val applicationInfo = mContext.packageManager.getApplicationInfo(appData.packageName!!, 0)
-        val isSystem = applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+        val isSystem =
+            applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
         actions.add(Action(R.drawable.ic_users, mContext.getString(R.string.open)))
         actions.add(Action(R.drawable.ic_shortcuts, mContext.getString(R.string.todesk)))
-        if(!isSystem){
+        actions.add(Action(R.drawable.ic_compatible, mContext.getString(R.string.compatible_config)))
+        if (!isSystem) {
             actions.add(Action(R.drawable.ic_uninstall, mContext.getString(R.string.uninstall)))
         }
         actionsLv.adapter = AppActionsAdapter(mContext, actions)
@@ -266,6 +269,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                     createShortcut(appData)
                 } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
                     uninstallApp(appData)
+                } else if (action.text.equals(mContext.getString(R.string.compatible_config))) {
+                    var inte = Intent(mContext, CompatibleListActivity::class.java)
+                    inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    inte.putExtra("packageName",appData.componentName?.packageName)
+                    mContext.startActivity(inte);
                 }
                 windowManager.removeView(view)
             }
@@ -282,9 +290,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private fun createShortcut(app: AppData) {
         Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
         val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-        val shortcutManager: ShortcutManager? = mContext?.getSystemService(ShortcutManager::class.java)
+        val shortcutManager: ShortcutManager? =
+            mContext?.getSystemService(ShortcutManager::class.java)
         if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-            val launchIntentForPackage: Intent = mContext?.getPackageManager()?.getLaunchIntentForPackage(app.packageName!!) as Intent
+            val launchIntentForPackage: Intent = mContext?.getPackageManager()
+                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
             launchIntentForPackage.action = Intent.ACTION_MAIN
             val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
                 .setLongLabel(app.name!!)
