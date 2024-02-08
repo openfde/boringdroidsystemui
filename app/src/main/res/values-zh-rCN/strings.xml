@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="compatible_set">兼容性设置</string>
 <!--    <string name="system_ui_overlay_name" translatable="false">Boringdroid SystemUI overlay</string>-->
 <!--    <string name="system_ui_debug_name">BoringdroidSystemUIDebug</string>-->
 <!--    <string name="user">User</string>-->
@@ -19,6 +20,7 @@
     <string name="todesk">快捷方式</string>
     <string name="close">关闭</string>
     <string name="uninstall">卸载</string>
+    <string name="compatible_config">兼容配置</string>
     <string name="notifications">通知</string>
     <string name="show">显示</string>
     <string name="hide">隐藏</string>
@@ -45,6 +47,8 @@
     <string name="fde_has_connected">已连接</string>
     <string name="fde_has_saved">已保存</string>
     <string name="fde_no_wifi_module">无网卡，无法操作</string>
+    <string name="fde_save">保存</string>
+    <string name="fde_input_hint">请输入值</string>
 
     <string name="fde_notification_battery">"电池管理"</string>
     <string name="fde_notification_volume">"音量管理"</string>
