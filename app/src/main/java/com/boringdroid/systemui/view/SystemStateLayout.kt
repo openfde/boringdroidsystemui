@@ -18,6 +18,7 @@ import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.boringdroid.systemui.AllAppsWindow
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.CountDownInterface
@@ -32,6 +33,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var wifiBtn:ImageView ?= null
     private var volumeBtn:ImageView ?= null
     private var batteryBtn:ImageView ?= null
+    private var controlCenterWindow: ControlCenterWindow? = null
     private var notificationBtn: TextView?= null
     private var audioPanelVisible:Boolean = false
     var listener: NotificationListener?= null
@@ -62,6 +64,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         volumeBtn = findViewById(R.id.volume_btn)
         batteryBtn = findViewById(R.id.battery_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
+        controlCenterWindow = ControlCenterWindow(context)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
@@ -76,7 +79,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener { toggleVolume() }
         batteryBtn?.setOnClickListener { batteryClick() }
-
 
         wifiBtn?.setOnHoverListener(object : View.OnHoverListener{
             override fun onHover(v: View?, event: MotionEvent?): Boolean {
@@ -223,12 +225,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private fun toggleVolume() {
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.adjustStreamVolume(
-            AudioManager.STREAM_MUSIC,
-            AudioManager.ADJUST_SAME,
-            AudioManager.FLAG_SHOW_UI
-        )
+        controlCenterWindow?.ifShowControlCenterView()
+//        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//        audioManager.adjustStreamVolume(
+//            AudioManager.STREAM_MUSIC,
+//            AudioManager.ADJUST_SAME,
+//            AudioManager.FLAG_SHOW_UI
+//        )
     }
 
     interface NotificationListener{

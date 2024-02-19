@@ -55,4 +55,10 @@
     <string name="fde_notification_volume">"volume management"</string>
     <string name="fde_notification_network">"network management"</string>
     <string name="fde_notification_message">"notice management"</string>
+
+    <string name="wifi_string">WIFI</string>
+    <string name="printscreen_string">PrintScreen</string>
+    <string name="recordscreen_string">ScreenRecord</string>
+    <string name="savepower_string">PowerSave</string>
+    <string name="setting_string">Setting</string>
 </resources>

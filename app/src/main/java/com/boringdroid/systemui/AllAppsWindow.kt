@@ -41,6 +41,8 @@ import android.widget.ImageView
 import android.widget.ListView
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.data.Action
+import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 import com.boringdroid.systemui.utils.Utils

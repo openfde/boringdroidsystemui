@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.data
 
 import android.content.ComponentName
 import android.graphics.drawable.Drawable
