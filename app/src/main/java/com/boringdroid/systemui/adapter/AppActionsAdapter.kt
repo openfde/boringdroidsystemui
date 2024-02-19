@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.boringdroid.systemui.Action
+import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 

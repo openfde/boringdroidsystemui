@@ -68,4 +68,9 @@
     <color name="red">#E53935</color>
     <color name="green">#00897B</color>
     <color name="blue"> #1E88E5 </color>
+
+
+    <color name="control_center_bg">#D8D8D8</color>
+    <color name="right_slide_center_bg">#CDE9EEF5</color>
+    <color name="control_text_color">#000000</color>
 </resources>

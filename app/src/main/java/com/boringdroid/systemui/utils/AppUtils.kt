@@ -10,7 +10,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.SystemClock
-import com.boringdroid.systemui.App
+import com.boringdroid.systemui.data.App
 import com.boringdroid.systemui.AppTask
 import com.boringdroid.systemui.Log
 
