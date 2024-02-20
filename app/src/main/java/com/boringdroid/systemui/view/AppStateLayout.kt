@@ -37,7 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
-import com.boringdroid.systemui.Action
+import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo

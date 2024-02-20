@@ -32,4 +32,15 @@
 
     <dimen name="fde_left_setting_size">16dp</dimen>
     <dimen name="fde_left_setting_padding_size">8dp</dimen>
+
+    <dimen name="control_center_window_width">406dp</dimen>
+    <dimen name="control_center_window_height">368dp</dimen>
+    <dimen name="control_center_window_margin">8dp</dimen>
+    <dimen name="control_center_window_radius">12dp</dimen>
+    <dimen name="control_info_width">110dp</dimen>
+    <dimen name="control_info_height">82dp</dimen>
+    <dimen name="control_info_decoration_h">14dp</dimen>
+    <dimen name="control_info_decoration_v">24dp</dimen>
+    <dimen name="control_text_size">14px</dimen>
+
 </resources>
