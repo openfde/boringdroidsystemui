@@ -74,4 +74,5 @@
     <color name="control_center_bg">#D8D8D8</color>
     <color name="right_slide_center_bg">#CDE9EEF5</color>
     <color name="control_text_color">#000000</color>
+    <color name="theme_blue">#DD2778f2</color>
 </resources>

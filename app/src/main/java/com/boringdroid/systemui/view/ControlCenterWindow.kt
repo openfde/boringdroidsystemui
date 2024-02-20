@@ -1,28 +1,51 @@
 package com.boringdroid.systemui.view
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
+import android.media.AudioManager
+import android.os.Build
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.ControlAdapter
+import com.boringdroid.systemui.adapter.ControlAdapter.ControlItemClickListener
+import com.boringdroid.systemui.constant.ControlConstant.POWER_CONTROL
+import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_CONTROL
+import com.boringdroid.systemui.constant.ControlConstant.RECORD_SCREEN_CONTROL
+import com.boringdroid.systemui.constant.ControlConstant.SETTING_CONTROL
+import com.boringdroid.systemui.data.Control
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
+import com.boringdroid.systemui.utils.DeviceUtils
+import kotlin.math.log
+
 
 class ControlCenterWindow (private val mContext: Context?) : View.OnClickListener{
 
     private var shown = false
     private val windowManager: WindowManager
+    private val audioManager: AudioManager
     private var windowContentView: View? = null
+    private var volumeSeekbar: SeekBar? = null
+    private var lightSeekbar: SeekBar? = null
     private var mRecyclerView: RecyclerView? = null
     private val controlAdapter: ControlAdapter
     private var mSpaceDecoration: RecyclerView.ItemDecoration
@@ -37,6 +60,8 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_control_center, null)
         mRecyclerView = windowContentView?.findViewById(R.id.recyclerView)
+        volumeSeekbar = windowContentView?.findViewById(R.id.seekbar_volume)
+        lightSeekbar = windowContentView?.findViewById(R.id.seekbar_light)
         mRecyclerView?.adapter = controlAdapter
         mRecyclerView?.layoutManager = GridLayoutManager(mContext, 3)
         mRecyclerView?.addItemDecoration(mSpaceDecoration);
@@ -50,7 +75,111 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
+        controlAdapter.setListener(listener)
         shown = true
+
+        windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
+            if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                dismiss()
+            }
+            false
+        }
+        initVolumeSeekbar()
+        initLightSeekbar()
+    }
+
+    /**
+     * The screen backlight brightness between 0 and 255.
+     */
+    private fun initLightSeekbar() {
+        val currentBrightness = Settings.System.getInt(mContext?.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS,0)
+        Log.w(TAG,"brightness: $currentBrightness ")
+        val streamMaxVolume = 255
+        val streamMinVolume = 0
+        lightSeekbar?.min = streamMinVolume
+        lightSeekbar?.max = streamMaxVolume
+        lightSeekbar?.progress = currentBrightness
+        lightSeekbar?.setOnSeekBarChangeListener(lightChangeListener)
+    }
+
+    private val lightChangeListener = object : OnSeekBarChangeListener{
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            Log.w(TAG,"progress: $progress ")
+            if (Settings.System.canWrite(mContext)) {
+                Settings.System.putInt(mContext?.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, progress)
+            }
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        }
+    }
+
+    private fun initVolumeSeekbar() {
+        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+        Log.w(TAG,"currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume")
+        volumeSeekbar?.min = streamMinVolume
+        volumeSeekbar?.max = streamMaxVolume
+        volumeSeekbar?.progress = currentVolume
+        volumeSeekbar?.setOnSeekBarChangeListener(volumeChangeListener)
+    }
+
+    private val volumeChangeListener = object : OnSeekBarChangeListener{
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            Log.w(TAG,"progress: $progress ")
+            val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        }
+    }
+
+    val listener = object : ControlItemClickListener {
+        override fun onItemClick(control: Control) {
+            dismiss()
+            when (control.control){
+                WIFI_CONTROL ->{
+                    val intent = Intent()
+                    val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
+                    intent.component = cn;
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    mContext?.startActivity(intent)
+                }
+                PRINT_SCREEN_CONTROL ->{
+                    Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
+                }
+                RECORD_SCREEN_CONTROL ->{
+                    val launcherComponent: ComponentName = ComponentName(
+                        SYSUI_PACKAGE,
+                        SYSUI_SCREENRECORD_LAUNCHER
+                    )
+                    val intent = Intent()
+                    intent.component = launcherComponent
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    mContext?.startActivity(intent)
+                }
+                POWER_CONTROL ->{
+                    val intent = Intent()
+                    val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+                    intent.component = cn;
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    mContext?.startActivity(intent)
+                }
+                SETTING_CONTROL ->{
+                    val intent = Intent("android.settings.SETTINGS")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    mContext?.startActivity(intent)
+                }
+            }
+        }
     }
 
     private fun generateLayoutParams(
@@ -67,7 +196,7 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.RGB_565
+            PixelFormat.RGBA_8888
         )
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -139,6 +268,7 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
 
     init {
         windowManager = mContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        audioManager = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         controlAdapter = ControlAdapter(mContext)
         mSpaceDecoration = GridSpaceDecoration(
             Utils.dpToPx(mContext,12),
