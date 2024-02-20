@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.utils
 
+import android.app.Instrumentation
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -52,6 +53,19 @@ object Utils {
 
     @JvmStatic fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
+    }
+
+    @JvmStatic fun sendKeyCode(keyCode: Int) {
+        object : Thread() {
+            override fun run() {
+                try {
+                    val inst = Instrumentation()
+                    inst.sendKeyDownUpSync(keyCode)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }.start()
     }
 
     fun drawableToBitmap(drawable: Drawable): Bitmap? {
