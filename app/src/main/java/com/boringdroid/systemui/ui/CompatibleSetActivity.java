@@ -17,7 +17,7 @@ import com.boringdroid.systemui.Constant;
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.adapter.CompatibleSetAdapter;
 import com.boringdroid.systemui.adapter.OnItemClickListener;
-import com.boringdroid.systemui.bean.Compatible;
+import com.boringdroid.systemui.data.Compatible;
 import com.boringdroid.systemui.utils.CompatibleConfig;
 import com.boringdroid.systemui.utils.LogTools;
 import com.boringdroid.systemui.utils.StringUtils;

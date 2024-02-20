@@ -1,4 +1,4 @@
-package com.boringdroid.systemui.bean;
+package com.boringdroid.systemui.data;
 
 import androidx.annotation.NonNull;
 
