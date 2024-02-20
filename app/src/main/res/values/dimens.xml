@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="nav_button_size">35dp</dimen>
-    <dimen name="all_apps_window_width">500dp</dimen>
-    <dimen name="all_apps_window_height">400dp</dimen>
+    <dimen name="all_apps_window_width">754dp</dimen>
+    <dimen name="all_apps_window_height">604dp</dimen>
     <dimen name="all_apps_item_spacing_horizontal">10dp</dimen>
     <dimen name="all_apps_item_spacing_vertical">10dp</dimen>
     <dimen name="all_apps_item_width">70dp</dimen>
-    <dimen name="all_apps_item_height">70dp</dimen>
+    <dimen name="all_apps_item_height">40dp</dimen>
     <dimen name="all_apps_corner_radius">8dp</dimen>
     <dimen name="app_info_name_text_size">13sp</dimen>
-    <dimen name="app_info_icon_width">30dp</dimen>
-    <dimen name="app_info_icon_height">30dp</dimen>
-    <dimen name="all_apps_margin_vertical">95dp</dimen>
+    <dimen name="app_info_icon_width">32dp</dimen>
+    <dimen name="app_info_icon_height">32dp</dimen>
+    <dimen name="all_apps_margin_vertical">20dp</dimen>
     <dimen name="all_apps_margin_vertical_bottom">20dp</dimen>
     <dimen name="all_apps_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_horizontal">10dp</dimen>
@@ -29,4 +29,7 @@
 
     <dimen name="wifi_status_window_width">100dp</dimen>
     <dimen name="wifi_status_window_height">36dp</dimen>
+
+    <dimen name="fde_left_setting_size">16dp</dimen>
+    <dimen name="fde_left_setting_padding_size">8dp</dimen>
 </resources>

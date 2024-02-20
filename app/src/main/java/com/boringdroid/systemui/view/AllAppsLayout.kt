@@ -108,7 +108,7 @@ class AllAppsLayout @JvmOverloads constructor(
     }
 
     companion object {
-        private const val NUMBER_OF_COLUMNS = 5
+        private const val NUMBER_OF_COLUMNS = 1
     }
 
     init {

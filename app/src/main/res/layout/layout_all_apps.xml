@@ -1,183 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/fde_bg">
 
     <RelativeLayout
-        android:layout_height="56dp"
-        android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/search_bar_background"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="10dp">
+        android:layout_width="40dp"
+        android:id="@+id/layoutLeft"
+        android:layout_alignParentLeft="true"
+        android:layout_height="match_parent">
 
         <ImageView
-            android:layout_height="36dp"
-            android:layout_width="36dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:src="@drawable/ic_user"
-            android:visibility="gone"
-            android:id="@+id/avatar_iv"/>
+            android:id="@+id/imgPower"
+            android:layout_width="@dimen/wifi_status_window_height"
+            android:src="@drawable/power"
+            android:padding="@dimen/fde_left_setting_padding_size"
+            android:layout_alignParentBottom="true"
+            android:layout_height="@dimen/wifi_status_window_height"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/user"
-            android:layout_marginLeft="10dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/avatar_iv"
-            android:id="@+id/user_name_tv"
-            android:textColor="#FFFFFFFF"
-            android:layout_marginRight="10dp"
-            android:maxEms="10"
-            android:visibility="gone"
-            android:singleLine="true"/>
+
         <ImageView
-            android:background="@drawable/circle"
-            android:padding="5dp"
-            android:layout_height="35dp"
-            android:layout_width="35dp"
-            android:layout_centerVertical="true"
-            android:layout_alignRight="@+id/power_btn"
-            android:src="@drawable/ic_screenrecord"
-            android:visibility="gone"
-            android:id="@+id/screen_recording_btn"
-            android:layout_marginRight="40dp" />
-        <ImageView
-            android:background="@drawable/circle"
-            android:padding="5dp"
-            android:layout_height="35dp"
-            android:layout_width="35dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/ic_power"
-            android:id="@+id/power_btn"
-            android:layout_marginRight="20dp"
-            android:layout_marginLeft="10dp"/>
-        <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="240dp"
-            android:gravity="center_vertical"
-            android:layout_toRightOf="@+id/user_name_tv"
-            android:background="#aaa"
-            android:id="@+id/power_search_entry">
-
-            <EditText
-                android:imeOptions="actionGo"
-                android:textColorHint="@android:color/darker_gray"
-                android:hint="@string/search"
-                android:textColor="#222222"
-                android:layout_height="35dp"
-                android:layout_width="match_parent"
-                android:paddingHorizontal="5dp"
-                android:maxLength="18"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/search_text_background"
-                android:id="@+id/search_et"
-                android:textSize="17sp"
-                android:singleLine="true"/>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/power_btn"
-            android:id="@+id/power_entry"
-            android:background="@drawable/round_rect"
-            android:elevation="5dp"
-            android:layout_centerVertical="true"
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:padding="5dp"
-                android:gravity="center"
-                android:orientation="vertical" >
-                <ImageButton
-                    android:id="@+id/power_off_btn"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/circle"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/ic_power" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:padding="5dp"
-                android:gravity="center"
-                android:orientation="vertical" >
-                <ImageButton
-                    android:id="@+id/restart_btn"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:scaleType="fitXY"
-                    android:background="@drawable/circle"
-                    android:src="@drawable/ic_restart" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:padding="5dp"
-                android:gravity="center"
-                android:orientation="vertical" >
-
-                <ImageButton
-                    android:id="@+id/logout_btn"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:scaleType="fitXY"
-                    android:background="@drawable/circle"
-                    android:src="@drawable/logout" />
-
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:padding="5dp"
-                android:gravity="center"
-                android:orientation="vertical" >
-
-                <ImageButton
-                    android:id="@+id/lock_btn"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:padding="3dp"
-                    android:scaleType="fitXY"
-                    android:background="@drawable/circle"
-                    android:src="@drawable/ic_lock" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+            android:id="@+id/imgSetting"
+            android:layout_above="@id/imgPower"
+            android:layout_width="@dimen/wifi_status_window_height"
+            android:src="@drawable/setting"
+            android:padding="@dimen/fde_left_setting_padding_size"
+            android:layout_height="@dimen/wifi_status_window_height"/>
 
     </RelativeLayout>
 
-    <com.boringdroid.systemui.view.AllAppsLayout
-        android:id="@+id/all_apps_layout"
-        android:layout_width="match_parent"
+    <View
+        android:layout_width="1dp"
+        android:background="#000"
+        android:alpha="0.06"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:id="@+id/layoutCenter"
+        android:layout_toRightOf="@id/layoutLeft"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/all_apps_margin_horizontal"
-        android:layout_marginTop="@dimen/all_apps_margin_vertical"
-        android:layout_marginEnd="@dimen/all_apps_margin_horizontal"
-        android:layout_marginBottom="@dimen/all_apps_margin_vertical_bottom"
-        android:scrollbars="vertical" />
-</RelativeLayout>
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_height="56dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/search_bar_background"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/layoutLeft"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:visibility="gone"
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:layout_height="36dp"
+                android:layout_width="36dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/ic_user"
+                android:visibility="gone"
+                android:id="@+id/avatar_iv"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/user"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/avatar_iv"
+                android:id="@+id/user_name_tv"
+                android:textColor="#FFFFFFFF"
+                android:layout_marginRight="10dp"
+                android:maxEms="10"
+                android:visibility="gone"
+                android:singleLine="true"/>
+            <ImageView
+                android:background="@drawable/circle"
+                android:padding="5dp"
+                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_centerVertical="true"
+                android:layout_alignRight="@+id/power_btn"
+                android:src="@drawable/ic_screenrecord"
+                android:visibility="gone"
+                android:id="@+id/screen_recording_btn"
+                android:layout_marginRight="40dp" />
+            <ImageView
+                android:background="@drawable/circle"
+                android:padding="5dp"
+                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ic_power"
+                android:id="@+id/power_btn"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="10dp"/>
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="240dp"
+                android:gravity="center_vertical"
+                android:layout_toRightOf="@+id/user_name_tv"
+                android:background="#aaa"
+                android:id="@+id/power_search_entry">
+
+                <EditText
+                    android:imeOptions="actionGo"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:hint="@string/search"
+                    android:textColor="#222222"
+                    android:layout_height="35dp"
+                    android:layout_width="match_parent"
+                    android:paddingHorizontal="5dp"
+                    android:maxLength="18"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/search_text_background"
+                    android:id="@+id/search_ett"
+                    android:textSize="17sp"
+                    android:singleLine="true"/>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/power_btn"
+                android:id="@+id/power_entry"
+                android:background="@drawable/round_rect"
+                android:elevation="5dp"
+                android:layout_centerVertical="true"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.0"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+                    <ImageButton
+                        android:id="@+id/power_off_btn"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/circle"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/ic_power" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.0"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+                    <ImageButton
+                        android:id="@+id/restart_btn"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:scaleType="fitXY"
+                        android:background="@drawable/circle"
+                        android:src="@drawable/ic_restart" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.0"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                    <ImageButton
+                        android:id="@+id/logout_btn"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:scaleType="fitXY"
+                        android:background="@drawable/circle"
+                        android:src="@drawable/logout" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.0"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                    <ImageButton
+                        android:id="@+id/lock_btn"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:padding="3dp"
+                        android:scaleType="fitXY"
+                        android:background="@drawable/circle"
+                        android:src="@drawable/ic_lock" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <EditText
+            android:imeOptions="actionGo"
+            android:textColorHint="@android:color/darker_gray"
+            android:hint="@string/search"
+            android:textColor="#222222"
+            android:layout_height="36dp"
+            android:layout_width="268dp"
+            android:paddingHorizontal="5dp"
+            android:maxLength="18"
+            android:layout_marginTop="12dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/search_text_background"
+            android:id="@+id/search_et"
+            android:textSize="17sp"
+            android:singleLine="true"/>
+
+        <com.boringdroid.systemui.view.AllAppsLayout
+            android:id="@+id/all_apps_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/all_apps_margin_horizontal"
+            android:layout_marginTop="@dimen/all_apps_margin_vertical"
+            android:layout_marginEnd="@dimen/all_apps_margin_horizontal"
+            android:layout_marginBottom="@dimen/all_apps_margin_vertical_bottom"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:background="#000"
+        android:alpha="0.06"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout
+        android:layout_toLeftOf="@id/layoutCenter"
+        android:layout_width="408dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/line_long_width"
+        android:layout_marginTop="@dimen/fde_left_setting_size"
+        android:orientation="vertical">
+
+        <TextView
+            android:text="收藏"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <com.android.internal.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>
