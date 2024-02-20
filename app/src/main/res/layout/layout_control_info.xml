@@ -17,11 +17,12 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
+        android:id="@+id/layoutIcon"
         android:layout_width="110dp"
         android:layout_height="54dp"
         android:layout_marginBottom="8dp"
         android:orientation="horizontal"
-        android:background="@drawable/bg_control_icon"
+        android:background="@drawable/bg_control_selector"
         android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
