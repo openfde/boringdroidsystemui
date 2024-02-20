@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.view
 
+import android.animation.ObjectAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -18,6 +19,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.ContextCompat.getSystemService
@@ -35,12 +38,17 @@ import com.boringdroid.systemui.data.Control
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
 import com.boringdroid.systemui.utils.DeviceUtils
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.log
 
 
 class ControlCenterWindow (private val mContext: Context?) : View.OnClickListener{
 
     private var shown = false
+    private var windowWidth:Int
+    private var windowHeight:Int
     private val windowManager: WindowManager
     private val audioManager: AudioManager
     private var windowContentView: View? = null
@@ -75,6 +83,11 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
+        val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_Y, windowHeight.toFloat(), 0f)
+        animator.duration = FADE_DURATION
+        animator.interpolator = LinearInterpolator()
+        animator.start()
+
         controlAdapter.setListener(listener)
         shown = true
 
@@ -87,6 +100,8 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         initVolumeSeekbar()
         initLightSeekbar()
     }
+
+
 
     /**
      * The screen backlight brightness between 0 and 255.
@@ -187,8 +202,8 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         windowManager: WindowManager
     ): WindowManager.LayoutParams {
         val resources = context!!.resources
-        val windowWidth = resources.getDimension(R.dimen.control_center_window_width).toInt()
-        val windowHeight = resources.getDimension(R.dimen.control_center_window_height).toInt()
+        windowWidth = resources.getDimension(R.dimen.control_center_window_width).toInt()
+        windowHeight = resources.getDimension(R.dimen.control_center_window_height).toInt()
         val layoutParams = WindowManager.LayoutParams(
             windowWidth,
             windowHeight,
@@ -217,15 +232,22 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     }
 
     fun dismiss() {
-        try {
-            if (windowContentView != null) {
-                windowManager.removeViewImmediate(windowContentView)
+        val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_Y, 0f, windowHeight.toFloat())
+        animator.duration = FADE_DURATION
+        animator.interpolator = LinearInterpolator()
+        animator.start()
+        GlobalScope.launch {
+            delay(FADE_DURATION)
+            try {
+                if (windowContentView != null) {
+                    windowManager?.removeView(windowContentView)
+                }
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Catch exception when remove control window：" + e)
             }
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Catch exception when remove control window：" + e)
+            windowContentView = null
+            shown = false
         }
-        windowContentView = null
-        shown = false
     }
 
     fun ifShowControlCenterView() {
@@ -264,11 +286,15 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
 
     companion object {
         private const val TAG = "ControlCenterWindow"
+        private const val FADE_DURATION :Long = 180
+
     }
 
     init {
         windowManager = mContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         audioManager = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        windowWidth = mContext!!.resources.getDimension(R.dimen.control_center_window_width).toInt()
+        windowHeight = mContext!!.resources.getDimension(R.dimen.control_center_window_height).toInt()
         controlAdapter = ControlAdapter(mContext)
         mSpaceDecoration = GridSpaceDecoration(
             Utils.dpToPx(mContext,12),

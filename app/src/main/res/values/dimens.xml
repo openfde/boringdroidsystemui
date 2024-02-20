@@ -34,7 +34,7 @@
     <dimen name="fde_left_setting_padding_size">8dp</dimen>
 
     <dimen name="control_center_window_width">406dp</dimen>
-    <dimen name="control_center_window_height">368dp</dimen>
+    <dimen name="control_center_window_height">348dp</dimen>
     <dimen name="control_center_window_margin">8dp</dimen>
     <dimen name="control_center_window_radius">12dp</dimen>
     <dimen name="control_info_width">110dp</dimen>
