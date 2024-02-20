@@ -32,12 +32,14 @@ import android.widget.*
 import com.android.internal.widget.GridLayoutManager
 import com.android.internal.widget.LinearLayoutManager
 import com.android.internal.widget.RecyclerView
+
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.adapter.CollectAdapter
 import com.boringdroid.systemui.bean.Collect
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.ui.CompatibleListActivity
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 import com.boringdroid.systemui.utils.Utils
@@ -67,6 +69,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
     private var collectAdapter:CollectAdapter?=null
     private var list:MutableList<Collect>?=null
+
 
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
@@ -162,8 +165,12 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 //                Log.d(TAG, "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after")
             }
 
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                Log.d(TAG, "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count")
+                Log.d(
+                    TAG,
+                    "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count"
+                )
             }
         })
     }
@@ -267,11 +274,15 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }
         val applicationInfo = mContext.packageManager.getApplicationInfo(appData.packageName!!, 0)
         val flagInfo = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
-        val isSystem = applicationInfo.flags and flagInfo != 0
+//        val isSystem = applicationInfo.flags and flagInfo != 0
+        val isSystem =
+            applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
         actions.add(Action(R.drawable.ic_users, mContext.getString(R.string.open)))
         actions.add(Action(R.drawable.ic_shortcuts, mContext.getString(R.string.todesk)))
+
+        actions.add(Action(R.drawable.ic_compatible, mContext.getString(R.string.compatible_config)))
         if (!isSystem) {
             actions.add(Action(R.drawable.ic_uninstall, mContext.getString(R.string.uninstall)))
         }
@@ -293,6 +304,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                     createShortcut(appData)
                 } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
                     uninstallApp(appData)
+                } else if (action.text.equals(mContext.getString(R.string.compatible_config))) {
+                    var inte = Intent(mContext, CompatibleListActivity::class.java)
+                    inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    inte.putExtra("packageName",appData.componentName?.packageName)
+                    mContext.startActivity(inte);
                 }
                 windowManager.removeView(view)
             }

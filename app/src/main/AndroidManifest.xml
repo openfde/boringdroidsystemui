@@ -1,41 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.boringdroid.systemui"
-    android:sharedUserId="android.uid.system"
-    >
+    android:sharedUserId="android.uid.system" >
 
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="com.android.systemui.permission.PLUGIN" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 
-    <application tools:ignore="AllowBackup,MissingApplicationIcon"
+    <application
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="true"
-        >
+        tools:ignore="AllowBackup,MissingApplicationIcon" >
+        <activity
+            android:name=".ui.CompatibleSetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.CompatibleListActivity"
+            android:exported="false" />
+
         <service
             android:name="com.boringdroid.systemui.SystemUIOverlay"
             android:label="@string/system_ui_overlay_name"
             android:largeHeap="true"
             android:supportsRtl="false"
-            tools:ignore="ExportedService,Instantiatable">
+            tools:ignore="ExportedService,Instantiatable" >
             <intent-filter>
                 <action android:name="com.android.systemui.action.PLUGIN_OVERLAY" />
             </intent-filter>
         </service>
-
         <service
             android:name=".NotificationService"
             android:label="@string/app_name"
@@ -44,6 +50,20 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <provider
+            android:name=".provider.CompatibleContentProvider"
+            android:authorities="com.boringdroid.systemuiprovider"
+            android:exported="true" />
+
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

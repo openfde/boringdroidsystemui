@@ -173,7 +173,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             )
             layoutParams.gravity = Gravity.BOTTOM or Gravity.RIGHT
             layoutParams.horizontalMargin = right
-            layoutParams.verticalMargin = 0.01f
+            layoutParams.verticalMargin = 0.04f
             windowContentView = LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
             var txtName :TextView ;
             txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
@@ -197,6 +197,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * network wifi click
      */
     private fun wifiClick(){
+        android.util.Log.i("bella","-------wifiClick-----------");
         showTips("",0.05f)
 
         val intent = Intent()

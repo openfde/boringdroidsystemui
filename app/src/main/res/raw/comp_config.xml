@@ -1,0 +1,30 @@
+<library>
+    <compatible>
+        <keycode>size</keycode>
+        <keydesc>分辨率</keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <optionjson>[{
+            "width": "1920",
+            "height": "1080"
+            },
+            {
+            "width": "800",
+            "height": "600"
+            }, {
+            "width": "400",
+            "height": "320"
+            }
+            ]</optionjson>
+    </compatible>
+
+
+    <compatible>
+        <keycode>maxWidth</keycode>
+        <keydesc>最大宽度</keydesc>
+        <defaultvalue>1920</defaultvalue>
+        <inputtype>input</inputtype>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+</library>
