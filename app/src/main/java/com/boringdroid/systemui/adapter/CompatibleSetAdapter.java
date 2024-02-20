@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.boringdroid.systemui.R;
-import com.boringdroid.systemui.bean.Compatible;
+import com.boringdroid.systemui.data.Compatible;
 import com.boringdroid.systemui.utils.LogTools;
 import com.boringdroid.systemui.utils.StringUtils;
 

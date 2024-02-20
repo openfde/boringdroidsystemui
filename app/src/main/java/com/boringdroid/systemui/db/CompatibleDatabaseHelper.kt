@@ -1,8 +1,11 @@
 package com.boringdroid.systemui.db
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.boringdroid.systemui.data.Collect
 import com.boringdroid.systemui.utils.LogTools
 
 
@@ -20,6 +23,10 @@ class CompatibleDatabaseHelper(context: Context) :
             "CREATE TABLE COMPATIBLE_VALUE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "PACKAGE_NAME TEXT ,KEY_CODE TEXT  ,VALUE TEXT  , NOTES TEXT,EDIT_DATE TEXT,FIELDS1 TEXT,FIELDS2 TEXT, UNIQUE(PACKAGE_NAME, KEY_CODE));"
 
+        private const val COLLECT_CREATE =
+            "CREATE TABLE COLLECT_APP ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "PACKAGE_NAME TEXT ,APP_NAME TEXT  ,PIC_URL TEXT  ,IS_COLLECT TEXT  ,CREATE_DATE TEXT, UNIQUE(PACKAGE_NAME));"
+
 
         private const val COMPATIBLE_VALUE_INDEX =
             "CREATE INDEX PACKAGE_V_INDEX ON COMPATIBLE_VALUE (PACKAGE_NAME);"
@@ -33,11 +40,50 @@ class CompatibleDatabaseHelper(context: Context) :
         db!!.execSQL(COMPATIBLE_LIST_CREATE)
         db.execSQL(COMPATIBLE_VALUE_CREATE)
         db.execSQL(COMPATIBLE_VALUE_INDEX)
+        db.execSQL(COLLECT_CREATE)
         LogTools.i("create table success !")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         TODO("Not yet implemented")
+    }
+
+
+    fun addCollect(packageName: String,appName: String,picUrl: String) {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put("PACKAGE_NAME", packageName)
+        values.put("APP_NAME", appName)
+        values.put("PIC_URL", picUrl)
+        db.insert("COLLECT_APP", null, values)
+        db.close()
+    }
+
+    fun deleteCollect(packageName: String) {
+        val db = this.writableDatabase
+        db.delete("COLLECT_APP", "PACKAGE_NAME=?",  arrayOf(packageName))
+        db.close()
+    }
+
+    fun getCollectApps(): List<Collect> {
+        val userList = ArrayList<Collect>()
+        val selectQuery = "SELECT * FROM COLLECT_APP"
+        val db = this.readableDatabase
+        val cursor: Cursor = db.rawQuery(selectQuery, null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndex("_ID"))
+                val packageName = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"))
+                val appName = cursor.getString(cursor.getColumnIndex("APP_NAME"))
+                val picUrl = cursor.getString(cursor.getColumnIndex("PIC_URL"))
+                userList.add(Collect(id,packageName,appName,picUrl))
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+        return userList
     }
 
 }

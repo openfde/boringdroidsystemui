@@ -6,9 +6,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.android.internal.widget.RecyclerView
-import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.bean.Collect
+import com.boringdroid.systemui.data.Collect
 
 class CollectAdapter (private val items: List<Collect>) : RecyclerView.Adapter<CollectAdapter.ViewHolder>() {
 
@@ -27,7 +26,7 @@ class CollectAdapter (private val items: List<Collect>) : RecyclerView.Adapter<C
     // 绑定数据到 ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = items[position]
-        holder.descTextView.text = currentItem.description
+        holder.descTextView.text = currentItem.packageName
         holder.nameTextView.setImageResource(R.mipmap.default_icon_round)
     }
 

@@ -30,12 +30,11 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
 import com.android.internal.widget.GridLayoutManager
-import com.android.internal.widget.LinearLayoutManager
 import com.android.internal.widget.RecyclerView
 
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.adapter.CollectAdapter
-import com.boringdroid.systemui.bean.Collect
+import com.boringdroid.systemui.data.Collect
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
@@ -101,12 +100,12 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 //            Collect("Item 3", "Description of Item 3")
 //        )
         val items = listOf(
-            Collect("1", "aaaa"),
-            Collect("2", "bbbb"),
-            Collect("3", "cccc"),
-            Collect("4", "dddd"),
-            Collect("5", "eeee"),
-            Collect("6", "ffff")
+            Collect(1, "aaaa", "aaaa", "aaaa"),
+            Collect(2, "bbbb", "aaaa", "aaaa"),
+            Collect(3, "cccc", "aaaa", "aaaa"),
+            Collect(4, "dddd", "aaaa", "aaaa"),
+            Collect(5, "eeee", "aaaa", "aaaa"),
+            Collect(6, "ffff", "aaaa", "aaaa")
         )
         collectAdapter = CollectAdapter(items)
         recyclerView?.adapter = collectAdapter
