@@ -68,4 +68,7 @@
     <color name="red">#E53935</color>
     <color name="green">#00897B</color>
     <color name="blue"> #1E88E5 </color>
+    <color name="fde_bg">#F0F2F5</color>
+
+    <color name="fde_edit_bg">#F2F2F2</color>
 </resources>

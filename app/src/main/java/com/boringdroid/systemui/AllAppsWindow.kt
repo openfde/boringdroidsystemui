@@ -27,19 +27,14 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.DisplayMetrics
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewOutlineProvider
-import android.view.WindowManager
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ListView
+import android.view.*
+import android.widget.*
+import com.android.internal.widget.GridLayoutManager
+import com.android.internal.widget.LinearLayoutManager
+import com.android.internal.widget.RecyclerView
 import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.adapter.CollectAdapter
+import com.boringdroid.systemui.bean.Collect
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.SystemuiColorUtils
@@ -60,6 +55,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var lockBtn: ImageButton? = null
     private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
+    private var recyclerView: RecyclerView? = null
     private var shown = false
     private val appLoaderTask: AppLoaderTask
     private val handler = H(this)
@@ -67,6 +63,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var sp: SharedPreferences? = null
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
+    private var collectAdapter:CollectAdapter?=null
+    private var list:MutableList<Collect>?=null
+
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
@@ -77,6 +76,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
+        recyclerView = windowContentView !!.findViewById(R.id.recyclerView)
         powerBtn = windowContentView!!.findViewById(R.id.power_btn)
         screenRecordBtn = windowContentView!!.findViewById(R.id.screen_recording_btn)
         powerEntry = windowContentView!!.findViewById(R.id.power_entry)
@@ -86,6 +86,27 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         lockBtn = windowContentView!!.findViewById(R.id.lock_btn)
         searchEt = windowContentView!!.findViewById(R.id.search_et)
         allAppsLayout!!.handler = handler
+
+        recyclerView?.layoutManager = GridLayoutManager(mContext,4)
+//        recyclerView?.layoutManager = LinearLayoutManager(mContext)
+
+//        list = listOf(
+//            Collect("Item 1", "Description of Item 1"),
+//            Collect("Item 2", "Description of Item 2"),
+//            Collect("Item 3", "Description of Item 3")
+//        )
+        val items = listOf(
+            Collect("1", "aaaa"),
+            Collect("2", "bbbb"),
+            Collect("3", "cccc"),
+            Collect("4", "dddd"),
+            Collect("5", "eeee"),
+            Collect("6", "ffff")
+        )
+        collectAdapter = CollectAdapter(items)
+        recyclerView?.adapter = collectAdapter
+
+
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
@@ -113,7 +134,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 showPowerMenu()
             }
         })
-        screenRecordBtn!!.setOnClickListener{
+        screenRecordBtn!!.setOnClickListener {
             val launcherComponent: ComponentName = ComponentName(
                 SYSUI_PACKAGE,
                 SYSUI_SCREENRECORD_LAUNCHER
@@ -127,16 +148,18 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         searchEt?.setText("")
         searchEt?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if(!TextUtils.isEmpty(s.toString())){
+                if (!TextUtils.isEmpty(s.toString())) {
                     appLoaderTask.start(s.toString())
-                } else{
+                } else {
                     appLoaderTask.start("")
                 }
                 Log.d(TAG, "afterTextChanged() called with: " + s.toString());
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 //                Log.d(TAG, "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after")
             }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 //                Log.d(TAG, "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count")
             }
@@ -247,7 +270,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val actions = ArrayList<Action?>()
         actions.add(Action(R.drawable.ic_users, mContext.getString(R.string.open)))
         actions.add(Action(R.drawable.ic_shortcuts, mContext.getString(R.string.todesk)))
-        if(!isSystem){
+        if (!isSystem) {
             actions.add(Action(R.drawable.ic_uninstall, mContext.getString(R.string.uninstall)))
         }
         actionsLv.adapter = AppActionsAdapter(mContext, actions)
@@ -284,9 +307,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private fun createShortcut(app: AppData) {
         Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
         val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-        val shortcutManager: ShortcutManager? = mContext?.getSystemService(ShortcutManager::class.java)
+        val shortcutManager: ShortcutManager? =
+            mContext?.getSystemService(ShortcutManager::class.java)
         if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-            val launchIntentForPackage: Intent = mContext?.getPackageManager()?.getLaunchIntentForPackage(app.packageName!!) as Intent
+            val launchIntentForPackage: Intent = mContext?.getPackageManager()
+                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
             launchIntentForPackage.action = Intent.ACTION_MAIN
             val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
                 .setLongLabel(app.name!!)
