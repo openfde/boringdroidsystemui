@@ -24,7 +24,6 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
-import com.android.internal.widget.RecyclerView
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
@@ -51,7 +50,6 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
     private var collectAppsLayout: CollectAppsLayout? = null
-    private var recyclerView: RecyclerView? = null
     private var shown = false
     private val appLoaderTask: AppLoaderTask
     private val handler = H(this)
@@ -73,7 +71,6 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
         collectAppsLayout = windowContentView!!.findViewById(R.id.collect_apps_layout)
-        recyclerView = windowContentView!!.findViewById(R.id.recyclerView)
         powerBtn = windowContentView!!.findViewById(R.id.power_btn)
         screenRecordBtn = windowContentView!!.findViewById(R.id.screen_recording_btn)
         powerEntry = windowContentView!!.findViewById(R.id.power_entry)
@@ -170,7 +167,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         lp?.flags = focus or touch
         val location = IntArray(2)
         anchor.getLocationOnScreen(location)
-        lp?.x = location[0]
+        lp?.x = 60;//location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
         view.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
@@ -295,10 +292,12 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         var allApps = appLoaderTask.allApps
 //        val equalProperties = allApps.zip(items).filterNot  { (app1, app2) -> app1.packageName == app2.packageName  }
         var list: MutableList<AppData> = mutableListOf()
-        for (app in allApps) {
-            for (item in items) {
-                if (app.packageName.equals(item.packageName)) {
-                    list.add(app)
+        if(items !=null){
+            for (app in allApps) {
+                for (item in items) {
+                    if (app.packageName.equals(item.packageName)) {
+                        list.add(app)
+                    }
                 }
             }
         }
