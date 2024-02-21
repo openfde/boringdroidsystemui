@@ -250,19 +250,29 @@
         android:layout_toLeftOf="@id/layoutCenter"
         android:layout_width="408dp"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/line_long_width"
+        android:layout_marginLeft="@dimen/fde_left_setting_size"
         android:layout_marginTop="@dimen/fde_left_setting_size"
         android:orientation="vertical">
 
         <TextView
-            android:text="收藏"
+            android:text="@string/fde_collect"
             android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#333"
+            android:textStyle="bold"
             android:layout_height="wrap_content"/>
 
         <com.android.internal.widget.RecyclerView
             android:id="@+id/recyclerView"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
+        <com.boringdroid.systemui.view.CollectAppsLayout
+            android:id="@+id/collect_apps_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
 
 
     </LinearLayout>

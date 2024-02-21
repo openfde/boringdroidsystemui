@@ -23,13 +23,18 @@ class AppActionsAdapter(private val context: Context, actions: ArrayList<Action?
             LayoutInflater.from(context).inflate(R.layout.pin_entry, null)
         val icon = convertView!!.findViewById<ImageView>(R.id.pin_entry_iv)
         val text = convertView.findViewById<TextView>(R.id.pin_entry_tv)
-        SystemuiColorUtils.applySecondaryColor(
-            context, PreferenceManager.getDefaultSharedPreferences(
-                context
-            ), icon
-        )
+//        SystemuiColorUtils.applySecondaryColor(
+//            context, PreferenceManager.getDefaultSharedPreferences(
+//                context
+//            ), icon
+//        )
         text.text = action!!.text
-        icon.setImageResource(action.icon)
+        if(action.icon == 0){
+            icon.visibility = View.GONE
+        }else{
+            icon.visibility = View.VISIBLE
+            icon.setImageResource(action.icon)
+        }
         return convertView
     }
 }

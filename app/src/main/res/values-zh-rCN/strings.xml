@@ -49,6 +49,12 @@
     <string name="fde_no_wifi_module">无网卡，无法操作</string>
     <string name="fde_save">保存</string>
     <string name="fde_input_hint">请输入值</string>
+    <string name="fde_collect">收藏</string>
+    <string name="fde_uncollect">取消收藏</string>
+    <string name="fde_lock_screen">锁屏</string>
+    <string name="fde_log_off">注销</string>
+    <string name="fde_restart">重启</string>
+    <string name="fde_shutdown">关机</string>
 
     <string name="fde_notification_battery">"电池管理"</string>
     <string name="fde_notification_volume">"音量管理"</string>

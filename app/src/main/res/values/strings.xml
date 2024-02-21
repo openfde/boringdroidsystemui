@@ -54,6 +54,12 @@
     <string name="fde_no_wifi_module">no wifi module</string>
     <string name="fde_save">Save</string>
     <string name="fde_input_hint">please input data</string>
+    <string name="fde_collect">collect</string>
+    <string name="fde_uncollect">cancel Favorite</string>
+    <string name="fde_lock_screen">Lock Screen</string>
+    <string name="fde_log_off">Log Off</string>
+    <string name="fde_restart">Restart</string>
+    <string name="fde_shutdown">Shutdown</string>
 
     <string name="fde_notification_battery">"battery management"</string>
     <string name="fde_notification_volume">"volume management"</string>

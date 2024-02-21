@@ -18,7 +18,7 @@ import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.view.RightClickView.RightClickListener
 import com.boringdroid.systemui.constant.HandlerConstant
 
-class AllAppsLayout @JvmOverloads constructor(
+class CollectAppsLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0
@@ -46,7 +46,7 @@ class AllAppsLayout @JvmOverloads constructor(
         private var appsWindow: AllAppsWindow?= null
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val appInfoLayout = LayoutInflater.from(context)
-                .inflate(R.layout.layout_app_info, parent, false) as ViewGroup
+                .inflate(R.layout.item_layout_collect, parent, false) as ViewGroup
             return ViewHolder(appInfoLayout)
         }
 
@@ -73,7 +73,7 @@ class AllAppsLayout @JvmOverloads constructor(
 
 
         private fun showUserContextMenu(clickView: RightClickView, appData: AppData) {
-            appsWindow?.showUserContextMenu(clickView, appData,true)
+            appsWindow?.showUserContextMenu(clickView, appData,false)
         }
 
         override fun getItemCount(): Int {
@@ -108,7 +108,7 @@ class AllAppsLayout @JvmOverloads constructor(
     }
 
     companion object {
-        private const val NUMBER_OF_COLUMNS = 1
+        private const val NUMBER_OF_COLUMNS = 4
     }
 
     init {

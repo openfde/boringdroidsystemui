@@ -1,30 +1,31 @@
 <library>
     <compatible>
-        <keycode>size</keycode>
-        <keydesc>分辨率</keydesc>
-        <defaultvalue>1</defaultvalue>
+        <keycode>isAllowHideDecorCaption</keycode>
+        <keydesc>是否允许隐藏标题栏</keydesc>
+        <defaultvalue>0</defaultvalue>
         <inputtype>select</inputtype>
         <optionjson>[{
-            "width": "1920",
-            "height": "1080"
+            "value": "true"
             },
             {
-            "width": "800",
-            "height": "600"
-            }, {
-            "width": "400",
-            "height": "320"
+            "value": "false"
             }
             ]</optionjson>
     </compatible>
 
-
     <compatible>
-        <keycode>maxWidth</keycode>
-        <keydesc>最大宽度</keydesc>
-        <defaultvalue>1920</defaultvalue>
-        <inputtype>input</inputtype>
-        <optionjson>[]</optionjson>
+        <keycode>isAllowUnresizeable</keycode>
+        <keydesc>是否允许固定最大化</keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>select</inputtype>
+        <optionjson>[{
+            "value": "true"
+            },
+            {
+            "value": "false"
+            }
+            ]</optionjson>
     </compatible>
+
 
 </library>
