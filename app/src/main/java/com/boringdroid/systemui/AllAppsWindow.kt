@@ -7,19 +7,14 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
-import android.content.pm.ShortcutInfo
-import android.content.pm.ShortcutManager
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
-import android.graphics.drawable.Icon
-import android.net.Uri
 import android.os.Handler
 import android.os.Message
 import android.preference.PreferenceManager
@@ -29,20 +24,15 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
-import com.android.internal.widget.GridLayoutManager
 import com.android.internal.widget.RecyclerView
-
 import com.boringdroid.systemui.adapter.AppActionsAdapter
-import com.boringdroid.systemui.adapter.CollectAdapter
-import com.boringdroid.systemui.data.Collect
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.ui.CompatibleListActivity
-import com.boringdroid.systemui.utils.DeviceUtils
-import com.boringdroid.systemui.utils.SystemuiColorUtils
-import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.data.Collect
+import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
+import com.boringdroid.systemui.view.CollectAppsLayout
 import java.lang.ref.WeakReference
 
 
@@ -56,8 +46,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var restartBtn: ImageButton? = null
     private var logoutBtn: ImageButton? = null
     private var lockBtn: ImageButton? = null
+    private var imgSetting : ImageView? = null
+    private var imgPower : ImageView? = null
     private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
+    private var collectAppsLayout: CollectAppsLayout? = null
     private var recyclerView: RecyclerView? = null
     private var shown = false
     private val appLoaderTask: AppLoaderTask
@@ -66,8 +59,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var sp: SharedPreferences? = null
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
-    private var collectAdapter:CollectAdapter?=null
-    private var list:MutableList<Collect>?=null
+    private var list: MutableList<Collect>? = null
 
 
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
@@ -80,35 +72,20 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null)
         allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
-        recyclerView = windowContentView !!.findViewById(R.id.recyclerView)
+        collectAppsLayout = windowContentView!!.findViewById(R.id.collect_apps_layout)
+        recyclerView = windowContentView!!.findViewById(R.id.recyclerView)
         powerBtn = windowContentView!!.findViewById(R.id.power_btn)
         screenRecordBtn = windowContentView!!.findViewById(R.id.screen_recording_btn)
         powerEntry = windowContentView!!.findViewById(R.id.power_entry)
         powerOffBtn = windowContentView!!.findViewById(R.id.power_off_btn)
         restartBtn = windowContentView!!.findViewById(R.id.restart_btn)
+        imgSetting = windowContentView!!.findViewById(R.id.imgSetting)
+        imgPower = windowContentView!!.findViewById(R.id.imgPower)
         logoutBtn = windowContentView!!.findViewById(R.id.logout_btn)
         lockBtn = windowContentView!!.findViewById(R.id.lock_btn)
         searchEt = windowContentView!!.findViewById(R.id.search_et)
         allAppsLayout!!.handler = handler
-
-        recyclerView?.layoutManager = GridLayoutManager(mContext,4)
-//        recyclerView?.layoutManager = LinearLayoutManager(mContext)
-
-//        list = listOf(
-//            Collect("Item 1", "Description of Item 1"),
-//            Collect("Item 2", "Description of Item 2"),
-//            Collect("Item 3", "Description of Item 3")
-//        )
-        val items = listOf(
-            Collect(1, "aaaa", "aaaa", "aaaa"),
-            Collect(2, "bbbb", "aaaa", "aaaa"),
-            Collect(3, "cccc", "aaaa", "aaaa"),
-            Collect(4, "dddd", "aaaa", "aaaa"),
-            Collect(5, "eeee", "aaaa", "aaaa"),
-            Collect(6, "ffff", "aaaa", "aaaa")
-        )
-        collectAdapter = CollectAdapter(items)
-        recyclerView?.adapter = collectAdapter
+        collectAppsLayout!!.handler = handler
 
 
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
@@ -148,7 +125,16 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             screenRecordBtn!!.context.startActivity(intent)
         }
+        imgSetting!!.setOnClickListener {
+            val intent = Intent("android.settings.SETTINGS")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            mContext.startActivity(intent)
+        }
+        imgPower!!.setOnClickListener {
+            showPowerListMenu(imgPower!!)
+        }
         allAppsLayout?.setWindow(this)
+        collectAppsLayout?.setWindow(this)
         searchEt?.setText("")
         searchEt?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -173,6 +159,55 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             }
         })
     }
+
+    fun showPowerListMenu(anchor: View) {
+        val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
+        SystemuiColorUtils.applyMainColor(mContext, sp, view)
+        lp?.gravity = Gravity.TOP or Gravity.LEFT
+        val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        val focus = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        lp?.flags = focus or touch
+        val location = IntArray(2)
+        anchor.getLocationOnScreen(location)
+        lp?.x = location[0]
+        lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
+        view.setOnTouchListener { p1: View?, p2: MotionEvent ->
+            if (p2.action == MotionEvent.ACTION_OUTSIDE) {
+                windowManager.removeView(view)
+            }
+            false
+        }
+
+        val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
+        val actions = ArrayList<Action?>()
+
+
+        actions.add(Action(R.drawable.icon_lock_screen, mContext.getString(R.string.fde_lock_screen)))
+        actions.add(Action(R.drawable.icon_log_off, mContext.getString(R.string.fde_log_off)))
+        actions.add(Action(R.drawable.icon_restart, mContext.getString(R.string.fde_restart)))
+        actions.add(Action(R.drawable.icon_shutdown, mContext.getString(R.string.fde_shutdown)))
+
+
+        actionsLv.adapter = AppActionsAdapter(mContext, actions)
+        actionsLv.onItemClickListener =
+            AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
+                val action = p1.getItemAtPosition(p3) as Action
+                if (action.text.equals(mContext.getString(R.string.fde_lock_screen))) {
+                    DeviceUtils.lock()
+                } else if (action.text.equals(mContext.getString(R.string.fde_log_off))) {
+                    DeviceUtils.logout()
+                } else if (action.text.equals(mContext.getString(R.string.fde_restart))) {
+                    DeviceUtils.restart()
+                } else if (action.text.equals(mContext.getString(R.string.fde_shutdown))) {
+                    DeviceUtils.poweroff()
+                }
+                windowManager.removeView(view)
+            }
+        view.setBackground(mContext.getDrawable(R.drawable.round_rect))
+        windowManager.addView(view, lp)
+    }
+
 
     private fun showPowerMenu() {
         searchEt?.setText("")
@@ -251,9 +286,26 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     private fun notifyLoadSucceed() {
         allAppsLayout!!.setData(appLoaderTask.allApps)
+
+        refreshCollectList()
     }
 
-    fun showUserContextMenu(anchor: View, appData: AppData) {
+    private fun refreshCollectList() {
+        var items = CollectUtils.queryListData(mContext)
+        var allApps = appLoaderTask.allApps
+//        val equalProperties = allApps.zip(items).filterNot  { (app1, app2) -> app1.packageName == app2.packageName  }
+        var list: MutableList<AppData> = mutableListOf()
+        for (app in allApps) {
+            for (item in items) {
+                if (app.packageName.equals(item.packageName)) {
+                    list.add(app)
+                }
+            }
+        }
+        collectAppsLayout!!.setData(list)
+    }
+
+    fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, view)
@@ -278,73 +330,62 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
-        actions.add(Action(R.drawable.ic_users, mContext.getString(R.string.open)))
-        actions.add(Action(R.drawable.ic_shortcuts, mContext.getString(R.string.todesk)))
+        if (isCollect) {
+            actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+        } else {
+            actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
+        }
 
-        actions.add(Action(R.drawable.ic_compatible, mContext.getString(R.string.compatible_config)))
+        actions.add(Action(0, mContext.getString(R.string.todesk)))
+
+        actions.add(
+            Action(
+                0,
+                mContext.getString(R.string.compatible_config)
+            )
+        )
         if (!isSystem) {
-            actions.add(Action(R.drawable.ic_uninstall, mContext.getString(R.string.uninstall)))
+            actions.add(Action(0, mContext.getString(R.string.uninstall)))
         }
         actionsLv.adapter = AppActionsAdapter(mContext, actions)
         actionsLv.onItemClickListener =
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
-                if (action.text.equals(mContext.getString(R.string.open))) {
-                    val intent = Intent()
-                    intent.component = appData.componentName
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    mContext.startActivity(intent)
-                    if (handler != null) {
-                        handler!!.sendEmptyMessage(HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
-                    } else {
-                        Log.e(TAG, "Won't send dismiss event because of handler is null")
-                    }
+                if (action.text.equals(mContext.getString(R.string.fde_collect))) {
+//                    val intent = Intent()
+//                    intent.component = appData.componentName
+//                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                    mContext.startActivity(intent)
+//                    if (handler != null) {
+//                        handler!!.sendEmptyMessage(HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
+//                    } else {
+//                        Log.e(TAG, "Won't send dismiss event because of handler is null")
+//                    }
+                    val packageName = appData.packageName
+                    var appName = appData.name
+                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "333");
+                    LogTools.i("res " + res);
+                    refreshCollectList()
+                } else if (action.text.equals(mContext.getString(R.string.fde_uncollect))) {
+                    val packageName = appData.packageName
+                    CollectUtils.deleteCollectData(mContext,packageName)
+                    refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.todesk))) {
-                    createShortcut(appData)
+                    AppUtils.createShortcut(mContext, appData)
                 } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
-                    uninstallApp(appData)
+                    AppUtils.uninstallApp(mContext, appData)
                 } else if (action.text.equals(mContext.getString(R.string.compatible_config))) {
-                    var inte = Intent(mContext, CompatibleListActivity::class.java)
-                    inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    inte.putExtra("packageName",appData.componentName?.packageName)
-                    mContext.startActivity(inte);
+                    val packageNam = appData.componentName?.packageName
+                    if (packageNam != null) {
+                        AppUtils.toConpatiblePage(mContext, packageNam)
+                    }
                 }
                 windowManager.removeView(view)
             }
+        view.setBackground(mContext.getDrawable(R.drawable.round_rect))
         windowManager.addView(view, lp)
     }
 
-    private fun uninstallApp(appData: AppData) {
-        Log.d(TAG, "uninstallApp() called with: appData = $appData")
-        val packageUri = Uri.parse("package:${appData.packageName}")
-        val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
-        mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-    }
-
-    private fun createShortcut(app: AppData) {
-        Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
-        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-        val shortcutManager: ShortcutManager? =
-            mContext?.getSystemService(ShortcutManager::class.java)
-        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-            val launchIntentForPackage: Intent = mContext?.getPackageManager()
-                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
-            launchIntentForPackage.action = Intent.ACTION_MAIN
-            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
-                .setLongLabel(app.name!!)
-                .setShortLabel(app.name!!)
-                .setIcon(icon)
-                .setIntent(launchIntentForPackage)
-                .build()
-            val pinnedShortcutCallbackIntent =
-                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
-            val successCallback = PendingIntent.getBroadcast(
-                mContext, 0,
-                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
-            )
-            shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
-        }
-    }
 
     private class H(allAppsWindow: AllAppsWindow?) : Handler() {
         private val allAppsWindow: WeakReference<AllAppsWindow?>

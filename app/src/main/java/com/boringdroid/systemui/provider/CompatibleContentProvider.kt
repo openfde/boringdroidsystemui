@@ -16,11 +16,12 @@ class CompatibleContentProvider : ContentProvider() {
 
     private val TABLE_COMPATIBLE_LIST = "COMPATIBLE_LIST"
     private val TABLE_COMPATIBLE_VALUE = "COMPATIBLE_VALUE"
+    private val TABLE_COLLECT_APP = "COLLECT_APP"
     private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
 
     private val CODE_COMPATIBLE_LIST = 1
     private val CODE_COMPATIBLE_VALUE = 2
-
+    private val CODE_COLLECT_APP = 3
 
     init {
         uriMatcher.addURI(
@@ -33,8 +34,14 @@ class CompatibleContentProvider : ContentProvider() {
             TABLE_COMPATIBLE_VALUE,
             CODE_COMPATIBLE_VALUE
         )
-        uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_LIST + "/#", 3)
-        uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_VALUE + "Item", 4)
+        uriMatcher.addURI(
+            "com.boringdroid.systemuiprovider",
+            TABLE_COLLECT_APP,
+            CODE_COLLECT_APP
+        )
+        uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_LIST + "/#", 4)
+        uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_VALUE + "Item", 5)
+        uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COLLECT_APP + "Item", 6)
     }
 
 
@@ -80,6 +87,19 @@ class CompatibleContentProvider : ContentProvider() {
                 )
                 cursor.setNotificationUri(context!!.contentResolver, uri)
             }
+            CODE_COLLECT_APP -> {
+                //查询table1表中的单条数据
+                cursor = db.query(
+                    TABLE_COLLECT_APP,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null,
+                    null,
+                    sortOrder
+                )
+                cursor.setNotificationUri(context!!.contentResolver, uri)
+            }
         }
         return cursor
     }
@@ -98,6 +118,9 @@ class CompatibleContentProvider : ContentProvider() {
             }
             CODE_COMPATIBLE_VALUE -> {
                 id = db.insert(TABLE_COMPATIBLE_VALUE, null, values)
+            }
+            CODE_COLLECT_APP -> {
+                id = db.insert(TABLE_COLLECT_APP, null, values)
             }
         }
         LogTools.i("-------insert----------id $id")
@@ -119,6 +142,13 @@ class CompatibleContentProvider : ContentProvider() {
             CODE_COMPATIBLE_VALUE -> {
                 val rowsDeleted =
                     db.delete(TABLE_COMPATIBLE_LIST, selection, selectionArgs)
+                db.close()
+                context?.contentResolver?.notifyChange(uri, null)
+                return rowsDeleted
+            }
+            CODE_COLLECT_APP -> {
+                val rowsDeleted =
+                    db.delete(TABLE_COLLECT_APP, selection, selectionArgs)
                 db.close()
                 context?.contentResolver?.notifyChange(uri, null)
                 return rowsDeleted
