@@ -60,6 +60,7 @@
     <string name="fde_log_off">Log Off</string>
     <string name="fde_restart">Restart</string>
     <string name="fde_shutdown">Shutdown</string>
+    <string name="fde_search">Search App</string>
 
     <string name="fde_notification_battery">"battery management"</string>
     <string name="fde_notification_volume">"volume management"</string>

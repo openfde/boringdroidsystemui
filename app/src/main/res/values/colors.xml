@@ -69,7 +69,7 @@
     <color name="green">#00897B</color>
     <color name="blue"> #1E88E5 </color>
     <color name="fde_bg">#F0F2F5</color>
-    <color name="fde_edit_bg">#F2F2F2</color>
+    <color name="fde_edit_bg">#E6E6E6</color>
 
     <color name="control_center_bg">#D9F7F8FA</color>
     <color name="right_slide_center_bg">#CDE9EEF5</color>

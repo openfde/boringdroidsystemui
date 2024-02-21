@@ -55,6 +55,7 @@
     <string name="fde_log_off">注销</string>
     <string name="fde_restart">重启</string>
     <string name="fde_shutdown">关机</string>
+    <string name="fde_search">搜索应用</string>
 
     <string name="fde_notification_battery">"电池管理"</string>
     <string name="fde_notification_volume">"音量管理"</string>

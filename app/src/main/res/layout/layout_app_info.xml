@@ -23,6 +23,7 @@
         android:layout_width="@dimen/app_info_icon_width"
         android:layout_height="@dimen/app_info_icon_height"
         android:layout_gravity="center_horizontal"
+        android:src="@mipmap/default_icon_round"
         tools:ignore="ContentDescription" />
 
     <TextView

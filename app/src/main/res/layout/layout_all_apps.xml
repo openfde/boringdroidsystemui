@@ -8,6 +8,7 @@
         android:layout_width="40dp"
         android:id="@+id/layoutLeft"
         android:layout_alignParentLeft="true"
+        android:paddingBottom="8dp"
         android:layout_height="match_parent">
 
         <ImageView
@@ -115,7 +116,7 @@
                 <EditText
                     android:imeOptions="actionGo"
                     android:textColorHint="@android:color/darker_gray"
-                    android:hint="@string/search"
+                    android:hint="@string/fde_search"
                     android:textColor="#222222"
                     android:layout_height="35dp"
                     android:layout_width="match_parent"
@@ -214,7 +215,7 @@
         <EditText
             android:imeOptions="actionGo"
             android:textColorHint="@android:color/darker_gray"
-            android:hint="@string/search"
+            android:hint="@string/fde_search"
             android:textColor="#222222"
             android:layout_height="36dp"
             android:layout_width="268dp"
@@ -223,6 +224,8 @@
             android:layout_marginTop="12dp"
             android:layout_marginHorizontal="12dp"
             android:layout_gravity="center_vertical"
+            android:drawablePadding="4dp"
+            android:drawableLeft="@drawable/icon_search"
             android:background="@drawable/search_text_background"
             android:id="@+id/search_et"
             android:textSize="17sp"
@@ -262,11 +265,6 @@
             android:textStyle="bold"
             android:layout_height="wrap_content"/>
 
-        <com.android.internal.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
 
         <com.boringdroid.systemui.view.CollectAppsLayout
             android:id="@+id/collect_apps_layout"
