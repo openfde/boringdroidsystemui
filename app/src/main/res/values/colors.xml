@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="all_apps_btn_fill_color">@android:color/holo_blue_light</color>
-    <color name="highlight_line_color">@android:color/holo_blue_light</color>
+    <color name="highlight_line_color">@color/theme_blue</color>
+    <color name="no_highlight_line_color">#61000000</color>
     <color name="bg_app_info_pressed_color">@android:color/darker_gray</color>
     <color name="bg_app_info_hovered_color">@android:color/darker_gray</color>
     <color name="seed">#2b69e2</color>

@@ -1,6 +1,7 @@
 package com.boringdroid.systemui.utils
 
 import android.Manifest
+import android.app.Instrumentation
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -52,6 +53,19 @@ object DeviceUtils {
 
     @JvmStatic fun sendKeyEvent(keycode: Int) {
         runAsRoot("input keyevent $keycode")
+    }
+
+    @JvmStatic fun sendKeyCode(keyCode: Int) {
+        object : Thread() {
+            override fun run() {
+                try {
+                    val inst = Instrumentation()
+                    inst.sendKeyDownUpSync(keyCode)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }.start()
     }
 
     @get:Throws(IOException::class)

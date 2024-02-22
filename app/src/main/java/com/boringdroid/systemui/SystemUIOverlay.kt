@@ -23,11 +23,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.get
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
@@ -75,9 +79,10 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                 // to let all apps button group be center of navigation
                 // bar view.
                 val layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    Utils.dpToPx(pluginContext!!, 56),
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
+//                layoutParams.leftMargin = Utils.dpToPx(pluginContext!!, 12)
                 val oldBtAllAppsGroup = buttonGroup.findViewWithTag<View>(TAG_ALL_APPS_GROUP)
                 if (oldBtAllAppsGroup != null) {
                     buttonGroup.removeView(oldBtAllAppsGroup)
@@ -96,7 +101,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
-                stateLayoutParams.marginStart = 50
+                stateLayoutParams.marginStart = Utils.dpToPx(pluginContext!!, 69)
                 buttonGroup.addView(appStateLayout, 3, stateLayoutParams)
                 appStateLayout!!.initTasks()
 
