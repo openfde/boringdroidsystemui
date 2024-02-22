@@ -61,6 +61,7 @@
     <string name="fde_notification_volume">"音量管理"</string>
     <string name="fde_notification_network">"网络设置"</string>
     <string name="fde_notification_message">"通知管理"</string>
+    <string name="fde_control_center">"控制中心"</string>
 
     <string name="wifi_string">无线网络</string>
     <string name="printscreen_string">截图</string>

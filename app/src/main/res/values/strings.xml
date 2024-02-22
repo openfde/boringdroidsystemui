@@ -66,7 +66,7 @@
     <string name="fde_notification_volume">"volume management"</string>
     <string name="fde_notification_network">"network management"</string>
     <string name="fde_notification_message">"notice management"</string>
-
+    <string name="fde_control_center">"control center"</string>
     <string name="wifi_string">WIFI</string>
     <string name="printscreen_string">PrintScreen</string>
     <string name="recordscreen_string">ScreenRecord</string>

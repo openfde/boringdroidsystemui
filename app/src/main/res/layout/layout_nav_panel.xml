@@ -18,15 +18,6 @@
 <!--        android:padding="8dp"-->
 <!--        android:src="@drawable/ic_unpin" />-->
 
-    <TextView
-        android:id="@+id/notifications_btn"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_margin="8dp"
-        android:background="@drawable/circle_white"
-        android:gravity="center"
-        android:padding="2dp"
-        android:textSize="12sp" />
 
 <!--    <ImageView-->
 <!--        android:id="@+id/bluetooth_btn"-->
@@ -38,36 +29,55 @@
 
     <ImageView
         android:id="@+id/wifi_btn"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_margin="5dp"
-        android:padding="8dp"
-        android:src="@drawable/ic_wifi_on" />
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_wifi" />
 
     <ImageView
         android:id="@+id/volume_btn"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_margin="5dp"
-        android:padding="5dp"
-        android:src="@drawable/ic_volume" />
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_volume" />
 
     <ImageView
         android:id="@+id/battery_btn"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_margin="5dp"
-        android:padding="5dp"
-        android:src="@drawable/battery_charging_full" />
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_battery_chargeing_100" />
+
+    <ImageView
+        android:id="@+id/control_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_control" />
+
+    <ImageView
+        android:id="@+id/notifications_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_notification"
+        />
 
     <TextClock
         android:id="@+id/date_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:format12Hour="MM/dd hh:mm a"
+        android:format24Hour="MM/dd HH:mm"
         android:layout_marginRight="10dp"
-        android:textColor="@android:color/white" />
-    
+        android:textColor="@android:color/black" />
+
     <LinearLayout
         android:id="@+id/layout_home"
         android:layout_width="20dp"
