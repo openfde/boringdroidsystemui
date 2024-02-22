@@ -42,5 +42,7 @@
     <dimen name="control_info_decoration_h">14dp</dimen>
     <dimen name="control_info_decoration_v">24dp</dimen>
     <dimen name="control_text_size">14px</dimen>
+    <dimen name="systemstate_icon_size">32dp</dimen>
+    <dimen name="system_state_icon_padding">7dp</dimen>
 
 </resources>

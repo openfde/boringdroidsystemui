@@ -9,7 +9,6 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
 import android.media.AudioManager
-import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -19,11 +18,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.Log
@@ -37,11 +35,9 @@ import com.boringdroid.systemui.constant.ControlConstant.SETTING_CONTROL
 import com.boringdroid.systemui.data.Control
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
-import com.boringdroid.systemui.utils.DeviceUtils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 
 class ControlCenterWindow (private val mContext: Context?) : View.OnClickListener{
@@ -53,6 +49,8 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     private val audioManager: AudioManager
     private var windowContentView: View? = null
     private var volumeSeekbar: SeekBar? = null
+    private var achor: ImageView? = null
+
     private var lightSeekbar: SeekBar? = null
     private var mRecyclerView: RecyclerView? = null
     private val controlAdapter: ControlAdapter
@@ -232,6 +230,8 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     }
 
     fun dismiss() {
+        achor?.background = null
+        achor = null
         val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_Y, 0f, windowHeight.toFloat())
         animator.duration = FADE_DURATION
         animator.interpolator = LinearInterpolator()
@@ -250,11 +250,13 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         }
     }
 
-    fun ifShowControlCenterView() {
+    fun ifShowControlCenterView(imageView: ImageView) {
         if (shown) {
             dismiss()
             return
         } else {
+            achor = imageView
+            imageView.background = mContext!!.resources.getDrawable(R.drawable.round_rect_5dp)
             showControlCenterView();
         }
     }
