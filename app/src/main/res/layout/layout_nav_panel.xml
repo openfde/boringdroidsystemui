@@ -67,4 +67,15 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:textColor="@android:color/white" />
+    
+    <LinearLayout
+        android:id="@+id/layout_home"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="#F1C7C7C7"/>
+    </LinearLayout>
 </com.boringdroid.systemui.view.SystemStateLayout>

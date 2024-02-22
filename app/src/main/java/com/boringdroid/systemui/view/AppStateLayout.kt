@@ -30,7 +30,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ListView
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -289,6 +291,25 @@ class AppStateLayout @JvmOverloads constructor(
             } else {
                 holder.highLightLineTV.setImageResource(R.drawable.line_short)
             }
+            holder.layoutTask.setBackgroundResource(R.drawable.bg_task_info)
+            val hoverListener = object :View.OnHoverListener {
+                override fun onHover(v: View?, event: MotionEvent?): Boolean {
+                    val what = event?.action
+                    when (what) {
+                        MotionEvent.ACTION_HOVER_ENTER -> {
+                            holder.layoutTask.setBackgroundResource(R.drawable.round_rect_8dp)
+                        }
+
+                        MotionEvent.ACTION_HOVER_EXIT -> {
+                            holder.layoutTask.setBackgroundResource(R.drawable.round_rect_8dp_00)
+                        }
+                    }
+                    return false
+                }
+            }
+            holder.mask.setOnHoverListener(hoverListener)
+//            holder.highLightLineTV.setOnHoverListener(hoverListener)
+//            holder.iconIV.setOnHoverListener(hoverListener)
             var label: CharSequence? = packageName
             try {
                 label = packageManager.getApplicationLabel(
@@ -302,21 +323,6 @@ class AppStateLayout @JvmOverloads constructor(
             }
             holder.iconIV.tag = taskInfo.id
             holder.iconIV.tooltipText = label
-//            holder.iconIV.setOnClickListener {
-//                Log.e(TAG, "taskInfo ${taskInfo.id}")
-//                val runningTasks = systemUIActivityManager.getRunningTasks(1)
-//                for (task in runningTasks) {
-//                    Log.e(TAG, "runningTask ${task.id}")
-//                    if (task.id == taskInfo.id) {
-//                        systemUIActivityManager.moveTaskToBack(true, task.id)
-//                        return@setOnClickListener
-//                    }
-//                }
-//                systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
-//                context.sendBroadcast(
-//                    Intent("com.boringdroid.systemui.CLOSE_RECENTS")
-//                )
-//            }
             holder.iconIV.setOnTouchListener { _: View?, event: MotionEvent ->
                 if (event.buttonState == MotionEvent.BUTTON_PRIMARY && event.action == MotionEvent.ACTION_DOWN) {
                     showApplicationWindow(taskInfo)
@@ -443,6 +449,9 @@ class AppStateLayout @JvmOverloads constructor(
             RecyclerView.ViewHolder(taskInfoLayout) {
             val iconIV: ImageView = taskInfoLayout.findViewById(R.id.iv_task_info_icon)
             val highLightLineTV: ImageView = taskInfoLayout.findViewById(R.id.iv_highlight_line)
+            val layoutTask: FrameLayout = taskInfoLayout.findViewById(R.id.layoutTask)
+            val mask: View = taskInfoLayout.findViewById(R.id.mask)
+
         }
 
         companion object {

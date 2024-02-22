@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="nav_button_size">35dp</dimen>
+    <dimen name="nav_button_size">32dp</dimen>
     <dimen name="all_apps_window_width">754dp</dimen>
     <dimen name="all_apps_window_height">604dp</dimen>
     <dimen name="all_apps_item_spacing_horizontal">10dp</dimen>
@@ -17,12 +17,12 @@
     <dimen name="all_apps_window_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_vertical">10dp</dimen>
     <dimen name="task_info_icon_size">26dp</dimen>
-    <dimen name="line_long_width">30dp</dimen>
+    <dimen name="line_long_width">12dp</dimen>
     <dimen name="line_long_height">2dp</dimen>
-    <dimen name="line_short_width">15dp</dimen>
+    <dimen name="line_short_width">12dp</dimen>
     <dimen name="line_short_height">2dp</dimen>
     <dimen name="iv_highlight_line_margin_top">5dp</dimen>
-    <dimen name="task_info_item_padding_horizontal">5dp</dimen>
+    <dimen name="task_info_item_padding_horizontal">7dp</dimen>
     <dimen name="all_apps_padding_vertical">5dp</dimen>
     <dimen name="all_apps_padding_horizontal">5dp</dimen>
     <dimen name="control_bt_size">50dp</dimen>

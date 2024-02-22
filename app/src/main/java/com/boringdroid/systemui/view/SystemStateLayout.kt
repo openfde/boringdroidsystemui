@@ -4,25 +4,29 @@
  */
 package com.boringdroid.systemui.view
 
+import android.accessibilityservice.AccessibilityService
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
-import android.media.AudioManager
 import android.util.AttributeSet
-import android.view.View
-import android.view.WindowManager
-import android.view.MotionEvent
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.boringdroid.systemui.AllAppsWindow
+import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.CountDownInterface
 import com.boringdroid.systemui.utils.CountDownTimerUtils
+import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 
 
@@ -33,6 +37,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var wifiBtn:ImageView ?= null
     private var volumeBtn:ImageView ?= null
     private var batteryBtn:ImageView ?= null
+    private var homeBtn:LinearLayout ?= null
     private var controlCenterWindow: ControlCenterWindow? = null
     private var notificationBtn: TextView?= null
     private var audioPanelVisible:Boolean = false
@@ -61,6 +66,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     fun initState() {
 //        bluetoothBtn = findViewById(R.id.bluetooth_btn)
         wifiBtn = findViewById(R.id.wifi_btn)
+        homeBtn = findViewById(R.id.layout_home)
         volumeBtn = findViewById(R.id.volume_btn)
         batteryBtn = findViewById(R.id.battery_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
@@ -79,6 +85,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener { toggleVolume() }
         batteryBtn?.setOnClickListener { batteryClick() }
+        homeBtn?.setOnClickListener{ homeClick()}
 
         wifiBtn?.setOnHoverListener(object : View.OnHoverListener{
             override fun onHover(v: View?, event: MotionEvent?): Boolean {
@@ -149,7 +156,20 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 return false
             }
         })
+        removeHorizontalMargin()
+    }
 
+    private fun removeHorizontalMargin() {
+        val viewGroup = (parent as FrameLayout).parent.parent.parent as FrameLayout
+        val layoutParams = viewGroup.get(0).layoutParams as FrameLayout.LayoutParams
+        layoutParams.leftMargin = 0
+        layoutParams.rightMargin = 0
+        layoutParams.marginStart = 0
+        layoutParams.marginEnd = 0
+    }
+
+    private fun homeClick() {
+        DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
     }
 
 
@@ -226,6 +246,9 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private fun toggleVolume() {
+//        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
+//        val frameLayout1 = frameLayout.get(0) as FrameLayout
+//        val frameLayout2 = frameLayout1.get(0) as FrameLayout
         controlCenterWindow?.ifShowControlCenterView()
 //        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //        audioManager.adjustStreamVolume(
