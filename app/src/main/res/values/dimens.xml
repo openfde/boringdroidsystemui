@@ -45,4 +45,12 @@
     <dimen name="systemstate_icon_size">32dp</dimen>
     <dimen name="system_state_icon_padding">7dp</dimen>
 
+
+    <dimen name="notification_window_width">406dp</dimen>
+    <dimen name="notification_window_height">406dp</dimen>
+    <dimen name="notification_info_width">374dp</dimen>
+    <dimen name="notification_info_height">106dp</dimen>
+    <dimen name="notification_decoration">80dp</dimen>
+
+
 </resources>

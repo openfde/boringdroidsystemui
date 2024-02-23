@@ -289,7 +289,6 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     companion object {
         private const val TAG = "ControlCenterWindow"
         private const val FADE_DURATION :Long = 120
-
     }
 
     init {

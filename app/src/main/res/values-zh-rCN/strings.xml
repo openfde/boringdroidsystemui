@@ -69,4 +69,12 @@
     <string name="savepower_string">省电模式</string>
     <string name="setting_string">设置</string>
 
+    <string name="cleartext">清空</string>
+    <string name="no_notification">暂无新通知</string>
+    <string name="just_now">刚刚</string>
+    <string name="minute">分钟</string>
+    <string name="hours">小时</string>
+    <string name="days">天</string>
+
+
 </resources>

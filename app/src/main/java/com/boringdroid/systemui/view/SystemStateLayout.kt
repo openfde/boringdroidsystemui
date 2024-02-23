@@ -31,7 +31,7 @@ import com.boringdroid.systemui.utils.Utils
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     LinearLayout(context, attrs) ,CountDownInterface{
 
-//    private var bluetoothBtn:ImageView ?= null
+    //    private var bluetoothBtn:ImageView ?= null
     private var wifiBtn:ImageView ?= null
     private var volumeBtn:ImageView ?= null
     private var batteryBtn:ImageView ?= null
@@ -39,6 +39,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var homeBtn:LinearLayout ?= null
     private var dateBtn:TextClock ?= null
     private var controlCenterWindow: ControlCenterWindow? = null
+    private var notificationWindow: NotificationWindow? = null
+
     private var notificationBtn: ImageView?= null
     private var audioPanelVisible:Boolean = false
     var listener: NotificationListener?= null
@@ -73,6 +75,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         controlCenterWindow = ControlCenterWindow(context)
+//        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
@@ -82,6 +85,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 listener?.showNotification()
                 Utils.notificationPanelVisible = true
             }
+//            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
         }
 //        bluetoothBtn?.setOnClickListener { this }
         wifiBtn?.setOnClickListener { wifiClick() }
@@ -214,6 +218,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     fun onNotificationPanelVisibleChanged(boolean: Boolean){
         Utils.notificationPanelVisible = boolean
+        if( boolean ){
+            notificationBtn?.background  = context!!.resources.getDrawable(R.drawable.round_rect_5dp)
+        } else{
+            notificationBtn?.background  = null
+        }
     }
 
     override fun onTick(millisUntilFinished: Long) {
