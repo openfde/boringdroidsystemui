@@ -74,7 +74,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn = findViewById(R.id.battery_btn)
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
-        controlCenterWindow = ControlCenterWindow(context)
+        controlCenterWindow = ControlCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
@@ -83,6 +83,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 Utils.notificationPanelVisible = false
             } else {
                 listener?.showNotification()
+                controlCenterWindow?.dismiss()
                 Utils.notificationPanelVisible = true
             }
 //            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
@@ -99,6 +100,15 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn?.tooltipText = context.getString(R.string.fde_notification_battery)
         notificationBtn?.tooltipText = context.getString(R.string.fde_notification_message)
         removeHorizontalMargin()
+
+        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
+        frameLayout.setOnClickListener(View.OnClickListener {
+            controlCenterWindow?.dismiss()
+            if (Utils.notificationPanelVisible) {
+                listener?.hideNotification()
+                Utils.notificationPanelVisible = false
+            }
+        })
     }
 
     private fun removeHorizontalMargin() {
@@ -137,7 +147,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             layoutParams.horizontalMargin = right
             layoutParams.verticalMargin = 0.04f
             windowContentView = LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
-            var txtName :TextView ;
+            var txtName :TextView
             txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
             txtName.setText(content)
             windowManager?.addView(windowContentView,layoutParams)
@@ -192,6 +202,10 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        val frameLayout1 = frameLayout.get(0) as FrameLayout
 //        val frameLayout2 = frameLayout1.get(0) as FrameLayout
         controlCenterWindow?.ifShowControlCenterView(imageView)
+        if (Utils.notificationPanelVisible) {
+            listener?.hideNotification()
+            Utils.notificationPanelVisible = false
+        }
 //        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //        audioManager.adjustStreamVolume(
 //            AudioManager.STREAM_MUSIC,

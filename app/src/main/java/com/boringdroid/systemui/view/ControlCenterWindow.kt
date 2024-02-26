@@ -40,7 +40,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class ControlCenterWindow (private val mContext: Context?) : View.OnClickListener{
+class ControlCenterWindow(private val mContext: Context?, private val volumeBtn: ImageView?) : View.OnClickListener{
 
     private var shown = false
     private var windowWidth:Int
@@ -50,6 +50,7 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     private var windowContentView: View? = null
     private var volumeSeekbar: SeekBar? = null
     private var achor: ImageView? = null
+    private var volumeImage: ImageView? = null
 
     private var lightSeekbar: SeekBar? = null
     private var mRecyclerView: RecyclerView? = null
@@ -67,6 +68,7 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_control_center, null)
         mRecyclerView = windowContentView?.findViewById(R.id.recyclerView)
         volumeSeekbar = windowContentView?.findViewById(R.id.seekbar_volume)
+        volumeImage = windowContentView?.findViewById(R.id.iv_volume)
         lightSeekbar = windowContentView?.findViewById(R.id.seekbar_light)
         mRecyclerView?.adapter = controlAdapter
         mRecyclerView?.layoutManager = GridLayoutManager(mContext, 3)
@@ -146,6 +148,16 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
             Log.w(TAG,"progress: $progress ")
             val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+            if(progress < volumeSeekbar?.max!!.div(3)){
+                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+                volumeImage?.setImageResource(R.drawable.icon_volume_min)
+            } else if (progress < (volumeSeekbar?.max!!.div(3)*2)){
+                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+                volumeImage?.setImageResource(R.drawable.icon_volume_mid)
+            } else {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+                volumeImage?.setImageResource(R.drawable.icon_volume_max)
+            }
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -230,7 +242,12 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
     }
 
     fun dismiss() {
-        achor?.background = null
+        if (!shown){
+            return
+        }
+        if(achor != null){
+            achor?.background = null
+        }
         achor = null
         val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_Y, 0f, windowHeight.toFloat())
         animator.duration = FADE_DURATION
@@ -250,13 +267,13 @@ class ControlCenterWindow (private val mContext: Context?) : View.OnClickListene
         }
     }
 
-    fun ifShowControlCenterView(imageView: ImageView) {
+    fun ifShowControlCenterView(imageView: ImageView?) {
         if (shown) {
             dismiss()
             return
         } else {
             achor = imageView
-            imageView.background = mContext!!.resources.getDrawable(R.drawable.round_rect_5dp)
+            imageView?.background = mContext!!.resources.getDrawable(R.drawable.round_rect_5dp)
             showControlCenterView();
         }
     }
