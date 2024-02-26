@@ -131,6 +131,8 @@ class NotificationWindow(
             val position: Int = parent.getChildAdapterPosition(view)
             if ( position != state.getItemCount() - 1 ) {
                 outRect.set(0,0,0, Utils.dpToPx(context,8))
+            } else {
+                outRect.set(0,0,0, Utils.dpToPx(context,16))
             }
         }
     }

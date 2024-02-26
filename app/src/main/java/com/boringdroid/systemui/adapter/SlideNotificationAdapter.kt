@@ -64,17 +64,17 @@ class SlideNotificationAdapter(
         val name = AppUtils.getPackageLabel(context, sbn?.packageName)
         val postTime = sbn?.postTime
         val currentTimeMillis = System.currentTimeMillis()
-        Log.d(TAG, " ------------------- ")
-        Log.d(TAG, "onBindViewHolder: title = $title")
-        Log.d(TAG, "onBindViewHolder: extratext = $extratext")
-        Log.d(TAG, "onBindViewHolder: sbutext = $sbutext")
-        Log.d(TAG, "onBindViewHolder: summary = $summary")
-        Log.d(TAG, "onBindViewHolder: info = $info")
-        Log.d(TAG, "onBindViewHolder: name = $name")
-        Log.d(TAG, "onBindViewHolder: bigtext = $bigtext")
-        Log.d(TAG, "onBindViewHolder: titlebig = $titlebig")
-        Log.d(TAG, "onBindViewHolder: postTime = $postTime")
-        Log.d(TAG, "onBindViewHolder: currentTimeMillis = $currentTimeMillis")
+//        Log.d(TAG, " ------------------- ")
+//        Log.d(TAG, "onBindViewHolder: title = $title")
+//        Log.d(TAG, "onBindViewHolder: extratext = $extratext")
+//        Log.d(TAG, "onBindViewHolder: sbutext = $sbutext")
+//        Log.d(TAG, "onBindViewHolder: summary = $summary")
+//        Log.d(TAG, "onBindViewHolder: info = $info")
+//        Log.d(TAG, "onBindViewHolder: name = $name")
+//        Log.d(TAG, "onBindViewHolder: bigtext = $bigtext")
+//        Log.d(TAG, "onBindViewHolder: titlebig = $titlebig")
+//        Log.d(TAG, "onBindViewHolder: postTime = $postTime")
+//        Log.d(TAG, "onBindViewHolder: currentTimeMillis = $currentTimeMillis")
         val computeElapsedTime = Utils.computeElapsedTime(postTime!!, currentTimeMillis, context)
 
         holder.nameTv.text = name
@@ -114,25 +114,6 @@ class SlideNotificationAdapter(
                 true
             }
 
-            val itemHoverListener = object :View.OnHoverListener {
-                override fun onHover(v: View?, event: MotionEvent?): Boolean {
-                    val what = event?.action
-                    when (what) {
-                        MotionEvent.ACTION_HOVER_ENTER -> {
-//                            elapsedTv.visibility = View.GONE
-                            closeIv.visibility = View.VISIBLE
-                        }
-
-                        MotionEvent.ACTION_HOVER_EXIT -> {
-//                            elapsedTv.visibility = View.VISIBLE
-                            closeIv.visibility = View.GONE
-                        }
-                    }
-                    return false
-                }
-            }
-//            itemView.setOnHoverListener(itemHoverListener)
-
             val closeHoverListener = object :View.OnHoverListener {
                 override fun onHover(v: View?, event: MotionEvent?): Boolean {
                     val what = event?.action
@@ -161,12 +142,13 @@ class SlideNotificationAdapter(
     }
 
     fun notifyData(notifications: Array<StatusBarNotification>?) {
-        Log.d(TAG, "notifyData() called with: notifications = $notifications")
-        Log.d(TAG, "notifyData() called with: notificationList = $notificationList")
         if(!notifications.isNullOrEmpty()){
             val toMutableList = notifications?.toMutableList()
             notificationList?.clear()
             notificationList?.addAll(toMutableList)
+            notificationList?.stream()?.sorted { o1, o2 ->
+                (o1?.postTime ?: 0L).compareTo(o2?.postTime ?: 0L)
+            }
             notifyDataSetChanged()
         }
     }
@@ -178,7 +160,5 @@ class SlideNotificationAdapter(
     init {
         val toMutableList = notifications?.toMutableList()
         notificationList = toMutableList as ArrayList<StatusBarNotification>?
-        Log.d(TAG, "init: notifications = ${notifications?.size}")
-        Log.d(TAG, "init: notificationList = ${notificationList?.size}")
     }
 }
