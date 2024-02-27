@@ -52,6 +52,9 @@
     <string name="fde_has_connected">connected</string>
     <string name="fde_has_saved">saved</string>
     <string name="fde_no_wifi_module">no wifi module</string>
+    <string name="fde_net_mask" >"mask"</string>
+    <string name="fde_net_input_mask" >"enter mask"</string>
+    <string name="fde_net_invalid_mask" >"invalid mask"</string>
     <string name="fde_save">Save</string>
     <string name="fde_input_hint">please input data</string>
     <string name="fde_collect">collect</string>
@@ -61,6 +64,10 @@
     <string name="fde_restart">Restart</string>
     <string name="fde_shutdown">Shutdown</string>
     <string name="fde_search">Search App</string>
+    <string name="fde_more_net_setting">more net settings</string>
+    <string name="fde_not_open_wifi">please open wifi</string>
+    <string name="fde_has_saved_wifi">Network saved</string>
+    <string name="fde_has_nosaved_wifi">Other networks</string>
 
     <string name="fde_notification_battery">"battery management"</string>
     <string name="fde_notification_volume">"volume management"</string>
@@ -72,4 +79,7 @@
     <string name="recordscreen_string">ScreenRecord</string>
     <string name="savepower_string">PowerSave</string>
     <string name="setting_string">Setting</string>
+
+
+
 </resources>

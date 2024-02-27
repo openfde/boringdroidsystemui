@@ -128,7 +128,7 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position,String type) {
 
         for (int i = 0; i < list.size(); i++) {
             Compatible ca = list.get(i);
@@ -144,5 +144,15 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
         String content = StringUtils.ToString(compatible.getMp());
 
         CompatibleConfig.insertUpdateValueData(context, packageName, keyCode, content);
+    }
+
+    @Override
+    public void onItemClick(int pos, String content, View view) {
+
+    }
+
+    @Override
+    public void onItemClick(String title, String content) {
+
     }
 }

@@ -71,7 +71,7 @@ public class CompatibleSetAdapter extends RecyclerView.Adapter<CompatibleSetAdap
 
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(position);
+                onItemClickListener.onItemClick(position,"");
             }
         });
     }

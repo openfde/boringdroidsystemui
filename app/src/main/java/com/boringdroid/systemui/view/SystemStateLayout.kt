@@ -39,6 +39,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var batteryBtn:ImageView ?= null
     private var homeBtn:LinearLayout ?= null
     private var controlCenterWindow: ControlCenterWindow? = null
+    private var netCenterWindow: NetCenterWindow? = null
     private var notificationBtn: TextView?= null
     private var audioPanelVisible:Boolean = false
     var listener: NotificationListener?= null
@@ -71,6 +72,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn = findViewById(R.id.battery_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         controlCenterWindow = ControlCenterWindow(context)
+        netCenterWindow = NetCenterWindow(context)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
@@ -217,15 +219,17 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * network wifi click
      */
     private fun wifiClick(){
-        android.util.Log.i("bella","-------wifiClick-----------");
-        showTips("",0.05f)
+//        android.util.Log.i("bella","-------wifiClick-----------");
+//        showTips("",0.05f)
+//
+//        val intent = Intent()
+//        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
+////        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
+//        intent.component = cn;
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//        context.startActivity(intent)
 
-        val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
-//        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
-        intent.component = cn;
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
+        netCenterWindow?.ifShowNetCenterView()
     }
 
     /**
