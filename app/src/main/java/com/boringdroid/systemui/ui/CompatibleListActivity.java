@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -60,7 +61,7 @@ public class CompatibleListActivity extends Activity implements OnItemClickListe
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position,String type) {
         Intent intent = new Intent();
         intent.setClass(context, CompatibleSetActivity.class);
         intent.putExtra("packageName",packageName);
@@ -72,5 +73,15 @@ public class CompatibleListActivity extends Activity implements OnItemClickListe
         intent.putExtra("inputType",inputType);
         intent.putExtra("optionJson",optionJson);
         context.startActivity(intent);
+    }
+
+    @Override
+    public void onItemClick(int pos, String content, View view) {
+
+    }
+
+    @Override
+    public void onItemClick(String title, String content) {
+
     }
 }

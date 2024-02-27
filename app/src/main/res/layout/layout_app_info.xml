@@ -5,24 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/all_apps_item_height"
     android:layout_gravity="center"
+    android:gravity="center|left"
     android:layout_marginStart="@dimen/all_apps_item_spacing_horizontal"
-    android:layout_marginTop="@dimen/all_apps_item_spacing_vertical"
     android:layout_marginEnd="@dimen/all_apps_item_spacing_horizontal"
-    android:layout_marginBottom="@dimen/all_apps_item_spacing_vertical"
     android:clickable="true"
     android:focusable="true"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/all_apps_padding_horizontal"
-    android:paddingTop="@dimen/all_apps_padding_vertical"
-    android:paddingEnd="@dimen/all_apps_padding_horizontal"
-    android:paddingBottom="@dimen/all_apps_padding_vertical"
+    android:paddingHorizontal="@dimen/all_apps_padding_horizontal"
     tools:ignore="UseCompoundDrawables">
 
     <ImageView
         android:id="@+id/app_info_icon"
         android:layout_width="@dimen/app_info_icon_width"
         android:layout_height="@dimen/app_info_icon_height"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         android:src="@mipmap/default_icon_round"
         tools:ignore="ContentDescription" />
 
@@ -30,11 +26,11 @@
         android:id="@+id/app_info_name"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/app_info_icon_height"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         android:ellipsize="middle"
         android:gravity="center|left"
         android:singleLine="true"
-        android:text="ttt"
+        android:text="test"
         android:paddingLeft="@dimen/all_apps_window_margin_horizontal"
         android:textSize="@dimen/app_info_name_text_size" />
 </com.boringdroid.systemui.view.RightClickView>

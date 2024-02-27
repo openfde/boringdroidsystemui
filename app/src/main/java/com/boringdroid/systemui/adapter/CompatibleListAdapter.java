@@ -47,7 +47,7 @@ public class CompatibleListAdapter extends RecyclerView.Adapter<CompatibleListAd
         holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(position);
+                onItemClickListener.onItemClick(position,"");
 
             }
         });
