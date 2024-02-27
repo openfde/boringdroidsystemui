@@ -70,6 +70,9 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
     }
 
     override fun setup(statusBar: View, navBar: View) {
+
+
+
         Log.d(TAG, "setup status bar $statusBar, nav bar $navBar")
         if (navBarButtonGroupId > 0) {
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)

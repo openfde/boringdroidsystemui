@@ -7,10 +7,10 @@ package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
-import android.content.ClipData
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.Canvas
@@ -21,7 +21,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.UserManager
 import android.util.AttributeSet
-
 import android.view.DragEvent
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -32,18 +31,18 @@ import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ListView
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
-import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.NotificationService
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
-import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.adapter.AppStateActionsAdapter
+import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +66,9 @@ class AppStateLayout @JvmOverloads constructor(
     private val tasks: MutableList<TaskInfo> = ArrayList()
     private val taskAdapter: TaskAdapter?
     private val mScope = MainScope()
+    private var contextView:View ?= null
+    private val windowManager:WindowManager
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         AM_WRAPPER.registerTaskStackListener(appStateListener)
@@ -81,6 +83,10 @@ class AppStateLayout @JvmOverloads constructor(
         val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
         for (i in runningTaskInfos.indices.reversed()) {
             val runningTaskInfo = runningTaskInfos[i]
+            if(isLauncher(context, runningTaskInfo.topActivity)){
+                var taskThumbnail  = AM_WRAPPER.getTaskThumbnail(runningTaskInfo.taskId, false)
+                Log.d(TAG, "initTasks() called:" + taskThumbnail)
+            }
             if (shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
                 continue
             }
@@ -231,25 +237,38 @@ class AppStateLayout @JvmOverloads constructor(
     }
 
     private inner class AppStateListener : TaskStackChangeListener() {
+
+        private var init:Boolean = false
+
         override fun onTaskCreated(taskId: Int, componentName: ComponentName?) {
             super.onTaskCreated(taskId, componentName)
-            Log.d(TAG, "onTaskCreated $taskId, cm $componentName")
+            Log.d(TAG, "huyang onTaskCreated $taskId, cm $componentName")
             onTaskStackChanged()
         }
 
         override fun onTaskMovedToFront(taskId: Int) {
             super.onTaskMovedToFront(taskId)
-            Log.d(TAG, "onTaskMoveToFront taskId $taskId")
+            Log.d(TAG, "huyang onTaskMoveToFront taskId $taskId")
             onTaskStackChanged()
         }
 
+
         override fun onTaskMovedToFront(taskInfo: RunningTaskInfo) {
             super.onTaskMovedToFront(taskInfo)
-            Log.d(TAG, "onTaskMovedToFront $taskInfo")
+            Log.d(TAG, "huyang onTaskMovedToFront $taskInfo numactivity:${taskInfo.numActivities}")
             onTaskStackChanged()
         }
 
         override fun onTaskStackChanged() {
+            if(!init){
+                init = true
+                val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
+                frameLayout.setOnClickListener(View.OnClickListener {
+                    if (contextView != null && contextView?.isAttachedToWindow!!) {
+                        windowManager.removeView(contextView)
+                    }
+                })
+            }
             super.onTaskStackChanged()
             CoroutineScope(Dispatchers.Main).launch {
                 delay(300L)
@@ -261,19 +280,18 @@ class AppStateLayout @JvmOverloads constructor(
 
         override fun onTaskRemoved(taskId: Int) {
             super.onTaskRemoved(taskId)
-            Log.d(TAG, "onTaskRemoved $taskId")
+            Log.d(TAG, "huyang onTaskRemoved $taskId")
             removeTask(taskId)
         }
     }
 
-    private class TaskAdapter(private val context: Context, dragCloseThreshold: Int, private val am: ActivityManager) :
+    private class TaskAdapter(private val context: Context, dragCloseThreshold: Int, private val am: ActivityManager, private val contextView :View) :
         Adapter<TaskAdapter.ViewHolder>() {
         private val tasks: MutableList<TaskInfo> = ArrayList()
         private var systemUIActivityManager: ActivityManager
         private val packageManager: PackageManager
         private var topTaskId = -1
         private val dragCloseThreshold: Int
-        private var view:View ?= null
         val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -284,6 +302,12 @@ class AppStateLayout @JvmOverloads constructor(
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val taskInfo = tasks[position]
+            val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
+            for (task in runningTasks) {
+                if (task.taskId == taskInfo.id) {
+                    Log.d(TAG, "huyang onBindViewHolder ${taskInfo.packageName} numactivity:${task.numActivities}")
+                }
+            }
             val packageName = taskInfo.packageName
             holder.iconIV.setImageDrawable(taskInfo.icon)
             if (taskInfo.id == topTaskId) {
@@ -291,7 +315,6 @@ class AppStateLayout @JvmOverloads constructor(
             } else {
                 holder.highLightLineTV.setImageResource(R.drawable.line_short)
             }
-            holder.layoutTask.setBackgroundResource(R.drawable.bg_task_info)
             val hoverListener = object :View.OnHoverListener {
                 override fun onHover(v: View?, event: MotionEvent?): Boolean {
                     val what = event?.action
@@ -308,8 +331,6 @@ class AppStateLayout @JvmOverloads constructor(
                 }
             }
             holder.mask.setOnHoverListener(hoverListener)
-//            holder.highLightLineTV.setOnHoverListener(hoverListener)
-//            holder.iconIV.setOnHoverListener(hoverListener)
             var label: CharSequence? = packageName
             try {
                 label = packageManager.getApplicationLabel(
@@ -323,38 +344,44 @@ class AppStateLayout @JvmOverloads constructor(
             }
             holder.iconIV.tag = taskInfo.id
             holder.iconIV.tooltipText = label
-            holder.iconIV.setOnTouchListener { _: View?, event: MotionEvent ->
-                if (event.buttonState == MotionEvent.BUTTON_PRIMARY && event.action == MotionEvent.ACTION_DOWN) {
-                    showApplicationWindow(taskInfo)
-                    if (view != null && view?.isAttachedToWindow!!) {
-                        windowManager.removeView(view)
+            val contextListener = object : OnContextClickListener {
+                override fun onContextClick(v: View?): Boolean {
+                    if (contextView != null && contextView?.isAttachedToWindow!!) {
+                        windowManager.removeView(contextView)
                     }
-                } else if (event.buttonState == MotionEvent.BUTTON_SECONDARY && event.action == MotionEvent.ACTION_DOWN) {
-                    Log.d(TAG, "onBindViewHolder() called with: right click")
                     showUserContextMenu(holder.iconIV, taskInfo)
-                    if (view != null && view?.isAttachedToWindow!!) {
-                        windowManager.removeView(view)
-                    }
-                    true
+                    return true
                 }
-                false
             }
-            holder.iconIV.setOnLongClickListener { v: View ->
-                val item = ClipData.Item(TAG_TASK_ICON)
-                val dragData = ClipData(TAG_TASK_ICON, arrayOf("unknown"), item)
-                val shadow: DragShadowBuilder = DragDropShadowBuilder(v)
-                holder.iconIV.setOnDragListener(
-                    DragDropCloseListener(
-                        dragCloseThreshold,
-                        dragCloseThreshold
-                    ) { taskId: Int? ->
-                        AM_WRAPPER.removeTask(
-                            taskId!!
-                        )
-                    })
-                v.startDragAndDrop(dragData, shadow, null, DRAG_FLAG_GLOBAL)
-                true
+            val clickListener = object : OnClickListener {
+                override fun onClick(v: View?) {
+                    android.util.Log.d(TAG, "onBindViewHolder() called")
+                    showApplicationWindow(taskInfo)
+                    if (contextView != null && contextView?.isAttachedToWindow!!) {
+                        windowManager.removeView(contextView)
+                    }
+                }
             }
+            holder.layoutTask.setOnContextClickListener(contextListener)
+            holder.layoutTask.setOnClickListener( clickListener)
+            holder.iconIV.setOnContextClickListener( contextListener)
+            holder.iconIV.setOnClickListener( clickListener)
+//            holder.iconIV.setOnLongClickListener { v: View ->
+//                val item = ClipData.Item(TAG_TASK_ICON)
+//                val dragData = ClipData(TAG_TASK_ICON, arrayOf("unknown"), item)
+//                val shadow: DragShadowBuilder = DragDropShadowBuilder(v)
+//                holder.iconIV.setOnDragListener(
+//                    DragDropCloseListener(
+//                        dragCloseThreshold,
+//                        dragCloseThreshold
+//                    ) { taskId: Int? ->
+//                        AM_WRAPPER.removeTask(
+//                            taskId!!
+//                        )
+//                    })
+//                v.startDragAndDrop(dragData, shadow, null, DRAG_FLAG_GLOBAL)
+//                true
+//            }
         }
 
         private fun showApplicationWindow(taskInfo: TaskInfo){
@@ -365,33 +392,35 @@ class AppStateLayout @JvmOverloads constructor(
                 if (task.taskId == taskInfo.id) {
                     systemUIActivityManager.moveTaskToBack(true, task.taskId)
                 }
+                Log.d(TAG, "huyang showApplicationWindow $taskInfo numactivity:${task.numActivities}")
             }
-            systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
+            systemUIActivityManager.moveTaskToFront(taskInfo.id, ActivityManager.MOVE_TASK_NO_USER_ACTION)
 //            context.sendBroadcast(
 //                Intent("com.boringdroid.systemui.CLOSE_RECENTS")
 //            )
         }
 
         private fun showUserContextMenu(anchor: View, taskInfo: TaskInfo) {
-            view = LayoutInflater.from(context).inflate(R.layout.task_list, null)
             val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, context!!, true)
-            SystemuiColorUtils.applyMainColor(context, null, view)
+            SystemuiColorUtils.applyMainColor(context, null, contextView)
             lp?.gravity = Gravity.TOP or Gravity.LEFT
             lp?.flags =
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
             val location = IntArray(2)
             anchor.getLocationOnScreen(location)
             lp?.x = location[0]
-            lp?.y = location[1] + Utils.dpToPx(context, anchor.measuredHeight / 2)
-            view?.setOnTouchListener { p1: View?, p2: MotionEvent ->
+            val marginVertical = context.resources.getDimension(R.dimen.control_center_window_margin)
+                .toInt()
+            lp?.y = location[1] - anchor.measuredHeight - marginVertical * 9
+            contextView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
                 if (p2.action == MotionEvent.ACTION_OUTSIDE) {
-                    windowManager.removeView(view)
+                    windowManager.removeView(contextView)
                 }
                 false
             }
-//            val applicationInfo = context.packageManager.getApplicationInfo(taskInfo.packageName!!, 0)
-//            val isSystem = applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-            val actionsLv = view?.findViewById<ListView>(R.id.tasks_lv)
+            val applicationInfo = context.packageManager.getApplicationInfo(taskInfo.packageName!!, 0)
+            val isSystem = applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            val actionsLv = contextView?.findViewById<ListView>(R.id.tasks_lv)
             val actions = ArrayList<Action?>()
             var isShowing = false
             val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
@@ -400,18 +429,19 @@ class AppStateLayout @JvmOverloads constructor(
                 if (task.taskId == taskInfo.id) {
                     isShowing = true
                 }
+
             }
-//            if(isShowing){
-//                actions.add(Action(R.drawable.ic_screen_rotation_off, context.getString(R.string.hide)))
-//            } else{
-//                actions.add(Action(R.drawable.ic_users, context.getString(R.string.open)))
-//            }
-            actions.add(Action(R.drawable.ic_notification_clear_all, context.getString(R.string.close)))
+            if(isShowing){
+                actions.add(Action(0, context.getString(R.string.hide)))
+            } else{
+                actions.add(Action(0, context.getString(R.string.open)))
+            }
+            actions.add(Action(0, context.getString(R.string.close)))
 
 //            if(!isSystem){
-//                actions.add(Action(R.drawable.ic_uninstall, context.getString(R.string.uninstall)))
+//                actions.add(Action(0, context.getString(R.string.uninstall)))
 //            }
-            actionsLv?.adapter = AppActionsAdapter(context, actions)
+            actionsLv?.adapter = AppStateActionsAdapter(context, actions)
             actionsLv?.onItemClickListener =
                 AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                     val action = p1.getItemAtPosition(p3) as Action
@@ -422,9 +452,10 @@ class AppStateLayout @JvmOverloads constructor(
                     } else if (action.text.equals(context.getString(R.string.hide))){
                         systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
                     }
-                    windowManager.removeView(view)
+                    windowManager.removeView(contextView)
                 }
-            windowManager.addView(view, lp)
+            contextView.setBackground(context.getDrawable(R.drawable.round_rect))
+            windowManager.addView(contextView, lp)
         }
 
         override fun getItemCount(): Int {
@@ -542,7 +573,10 @@ class AppStateLayout @JvmOverloads constructor(
         layoutManager = manager
         setHasFixedSize(true)
         val appInfoIconWidth = context.resources.getDimensionPixelSize(R.dimen.app_info_icon_width)
-        taskAdapter = TaskAdapter(context, (appInfoIconWidth * 5), activityManager)
+        contextView = LayoutInflater.from(context).inflate(R.layout.task_list, null)
+        taskAdapter = TaskAdapter(context, (appInfoIconWidth * 5), activityManager, contextView!!)
         adapter = taskAdapter
+        windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
     }
 }
