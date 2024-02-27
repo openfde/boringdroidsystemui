@@ -57,7 +57,7 @@ class ControlAdapter (private val context: Context) :
         controlItemClickListener = listener
     }
 
-    class ViewHolder(val appInfoLayout: ViewGroup) : RecyclerView.ViewHolder(
+    class ViewHolder( appInfoLayout: ViewGroup) : RecyclerView.ViewHolder(
         appInfoLayout
     ) {
         val iconIV: ImageView = appInfoLayout.findViewById(R.id.icon)
