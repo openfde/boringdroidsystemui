@@ -28,9 +28,15 @@ class AppActionsAdapter(private val context: Context, actions: ArrayList<Action?
 //                context
 //            ), icon
 //        )
+
         text.text = action!!.text
-        if(action.icon == 0){
+        if(action.icon <= 0){
             icon.visibility = View.GONE
+            if(action.icon == -1){
+                text.setTextColor(context.getColor(R.color.gray))
+            }else{
+                text.setTextColor(context.getColor(R.color.app_black_dark))
+            }
         }else{
             icon.visibility = View.VISIBLE
             icon.setImageResource(action.icon)

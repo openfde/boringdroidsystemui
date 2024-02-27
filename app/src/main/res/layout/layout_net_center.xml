@@ -49,9 +49,11 @@
         android:layout_height="@dimen/net_center_wifi_list_height">
 
         <TextView
-            android:text="@string/fde_has_saved"
+            android:id="@+id/txtSavedTitle"
+            android:text="@string/fde_has_saved_wifi"
             android:textColor="@color/control_text_color"
             android:alpha="0.88"
+            android:paddingBottom="@dimen/fde_left_setting_padding_size"
             android:textSize="@dimen/net_common_font_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -64,8 +66,10 @@
              />
 
         <TextView
+            android:id="@+id/txtUnSavedTitle"
             android:text="@string/fde_has_nosaved_wifi"
             android:paddingTop="@dimen/net_center_wifi_padding"
+            android:paddingBottom="@dimen/fde_left_setting_padding_size"
             android:layout_width="wrap_content"
             android:textColor="@color/control_text_color"
             android:alpha="0.88"

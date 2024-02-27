@@ -332,11 +332,11 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
                     }
                 }
                 if(listSave != null){
-                    var maxHeight = 150
+                    var maxHeight = 144
                     if(listSave?.size!! < 2){
-                        maxHeight = 50
+                        maxHeight = 48
                     }else if(listSave?.size!! <3){
-                        maxHeight = 100
+                        maxHeight = 96
                     }
 
                     val pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, maxHeight.toFloat(), mContext?.resources?.displayMetrics).toInt()

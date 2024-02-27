@@ -79,11 +79,12 @@
     <color name="control_text_color">#000000</color>
     <color name="theme_blue">#F22778f2</color>
 
+    <color name="app_black_dark">#1A1A1A</color>
     <color name="app_black_light">#333333</color>
     <color name="app_gray_dark">#666666</color>
     <color name="app_blue_light">#008ED2</color>
     <color name="app_gray">#999999</color>
-
+    <color name="gray">#BEBEBE</color>
     <color name="white">#fff</color>
     <color name="black">#000</color>
 

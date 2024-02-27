@@ -159,7 +159,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showPowerListMenu(anchor: View) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(120, 142, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, view)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
@@ -306,7 +306,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, 150, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, view)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
@@ -345,6 +345,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         )
         if (!isSystem) {
             actions.add(Action(0, mContext.getString(R.string.uninstall)))
+        }else{
+            actions.add(Action(-1, mContext.getString(R.string.uninstall)))
         }
         actionsLv.adapter = AppActionsAdapter(mContext, actions)
         actionsLv.onItemClickListener =
@@ -372,7 +374,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 } else if (action.text.equals(mContext.getString(R.string.todesk))) {
                     AppUtils.createShortcut(mContext, appData)
                 } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
-                    AppUtils.uninstallApp(mContext, appData)
+                    if (!isSystem) {
+                        AppUtils.uninstallApp(mContext, appData)
+                    }
                 } else if (action.text.equals(mContext.getString(R.string.compatible_config))) {
                     val packageNam = appData.componentName?.packageName
                     if (packageNam != null) {
