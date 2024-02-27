@@ -7,6 +7,7 @@ import android.view.WindowManager;
 public class ScreenSizeUtils {
     private static ScreenSizeUtils instance = null;
     private int screenWidth, screenHeight;
+    private float density;
 
     public static ScreenSizeUtils getInstance(Context mContext) {
         if (instance == null) {
@@ -24,6 +25,7 @@ public class ScreenSizeUtils {
         manager.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;// 获取屏幕分辨率宽度
         screenHeight = dm.heightPixels;// 获取屏幕分辨率高度
+        density = dm.density;
     }
 
     //获取屏幕宽度
@@ -34,6 +36,10 @@ public class ScreenSizeUtils {
     //获取屏幕高度
     public int getScreenHeight() {
         return screenHeight;
+    }
+
+    public float getDensity() {
+        return density;
     }
 }
 

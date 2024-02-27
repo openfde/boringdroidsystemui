@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/control_center_window_width"
     android:background="@color/control_center_bg"
-    android:layout_height="wrap_content">
+    android:layout_height="@dimen/control_center_window_height">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -25,10 +25,10 @@
         android:progressDrawable="@drawable/seekbar_bg"
         android:splitTrack="false"
         android:thumb="@drawable/sb_thumb"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_volume"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintStart_toEndOf="@+id/iv_volume"
+        app:layout_constraintTop_toTopOf="@+id/iv_volume" />
 
     <SeekBar
         android:id="@+id/seekbar_light"
@@ -46,7 +46,7 @@
         app:layout_constraintTop_toTopOf="@+id/imageView2" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/iv_volume"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginStart="24dp"
@@ -62,8 +62,8 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/iv_volume"
+        app:layout_constraintTop_toBottomOf="@+id/iv_volume"
         android:src="@drawable/icon_light" />
 
 
