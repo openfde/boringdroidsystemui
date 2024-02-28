@@ -3,121 +3,147 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/fde_bg"
-    android:paddingTop="@dimen/net_center_wifi_padding"
-    android:layout_height="match_parent">
+    android:paddingTop="@dimen/net_center_wifi_padding">
 
 
     <TextView
         android:id="@+id/txtWifiTitle"
         android:layout_width="wrap_content"
-        android:text="@string/wifi_string"
-        android:paddingLeft="@dimen/net_center_wifi_padding"
-        android:textSize="@dimen/net_center_wifi_title_font"
-        android:textColor="@color/fde_wifi_title"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        android:paddingLeft="@dimen/net_center_wifi_padding"
         android:paddingBottom="@dimen/net_center_wifi_padding"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        android:text="@string/wifi_string"
+        android:textColor="@color/fde_wifi_title"
+        android:textSize="@dimen/net_center_wifi_title_font"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Switch
         android:id="@+id/switchWifi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingRight="@dimen/net_center_wifi_padding"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <View
         android:id="@+id/imgLineTop"
         android:layout_width="match_parent"
-        android:background="@color/control_text_color"
+        android:layout_height="1dp"
         android:alpha="0.1"
+        android:background="@color/control_text_color"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtWifiTitle"
-        android:layout_height="1dp"/>
+        app:layout_constraintTop_toBottomOf="@id/txtWifiTitle" />
 
-    <LinearLayout
-        android:id="@+id/layoutSave"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
         android:paddingTop="@dimen/net_center_wifi_padding"
-        app:layout_constraintTop_toBottomOf="@id/imgLineTop"
-        android:paddingHorizontal="@dimen/net_center_wifi_padding"
-        android:layout_height="@dimen/net_center_wifi_list_height">
+        app:layout_constraintTop_toBottomOf="@id/imgLineTop">
 
-        <TextView
-            android:id="@+id/txtSavedTitle"
-            android:text="@string/fde_has_saved_wifi"
-            android:textColor="@color/control_text_color"
-            android:alpha="0.88"
-            android:paddingBottom="@dimen/fde_left_setting_padding_size"
-            android:textSize="@dimen/net_common_font_size"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewSave"
+        <LinearLayout
+            android:id="@+id/layoutSave"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-             />
+            android:layout_height="@dimen/net_center_wifi_list_height"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/net_center_wifi_padding"
+            android:visibility="gone">
 
-        <TextView
-            android:id="@+id/txtUnSavedTitle"
-            android:text="@string/fde_has_nosaved_wifi"
-            android:paddingTop="@dimen/net_center_wifi_padding"
-            android:paddingBottom="@dimen/fde_left_setting_padding_size"
-            android:layout_width="wrap_content"
-            android:textColor="@color/control_text_color"
-            android:alpha="0.88"
-            android:textSize="@dimen/net_common_font_size"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtSavedTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.88"
+                android:paddingBottom="@dimen/fde_left_setting_padding_size"
+                android:text="@string/fde_has_saved_wifi"
+                android:textColor="@color/control_text_color"
+                android:textSize="@dimen/net_common_font_size" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewUnSave"
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible" />
+
+
+            <TextView
+                android:id="@+id/txtUnSavedTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.88"
+                android:paddingTop="@dimen/net_center_wifi_padding"
+                android:paddingBottom="@dimen/fde_left_setting_padding_size"
+                android:text="@string/fde_has_nosaved_wifi"
+                android:textColor="@color/control_text_color"
+                android:textSize="@dimen/net_common_font_size" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewUnSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/net_list_height"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutLoading"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="150dp"
-            android:visibility="visible"
-            />
-    </LinearLayout>
+            android:layout_height="@dimen/net_loading_height"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fde_scanning" />
+
+            <ImageView
+                android:id="@+id/imgLoading"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+        </LinearLayout>
+    </FrameLayout>
 
 
     <View
         android:id="@+id/imgLine"
         android:layout_width="match_parent"
-        android:background="@color/control_text_color"
+        android:layout_height="1dp"
         android:alpha="0.1"
+        android:background="@color/control_text_color"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@id/txtMoreNetSet"
-        android:layout_height="1dp"/>
+        app:layout_constraintTop_toTopOf="@id/txtMoreNetSet" />
 
     <TextView
         android:id="@+id/txtMoreNetSet"
         android:layout_width="wrap_content"
-        android:text="@string/fde_more_net_setting"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:gravity="center"
-        android:visibility="visible"
         android:layout_height="@dimen/all_apps_item_height"
+        android:gravity="center"
         android:paddingLeft="@dimen/net_center_wifi_padding"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:text="@string/fde_more_net_setting"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/txtShowNotOpenText"
         android:layout_width="wrap_content"
-        android:text="@string/fde_not_open_wifi"
-        android:gravity="center"
-        android:textColor="@color/control_text_color"
-        android:alpha="0.45"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:alpha="0.45"
+        android:gravity="center"
+        android:text="@string/fde_not_open_wifi"
+        android:textColor="@color/control_text_color"
         app:layout_constraintBottom_toBottomOf="@id/imgLine"
-        app:layout_constraintTop_toTopOf="@id/txtWifiTitle"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/txtWifiTitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

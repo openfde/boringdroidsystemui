@@ -32,6 +32,14 @@ class NetCenterAdapter(private val context: Context,private val listType:Int , p
             onItemClickListener.onItemClick(position,StringUtils.ToString(listType),holder.layoutWifiInfo)
         })
 
+        if("2".equals(isSaved)){
+            holder.imgLock.visibility = View.GONE
+            holder.txtContentText.visibility = View.VISIBLE
+        }else{
+            holder.imgLock.visibility = View.VISIBLE
+            holder.txtContentText.visibility = View.GONE
+        }
+
         val curNet :Int = StringUtils.ToInt(list!![position]["curNet"])
         if(listType.equals(Constant.INT_SAVE) ){
             if(curNet == position ){
@@ -71,6 +79,7 @@ class NetCenterAdapter(private val context: Context,private val listType:Int , p
     ) {
         val txtWifiName :TextView = appInfoLayout.findViewById(R.id.txtWifiName);
         val txtWifiType:TextView  = appInfoLayout.findViewById(R.id.txtWifiType);
+        val txtContentText:TextView  = appInfoLayout.findViewById(R.id.txtContentText);
         val layoutWifiInfo:LinearLayout  = appInfoLayout.findViewById(R.id.layoutWifiInfo);
         val imgWifi:ImageView  = appInfoLayout.findViewById(R.id.imgWifi);
         val imgLock:ImageView  = appInfoLayout.findViewById(R.id.imgLock);

@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.drawable.AnimationDrawable
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.TypedValue
@@ -24,6 +25,7 @@ import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.StringUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.SelectWlanWindow
+import java.util.*
 
 
 class NetCenterPersenter(private val mContext: Context?, private val windowContentView: View?) :
@@ -33,9 +35,13 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     private var switchWifi: Switch? = null
     private var txtMoreNetSet: TextView? = null
     private var txtShowNotOpenText: TextView? = null
-//    private var layoutUnSave: LinearLayout? = null
+
     private var layoutSave: LinearLayout? = null
-    private var wifiStatus = 1
+    private var layoutLoading: LinearLayout? = null
+    private var imgLoading: ImageView? = null
+
+
+    private var wifiStatus = 0
     var isScaning = false
     private var saveAdapter: NetCenterAdapter? = null
     private var unSaveAdapter: NetCenterAdapter? = null
@@ -48,6 +54,11 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     private val windowManager: WindowManager
     private var view: View? = null
     private var curWifiName: String? = null
+
+    private var frameAnimation: AnimationDrawable? = null
+
+    var timer: Timer? = null
+    var timerTask: TimerTask? = null
 
     init {
         sp = PreferenceManager.getDefaultSharedPreferences(mContext)
@@ -63,6 +74,8 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         txtShowNotOpenText = windowContentView?.findViewById(R.id.txtShowNotOpenText)
 //        layoutUnSave = windowContentView?.findViewById(R.id.layoutUnSave)
         layoutSave = windowContentView?.findViewById(R.id.layoutSave)
+        layoutLoading = windowContentView?.findViewById(R.id.layoutLoading)
+        imgLoading = windowContentView?.findViewById(R.id.imgLoading)
 
         listSave = ArrayList()
         listUnSave = ArrayList()
@@ -97,7 +110,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         })
 
         txtMoreNetSet?.setOnClickListener(View.OnClickListener {
-        val intent = Intent()
+            val intent = Intent()
             val cn: ComponentName? =
                 ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
 //        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
@@ -105,12 +118,14 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             mContext?.startActivity(intent)
         })
+
+        initTimer()
     }
 
 
     private fun openWifiView() {
         txtShowNotOpenText?.visibility = View.GONE
-        layoutSave?.visibility = View.VISIBLE
+//        layoutSave?.visibility = View.VISIBLE
 //        layoutUnSave?.visibility = View.VISIBLE
     }
 
@@ -120,6 +135,44 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
 //        layoutUnSave?.visibility = View.GONE
     }
 
+    fun initTimer() {
+        timer = Timer()
+        timerTask = object : TimerTask() {
+            override fun run() {
+//                LogTools.i("wifiStatus "+wifiStatus + " ,curWifiName "+curWifiName)
+                if (wifiStatus == 1 && "".equals(StringUtils.ToString(curWifiName))) {
+                    getAllSsid()
+                }
+            }
+        }
+        timer!!.schedule(timerTask, (1 * 1000).toLong(), (5 * 1000).toLong())
+    }
+
+    fun destTimer() {
+        if (timer != null) {
+            timer!!.cancel()
+            timer = null
+        }
+        if (timerTask != null) {
+            timerTask!!.cancel()
+            timerTask = null
+        }
+        isScaning = false
+    }
+
+    private fun setConntectingShow(pos: Int) {
+        try {
+            val mp: MutableMap<String, Any>? = listSave?.get(pos)
+            if (mp != null) {
+                mp.put("isSaved", "2")
+                listSave?.set(pos, mp)
+                saveAdapter?.notifyDataSetChanged()
+            }
+
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
 
     /**
      * wifi is enable ?
@@ -133,7 +186,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
                 if (wifiStatus === 1) {
                     switchWifi!!.isChecked = true
                     openWifiView()
-                    getAllSsid()
+                    scanWifiList()
                     switchWifi!!.isEnabled = true
                 } else {
                     closeWifiView()
@@ -174,7 +227,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
                 LogTools.i("callBackListener: enableWifi result-- >$result ,enable  $enable")
                 if (enable == 1) {
                     openWifiView()
-                    getAllSsid()
+                    scanWifiList()
                 } else {
                     isScaning = false
                     closeWifiView()
@@ -188,13 +241,18 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         })
     }
 
+    private fun scanWifiList(){
+        showProgressDialog()
+        getAllSsid()
+    }
+
     private fun getAllSsid() {
         if (isScaning) {
             LogTools.i("getAllSsid  isScaning")
             return
         }
         isScaning = true
-        showProgressDialog()
+//        showProgressDialog()
         NetCtrl.get(mContext, "getAllSsid", null, object : HttpRequestCallBack {
             override fun callBackListener(result: String) {
                 LogTools.i("callBackListener:getAllSsid  result-- >$result")
@@ -331,15 +389,19 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
                         }
                     }
                 }
-                if(listSave != null){
+                if (listSave != null) {
                     var maxHeight = 144
-                    if(listSave?.size!! < 2){
+                    if (listSave?.size!! < 2) {
                         maxHeight = 48
-                    }else if(listSave?.size!! <3){
+                    } else if (listSave?.size!! < 3) {
                         maxHeight = 96
                     }
 
-                    val pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, maxHeight.toFloat(), mContext?.resources?.displayMetrics).toInt()
+                    val pixels = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        maxHeight.toFloat(),
+                        mContext?.resources?.displayMetrics
+                    ).toInt()
                     recyclerViewSave?.layoutParams?.height = pixels
                 }
                 saveAdapter?.notifyDataSetChanged()
@@ -358,13 +420,15 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     }
 
     private fun connectActivedWifi(ssid: String, connect: Int) {
+        LogTools.i("connectActivedWifi-- > ssid "+ssid +" , connect: "+connect)
         val mp: MutableMap<String, Any> = HashMap()
         mp["ssid"] = ssid
         mp["connect"] = connect
         NetCtrl.get(mContext, "connectActivedWifi", mp, object : HttpRequestCallBack {
             override fun callBackListener(result: String) {
                 LogTools.i("callBackListener: connectSavedWifi result-- >$result")
-                connectedWifiList()
+                getAllSsid()
+//                connectedWifiList()
             }
 
             override fun requestFail(errorString: String, code: Int) {
@@ -374,6 +438,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     }
 
     private fun connectSsid(ssid: String, password: String) {
+        LogTools.i("connectSsid-- > ssid "+ssid +" , password: "+password)
         val mp: MutableMap<String, Any> = HashMap()
         mp["ssid"] = ssid
         mp["password"] = password
@@ -390,25 +455,25 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         })
     }
 
-
     private fun showProgressDialog() {
-//        val rotateAnimation = RotateAnimation(
-//            0, 360,  // Start and end values for the rotation
-//            Animation.RELATIVE_TO_SELF, 0.5f,  // Pivot point of X rotation
-//            Animation.RELATIVE_TO_SELF, 0.5f
-//        ) // Pivot point of Y rotation
-//        rotateAnimation.setDuration(2000) // Duration in milliseconds
-//        rotateAnimation.setRepeatCount(Animation.INFINITE)
-//        imgRefresh.startAnimation(rotateAnimation)
+        layoutSave?.visibility = View.GONE
+        layoutLoading?.visibility = View.VISIBLE
+        imgLoading?.setBackgroundResource(R.drawable.frame_animation)
+        frameAnimation = imgLoading?.getBackground() as AnimationDrawable
+        frameAnimation!!.start()
     }
 
     private fun hideProgressDialog() {
-//        imgRefresh.clearAnimation()
+        layoutSave?.visibility = View.VISIBLE
+        layoutLoading?.visibility = View.GONE
+        frameAnimation?.stop()
+        imgLoading?.clearAnimation()
     }
 
-    override fun onItemClick(title: String?, content: String?) {
-        if (title != null && content != null) {
-            connectSsid(title, content)
+    override fun onItemClick(ssid: String?, password: String?) {
+        if (ssid != null && password != null) {
+            curWifiName = "";
+            connectSsid(ssid, password)
         };
     }
 
@@ -420,18 +485,22 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         try {
             if (view != null) {
                 dismissWifiListDialog()
-                val wifiName = StringUtils.ToString(listUnSave!![pos]["name"])
+                var wifiName = "";
                 if (content.equals(StringUtils.ToString(Constant.INT_SAVE))) {
+                    curWifiName = "";
                     // if connect else unconnect
+                    wifiName = StringUtils.ToString(listSave!![pos]["name"])
                     val curNet: Int = StringUtils.ToInt(listUnSave!![pos]["curNet"])
-                    LogTools.i("wifiName " + wifiName + " ,curNet: " + curNet)
+//                    LogTools.i("wifiName " + wifiName + " ,curNet: " + curNet)
                     if (curNet >= 0) {
                         connectActivedWifi(wifiName, 0)
                     } else {
+                        setConntectingShow(pos);
                         connectActivedWifi(wifiName, 1)
                     }
                 } else {
 //                    showWifiListDialog(wifiName,view)
+                    wifiName = StringUtils.ToString(listUnSave!![pos]["name"])
                     val selectWlanWindow = SelectWlanWindow(mContext, wifiName, this)
                     selectWlanWindow.ifShowNetCenterView()
                 }
