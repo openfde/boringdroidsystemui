@@ -99,6 +99,7 @@ class NetCenterWindow (private val mContext: Context?) {
 
     fun dismiss() {
         netCenterPersenter?.dismissWifiListDialog()
+        netCenterPersenter?.destTimer()
         val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_Y, 0f, windowHeight.toFloat())
         animator.duration = FADE_DURATION
         animator.interpolator = LinearInterpolator()

@@ -43,6 +43,8 @@
     <dimen name="net_center_wifi_title_font">16sp</dimen>
     <dimen name="net_center_wifi_padding">20dp</dimen>
     <dimen name="net_common_font_size">14sp</dimen>
+    <dimen name="net_list_height">150dp</dimen>
+    <dimen name="net_loading_height">300dp</dimen>
 
     <dimen name="control_center_window_width">406dp</dimen>
     <dimen name="control_center_window_height">348dp</dimen>
