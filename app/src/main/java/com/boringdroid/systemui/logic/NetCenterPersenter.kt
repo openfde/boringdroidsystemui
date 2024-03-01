@@ -24,11 +24,16 @@ import com.boringdroid.systemui.net.NetCtrl
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.StringUtils
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.NetCenterWindow
 import com.boringdroid.systemui.view.SelectWlanWindow
 import java.util.*
 
 
-class NetCenterPersenter(private val mContext: Context?, private val windowContentView: View?) :
+class NetCenterPersenter(
+    private val mContext: Context?,
+    private val netCenterWindow: NetCenterWindow?,
+    private val windowContentView: View?
+) :
     OnItemClickListener {
     private var recyclerViewSave: RecyclerView? = null
     private var recyclerViewUnSave: RecyclerView? = null
@@ -117,6 +122,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
             intent.component = cn;
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             mContext?.startActivity(intent)
+            netCenterWindow?.dismiss()
         })
 
         initTimer()
@@ -241,7 +247,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
         })
     }
 
-    private fun scanWifiList(){
+    private fun scanWifiList() {
         showProgressDialog()
         getAllSsid()
     }
@@ -420,7 +426,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     }
 
     private fun connectActivedWifi(ssid: String, connect: Int) {
-        LogTools.i("connectActivedWifi-- > ssid "+ssid +" , connect: "+connect)
+        LogTools.i("connectActivedWifi-- > ssid " + ssid + " , connect: " + connect)
         val mp: MutableMap<String, Any> = HashMap()
         mp["ssid"] = ssid
         mp["connect"] = connect
@@ -438,7 +444,7 @@ class NetCenterPersenter(private val mContext: Context?, private val windowConte
     }
 
     private fun connectSsid(ssid: String, password: String) {
-        LogTools.i("connectSsid-- > ssid "+ssid +" , password: "+password)
+        LogTools.i("connectSsid-- > ssid " + ssid + " , password: " + password)
         val mp: MutableMap<String, Any> = HashMap()
         mp["ssid"] = ssid
         mp["password"] = password

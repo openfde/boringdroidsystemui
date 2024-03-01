@@ -34,7 +34,7 @@ class NetCenterWindow (private val mContext: Context?) {
     fun showNetCenterView() {
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_net_center, null)
-        netCenterPersenter = NetCenterPersenter(mContext,windowContentView)
+        netCenterPersenter = NetCenterPersenter(mContext,this,windowContentView)
 //        initView()
         val cornerRadius = mContext!!.resources.getDimension(R.dimen.control_center_window_radius)
         val elevation = mContext!!.resources.getInteger(R.integer.control_center_elevation)
