@@ -87,5 +87,6 @@
     <color name="gray">#BEBEBE</color>
     <color name="white">#fff</color>
     <color name="black">#000</color>
+    <color name="bord_gray">#D6D6D6</color>
 
 </resources>

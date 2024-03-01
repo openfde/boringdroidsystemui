@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/notification_info_width"
     android:layout_height="@dimen/notification_info_height"
-    android:background="@drawable/round_rect_10dp"
+    android:layout_marginLeft="16dp"
+    android:background="@drawable/shadow"
     >
 
     <ImageView
@@ -47,11 +48,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="6dp"
-        android:textSize="14sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
         android:text=""
         android:textColor="#E6000000"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/image_icon"
         app:layout_constraintTop_toBottomOf="@+id/image_icon" />
 
@@ -60,12 +61,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="18dp"
-        android:textColor="#E6000000"
-        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
         android:maxWidth="312dp"
         android:singleLine="true"
         android:text=""
+        android:textColor="#E6000000"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/image_icon" />
 
