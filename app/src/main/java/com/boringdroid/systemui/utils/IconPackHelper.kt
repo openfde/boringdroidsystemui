@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.utils
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
@@ -14,6 +14,7 @@ import android.text.TextUtils
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
+import com.boringdroid.systemui.Log
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory

@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.logic.NetCenterPersenter
+import com.boringdroid.systemui.ui.logic.NetCenterPersenter
 import com.boringdroid.systemui.net.HttpRequestCallBack
 import com.boringdroid.systemui.net.NetCtrl
 import com.boringdroid.systemui.utils.LogTools
@@ -29,7 +29,7 @@ class NetCenterWindow (private val mContext: Context?) {
     private val windowManager: WindowManager
     private var windowContentView: View? = null
 
-    private var netCenterPersenter:NetCenterPersenter?=null
+    private var netCenterPersenter: NetCenterPersenter?=null
 
     fun showNetCenterView() {
         val layoutParams = generateLayoutParams(mContext, windowManager)

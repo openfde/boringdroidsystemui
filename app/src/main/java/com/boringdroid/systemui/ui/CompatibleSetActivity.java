@@ -8,12 +8,13 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.boringdroid.systemui.Constant;
+import com.boringdroid.systemui.constant.Constant;
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.adapter.CompatibleSetAdapter;
 import com.boringdroid.systemui.adapter.OnItemClickListener;
@@ -33,18 +34,19 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
     String packageName;
     String optionJson;
     String inputType;
-
+    String keyDesc;
     String keyCode;
     RecyclerView recyclerView;
     EditText editText;
 
     Button btnSave;
 
+    TextView txtKeyDesc;
+
     LinearLayout layoutEdit;
 
     CompatibleSetAdapter compatibleSetAdapter;
     List<Compatible> list;
-
     Context context;
 
     @Override
@@ -57,6 +59,7 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
         optionJson = getIntent().getStringExtra("optionJson");
         inputType = getIntent().getStringExtra("inputType");
         keyCode = getIntent().getStringExtra("keyCode");
+        keyDesc = getIntent().getStringExtra("keyDesc");
         context = this;
         initView();
 
@@ -67,6 +70,8 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
         editText = (EditText) findViewById(R.id.editText);
         layoutEdit = (LinearLayout) findViewById(R.id.layoutEdit);
         btnSave = (Button) findViewById(R.id.btnSave);
+        txtKeyDesc = (TextView) findViewById(R.id.txtKeyDesc);
+        txtKeyDesc.setText(keyDesc);
 
         list = new ArrayList<>();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
@@ -128,7 +133,7 @@ public class CompatibleSetActivity extends Activity implements OnItemClickListen
     }
 
     @Override
-    public void onItemClick(int position,String type) {
+    public void onItemClick(int position, String type) {
 
         for (int i = 0; i < list.size(); i++) {
             Compatible ca = list.get(i);

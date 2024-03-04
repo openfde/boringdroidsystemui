@@ -48,7 +48,8 @@ public class CompatibleSetAdapter extends RecyclerView.Adapter<CompatibleSetAdap
             String key = entry.getKey();
             String value = StringUtils.ToString(entry.getValue());
             LogTools.Companion.i("onBindViewHolder key: " + key + " , value " + value);
-            showContent += key + ": " + value + "\n";
+//            showContent += key + ": " + value + "\n";
+            showContent +=  value + "";
             holder.txtTitle.setText(showContent);
         }
 
@@ -84,14 +85,12 @@ public class CompatibleSetAdapter extends RecyclerView.Adapter<CompatibleSetAdap
     class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout rootView;
         TextView txtTitle;
-        TextView txtContent;
         ImageView radioButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             rootView = (LinearLayout) itemView.findViewById(R.id.rootView);
             txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
-            txtContent = (TextView) itemView.findViewById(R.id.txtContent);
             radioButton = (ImageView) itemView.findViewById(R.id.radioButton);
         }
     }

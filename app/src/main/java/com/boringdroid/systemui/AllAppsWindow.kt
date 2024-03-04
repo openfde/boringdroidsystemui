@@ -379,8 +379,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                     }
                 } else if (action.text.equals(mContext.getString(R.string.compatible_config))) {
                     val packageNam = appData.componentName?.packageName
-                    if (packageNam != null) {
-                        AppUtils.toConpatiblePage(mContext, packageNam)
+                    val appNam = appData.name
+                    if (packageNam != null && appNam != null) {
+                        AppUtils.toConpatiblePage(mContext, packageNam,appNam)
                     }
                 }
                 windowManager.removeView(view)
