@@ -1,4 +1,4 @@
-package com.boringdroid.systemui;
+package com.boringdroid.systemui.constant;
 
 public class Constant {
     public static final String TYPE_SELECT = "select";

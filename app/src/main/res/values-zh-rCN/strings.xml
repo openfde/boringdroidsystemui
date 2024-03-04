@@ -63,6 +63,7 @@
     <string name="fde_not_open_wifi">未开启无线网络</string>
     <string name="fde_has_saved_wifi">已保存网络</string>
     <string name="fde_has_nosaved_wifi">其它网络</string>
+    <string name="fde_app_name_title">应用名称</string>
 
     <string name="fde_notification_battery">"电池管理"</string>
     <string name="fde_notification_volume">"音量管理"</string>

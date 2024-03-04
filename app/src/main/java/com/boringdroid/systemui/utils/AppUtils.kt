@@ -221,7 +221,8 @@ object AppUtils {
                 if ((taskInfo.topActivity!!.className == "cu.axel.smartdock.activities.MainActivity" || taskInfo.topActivity!!.className != "cu.axel.smartdock.activities.DebugActivity" && taskInfo.topActivity!!.packageName == getCurrentLauncher(
                         pm
                     )
-                )) continue
+                            )
+                ) continue
                 if (Build.VERSION.SDK_INT > 29) {
                     try {
                         val isRunning = taskInfo.javaClass.getField("isRunning")
@@ -322,13 +323,13 @@ object AppUtils {
         return context!!.getDrawable(android.R.drawable.sym_def_app_icon)
     }
 
-    public fun uninstallApp(mContext:Context,appData: AppData) {
+    public fun uninstallApp(mContext: Context, appData: AppData) {
         val packageUri = Uri.parse("package:${appData.packageName}")
         val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
         mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    public fun createShortcut(mContext:Context,app: AppData) {
+    public fun createShortcut(mContext: Context, app: AppData) {
 //        Log.d(AllAppsWindow.TAG, "createShortcut() called with: app = [${app.name}]")
         val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
         val shortcutManager: ShortcutManager? =
@@ -353,10 +354,11 @@ object AppUtils {
         }
     }
 
-    public fun toConpatiblePage(mContext:Context,packageName:String){
+    public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {
         var inte = Intent(mContext, CompatibleListActivity::class.java)
         inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        inte.putExtra("packageName",packageName)
+        inte.putExtra("packageName", packageName)
+        inte.putExtra("appName", appName)
         mContext.startActivity(inte);
     }
 

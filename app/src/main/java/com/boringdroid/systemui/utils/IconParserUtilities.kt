@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import com.boringdroid.systemui.IconPackHelper
 
 class IconParserUtilities( /*
      Small utility for handling icon pack changes for apps

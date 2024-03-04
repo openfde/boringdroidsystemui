@@ -1,4 +1,4 @@
-package com.boringdroid.systemui.logic
+package com.boringdroid.systemui.ui.logic
 
 import android.content.ComponentName
 import android.content.Context
@@ -15,7 +15,7 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.Constant
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.NetCenterAdapter
 import com.boringdroid.systemui.adapter.OnItemClickListener
