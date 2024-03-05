@@ -83,6 +83,7 @@
     <string name="minute">分钟</string>
     <string name="hours">小时</string>
     <string name="days">天</string>
+    <string name="recording">录制中</string>
 
 
 </resources>

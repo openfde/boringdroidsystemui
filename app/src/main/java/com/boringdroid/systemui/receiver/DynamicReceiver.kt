@@ -29,6 +29,10 @@ class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : Broa
                 systemStateLayout?.onNotificationPanelVisibleChanged(intent.getBooleanExtra("panel_visible",false))
             }
 
+            TYEP_SCREEN_NOTIFY ->{
+                systemStateLayout?.onScreenRecordStateChange(intent.getIntExtra("id",0))
+            }
+
         }
 
     }
@@ -46,7 +50,11 @@ class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : Broa
         val TYEP_CLEAR_NOTIFY_ACTION = 7
         val TYEP_CLEAR_NOTIFIES_ACTION = 8
         val TYEP_UPDATE_NOTIFY = 9
+        val TYEP_SCREEN_NOTIFY = 10
         val WIFI_STATUS = 80
+        val NOTIFICATION_RECORDING_ID = 4274   //screen record
+        val NOTIFICATION_PROCESSING_ID = 4275  //screen record process
+        val NOTIFICATION_VIEW_ID = 4273        //screen record ready
     }
 
 }

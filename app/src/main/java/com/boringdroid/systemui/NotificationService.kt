@@ -38,8 +38,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.adapter.NotificationAdapter
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_PROCESSING_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_RECORDING_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_VIEW_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_SCREEN_NOTIFY
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.IconParserUtilities
 import com.boringdroid.systemui.utils.ColorUtils
@@ -155,9 +159,18 @@ class NotificationService : NotificationListenerService(),
         Log.d(TAG, "onNotificationPosted() called with: sbn = $sbn")
         super.onNotificationPosted(sbn)
         updateNotificationCount()
+//        val toString = sbn.notification.actions.toString()
+//        Log.d(TAG, "onNotificationPosted() called with: sbn action = $toString")
         if (Utils.notificationPanelVisible) {
             updateNotificationPanel()
         }
+        if(sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID){
+            sendBroadcast(
+                Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY)
+                    .putExtra("id", sbn.id)
+            )
+        }
+
 //        else {
 //            if (sp!!.getBoolean("show_notifications", true)) {
 //                val notification = sbn.notification
