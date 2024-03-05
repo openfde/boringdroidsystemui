@@ -429,17 +429,19 @@ class AppStateLayout @JvmOverloads constructor(
             windowManager.addView(contextView, lp)
         }
 
-        private fun isShowing(id: Int):Boolean {
+        private fun isShowing(id: Int): Boolean {
             val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
-            var runningTask: RunningTaskInfo ?= null
+            var runningTask: RunningTaskInfo? = null
             for (task in runningTasks) {
                 Log.e(TAG, "runningTask ${task.taskId}")
                 if (task.taskId == id) {
                     runningTask = task
+                    break
                 }
             }
-            return  runningTask?.isVisible() as Boolean
+            return runningTask?.isVisible() ?: false
         }
+
 
         override fun getItemCount(): Int {
             return tasks.size
