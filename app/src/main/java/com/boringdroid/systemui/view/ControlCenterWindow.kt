@@ -40,7 +40,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class ControlCenterWindow(private val mContext: Context?, private val volumeBtn: ImageView?) : View.OnClickListener{
+class ControlCenterWindow(
+    private val mContext: Context?,
+    private val volumeBtn: ImageView?,
+    private var screenRecordState: Int
+) : View.OnClickListener{
 
     private var shown = false
     private var windowWidth:Int
@@ -70,6 +74,7 @@ class ControlCenterWindow(private val mContext: Context?, private val volumeBtn:
         volumeSeekbar = windowContentView?.findViewById(R.id.seekbar_volume)
         volumeImage = windowContentView?.findViewById(R.id.iv_volume)
         lightSeekbar = windowContentView?.findViewById(R.id.seekbar_light)
+        controlAdapter.screenRecordState = screenRecordState
         mRecyclerView?.adapter = controlAdapter
         mRecyclerView?.layoutManager = GridLayoutManager(mContext, 3)
         mRecyclerView?.addItemDecoration(mSpaceDecoration);
@@ -276,6 +281,11 @@ class ControlCenterWindow(private val mContext: Context?, private val volumeBtn:
             imageView?.background = mContext!!.resources.getDrawable(R.drawable.round_rect_5dp)
             showControlCenterView();
         }
+    }
+
+    fun onScreenRecordStateChange(state: Int) {
+        screenRecordState = state
+        controlAdapter?.notifyScreenStateChanged(screenRecordState)
     }
 
     private class GridSpaceDecoration constructor(private val  hspace: Int, private val  vspace: Int): RecyclerView.ItemDecoration() {

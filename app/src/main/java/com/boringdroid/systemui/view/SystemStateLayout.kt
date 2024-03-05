@@ -41,6 +41,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var controlCenterWindow: ControlCenterWindow? = null
     private var netCenterWindow: NetCenterWindow? = null
     private var notificationWindow: NotificationWindow? = null
+    private var screenRecordState:Int = 0
 
     private var notificationBtn: ImageView?= null
     private var audioPanelVisible:Boolean = false
@@ -76,7 +77,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         netCenterWindow = NetCenterWindow(context)
-        controlCenterWindow = ControlCenterWindow(context, volumeBtn)
+        controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
@@ -250,6 +251,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     override fun onFinish() {
         android.util.Log.i("bella","-------onFinish-------");
         showTips("",0.05f)
+    }
+
+    fun onScreenRecordStateChange(state: Int) {
+        screenRecordState = state
+        controlCenterWindow?.onScreenRecordStateChange(state)
     }
 
 }

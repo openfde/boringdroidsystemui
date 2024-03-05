@@ -87,4 +87,5 @@
     <string name="minute">minutes</string>
     <string name="hours">hours</string>
     <string name="days">days</string>
+    <string name="recording">录制中</string>
 </resources>
