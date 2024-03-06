@@ -159,7 +159,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showPowerListMenu(anchor: View) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(120, 142, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(120, -2, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, view)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
@@ -306,7 +306,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, 150, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, -2, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, view)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
