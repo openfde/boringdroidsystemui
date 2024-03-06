@@ -38,6 +38,8 @@ import java.lang.ref.WeakReference
 class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val windowManager: WindowManager
     private var windowContentView: View? = null
+    private var windowPowerView: View? = null
+    private var windowCollectView: View? = null
     private var powerEntry: View? = null
     private var powerBtn: ImageView? = null
     private var screenRecordBtn: ImageView? = null
@@ -158,9 +160,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     }
 
     fun showPowerListMenu(anchor: View) {
-        val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
+        windowPowerView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(120, -2, mContext!!, true)
-        SystemuiColorUtils.applyMainColor(mContext, sp, view)
+        SystemuiColorUtils.applyMainColor(mContext, sp, windowPowerView)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         val focus = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -169,14 +171,14 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         anchor.getLocationOnScreen(location)
         lp?.x = 60;//location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
-        view.setOnTouchListener { p1: View?, p2: MotionEvent ->
+        windowPowerView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
-                windowManager.removeView(view)
+                windowManager.removeView(windowPowerView)
             }
             false
         }
 
-        val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
+        val actionsLv = windowPowerView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
 
 
@@ -186,8 +188,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         actions.add(Action(R.drawable.icon_shutdown, mContext.getString(R.string.fde_shutdown)))
 
 
-        actionsLv.adapter = AppActionsAdapter(mContext, actions)
-        actionsLv.onItemClickListener =
+        actionsLv?.adapter = AppActionsAdapter(mContext, actions)
+        actionsLv?.onItemClickListener =
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_lock_screen))) {
@@ -199,10 +201,10 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 } else if (action.text.equals(mContext.getString(R.string.fde_shutdown))) {
                     DeviceUtils.poweroff()
                 }
-                windowManager.removeView(view)
+                windowManager.removeView(windowPowerView)
             }
-        view.setBackground(mContext.getDrawable(R.drawable.round_rect))
-        windowManager.addView(view, lp)
+        windowPowerView?.setBackground(mContext.getDrawable(R.drawable.round_rect))
+        windowManager.addView(windowPowerView, lp)
     }
 
 
@@ -269,11 +271,28 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         return layoutParams
     }
 
+    fun dismissChild(){
+        hidePowerMenu()
+        try {
+            if(windowCollectView != null){
+                windowManager.removeViewImmediate(windowCollectView)
+            }
+
+            if(windowPowerView != null){
+                windowManager.removeViewImmediate(windowPowerView)
+            }
+        } catch (e: Exception) {
+        }
+        windowCollectView = null ;
+        windowPowerView = null ;
+    }
+
     fun dismiss() {
         try {
             if (windowContentView != null) {
                 windowManager.removeViewImmediate(windowContentView)
             }
+            dismissChild()
         } catch (e: IllegalArgumentException) {
             Log.e(TAG, "Catch exception when remove all apps window：" + e)
         }
@@ -305,9 +324,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     }
 
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
-        val view = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
+        windowCollectView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, -2, mContext!!, true)
-        SystemuiColorUtils.applyMainColor(mContext, sp, view)
+        SystemuiColorUtils.applyMainColor(mContext, sp, windowCollectView)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         val focus = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -316,9 +335,9 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         anchor.getLocationOnScreen(location)
         lp?.x = location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
-        view.setOnTouchListener { p1: View?, p2: MotionEvent ->
+        windowCollectView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
-                windowManager.removeView(view)
+                windowManager.removeView(windowCollectView)
             }
             false
         }
@@ -327,7 +346,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 //        val isSystem = applicationInfo.flags and flagInfo != 0
         val isSystem =
             applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-        val actionsLv = view.findViewById<ListView>(R.id.tasks_lv)
+        val actionsLv = windowCollectView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
         if (isCollect) {
             actions.add(Action(0, mContext.getString(R.string.fde_collect)))
@@ -348,8 +367,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }else{
             actions.add(Action(-1, mContext.getString(R.string.uninstall)))
         }
-        actionsLv.adapter = AppActionsAdapter(mContext, actions)
-        actionsLv.onItemClickListener =
+        actionsLv?.adapter = AppActionsAdapter(mContext, actions)
+        actionsLv?.onItemClickListener =
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_collect))) {
@@ -384,10 +403,10 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                         AppUtils.toConpatiblePage(mContext, packageNam,appNam)
                     }
                 }
-                windowManager.removeView(view)
+                windowManager.removeView(windowCollectView)
             }
-        view.setBackground(mContext.getDrawable(R.drawable.round_rect))
-        windowManager.addView(view, lp)
+        windowCollectView?.setBackground(mContext.getDrawable(R.drawable.round_rect))
+        windowManager.addView(windowCollectView, lp)
     }
 
 
