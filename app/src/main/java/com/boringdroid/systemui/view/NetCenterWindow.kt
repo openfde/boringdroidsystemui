@@ -17,6 +17,7 @@ import com.boringdroid.systemui.ui.logic.NetCenterPersenter
 import com.boringdroid.systemui.net.HttpRequestCallBack
 import com.boringdroid.systemui.net.NetCtrl
 import com.boringdroid.systemui.utils.LogTools
+import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ class NetCenterWindow (private val mContext: Context?) {
         animator.start()
 
         shown = true
+        Utils.wifiWindowVisible = true
 
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_OUTSIDE) {
@@ -115,6 +117,7 @@ class NetCenterWindow (private val mContext: Context?) {
             }
             windowContentView = null
             shown = false
+            Utils.wifiWindowVisible = false
         }
     }
 

@@ -86,8 +86,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 Utils.notificationPanelVisible = false
             } else {
                 listener?.showNotification()
-                controlCenterWindow?.dismiss()
                 Utils.notificationPanelVisible = true
+                listener?.syncVisible(Utils.NOTIFICATION_VISIBLE)
             }
 //            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
         }
@@ -183,6 +183,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        context.startActivity(intent)
 
         netCenterWindow?.ifShowNetCenterView()
+        listener?.syncVisible(Utils.WIFIWINDOW_VISIBLE)
     }
 
     /**
@@ -207,9 +208,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        val frameLayout1 = frameLayout.get(0) as FrameLayout
 //        val frameLayout2 = frameLayout1.get(0) as FrameLayout
         controlCenterWindow?.ifShowControlCenterView(imageView)
-        if (Utils.notificationPanelVisible) {
-            listener?.hideNotification()
-            Utils.notificationPanelVisible = false
+        if (Utils.controlCenterWindoVisible) {
+            listener?.syncVisible(Utils.CONTROLCENTERWINDOW_VISIBLE)
         }
 //        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //        audioManager.adjustStreamVolume(
@@ -219,9 +219,12 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        )
     }
 
+
+
     interface NotificationListener{
-        fun showNotification()
         fun hideNotification()
+        fun showNotification()
+        fun syncVisible(which :Int)
     }
 
     fun onNotifyCount(count: Int?) {
@@ -256,6 +259,14 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     fun onScreenRecordStateChange(state: Int) {
         screenRecordState = state
         controlCenterWindow?.onScreenRecordStateChange(state)
+    }
+
+    fun hideControlWindow() {
+        controlCenterWindow?.dismiss()
+    }
+
+    fun hideWifiWindow() {
+        netCenterWindow?.dismiss()
     }
 
 }

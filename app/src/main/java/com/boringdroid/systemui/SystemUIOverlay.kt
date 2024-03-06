@@ -23,14 +23,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.view.get
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
-import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.SystemStateLayout
@@ -70,9 +67,6 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
     }
 
     override fun setup(statusBar: View, navBar: View) {
-
-
-
         Log.d(TAG, "setup status bar $statusBar, nav bar $navBar")
         if (navBarButtonGroupId > 0) {
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
@@ -123,7 +117,9 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                 systemStateLayoutParams.gravity = Gravity.RIGHT
                 buttonGroup.addView(systemStateLayout, 4, systemStateLayoutParams)
                 systemStateLayout!!.initState()
-
+                navBarButtonGroup?.setOnClickListener {
+                    syncVisible(Utils.ALL_INVISIBLE)
+                }
             }
         }
     }
@@ -151,6 +147,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
+        allAppsWindow?.listener = this
         btAllApps!!.setOnClickListener(allAppsWindow)
         resolver = sysUIContext.contentResolver
         initializeTuningServiceSettingKeys(resolver, tunerKeyObserver)
@@ -164,6 +161,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         pluginContext.registerReceiver(dynamicReceiver, intentFilter);
+
     }
 
     private fun grantNmnPermission() {
@@ -311,5 +309,20 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                 "HIDE_NOTIF_PANEL"
             )
         )
+    }
+
+    override fun syncVisible(which: Int) {
+            if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
+                systemStateLayout?.hideControlWindow()
+            }
+            if(Utils.notificationPanelVisible && (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
+                hideNotification()
+            }
+            if(Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0  ){
+                allAppsWindow?.dismiss()
+            }
+            if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
+                systemStateLayout?.hideWifiWindow()
+            }
     }
 }

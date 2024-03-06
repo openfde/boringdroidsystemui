@@ -32,6 +32,7 @@ import com.boringdroid.systemui.data.Collect
 import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
+import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.ref.WeakReference
 
 
@@ -60,6 +61,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
     private var list: MutableList<Collect>? = null
+    var listener: SystemStateLayout.NotificationListener?= null
 
 
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
@@ -105,6 +107,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         windowManager.addView(windowContentView, layoutParams)
         appLoaderTask.start("")
         shown = true
+        Utils.allAppsWindowVisible = true
+        listener?.syncVisible(Utils.ALLAPPWINDOW_VISIBLE)
         powerMenuVisible = false
         powerEntry!!.visibility = View.GONE
         powerBtn!!.setOnClickListener(View.OnClickListener {
@@ -298,6 +302,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }
         windowContentView = null
         shown = false
+        Utils.allAppsWindowVisible = false
     }
 
     private fun notifyLoadSucceed() {
