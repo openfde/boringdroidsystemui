@@ -95,7 +95,7 @@ class ControlCenterWindow(
 
         controlAdapter.setListener(listener)
         shown = true
-
+        Utils.controlCenterWindoVisible = true
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_OUTSIDE) {
                 dismiss()
@@ -269,6 +269,7 @@ class ControlCenterWindow(
             }
             windowContentView = null
             shown = false
+            Utils.controlCenterWindoVisible = false
         }
     }
 

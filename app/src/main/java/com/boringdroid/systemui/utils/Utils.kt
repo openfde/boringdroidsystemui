@@ -16,7 +16,15 @@ import java.util.concurrent.TimeUnit
 object Utils {
 
     @JvmField var notificationPanelVisible = false
+    @JvmField var controlCenterWindoVisible = false
+    @JvmField var allAppsWindowVisible = false
+    @JvmField var wifiWindowVisible = false
     @JvmField var shouldPlayChargeComplete = false
+    const val ALL_INVISIBLE:Int = 0x1111
+    const val NOTIFICATION_VISIBLE:Int = 1
+    const val ALLAPPWINDOW_VISIBLE:Int = 2
+    const val CONTROLCENTERWINDOW_VISIBLE:Int = 4
+    const val WIFIWINDOW_VISIBLE:Int = 8
 
     @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
