@@ -1,7 +1,0 @@
-[
-{
-  "directory": "D:/code/waydroid/vendor_packages_apps_BoringdroidSystemUI_git/restrictionbypass/.cxx/cmake/release/arm64-v8a",
-  "command": "C:\\Users\\huyan\\AppData\\Local\\Android\\Sdk\\ndk\\22.1.7171670\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android21 --gcc-toolchain=C:/Users/huyan/AppData/Local/Android/Sdk/ndk/22.1.7171670/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/huyan/AppData/Local/Android/Sdk/ndk/22.1.7171670/toolchains/llvm/prebuilt/windows-x86_64/sysroot  -Dnrb_EXPORTS  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++14 -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\nrb.dir\\src\\main\\cpp\\RestrictionBypass.cpp.o -c D:\\code\\waydroid\\vendor_packages_apps_BoringdroidSystemUI_git\\restrictionbypass\\src\\main\\cpp\\RestrictionBypass.cpp",
-  "file": "D:/code/waydroid/vendor_packages_apps_BoringdroidSystemUI_git/restrictionbypass/src/main/cpp/RestrictionBypass.cpp"
-}
-]

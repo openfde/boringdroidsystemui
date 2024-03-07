@@ -1,3 +1,0 @@
-D:/code/waydroid/vendor_packages_apps_BoringdroidSystemUI_git/restrictionbypass/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/nrb.dir
-D:/code/waydroid/vendor_packages_apps_BoringdroidSystemUI_git/restrictionbypass/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/edit_cache.dir
-D:/code/waydroid/vendor_packages_apps_BoringdroidSystemUI_git/restrictionbypass/.cxx/cmake/debug/armeabi-v7a/CMakeFiles/rebuild_cache.dir
