@@ -19,7 +19,8 @@
             android:layout_width="@dimen/nav_button_size"
             android:layout_height="@dimen/nav_button_size"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/icon_menu"
+            android:background="@drawable/bg_dock"
+            android:src="@drawable/icon_all_apps"
             tools:ignore="ContentDescription" />
     </androidx.cardview.widget.CardView>
 
