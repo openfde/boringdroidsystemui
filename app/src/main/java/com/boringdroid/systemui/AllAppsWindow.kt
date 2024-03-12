@@ -132,6 +132,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             val intent = Intent("android.settings.SETTINGS")
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             mContext.startActivity(intent)
+            listener?.syncVisible(Utils.ALL_INVISIBLE)
         }
         imgPower!!.setOnClickListener {
             showPowerListMenu(imgPower!!)
