@@ -28,6 +28,8 @@
         android:layout_height="@dimen/app_info_icon_height"
         android:layout_gravity="center"
         android:ellipsize="middle"
+        android:textColor="@color/black"
+        android:alpha="0.88"
         android:gravity="center|left"
         android:singleLine="true"
         android:text="test"
