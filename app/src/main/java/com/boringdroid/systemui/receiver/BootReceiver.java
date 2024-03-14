@@ -28,9 +28,10 @@ public class BootReceiver extends BroadcastReceiver {
 
     public static void parseXML(Context context) {
         try {
+            CompatibleConfig.cleanListData(context);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);//context.getAssets().open("comp_config.xml");
+            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_demo);//context.getAssets().open("comp_config.xml");
 
             Document document = builder.parse(inputStream);
 
@@ -44,14 +45,9 @@ public class BootReceiver extends BroadcastReceiver {
                 String defaultvalue = bookElement.getElementsByTagName("defaultvalue").item(0).getTextContent();
                 String optionjson = bookElement.getElementsByTagName("optionjson").item(0).getTextContent();
                 String inputtype = bookElement.getElementsByTagName("inputtype").item(0).getTextContent();
+                String notes = bookElement.getElementsByTagName("notes").item(0).getTextContent();
 
-//                LogTools.Companion.i( "keycode: " + keycode);
-//                LogTools.Companion.i( "keydesc: " + keydesc);
-//                LogTools.Companion.i(  "defaultvalue: " + defaultvalue);
-//                LogTools.Companion.i( "defaultvalue: " + optionjson);
-//                LogTools.Companion.i( "inputtype: " + inputtype);
-
-                CompatibleConfig.insertListData(context,keycode,keydesc,optionjson,inputtype,defaultvalue);
+                CompatibleConfig.insertListData(context,keycode,keydesc,optionjson,inputtype,notes,defaultvalue);
             }
         } catch (Exception e) {
             e.printStackTrace();
