@@ -13,19 +13,6 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
-        <keycode>isAllowUnresizeable</keycode>
-        <keydesc>允许固定最大化</keydesc>
-        <defaultvalue>0</defaultvalue>
-        <inputtype>switch</inputtype>
-        <notes>
-            {
-             "en":"test text",
-             "ch":"测试文本"
-            }
-        </notes>
-        <optionjson>[]</optionjson>
-    </compatible>
 
     <compatible>
         <keycode>maxWidth</keycode>
@@ -42,19 +29,6 @@
     </compatible>
 
 
-    <compatible>
-        <keycode>maxHeight</keycode>
-        <keydesc>最大分辨率高</keydesc>
-        <defaultvalue>1920</defaultvalue>
-        <inputtype>input</inputtype>
-        <notes>
-            {
-            "en":"test text",
-            "ch":"测试文本"
-            }
-        </notes>
-        <optionjson>[]</optionjson>
-    </compatible>
 
     <compatible>
         <keycode>maxWindowsNum</keycode>

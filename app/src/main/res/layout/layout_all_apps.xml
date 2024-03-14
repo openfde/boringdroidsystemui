@@ -24,7 +24,7 @@
             android:id="@+id/imgSetting"
             android:layout_above="@id/imgPower"
             android:layout_width="@dimen/wifi_status_window_height"
-            android:src="@drawable/setting"
+            android:src="@mipmap/setting"
             android:padding="@dimen/fde_left_setting_padding_size"
             android:layout_height="@dimen/wifi_status_window_height"/>
 
