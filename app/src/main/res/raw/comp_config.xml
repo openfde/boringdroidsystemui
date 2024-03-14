@@ -6,8 +6,8 @@
         <inputtype>switch</inputtype>
         <notes>
             {
-            "en":"test text",
-            "ch":"测试文本"
+            "en":"",
+            "ch":""
             }
         </notes>
         <optionjson>[]</optionjson>
@@ -20,66 +20,11 @@
         <inputtype>switch</inputtype>
         <notes>
             {
-             "en":"test text",
-             "ch":"测试文本"
+             "en":"",
+             "ch":""
             }
         </notes>
         <optionjson>[]</optionjson>
-    </compatible>
-
-    <compatible>
-        <keycode>maxWidth</keycode>
-        <keydesc>最大分辨率宽</keydesc>
-        <defaultvalue>1080</defaultvalue>
-        <inputtype>input</inputtype>
-        <notes>
-            {
-            "en":"test text",
-            "ch":"测试文本"
-            }
-        </notes>
-        <optionjson>[]</optionjson>
-    </compatible>
-
-
-    <compatible>
-        <keycode>maxHeight</keycode>
-        <keydesc>最大分辨率高</keydesc>
-        <defaultvalue>1920</defaultvalue>
-        <inputtype>input</inputtype>
-        <notes>
-            {
-            "en":"test text",
-            "ch":"测试文本"
-            }
-        </notes>
-        <optionjson>[]</optionjson>
-    </compatible>
-
-    <compatible>
-        <keycode>maxWindowsNum</keycode>
-        <keydesc>最大窗口数量</keydesc>
-        <defaultvalue>1</defaultvalue>
-        <inputtype>select</inputtype>
-        <notes>
-            {
-            "en":"test text",
-            "ch":"测试文本"
-            }
-        </notes>
-        <optionjson>[{
-            "value": "10"
-            },
-            {
-            "value": "20"
-            },
-            {
-            "value": "30"
-            },
-            {
-            "value": "40"
-            }
-            ]</optionjson>
     </compatible>
 
 
