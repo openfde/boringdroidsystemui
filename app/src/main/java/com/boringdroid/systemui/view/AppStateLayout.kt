@@ -404,7 +404,7 @@ class AppStateLayout @JvmOverloads constructor(
             val actions = ArrayList<Action?>()
             var isShowing =  isShowing(taskInfo.id)
             if( isShowing!!){
-                actions.add(Action(0, context.getString(R.string.hide)))
+                actions.add(Action(0, context.getString(R.string.minimize)))
             } else{
                 actions.add(Action(0, context.getString(R.string.open)))
             }
@@ -420,7 +420,7 @@ class AppStateLayout @JvmOverloads constructor(
                         showApplicationWindow(taskInfo)
                     } else if (action.text.equals(context.getString(R.string.close))) {
                         systemUIActivityManager.moveTaskToBack(false, taskInfo.id)
-                    } else if (action.text.equals(context.getString(R.string.hide))){
+                    } else if (action.text.equals(context.getString(R.string.minimize))){
                         systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
                     }
                     windowManager.removeView(contextView)
