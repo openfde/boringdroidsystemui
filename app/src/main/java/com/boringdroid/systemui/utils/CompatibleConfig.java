@@ -198,7 +198,7 @@ public class CompatibleConfig {
     public static void insertUpdateListData(){
 
     }
-    public static void insertListData(Context context,  String keycode, String keyDesc, String optionJson,String inputType, String defaultValue) {
+    public static void insertListData(Context context,  String keycode, String keyDesc, String optionJson,String inputType,String notes, String defaultValue) {
         try {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_LIST");
             ContentValues values = new ContentValues();
@@ -207,6 +207,7 @@ public class CompatibleConfig {
             values.put("OPTION_JSON", optionJson);
             values.put("KEY_DESC", keyDesc);
             values.put("INPUT_TYPE", inputType);
+            values.put("NOTES",notes);
             values.put("CREATE_DATE", getCurDateTime());
             Uri resUri = context.getContentResolver()
                     .insert(uri, values);
