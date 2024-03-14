@@ -239,7 +239,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private fun hidePowerMenu() {
         searchEt?.setText("")
         powerMenuVisible = false
-        powerEntry!!.visibility = View.GONE
+        powerEntry?.visibility = View.GONE
     }
 
     private fun generateLayoutParams(
