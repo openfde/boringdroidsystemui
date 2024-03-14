@@ -39,6 +39,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.SystemUIOverlay
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.AppStateActionsAdapter
 import com.boringdroid.systemui.data.Action
@@ -58,6 +59,7 @@ class AppStateLayout @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
+    lateinit var listener: SystemStateLayout.NotificationListener
     private val activityManager: ActivityManager
     private val appStateListener = AppStateListener()
     private val launchApps: LauncherApps
@@ -79,6 +81,7 @@ class AppStateLayout @JvmOverloads constructor(
     }
 
     fun initTasks() {
+        taskAdapter?.listener = listener
         val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
         for (i in runningTaskInfos.indices.reversed()) {
             val runningTaskInfo = runningTaskInfos[i]
@@ -291,6 +294,7 @@ class AppStateLayout @JvmOverloads constructor(
         private val packageManager: PackageManager
         private var topTaskId = -1
         private val dragCloseThreshold: Int
+        lateinit var listener: SystemStateLayout.NotificationListener
         val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -344,6 +348,7 @@ class AppStateLayout @JvmOverloads constructor(
             holder.iconIV.tooltipText = label
             val contextListener = object : OnContextClickListener {
                 override fun onContextClick(v: View?): Boolean {
+                    listener?.syncVisible(Utils.ALL_INVISIBLE)
                     if (contextView != null && contextView?.isAttachedToWindow!!) {
                         windowManager.removeView(contextView)
                     }
@@ -353,6 +358,7 @@ class AppStateLayout @JvmOverloads constructor(
             }
             val clickListener = object : OnClickListener {
                 override fun onClick(v: View?) {
+                    listener?.syncVisible(Utils.ALL_INVISIBLE)
                     Log.d(TAG, "onClick() called ${taskInfo.packageName}")
                     if(!isShowing(taskInfo.id)){
                         showApplicationWindow(taskInfo)

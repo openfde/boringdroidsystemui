@@ -141,6 +141,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             .getIdentifier("dpad_group", "id", "com.android.systemui")
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        appStateLayout?.listener = this
         systemStateLayout = initializeSystemStateLayout(this.pluginContext, systemStateLayout)
         //notificationWindow = NotificationWindow(this.pluginContext, this.systemUIContext!!)
         systemStateLayout?.listener = this
