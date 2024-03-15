@@ -166,7 +166,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showPowerListMenu(anchor: View) {
         windowPowerView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(120, -2, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, windowPowerView)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
@@ -176,6 +176,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         anchor.getLocationOnScreen(location)
         lp?.x = 60;//location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
+//        lp?.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        LogTools.i("showPowerListMenu width "+lp?.width)
         windowPowerView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
                 windowManager.removeView(windowPowerView)
@@ -332,7 +334,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         windowCollectView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, -2, mContext!!, true)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
         SystemuiColorUtils.applyMainColor(mContext, sp, windowCollectView)
         lp?.gravity = Gravity.TOP or Gravity.LEFT
         val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
