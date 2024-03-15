@@ -79,6 +79,7 @@ class SlideNotificationAdapter(
 
         holder.nameTv.text = name
         holder.titleTv.text = notificationTitle.toString() + p
+        holder.titleTv.setSingleLine()
         holder.contentTv.text  =  notificationText
         holder.elapsedTv.text = computeElapsedTime
         val actions = notification?.actions
