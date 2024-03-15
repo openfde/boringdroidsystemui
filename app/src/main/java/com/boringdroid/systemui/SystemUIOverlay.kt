@@ -98,7 +98,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
-                stateLayoutParams.marginStart = Utils.dpToPx(pluginContext!!, 60)
+                stateLayoutParams.marginStart = Utils.dpToPx(systemUIContext!!, 60)
                 buttonGroup.addView(appStateLayout, 3, stateLayoutParams)
                 appStateLayout!!.initTasks()
 
@@ -141,6 +141,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             .getIdentifier("dpad_group", "id", "com.android.systemui")
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        appStateLayout?.listener = this
         systemStateLayout = initializeSystemStateLayout(this.pluginContext, systemStateLayout)
         //notificationWindow = NotificationWindow(this.pluginContext, this.systemUIContext!!)
         systemStateLayout?.listener = this
@@ -315,7 +316,7 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
                 systemStateLayout?.hideControlWindow()
             }
-            if(Utils.notificationPanelVisible && (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
+            if( (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
                 hideNotification()
             }
             if(Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0  ){
