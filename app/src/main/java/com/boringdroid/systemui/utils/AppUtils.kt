@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -15,20 +16,13 @@ import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
-import com.boringdroid.systemui.AllAppsWindow
-import com.boringdroid.systemui.data.App
 import com.boringdroid.systemui.AppTask
 import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.data.App
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.ui.CompatibleListActivity
-
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
-import java.util.Collections
+import com.boringdroid.systemui.receiver.BootReceiver
+import java.io.*
+import java.util.*
 
 
 object AppUtils {
@@ -355,11 +349,29 @@ object AppUtils {
     }
 
     public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {
-        var inte = Intent(mContext, CompatibleListActivity::class.java)
-        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        inte.putExtra("packageName", packageName)
-        inte.putExtra("appName", appName)
-        mContext.startActivity(inte);
+//        var inte = Intent(mContext, CompatibleListActivity::class.java)
+//        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        inte.putExtra("packageName", packageName)
+//        inte.putExtra("appName", appName)
+//        mContext.startActivity(inte);
+
+//        CompatibleConfig.call(mContext)
+
+//        LogTools.i("toConpatiblePage")
+//        val result = CompatibleConfig.queryValueData(
+//            mContext, "com.android.gallery3d",
+//           "isAllowScreenshotAndRecord"
+//        )
+//        LogTools.i("toConpatiblePage result "+result)
+//        BootReceiver.parseXML(mContext);
+
+        val intent = Intent()
+        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")
+        intent.component = cn;
+        intent.putExtra("appName",appName)
+        intent.putExtra("packageName",packageName)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        mContext.startActivity(intent)
     }
 
 
