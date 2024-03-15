@@ -13,19 +13,28 @@ class CompatibleDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         private const val DATABASE_NAME = "compatible.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         private const val COMPATIBLE_LIST_CREATE =
-            "CREATE TABLE COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "KEY_CODE TEXT ,KEY_DESC TEXT  ,DEFAULT_VALUE TEXT  ,OPTION_JSON TEXT, NOTES TEXT,INPUT_TYPE TEXT,CREATE_DATE TEXT, UNIQUE( KEY_CODE));"
 
         private const val COMPATIBLE_VALUE_CREATE =
-            "CREATE TABLE COMPATIBLE_VALUE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_VALUE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "PACKAGE_NAME TEXT ,KEY_CODE TEXT  ,VALUE TEXT  , NOTES TEXT,EDIT_DATE TEXT,FIELDS1 TEXT,FIELDS2 TEXT, UNIQUE(PACKAGE_NAME, KEY_CODE));"
 
         private const val COLLECT_CREATE =
-            "CREATE TABLE COLLECT_APP ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "CREATE TABLE  IF NOT EXISTS  COLLECT_APP ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "PACKAGE_NAME TEXT ,APP_NAME TEXT  ,PIC_URL TEXT  ,IS_COLLECT TEXT  ,CREATE_DATE TEXT, UNIQUE(PACKAGE_NAME));"
+
+
+        private const val WIFI_HISTORY_CREATE =
+            "CREATE TABLE  IF NOT EXISTS  WIFI_HISTORY ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "WIFI_NAME TEXT ,WIFI_SIGNAL TEXT  ,WIFI_TYPE TEXT  ,IS_SAVE TEXT  ,IS_ENCRYPTION TEXT, NOTES TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT, UNIQUE(WIFI_NAME));"
+
+        private const val SYSTEM_CONFIG =
+            "CREATE TABLE  IF NOT EXISTS  SYSTEM_CONFIG ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "KEY_CODE TEXT ,KEY_DESC TEXT , KEY_VALUE TEXT , NOTES TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT, UNIQUE(KEY_CODE));"
 
 
         private const val COMPATIBLE_VALUE_INDEX =
@@ -35,19 +44,28 @@ class CompatibleDatabaseHelper(context: Context) :
 
     override fun onCreate(db: SQLiteDatabase?) {
         LogTools.i("create table start !")
-//        db!!.execSQL("DROP TABLE COMPATIBLE_LIST_CREATE");
-//        db!!.execSQL("DROP TABLE COMPATIBLE_VALUE_CREATE");
         db!!.execSQL(COMPATIBLE_LIST_CREATE)
         db.execSQL(COMPATIBLE_VALUE_CREATE)
         db.execSQL(COMPATIBLE_VALUE_INDEX)
         db.execSQL(COLLECT_CREATE)
+        db?.execSQL(WIFI_HISTORY_CREATE)
+        db?.execSQL(SYSTEM_CONFIG)
         LogTools.i("create table success !")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        TODO("Not yet implemented")
+        if(oldVersion < 2){
+            createTableSQL(db)
+        }
     }
 
+
+    fun createTableSQL(db: SQLiteDatabase?){
+//        db!!.execSQL("DROP TABLE COMPATIBLE_LIST_CREATE");
+//        db!!.execSQL("DROP TABLE COMPATIBLE_VALUE_CREATE");
+        db?.execSQL(WIFI_HISTORY_CREATE)
+        db?.execSQL(SYSTEM_CONFIG)
+    }
 
     fun addCollect(packageName: String,appName: String,picUrl: String) {
         val db = this.writableDatabase

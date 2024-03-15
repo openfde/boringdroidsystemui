@@ -13,6 +13,20 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible>
+        <keycode>isAllowMuliWindows</keycode>
+        <keydesc>允许多窗口</keydesc>
+        <defaultvalue>false</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"VNC wether allow muti windows or not.",
+            "ch":"VNC应用是否允许多窗口"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
 
     <compatible>
         <keycode>maxWidth</keycode>
