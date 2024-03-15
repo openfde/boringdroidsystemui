@@ -329,6 +329,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         collectAppsLayout!!.setData(list)
     }
 
+
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         windowCollectView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(130, -2, mContext!!, true)
@@ -354,8 +355,14 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         val actionsLv = windowCollectView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
+
         if (isCollect) {
-            actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+            val isAppCollected = CollectUtils.queryCollectDataByPackageName(mContext,appData.packageName);
+            if(isAppCollected !=null){
+                actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
+            }else{
+                actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+            }
         } else {
             actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
         }
@@ -389,8 +396,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 //                    }
                     val packageName = appData.packageName
                     var appName = appData.name
-                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "333");
-                    LogTools.i("res " + res);
+                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "0");
                     refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.fde_uncollect))) {
                     val packageName = appData.packageName

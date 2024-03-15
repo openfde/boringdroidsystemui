@@ -48,6 +48,38 @@ public class CollectUtils {
         return list;
     }
 
+
+    public static Map<String, Object> queryCollectDataByPackageName(Context context, String packageName) {
+        Uri uri = Uri.parse(COMPATIBLE_URI + "/COLLECT_APP");
+        Cursor cursor = null;
+        Map<String, Object> result = null;
+        String selection = "PACKAGE_NAME = ?";
+        String[] selectionArgs = {packageName};
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
+                String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
+                String APP_NAME = cursor.getString(cursor.getColumnIndex("APP_NAME"));
+                String IS_COLLECT = cursor.getString(cursor.getColumnIndex("IS_COLLECT"));
+                result = new HashMap<>();
+                result.put("_ID", _ID);
+                result.put("PACKAGE_NAME", PACKAGE_NAME);
+                result.put("APP_NAME", APP_NAME);
+                result.put("IS_COLLECT", IS_COLLECT);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
+    }
+
     public static int insertCollectData(Context context, String packageName, String appName, String picUrl) {
         try {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COLLECT_APP");
@@ -55,6 +87,7 @@ public class CollectUtils {
             values.put("PACKAGE_NAME", packageName);
             values.put("APP_NAME", appName);
             values.put("PIC_URL", picUrl);
+            values.put("IS_COLLECT","1");
             values.put("CREATE_DATE", CompatibleConfig.getCurDateTime());
             Uri resUri = context.getContentResolver()
                     .insert(uri, values);
