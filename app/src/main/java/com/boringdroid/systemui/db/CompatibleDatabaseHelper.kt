@@ -44,10 +44,10 @@ class CompatibleDatabaseHelper(context: Context) :
 
     override fun onCreate(db: SQLiteDatabase?) {
         LogTools.i("create table start !")
-        db!!.execSQL(COMPATIBLE_LIST_CREATE)
-        db.execSQL(COMPATIBLE_VALUE_CREATE)
-        db.execSQL(COMPATIBLE_VALUE_INDEX)
-        db.execSQL(COLLECT_CREATE)
+        db?.execSQL(COMPATIBLE_LIST_CREATE)
+        db?.execSQL(COMPATIBLE_VALUE_CREATE)
+        db?.execSQL(COMPATIBLE_VALUE_INDEX)
+        db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
         db?.execSQL(SYSTEM_CONFIG)
         LogTools.i("create table success !")
@@ -63,6 +63,7 @@ class CompatibleDatabaseHelper(context: Context) :
     fun createTableSQL(db: SQLiteDatabase?){
 //        db!!.execSQL("DROP TABLE COMPATIBLE_LIST_CREATE");
 //        db!!.execSQL("DROP TABLE COMPATIBLE_VALUE_CREATE");
+        db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
         db?.execSQL(SYSTEM_CONFIG)
     }
