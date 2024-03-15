@@ -408,8 +408,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                     if (packageNam != null && appNam != null) {
                         AppUtils.toConpatiblePage(mContext, packageNam,appNam)
                     }
+                    listener?.syncVisible(Utils.ALL_INVISIBLE)
                 }
-                windowManager.removeView(windowCollectView)
+                if(windowCollectView !=null){
+                    windowManager.removeView(windowCollectView)
+                }
             }
         windowCollectView?.setBackground(mContext.getDrawable(R.drawable.round_rect))
         windowManager.addView(windowCollectView, lp)

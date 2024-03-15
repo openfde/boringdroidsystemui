@@ -110,7 +110,7 @@ class CompatibleContentProvider : ContentProvider() {
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         val db = dbHelper.writableDatabase
-        LogTools.i("-------insert---------- " + uri.authority + " ,values " + values.toString())
+//        LogTools.i("-------insert---------- " + uri.authority + " ,values " + values.toString())
         var id: Long? = 0;
         when (uriMatcher.match(uri)) {
             CODE_COMPATIBLE_LIST -> {
@@ -123,7 +123,7 @@ class CompatibleContentProvider : ContentProvider() {
                 id = db.insert(TABLE_COLLECT_APP, null, values)
             }
         }
-        LogTools.i("-------insert----------id $id")
+//        LogTools.i("-------insert----------id $id")
         context!!.contentResolver.notifyChange(uri, null)
         db.close()
         return id?.let { ContentUris.withAppendedId(uri, it) }
@@ -141,7 +141,7 @@ class CompatibleContentProvider : ContentProvider() {
             }
             CODE_COMPATIBLE_VALUE -> {
                 val rowsDeleted =
-                    db.delete(TABLE_COMPATIBLE_LIST, selection, selectionArgs)
+                    db.delete(TABLE_COMPATIBLE_VALUE, selection, selectionArgs)
                 db.close()
                 context?.contentResolver?.notifyChange(uri, null)
                 return rowsDeleted
