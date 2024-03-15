@@ -37,8 +37,8 @@
         <inputtype>select</inputtype>
         <notes>
             {
-            "en":"test text",
-            "ch":"测试文本"
+            "en":"readme",
+            "ch":"说明文档"
             }
         </notes>
         <optionjson>[{
