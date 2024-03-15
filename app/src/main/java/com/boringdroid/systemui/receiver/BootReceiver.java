@@ -31,7 +31,7 @@ public class BootReceiver extends BroadcastReceiver {
             CompatibleConfig.cleanListData(context);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_demo);
+//            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_demo);
             InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
 
             Document document = builder.parse(inputStream);
