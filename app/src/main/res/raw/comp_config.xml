@@ -1,13 +1,13 @@
 <library>
     <compatible>
         <keycode>isAllowHideDecorCaption</keycode>
-        <keydesc>允许隐藏标题栏</keydesc>
+        <keydesc>应用内图标显示修复</keydesc>
         <defaultvalue>0</defaultvalue>
         <inputtype>switch</inputtype>
         <notes>
             {
-            "en":"",
-            "ch":""
+            "en":"Application icon display fix: Solve the issue of incomplete display of application icons in non-full-screen mode.",
+            "ch":"应用内图标显示修复：解决非全屏模式下应用内图标显示不全。"
             }
         </notes>
         <optionjson>[]</optionjson>
@@ -15,17 +15,55 @@
 
     <compatible>
         <keycode>isAllowUnresizeable</keycode>
-        <keydesc>允许固定最大化</keydesc>
+        <keydesc>应用窗口固定最大化</keydesc>
         <defaultvalue>0</defaultvalue>
         <inputtype>switch</inputtype>
         <notes>
             {
-             "en":"",
-             "ch":""
+             "en":"Application window fixed maximization: Solve the problem of some gaming applications unable to display and operate in non-full-screen mode.",
+             "ch":"应用窗口固定最大化：解决非全屏模式下部分游戏类应用无法显示和操作。"
             }
         </notes>
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible>
+        <keycode>isAllowScreenshotRecord</keycode>
+        <keydesc>解除截图录屏限制</keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Remove screenshot and screen recording restrictions: Resolve the issue of certain application interfaces being unable to be captured or recorded.",
+            "ch":"解除截图录屏限制：解决应用部分界面无法截图和录屏。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible>
+        <keycode>size</keycode>
+        <keydesc>应用虚拟分辨率</keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"Application virtual resolution ratio: Addressing the limitation of certain application functionalities being restricted under the system's default resolution ratio.",
+            "ch":"应用虚拟分辨率：解决部分应用在系统预设的分辨率下内部某些功能被限制使用。"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "1920",
+            "height": "1080"
+            },
+            {
+            "width": "1600",
+            "height": "900"
+            }, {
+            "width": "800",
+            "height": "600"
+            }
+            ]</optionjson>
+    </compatible>
 
 </library>
