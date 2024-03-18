@@ -63,6 +63,7 @@ class CompatibleDatabaseHelper(context: Context) :
     fun createTableSQL(db: SQLiteDatabase?){
 //        db!!.execSQL("DROP TABLE COMPATIBLE_LIST_CREATE");
 //        db!!.execSQL("DROP TABLE COMPATIBLE_VALUE_CREATE");
+        db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
         db?.execSQL(SYSTEM_CONFIG)
     }
