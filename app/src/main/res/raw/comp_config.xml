@@ -1,7 +1,12 @@
 <library>
     <compatible>
         <keycode>isAllowHideDecorCaption</keycode>
-        <keydesc>应用内图标显示修复</keydesc>
+        <keydesc>
+            {
+            "en":"App icon display repair",
+            "ch":"应用内图标显示修复"
+            }
+        </keydesc>
         <defaultvalue>0</defaultvalue>
         <inputtype>switch</inputtype>
         <notes>
@@ -15,7 +20,12 @@
 
     <compatible>
         <keycode>isAllowUnresizeable</keycode>
-        <keydesc>应用窗口固定最大化</keydesc>
+        <keydesc>
+            {
+            "en":"Application window fixed maximization",
+            "ch":"应用窗口固定最大化"
+            }
+        </keydesc>
         <defaultvalue>0</defaultvalue>
         <inputtype>switch</inputtype>
         <notes>
@@ -29,7 +39,12 @@
 
     <compatible>
         <keycode>isAllowScreenshotRecord</keycode>
-        <keydesc>解除截图录屏限制</keydesc>
+        <keydesc>
+            {
+            "en":"Remove screenshot recording restrictions",
+            "ch":"解除截图录屏限制"
+            }
+        </keydesc>
         <defaultvalue>0</defaultvalue>
         <inputtype>switch</inputtype>
         <notes>
@@ -43,7 +58,12 @@
 
     <compatible>
         <keycode>size</keycode>
-        <keydesc>应用虚拟分辨率</keydesc>
+        <keydesc>
+            {
+            "en":"Apply virtual resolution",
+            "ch":"应用虚拟分辨率"
+            }
+        </keydesc>
         <defaultvalue>1</defaultvalue>
         <inputtype>select</inputtype>
         <notes>
@@ -64,6 +84,26 @@
             "height": "600"
             }
             ]</optionjson>
+    </compatible>
+
+
+    <compatible>
+        <keycode>isAllowMuliWindows</keycode>
+        <keydesc>
+            {
+            "en":"Linux apps support for multiple windows",
+            "ch":"融合应用支持多窗口"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Open fusion application in multi window mode, only valid for Linux",
+            "ch":"多窗口模式打开融合应用，仅对Linux有效"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
     </compatible>
 
 </library>
