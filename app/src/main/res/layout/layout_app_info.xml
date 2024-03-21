@@ -16,8 +16,8 @@
 
     <ImageView
         android:id="@+id/app_info_icon"
-        android:layout_width="@dimen/app_info_icon_width"
-        android:layout_height="@dimen/app_info_icon_height"
+        android:layout_width="@dimen/app_info_icon_size"
+        android:layout_height="@dimen/app_info_icon_size"
         android:layout_gravity="center"
         android:src="@mipmap/default_icon_round"
         tools:ignore="ContentDescription" />
