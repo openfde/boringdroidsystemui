@@ -50,6 +50,7 @@ public class CollectUtils {
 
 
     public static Map<String, Object> queryCollectDataByPackageName(Context context, String packageName) {
+        LogTools.Companion.i("queryCollectDataByPackageName packageName : "+packageName);
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COLLECT_APP");
         Cursor cursor = null;
         Map<String, Object> result = null;
@@ -77,6 +78,7 @@ public class CollectUtils {
                 cursor.close();
             }
         }
+        LogTools.Companion.i("queryCollectDataByPackageName result:"+result);
         return result;
     }
 

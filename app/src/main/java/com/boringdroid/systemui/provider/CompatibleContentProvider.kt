@@ -9,6 +9,7 @@ import android.media.UnsupportedSchemeException
 import android.net.Uri
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
 import com.boringdroid.systemui.utils.LogTools
+import com.boringdroid.systemui.utils.ParseUtils
 
 class CompatibleContentProvider : ContentProvider() {
 
@@ -22,6 +23,7 @@ class CompatibleContentProvider : ContentProvider() {
     private val CODE_COMPATIBLE_LIST = 1
     private val CODE_COMPATIBLE_VALUE = 2
     private val CODE_COLLECT_APP = 3
+    private val CODE_RECOVERY = 4
 
     init {
         uriMatcher.addURI(
@@ -38,6 +40,11 @@ class CompatibleContentProvider : ContentProvider() {
             "com.boringdroid.systemuiprovider",
             TABLE_COLLECT_APP,
             CODE_COLLECT_APP
+        )
+        uriMatcher.addURI(
+            "com.boringdroid.systemuiprovider",
+            "RECOVERY_VALUE",
+            CODE_RECOVERY
         )
         uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_LIST + "/#", 4)
         uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_VALUE + "Item", 5)
@@ -109,6 +116,13 @@ class CompatibleContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
+        if(uriMatcher.match(uri) == CODE_RECOVERY){
+            LogTools.i("---------recovery --------------")
+            val packageName = values?.get("PACKAGE_NAME") as String
+            LogTools.i("---------packageName --------------"+packageName)
+            ParseUtils.parseValueXML(context,packageName)
+            return null; ;
+        }
         val db = dbHelper.writableDatabase
 //        LogTools.i("-------insert---------- " + uri.authority + " ,values " + values.toString())
         var id: Long? = 0;
@@ -190,6 +204,17 @@ class CompatibleContentProvider : ContentProvider() {
                 db.close()
                 return rowsUpdated
             }
+            CODE_COLLECT_APP -> {
+            val rowsUpdated = db.update(
+                TABLE_COLLECT_APP,
+                values,
+                selection,
+                selectionArgs
+            )
+            context!!.contentResolver.notifyChange(uri, null)
+            db.close()
+            return rowsUpdated
+        }
             else -> {
                 throw UnsupportedSchemeException("error ")
             }
