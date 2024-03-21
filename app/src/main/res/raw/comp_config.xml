@@ -106,4 +106,40 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible>
+        <keycode>minBoundsVisibleWidth</keycode>
+        <keydesc>
+            {
+            "en":"Minimum width of application window",
+            "ch":"应用窗口最小宽度"
+            }</keydesc>
+        <defaultvalue>48</defaultvalue>
+        <inputtype>input</inputtype>
+        <notes>
+            {
+            "en":"Minimum width of application window: The minimum adjustable width of the application window in freeform window mode",
+            "ch":"应用窗口最小宽度: 自由窗口模式下应用窗口可调整的最小宽度"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible>
+        <keycode>minBoundsVisibleHeight</keycode>
+        <keydesc>
+            {
+            "en":"Minimum height of application window",
+            "ch":"应用窗口最小高度"
+            }</keydesc>
+        <defaultvalue>32</defaultvalue>
+        <inputtype>input</inputtype>
+        <notes>
+            {
+            "en":"Minimum height of application window: The minimum adjustable height of the application window in freeform window mode",
+            "ch":"应用窗口最小高度: 自由窗口模式下应用窗口可调整的最小高度"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
 </library>
