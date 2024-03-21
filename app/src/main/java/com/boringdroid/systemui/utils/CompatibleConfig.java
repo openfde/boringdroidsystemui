@@ -20,7 +20,7 @@ public class CompatibleConfig {
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
         Cursor cursor = null;
         Map<String, Object> result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ?";
+        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? AND IS_DEL != 1";
         String[] selectionArgs = {packageName, keycode};
         try {
             ContentResolver contentResolver = context.getContentResolver();
@@ -49,12 +49,43 @@ public class CompatibleConfig {
         return result;
     }
 
+    public static Map<String, Object> queryMapValueDataHasDel(Context context, String packageName, String keycode) {
+        Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
+        Cursor cursor = null;
+        Map<String, Object> result = null;
+        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? ";
+        String[] selectionArgs = { packageName, keycode };
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
+                String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
+                String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
+                String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
+                String EDIT_DATE = cursor.getString(cursor.getColumnIndex("EDIT_DATE"));
+                result = new HashMap<>();
+                result.put("_ID", _ID);
+                result.put("PACKAGE_NAME", PACKAGE_NAME);
+                result.put("KEY_CODE", KEY_CODE);
+                result.put("VALUE", VALUE);
+                result.put("EDIT_DATE", EDIT_DATE);
+            }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
+    }
     public static String queryValueData(Context context, String packageName, String keycode) {
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
         Cursor cursor = null;
         String result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ?";
+        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? AND IS_DEL != 1";
         String[] selectionArgs = {packageName, keycode};
         try {
             ContentResolver contentResolver = context.getContentResolver();
@@ -80,6 +111,7 @@ public class CompatibleConfig {
             values.put("PACKAGE_NAME", packageName);
             values.put("KEY_CODE", keycode);
             values.put("VALUE", value);
+            values.put("IS_DEL", "0");
             values.put("EDIT_DATE", getCurDateTime());
             Uri resUri = context.getContentResolver()
                     .insert(uri, values);
@@ -90,8 +122,8 @@ public class CompatibleConfig {
     }
 
     public static void insertUpdateValueData(Context context, String packageName, String keycode,String value){
-        Map<String, Object>  result = queryMapValueData(context,packageName,keycode);
-        if(result ==null){
+        Map<String, Object>  result = queryMapValueDataHasDel(context,packageName,keycode);
+        if(result == null){
             insertValueData(context,packageName,keycode,value);
         }else {
             updateValueData(context,packageName,keycode,value);
@@ -102,6 +134,7 @@ public class CompatibleConfig {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
             ContentValues values = new ContentValues();
             values.put("VALUE", newValue);
+            values.put("IS_DEL", "0");
             values.put("EDIT_DATE", getCurDateTime());
             String selection = "PACKAGE_NAME = ? AND KEY_CODE = ?";
             String[] selectionArgs = {packageName, keycode};
@@ -140,7 +173,7 @@ public class CompatibleConfig {
         }
     }
 
-    public static void cleanValueData(Context context) {
+    public static void cleanAllValueData(Context context) {
         try {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
             String selection = null;
@@ -194,10 +227,6 @@ public class CompatibleConfig {
         return list;
     }
 
-
-    public static void insertUpdateListData(){
-
-    }
     public static void insertListData(Context context,  String keycode, String keyDesc, String optionJson,String inputType,String notes, String defaultValue) {
         try {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_LIST");
@@ -208,6 +237,7 @@ public class CompatibleConfig {
             values.put("KEY_DESC", keyDesc);
             values.put("INPUT_TYPE", inputType);
             values.put("NOTES",notes);
+            values.put("IS_DEL", "0");
             values.put("CREATE_DATE", getCurDateTime());
             Uri resUri = context.getContentResolver()
                     .insert(uri, values);
