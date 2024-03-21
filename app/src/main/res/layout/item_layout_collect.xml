@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/app_info_icon"
-        android:layout_width="@dimen/all_apps_item_height"
-        android:layout_height="@dimen/all_apps_item_height"
+        android:layout_width="@dimen/collect_app_icon_size"
+        android:layout_height="@dimen/collect_app_icon_size"
         android:src="@mipmap/default_icon_round"
         android:layout_gravity="center"
         tools:ignore="ContentDescription" />
@@ -31,5 +31,5 @@
         android:text="tt333t"
         android:alpha="0.88"
         android:textColor="#000"
-        android:textSize="@dimen/app_collect_name_text_size" />
+        android:textSize="@dimen/app_info_name_text_size" />
 </com.boringdroid.systemui.view.RightClickView>
