@@ -20,7 +20,6 @@ import com.boringdroid.systemui.AppTask
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.data.App
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.receiver.BootReceiver
 import java.io.*
 import java.util.*
 
@@ -363,7 +362,10 @@ object AppUtils {
 //           "isAllowScreenshotAndRecord"
 //        )
 //        LogTools.i("toConpatiblePage result "+result)
-//        BootReceiver.parseXML(mContext);
+
+
+        ParseUtils.parseListXML(mContext);
+        ParseUtils.parseValueXML(mContext);
 
         val intent = Intent()
         val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")

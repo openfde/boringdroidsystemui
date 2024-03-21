@@ -1,0 +1,29 @@
+<library>
+    <keycode>
+        <name>isAllowHideDecorCaption</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>false</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.android.gallery3d</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>isAllowMuliWindows</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>false</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.android.gallery3d</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+
+</library>

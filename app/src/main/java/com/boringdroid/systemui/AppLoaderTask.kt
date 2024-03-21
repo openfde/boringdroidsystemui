@@ -9,6 +9,8 @@ import android.os.UserManager
 import android.text.TextUtils
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.utils.CollectUtils
+import com.boringdroid.systemui.utils.LogTools
 import java.lang.ref.WeakReference
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
@@ -49,6 +51,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
                 loaderAllApps.add(appData)
             }
         }
+
         loaderAllApps.sortWith { appDataOne: AppData, appDataTwo: AppData ->
             appDataOne.name!!.compareTo(
                 appDataTwo.name!!
