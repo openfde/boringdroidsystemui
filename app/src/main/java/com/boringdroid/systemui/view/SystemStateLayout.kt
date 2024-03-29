@@ -8,28 +8,24 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.provider.Settings
 import android.util.AttributeSet
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.WindowManager
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextClock
-import android.widget.TextView
+import android.view.*
+import android.widget.*
 import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.utils.CountDownInterface
-import com.boringdroid.systemui.utils.CountDownTimerUtils
 import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.LogTools
+import com.boringdroid.systemui.utils.TimerSingleton
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.utils.WifiUtils
+import java.util.Timer
+import java.util.TimerTask
 
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
-    LinearLayout(context, attrs) ,CountDownInterface{
+    LinearLayout(context, attrs) {
 
     //    private var bluetoothBtn:ImageView ?= null
     private var wifiBtn:ImageView ?= null
@@ -51,7 +47,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
 
-    var mCountDownTimerUtils: CountDownTimerUtils? = null;
 
     var isShowDlg :Boolean? =false;
 
@@ -97,7 +92,24 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn?.setOnClickListener { batteryClick() }
         homeBtn?.setOnClickListener{ homeClick()}
         controlBtn?.setOnClickListener{ toggleVolume(controlBtn!!)}
-        wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+//        if(Settings.Global.getInt(context.contentResolver,"wifi_status") == 1){
+//            wifiBtn?.tooltipText = "已连接";
+//        }else{
+//            wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+//        }
+
+        wifiBtn?.setOnHoverListener( object :View.OnHoverListener{
+            override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
+                val curWifi = WifiUtils.queryCurWifi(context)
+                val status = Settings.Global.getInt(context.contentResolver,"wifi_status");
+                if( curWifi != null && status == 1 ){
+                    wifiBtn?.tooltipText = curWifi;
+                }else{
+                    wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+                }
+                return  false
+            }
+        });
         volumeBtn?.tooltipText = context.getString(R.string.fde_notification_volume)
         controlBtn?.tooltipText = context.getString(R.string.fde_control_center)
         batteryBtn?.tooltipText = context.getString(R.string.fde_notification_battery)
@@ -113,6 +125,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             }
         })
     }
+
 
     private fun removeHorizontalMargin() {
         val viewGroup = (parent as FrameLayout).parent.parent.parent as FrameLayout
@@ -130,8 +143,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun showTips( content:String,right: Float){
         if(!"".equals(content)){
-//            mCountDownTimerUtils = CountDownTimerUtils(this, 3000, 1000)
-//            mCountDownTimerUtils?.start()
             if(isShowDlg == true){
                 return;
             }
@@ -164,7 +175,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             }
             windowContentView = null
             isShowDlg = false ;
-//            mCountDownTimerUtils?.cancel()
         }
     }
 
@@ -194,7 +204,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        val isCharging = if (batteryManager.isCharging ) "正在充电" else "未充电"
 //        val currentLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
 //        Toast.makeText(context,"batteryClick "+currentLevel + " , "+isCharging,Toast.LENGTH_SHORT).show();
-
+//       TimerSingleton.stopTimer()
         val intent = Intent()
         val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
         intent.component = cn;
@@ -245,15 +255,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         } else{
             notificationBtn?.background  = null
         }
-    }
-
-    override fun onTick(millisUntilFinished: Long) {
-        android.util.Log.i("bella","-------onTick-------"+millisUntilFinished/1000);
-    }
-
-    override fun onFinish() {
-        android.util.Log.i("bella","-------onFinish-------");
-        showTips("",0.05f)
     }
 
     fun onScreenRecordStateChange(state: Int) {

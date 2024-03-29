@@ -8,6 +8,7 @@ import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.utils.CompatibleConfig;
 import com.boringdroid.systemui.utils.LogTools;
 import com.boringdroid.systemui.utils.ParseUtils;
+import com.boringdroid.systemui.utils.TimerSingleton;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,8 +23,8 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-            LogTools.Companion.i("system start up");
             ParseUtils.parseListXML(context);
+            TimerSingleton.INSTANCE.startTimer(context);
         }
     }
 

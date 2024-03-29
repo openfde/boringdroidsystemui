@@ -22,6 +22,8 @@
     <uses-permission android:name="android.permission.INSTALL_PACKAGE_UPDATES"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.BROADCAST_PACKAGE_REMOVED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 
     <application
@@ -57,6 +59,11 @@
         <provider
             android:name=".provider.CompatibleContentProvider"
             android:authorities="com.boringdroid.systemuiprovider"
+            android:exported="true" />
+
+        <provider
+            android:name=".provider.WifiContentProvider"
+            android:authorities="com.boringdroid.systemuiprovider.wifi"
             android:exported="true" />
 
         <receiver

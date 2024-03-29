@@ -42,6 +42,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/net_center_wifi_padding"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@id/txtMoreNetSet"
         app:layout_constraintTop_toBottomOf="@id/imgLineTop">
 
         <LinearLayout
