@@ -17,6 +17,7 @@
 package com.boringdroid.systemui.net;
 
 import android.content.Context;
+import android.provider.Settings;
 
 import com.boringdroid.systemui.utils.Net;
 
@@ -30,6 +31,7 @@ public class NetApi {
     public static int isWifiEnable(Context context) {
         Net net = Net.getInstance(context);
         int status = net.isWifiEnable();
+        Settings.Global.putInt(context.getContentResolver(),"wifi_status",status);
         return status;
     }
 
@@ -39,6 +41,7 @@ public class NetApi {
     public static int enableWifi(Context context, int enable) {
         Net net = Net.getInstance(context);
         int status = net.enableWifi(enable);
+        Settings.Global.putInt(context.getContentResolver(),"wifi_status",enable);
         return status;
     }
 

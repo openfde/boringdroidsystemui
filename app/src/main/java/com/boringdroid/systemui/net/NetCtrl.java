@@ -9,4 +9,9 @@ public class NetCtrl {
                            HttpRequestCallBack listener) {
         new GetTask(mContext, url, params, listener).execute();
     }
+
+    public static void getData(Context mContext, final String url,DatabaseRequestCallBack listener){
+        new GetDataTask(mContext,url,listener).execute();
+    }
+
 }

@@ -8,15 +8,9 @@ import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.animation.LinearInterpolator
-import android.widget.Switch
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.ui.logic.NetCenterPersenter
-import com.boringdroid.systemui.net.HttpRequestCallBack
-import com.boringdroid.systemui.net.NetCtrl
-import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

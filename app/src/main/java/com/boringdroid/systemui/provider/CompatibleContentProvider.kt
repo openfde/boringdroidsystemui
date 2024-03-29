@@ -25,6 +25,8 @@ class CompatibleContentProvider : ContentProvider() {
     private val CODE_COLLECT_APP = 3
     private val CODE_RECOVERY = 4
 
+
+
     init {
         uriMatcher.addURI(
             "com.boringdroid.systemuiprovider",
@@ -180,7 +182,6 @@ class CompatibleContentProvider : ContentProvider() {
         selectionArgs: Array<out String>?
     ): Int {
         val db = dbHelper.writableDatabase
-
         when (uriMatcher.match(uri)) {
             CODE_COMPATIBLE_LIST -> {
                 val rowsUpdated = db.update(

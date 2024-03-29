@@ -5,27 +5,27 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.AnimationDrawable
-import android.os.Build
 import android.preference.PreferenceManager
-import android.util.TypedValue
-import android.view.Gravity
-import android.view.LayoutInflater
+import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.NetCenterAdapter
 import com.boringdroid.systemui.adapter.OnItemClickListener
+import com.boringdroid.systemui.constant.Constant
+import com.boringdroid.systemui.net.DatabaseRequestCallBack
 import com.boringdroid.systemui.net.HttpRequestCallBack
 import com.boringdroid.systemui.net.NetCtrl
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.StringUtils
-import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.utils.WifiUtils
 import com.boringdroid.systemui.view.NetCenterWindow
 import com.boringdroid.systemui.view.SelectWlanWindow
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -53,12 +53,9 @@ class NetCenterPersenter(
 
     var listSave: MutableList<MutableMap<String, Any>>? = null
     var listUnSave: MutableList<MutableMap<String, Any>>? = null
-    var listAllSave: MutableList<MutableMap<String, Any>>? = null
-    var listAll: MutableList<MutableMap<String, Any>>? = null
     private var sp: SharedPreferences? = null
     private val windowManager: WindowManager
     private var view: View? = null
-    private var curWifiName: String? = null
 
     private var frameAnimation: AnimationDrawable? = null
 
@@ -84,8 +81,6 @@ class NetCenterPersenter(
 
         listSave = ArrayList()
         listUnSave = ArrayList()
-        listAll = ArrayList()
-        listAllSave = ArrayList()
 
         saveAdapter =
             mContext?.let { NetCenterAdapter(it, Constant.INT_SAVE, listSave, this) }
@@ -131,27 +126,26 @@ class NetCenterPersenter(
 
     private fun openWifiView() {
         txtShowNotOpenText?.visibility = View.GONE
-//        layoutSave?.visibility = View.VISIBLE
-//        layoutUnSave?.visibility = View.VISIBLE
+        layoutSave?.visibility = View.GONE
     }
 
     private fun closeWifiView() {
         txtShowNotOpenText?.visibility = View.VISIBLE
         layoutSave?.visibility = View.GONE
-//        layoutUnSave?.visibility = View.GONE
     }
 
     fun initTimer() {
         timer = Timer()
         timerTask = object : TimerTask() {
             override fun run() {
-//                LogTools.i("wifiStatus "+wifiStatus + " ,curWifiName "+curWifiName)
-                if (wifiStatus == 1 && "".equals(StringUtils.ToString(curWifiName))) {
+                val calendar = Calendar.getInstance()
+                val seconds = calendar[Calendar.SECOND]
+                if (wifiStatus == 1 && seconds % 10 == 3) {
                     getAllSsid()
                 }
             }
         }
-        timer!!.schedule(timerTask, (1 * 1000).toLong(), (5 * 1000).toLong())
+        timer?.schedule(timerTask, (1 * 1000).toLong(), (1 * 1000).toLong())
     }
 
     fun destTimer() {
@@ -167,58 +161,46 @@ class NetCenterPersenter(
     }
 
     private fun setConntectingShow(pos: Int) {
-        try {
-            val mp: MutableMap<String, Any>? = listSave?.get(pos)
-            if (mp != null) {
-                mp.put("isSaved", "2")
-                listSave?.set(pos, mp)
-                saveAdapter?.notifyDataSetChanged()
-            }
-
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
-        }
+//        try {
+//            val mp: MutableMap<String, Any>? = listSave?.get(pos)
+//            if (mp != null) {
+//                mp.put("isSaved", "2")
+//                listSave?.set(pos, mp)
+//                saveAdapter?.notifyDataSetChanged()
+//            }
+//
+//        } catch (e: java.lang.Exception) {
+//            e.printStackTrace()
+//        }
     }
 
     /**
      * wifi is enable ?
      */
     private fun isWifiEnable() {
-        NetCtrl.get(mContext, "isWifiEnable", null, object : HttpRequestCallBack {
-            override fun callBackListener(result: String) {
-                LogTools.i("callBackListener: isWifiEnable result-- >$result")
-                wifiStatus = StringUtils.ToInt(result)
-                switchWifi!!.visibility = View.VISIBLE
-                if (wifiStatus === 1) {
-                    switchWifi!!.isChecked = true
-                    openWifiView()
-                    scanWifiList()
-                    switchWifi!!.isEnabled = true
-                } else {
-                    closeWifiView()
-                    switchWifi!!.isChecked = false
-                    if (wifiStatus === 2) {
-                        Toast.makeText(
-                            mContext,
-                            mContext!!.getString(R.string.fde_no_wifi_module),
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        switchWifi!!.isEnabled = false
-                    } else {
-                        switchWifi!!.isEnabled = true
-                    }
-                }
-            }
+        wifiStatus = Settings.Global.getInt(mContext?.contentResolver,"wifi_status");
+        switchWifi?.visibility = View.VISIBLE
 
-            override fun requestFail(errorString: String, code: Int) {
-                LogTools.i("requestFail:isWifiEnable  errorString-- >$errorString ,code $code")
-                wifiStatus = 2
-                switchWifi!!.visibility = View.VISIBLE
-                closeWifiView()
-                switchWifi!!.isChecked = false
+        if (wifiStatus === 1) {
+            switchWifi!!.isChecked = true
+            openWifiView()
+            scanWifiList()
+            switchWifi!!.isEnabled = true
+        } else {
+            closeWifiView()
+            switchWifi!!.isChecked = false
+            if (wifiStatus === 2) {
+                Toast.makeText(
+                    mContext,
+                    mContext!!.getString(R.string.fde_no_wifi_module),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                switchWifi!!.isEnabled = false
+            } else {
+                switchWifi!!.isEnabled = true
             }
-        })
+        }
     }
 
     /**
@@ -248,199 +230,67 @@ class NetCenterPersenter(
     }
 
     private fun scanWifiList() {
+        LogTools.i("scanWifiList........... " )
         showProgressDialog()
         getAllSsid()
     }
 
+
     private fun getAllSsid() {
-        if (isScaning) {
-            LogTools.i("getAllSsid  isScaning")
-            return
-        }
-        isScaning = true
-//        showProgressDialog()
-        NetCtrl.get(mContext, "getAllSsid", null, object : HttpRequestCallBack {
-            override fun callBackListener(result: String) {
-                LogTools.i("callBackListener:getAllSsid  result-- >$result")
-                try {
-                    if (result != null) {
-                        val arrWifis = result.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                        if (arrWifis != null && arrWifis.size > 0) {
-                            listAll?.clear()
-                        }
-                        for (wi in arrWifis) {
-                            if (!wi.startsWith(":")) {
-                                val arrInfo = wi.split(":".toRegex()).dropLastWhile { it.isEmpty() }
-                                    .toTypedArray()
-                                val mp: MutableMap<String, Any> =
-                                    HashMap()
-                                mp["name"] = arrInfo[0]
-                                mp["isEncrypted"] = ""
-                                mp["isSaved"] = "0"
-                                mp["signal"] = arrInfo[1]
-                                mp["encryption"] = arrInfo[2]
-                                mp["curNet"] = -1
-                                listAll?.add(mp)
-                            }
-                        }
-                    } else {
-                        saveAdapter?.notifyDataSetChanged()
-                        hideProgressDialog()
-                        isScaning = false
-                    }
-//                    Collections.sort(list, object : Comparator<Map<String?, Any?>?>() {
-//                        fun compare(o1: Map<String?, Any?>, o2: Map<String?, Any?>): Int {
-//                            return java.lang.Long.compare(
-//                                StringUtils.ToLong(
-//                                    o2["signal"]
-//                                ),
-//                                StringUtils.ToLong(o1["signal"])
-//                            )
-//                        }
-//                    })
-                    LogTools.i("listAll  " + (listAll?.size ?: 0))
-//                    saveAdapter?.notifyDataSetChanged();
-                    connectedWifiList()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    saveAdapter?.notifyDataSetChanged()
-                    hideProgressDialog()
-                    isScaning = false
-                }
-            }
 
-            override fun requestFail(errorString: String, code: Int) {
-                LogTools.i("requestFail: getAllSsid errorString-- >$errorString ,code $code")
-                hideProgressDialog()
+        NetCtrl.getData(mContext,"save",object : DatabaseRequestCallBack {
+            override fun callBackListener(result: MutableList<MutableMap<String, Any>>?) {
+                if (result != null) {
+                    listSave?.clear()
+                    listSave?.addAll(result)
+                };
                 saveAdapter?.notifyDataSetChanged()
-                isScaning = false
-            }
-        })
-    }
-
-    private fun connectedWifiList() {
-        val mp: Map<String, Any> = HashMap()
-        NetCtrl.get(mContext, "connectedWifiList", mp, object : HttpRequestCallBack {
-            override fun callBackListener(result: String) {
-                LogTools.i("callBackListener: connectedWifiList result-- >$result")
-                try {
-                    if (result != null) {
-                        listAllSave?.clear()
-                        listSave?.clear()
-                        listUnSave?.clear()
-                        val arrWifis = result.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                        for (wi in arrWifis) {
-                            val mapsWithPropertyValue = listAll?.filter { it["name"] == wi }
-                            if (mapsWithPropertyValue != null) {
-                                if (mapsWithPropertyValue.isNotEmpty()) {
-                                    listSave?.add(mapsWithPropertyValue.get(0))
-                                }
-                            }
-                        }
-
-                        if (listSave != null) {
-                            val listUnSaveTemp = listAll?.filter { item1 ->
-                                !listSave!!.any { item2 -> item1 == item2 }
-                            }
-                            if (listUnSaveTemp != null) {
-                                listUnSave?.addAll(listUnSaveTemp)
-                            }
-                        }
-                        LogTools.i("listSave " + listSave?.size + " ,listUnSave " + listUnSave?.size)
-
-                        saveAdapter?.notifyDataSetChanged()
-                        unSaveAdapter?.notifyDataSetChanged()
-                        getActivedWifi()
-                    } else {
-                        isScaning = false
-//                        fdeWifiAdapter.notifyDataSetChanged()
-                        hideProgressDialog()
-                    }
-                } catch (e: java.lang.Exception) {
-                    isScaning = false
-//                    fdeWifiAdapter.notifyDataSetChanged()
-                    hideProgressDialog()
-                    e.printStackTrace()
-                }
-            }
-
-            override fun requestFail(errorString: String, code: Int) {
-                LogTools.i("requestFail:connectedWifiList  errorString-- >$errorString ,code $code")
-                isScaning = false
-//                fdeWifiAdapter.notifyDataSetChanged()
-            }
-        })
-    }
-
-    private fun getActivedWifi() {
-        val mp: Map<String, Any> = HashMap()
-        NetCtrl.get(mContext, "getActivedWifi", mp, object : HttpRequestCallBack {
-            override fun callBackListener(result: String) {
-                LogTools.i("callBackListener: getActivedWifi result-- >$result")
-                if (result == null || "" == result) {
-                    curWifiName = ""
-                } else {
-                    curWifiName = result
-                    for (i in 0 until (listSave?.size ?: 0)) {
-                        val mAc: MutableMap<String, Any> =
-                            listSave?.get(i) as MutableMap<String, Any>
-                        if ("" != result && result == mAc["name"].toString()) {
-                            mAc.put("curNet", i)
-                            listSave?.set(i, mAc)
-                        } else {
-                            mAc.put("curNet", -1)
-                            listSave?.set(i, mAc)
-                        }
-                    }
-                }
-                if (listSave != null) {
-                    var maxHeight = 144
-                    if (listSave?.size!! < 2) {
-                        maxHeight = 48
-                    } else if (listSave?.size!! < 3) {
-                        maxHeight = 96
-                    }
-
-                    val pixels = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        maxHeight.toFloat(),
-                        mContext?.resources?.displayMetrics
-                    ).toInt()
-                    recyclerViewSave?.layoutParams?.height = pixels
-                }
-                saveAdapter?.notifyDataSetChanged()
-                hideProgressDialog()
-                isScaning = false
-            }
-
-            override fun requestFail(errorString: String, code: Int) {
-                LogTools.i("requestFail:getActivedWifi  errorString-- >$errorString ,code $code")
-                curWifiName = ""
-                isScaning = false
-                saveAdapter?.notifyDataSetChanged()
+                LogTools.i("listSave " + listSave?.size)
                 hideProgressDialog()
             }
-        })
+
+            override fun requestFail(errorString: String?, code: Int) {
+
+            }
+
+        });
+
+        NetCtrl.getData(mContext,"unsave",object : DatabaseRequestCallBack {
+            override fun callBackListener(result: MutableList<MutableMap<String, Any>>?) {
+                if (result != null) {
+                    listUnSave?.clear()
+                    listUnSave?.addAll(result)
+                };
+                unSaveAdapter?.notifyDataSetChanged()
+                LogTools.i("listUnSave " + listUnSave?.size)
+                hideProgressDialog()
+            }
+
+            override fun requestFail(errorString: String?, code: Int) {
+
+            }
+
+        });
+
     }
+
 
     private fun connectActivedWifi(ssid: String, connect: Int) {
         LogTools.i("connectActivedWifi-- > ssid " + ssid + " , connect: " + connect)
         val mp: MutableMap<String, Any> = HashMap()
         mp["ssid"] = ssid
         mp["connect"] = connect
-        NetCtrl.get(mContext, "connectActivedWifi", mp, object : HttpRequestCallBack {
-            override fun callBackListener(result: String) {
-                LogTools.i("callBackListener: connectSavedWifi result-- >$result")
-                getAllSsid()
-//                connectedWifiList()
-            }
+        GlobalScope.launch {
+            NetCtrl.get(mContext, "connectActivedWifi", mp, object : HttpRequestCallBack {
+                override fun callBackListener(result: String) {
+                    LogTools.i("callBackListener: connectActivedWifi result-- >$result")
+                }
 
-            override fun requestFail(errorString: String, code: Int) {
-                LogTools.i("requestFail:connectSavedWifi  errorString-- >$errorString ,code $code")
-            }
-        })
+                override fun requestFail(errorString: String, code: Int) {
+                    LogTools.i("requestFail:connectActivedWifi  errorString-- >$errorString ,code $code")
+                }
+            })
+        }
     }
 
     private fun connectSsid(ssid: String, password: String) {
@@ -451,7 +301,7 @@ class NetCenterPersenter(
         NetCtrl.get(mContext, "connectSsid", mp, object : HttpRequestCallBack {
             override fun callBackListener(result: String) {
                 LogTools.i("callBackListener: connectSsid result-- >$result")
-                getAllSsid()
+//                getAllSsid()
                 //connectedWifiList()
             }
 
@@ -478,7 +328,9 @@ class NetCenterPersenter(
 
     override fun onItemClick(ssid: String?, password: String?) {
         if (ssid != null && password != null) {
-            curWifiName = "";
+            WifiUtils.resetWifiListStatus(mContext)
+            WifiUtils.updateWifiListStatus(mContext, "WIFI_NAME = ?", arrayOf(ssid),StringUtils.ToString(2));
+            getAllSsid();
             connectSsid(ssid, password)
         };
     }
@@ -493,20 +345,22 @@ class NetCenterPersenter(
                 dismissWifiListDialog()
                 var wifiName = "";
                 if (content.equals(StringUtils.ToString(Constant.INT_SAVE))) {
-                    curWifiName = "";
                     // if connect else unconnect
-                    wifiName = StringUtils.ToString(listSave!![pos]["name"])
-                    val curNet: Int = StringUtils.ToInt(listUnSave!![pos]["curNet"])
-//                    LogTools.i("wifiName " + wifiName + " ,curNet: " + curNet)
-                    if (curNet >= 0) {
+                    wifiName = StringUtils.ToString(listSave!![pos]["WIFI_NAME"])
+                    val curNet: Int = StringUtils.ToInt(listSave!![pos]["IS_CUR"])
+                    LogTools.i("wifiName " + wifiName + " ,curNet: " + curNet)
+                    if (curNet == 1) {
+                        WifiUtils.resetWifiListStatus(mContext)
+                        getAllSsid();
                         connectActivedWifi(wifiName, 0)
                     } else {
-                        setConntectingShow(pos);
+                        WifiUtils.resetWifiListStatus(mContext)
+                        WifiUtils.updateWifiListStatus(mContext, "WIFI_NAME = ?", arrayOf(wifiName),StringUtils.ToString(2));
+                        getAllSsid();
                         connectActivedWifi(wifiName, 1)
                     }
                 } else {
-//                    showWifiListDialog(wifiName,view)
-                    wifiName = StringUtils.ToString(listUnSave!![pos]["name"])
+                    wifiName = StringUtils.ToString(listUnSave!![pos]["WIFI_NAME"])
                     val selectWlanWindow = SelectWlanWindow(mContext, wifiName, this)
                     selectWlanWindow.ifShowNetCenterView()
                 }
@@ -524,43 +378,6 @@ class NetCenterPersenter(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    fun showWifiListDialog(wifiName: String, anchor: View) {
-        view = LayoutInflater.from(mContext).inflate(R.layout.dialog_fde_select_wlan, null)
-        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(312, 170, mContext!!, true)
-        lp?.gravity = Gravity.TOP or Gravity.LEFT
-        val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-        val focus = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-        lp?.flags = focus or touch
-        val location = IntArray(2)
-        anchor.getLocationOnScreen(location)
-        lp?.x = location[0]
-        lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
-        lp?.type =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
-
-        val txtCancel = view?.findViewById<TextView>(R.id.txtCancel)
-        val txtConfirm = view?.findViewById<TextView>(R.id.txtConfirm)
-        val txtWifiName = view?.findViewById<TextView>(R.id.txtWifiName)
-        val editPassword = view?.findViewById<EditText>(R.id.editPassword)
-//        editPassword?.requestFocus()
-//        val imm: InputMethodManager =
-//            mContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//        imm.showSoftInput(editPassword, InputMethodManager.SHOW_IMPLICIT)
-
-        txtWifiName?.setText(wifiName)
-        txtCancel?.setOnClickListener(View.OnClickListener {
-            windowManager.removeView(view)
-        })
-
-        txtConfirm?.setOnClickListener(View.OnClickListener {
-            windowManager.removeView(view)
-            connectSsid(wifiName, StringUtils.ToString(editPassword?.text))
-        })
-
-        view?.setBackground(mContext.getDrawable(R.drawable.round_rect))
-        windowManager.addView(view, lp)
     }
 
 }

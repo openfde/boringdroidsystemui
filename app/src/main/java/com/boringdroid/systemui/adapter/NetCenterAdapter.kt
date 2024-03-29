@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.StringUtils
 
 class NetCenterAdapter(private val context: Context,private val listType:Int , private val list: MutableList<MutableMap<String, Any>>?,private val onItemClickListener: OnItemClickListener)  :   RecyclerView.Adapter<NetCenterAdapter.ViewHolder>() {
@@ -21,17 +22,28 @@ class NetCenterAdapter(private val context: Context,private val listType:Int , p
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val isSaved: String = StringUtils.ToString(list!![position]["isSaved"])
-        val wifiName = list[position]["name"].toString()
+        val wifiName = list?.get(position)?.get("WIFI_NAME")?.toString()
         holder.txtWifiName.setText(wifiName);
 
-        val signal = StringUtils.ToInt(list[position]["signal"])
+        val signal = StringUtils.ToInt(list?.get(position)?.get("WIFI_SIGNAL") ?:0 )
 
         holder.layoutWifiInfo.setOnClickListener(View.OnClickListener {
             onItemClickListener.onItemClick(position,StringUtils.ToString(listType),holder.layoutWifiInfo)
         })
 
-        if("2".equals(isSaved)){
+//        val isSaved: String = StringUtils.ToString(list!![position]["IS_SAVE"])
+//        if("2".equals(isSaved)){
+//            holder.imgLock.visibility = View.GONE
+//            holder.txtContentText.visibility = View.VISIBLE
+//        }else{
+//            holder.imgLock.visibility = View.VISIBLE
+//            holder.txtContentText.visibility = View.GONE
+//        }
+
+
+        val curNet :Int = StringUtils.ToInt(list!![position]["IS_CUR"])
+
+        if(curNet == 2){
             holder.imgLock.visibility = View.GONE
             holder.txtContentText.visibility = View.VISIBLE
         }else{
@@ -39,9 +51,10 @@ class NetCenterAdapter(private val context: Context,private val listType:Int , p
             holder.txtContentText.visibility = View.GONE
         }
 
-        val curNet :Int = StringUtils.ToInt(list!![position]["curNet"])
+        LogTools.i(" ,curNet: " + curNet + ",wifiName "+wifiName )
+
         if(listType.equals(Constant.INT_SAVE) ){
-            if(curNet == position ){
+            if(curNet == 1 ){
                 holder.imgWifi.background = context.getDrawable(R.drawable.circle_blue)
                 if (signal >= 80) {
                     holder.imgWifi.setImageResource(R.mipmap.icon_white_wifi_all)
