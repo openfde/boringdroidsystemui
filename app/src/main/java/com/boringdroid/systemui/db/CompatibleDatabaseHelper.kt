@@ -13,7 +13,7 @@ class CompatibleDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         private const val DATABASE_NAME = "compatible.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 12
 
         private const val COMPATIBLE_LIST_CREATE =
             "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -54,7 +54,7 @@ class CompatibleDatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        if(oldVersion < 2){
+        if(oldVersion < 12){
             createTableSQL(db)
         }
     }
