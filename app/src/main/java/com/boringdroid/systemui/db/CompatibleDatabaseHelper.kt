@@ -13,7 +13,8 @@ class CompatibleDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         private const val DATABASE_NAME = "compatible.db"
-        private const val DATABASE_VERSION = 7
+
+        private const val DATABASE_VERSION = 12
 
         private const val COMPATIBLE_LIST_CREATE =
             "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -32,7 +33,7 @@ class CompatibleDatabaseHelper(context: Context) :
             "CREATE TABLE  IF NOT EXISTS  WIFI_HISTORY ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "WIFI_NAME TEXT ,WIFI_SIGNAL TEXT  ,WIFI_TYPE TEXT  ,IS_SAVE TEXT  ,IS_ENCRYPTION TEXT, NOTES TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT,IS_DEL TEXT,  UNIQUE(WIFI_NAME));"
 
-        private const val SYSTEM_CONFIG =
+        private const val SYSTEM_CONFIG_CREATE =
             "CREATE TABLE  IF NOT EXISTS  SYSTEM_CONFIG ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "KEY_CODE TEXT ,KEY_DESC TEXT , KEY_VALUE TEXT , NOTES TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT,IS_DEL TEXT,  UNIQUE(KEY_CODE));"
 
@@ -44,31 +45,33 @@ class CompatibleDatabaseHelper(context: Context) :
 
     override fun onCreate(db: SQLiteDatabase?) {
         LogTools.i("create table start !")
-        db!!.execSQL(COMPATIBLE_LIST_CREATE)
-        db.execSQL(COMPATIBLE_VALUE_CREATE)
-        db.execSQL(COMPATIBLE_VALUE_INDEX)
-        db.execSQL(COLLECT_CREATE)
-        db?.execSQL(WIFI_HISTORY_CREATE)
-        db?.execSQL(SYSTEM_CONFIG)
+        createTableSQL(db)
         LogTools.i("create table success !")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        if(oldVersion < 7){
-            createTableSQL(db);
-            db?.execSQL("ALTER TABLE COMPATIBLE_LIST ADD COLUMN   IS_DEL TEXT DEFAULT 0");
-            db?.execSQL("ALTER TABLE COMPATIBLE_VALUE ADD COLUMN IS_DEL TEXT DEFAULT 0");
-            db?.execSQL("ALTER TABLE COLLECT_APP ADD COLUMN  IS_DEL TEXT DEFAULT 0");
+        if(oldVersion < 12){
+            dropTables(db)
+            createTableSQL(db)
         }
     }
 
 
+    fun dropTables (db: SQLiteDatabase?){
+        db?.execSQL("DROP TABLE COMPATIBLE_LIST");
+        db?.execSQL("DROP TABLE COMPATIBLE_VALUE");
+        db?.execSQL("DROP TABLE COLLECT_APP");
+        db?.execSQL("DROP TABLE WIFI_HISTORY");
+        db?.execSQL("DROP TABLE SYSTEM_CONFIG");
+    }
+
     fun createTableSQL(db: SQLiteDatabase?){
-//        db!!.execSQL("DROP TABLE COMPATIBLE_LIST_CREATE");
-//        db!!.execSQL("DROP TABLE COMPATIBLE_VALUE_CREATE");
+        db?.execSQL(COMPATIBLE_LIST_CREATE);
+        db?.execSQL(COMPATIBLE_VALUE_CREATE);
+        db?.execSQL(COMPATIBLE_VALUE_INDEX)
         db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
-        db?.execSQL(SYSTEM_CONFIG)
+        db?.execSQL(SYSTEM_CONFIG_CREATE)
     }
 
     fun addCollect(packageName: String,appName: String,picUrl: String) {

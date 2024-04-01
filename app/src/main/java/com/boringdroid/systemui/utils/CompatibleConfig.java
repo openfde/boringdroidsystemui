@@ -53,7 +53,7 @@ public class CompatibleConfig {
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
         Cursor cursor = null;
         Map<String, Object> result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? ";
+        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? AND IS_DEL != 1";
         String[] selectionArgs = { packageName, keycode };
         try {
             ContentResolver contentResolver = context.getContentResolver();
