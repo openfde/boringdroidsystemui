@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 import android.util.Log;
 import androidx.annotation.Nullable;
 
+import com.boringdroid.systemui.utils.LogTools;
+
 public class RightClickView extends LinearLayout {
 
 
@@ -32,7 +34,10 @@ public class RightClickView extends LinearLayout {
                 listener.onRightClick(true);
             } else if(event.getAction() == MotionEvent.ACTION_UP && event.getButtonState() == 0){
                 listener.onRightClick(false);
+            }else {
             }
+        }else if(event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
+            listener.onRightClick(false);
         }
 
         Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
