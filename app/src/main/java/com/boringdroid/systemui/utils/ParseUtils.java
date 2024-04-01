@@ -58,7 +58,7 @@ public class ParseUtils {
                 for(int j = 0 ; j < packageList.getLength();j++){
                     Element packageElement = (Element) packageList.item(j);
                     String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
-                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent();
+                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
                     LogTools.Companion.i("name "+name + ",packagename "+packagename + ",defaultvalue  "+defaultvalue);
                     CompatibleConfig.insertValueData(context,packagename,name,defaultvalue);
                 }
@@ -85,8 +85,8 @@ public class ParseUtils {
                 for(int j = 0 ; j < packageList.getLength();j++){
                     Element packageElement = (Element) packageList.item(j);
                     String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
-                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent();
-                    LogTools.Companion.i("name "+name + ",packagename "+packagename + ",defaultvalue  "+defaultvalue);
+                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
+                    LogTools.Companion.i("name "+name + ",packagename "+packagename + ",defaultvalue  "+defaultvalue + ",recoPackageName "+recoPackageName);
                     if(packagename.equals(recoPackageName)){
                         CompatibleConfig.insertUpdateValueData(context,packagename,name,defaultvalue);
                     }
