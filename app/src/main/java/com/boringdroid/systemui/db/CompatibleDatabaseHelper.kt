@@ -13,6 +13,7 @@ class CompatibleDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         private const val DATABASE_NAME = "compatible.db"
+
         private const val DATABASE_VERSION = 12
 
         private const val COMPATIBLE_LIST_CREATE =
@@ -49,17 +50,12 @@ class CompatibleDatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        LogTools.i("onUpgrade oldVersion "+oldVersion +" , newVersion  "+newVersion)
         if(oldVersion < 12){
             dropTables(db)
-            createTableSQL(db);
-//            db?.execSQL("ALTER TABLE COMPATIBLE_LIST ADD COLUMN   IS_DEL TEXT DEFAULT 0");
-//            db?.execSQL("ALTER TABLE COMPATIBLE_VALUE ADD COLUMN IS_DEL TEXT DEFAULT 0");
-//            db?.execSQL("ALTER TABLE COLLECT_APP ADD COLUMN  IS_DEL TEXT DEFAULT 0");
-//            db?.execSQL("ALTER TABLE WIFI_HISTORY ADD COLUMN  IS_DEL TEXT DEFAULT 0");
-//            db?.execSQL("ALTER TABLE SYSTEM_CONFIG ADD COLUMN  IS_DEL TEXT DEFAULT 0");
+            createTableSQL(db)
         }
     }
+
 
     fun dropTables (db: SQLiteDatabase?){
         db?.execSQL("DROP TABLE COMPATIBLE_LIST");
