@@ -17,6 +17,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.view.RightClickView.RightClickListener
 import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.utils.LogTools
 
 class CollectAppsLayout @JvmOverloads constructor(
     context: Context,

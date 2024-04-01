@@ -24,6 +24,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             LogTools.Companion.i("system start up");
             ParseUtils.parseListXML(context);
+            ParseUtils.parseValueXML(context);
         }
     }
 

@@ -46,7 +46,7 @@ public class ParseUtils {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value_demo);
+            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value);
             Document document = builder.parse(inputStream);
             Element rootElement = document.getDocumentElement();
             NodeList keycodeList  = document.getElementsByTagName("keycode");
@@ -73,7 +73,7 @@ public class ParseUtils {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value_demo);
+            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value);
             Document document = builder.parse(inputStream);
             Element rootElement = document.getDocumentElement();
             NodeList keycodeList  = document.getElementsByTagName("keycode");
