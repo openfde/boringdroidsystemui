@@ -1,3 +1,63 @@
 <library>
+    <keycode>
+        <name>isAllowHideDecorCaption</name>
+        <package>
+            <packagename>com.lemon.lv</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
 
+        <package>
+            <packagename>com.tencent.wemeet.app</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>isAllowUnresizeable</name>
+        <package>
+            <packagename>com.happyelements.AndroidAnimal.qq</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>bf.sgs.hdexp</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>isAllowScreenshotRecord</name>
+        <package>
+            <packagename>com.jingdong.app.mall</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>size</name>
+        <package>
+            <packagename>com.microsoft.office.word</packagename>
+            <defaultvalue> { width = 800,height = 600 }</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>minBoundsVisibleWidth</name>
+        <package>
+            <packagename>com.tencent.wemeet.app</packagename>
+            <defaultvalue>
+                600
+            </defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>minBoundsVisibleHeight</name>
+        <package>
+            <packagename>com.tencent.wemeet.app</packagename>
+            <defaultvalue>
+                600
+            </defaultvalue>
+        </package>
+    </keycode>
 </library>
