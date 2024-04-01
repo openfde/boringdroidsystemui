@@ -56,6 +56,12 @@
             </intent-filter>
         </service>
 
+        <service android:name=".service.SystemUIService"
+            android:enabled="true"
+            android:exported="true">
+
+        </service>
+
         <provider
             android:name=".provider.CompatibleContentProvider"
             android:authorities="com.boringdroid.systemuiprovider"
@@ -81,6 +87,7 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>
