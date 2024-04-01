@@ -364,8 +364,8 @@ object AppUtils {
 //        LogTools.i("toConpatiblePage result "+result)
 
 
-        ParseUtils.parseListXML(mContext);
-        ParseUtils.parseValueXML(mContext);
+//        ParseUtils.parseListXML(mContext);
+//        ParseUtils.parseValueXML(mContext);
 
         val intent = Intent()
         val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")

@@ -24,6 +24,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             ParseUtils.parseListXML(context);
+            ParseUtils.parseValueXML(context);
             TimerSingleton.INSTANCE.startTimer(context);
         }
     }
