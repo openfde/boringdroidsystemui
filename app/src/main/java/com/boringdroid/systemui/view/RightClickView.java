@@ -37,7 +37,9 @@ public class RightClickView extends LinearLayout {
             }else {
             }
         }else if(event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
-            listener.onRightClick(false);
+            if(event.getAction() == MotionEvent.ACTION_UP && event.getButtonState() == 0){
+                listener.onRightClick(false);
+            }
         }
 
         Log.d(TAG, "dispatchTouchEvent() called with: event = [" + event + "]");
