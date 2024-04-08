@@ -312,7 +312,7 @@ class AppStateLayout @JvmOverloads constructor(
             val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
             val packageName = taskInfo.packageName
             holder.iconIV.setImageDrawable(taskInfo.icon)
-            if (isShowing(taskInfo.id)) {
+            if (topTaskId == (taskInfo.id)) {
                 holder.highLightLineTV.setImageResource(R.drawable.line_long)
             } else {
                 holder.highLightLineTV.setImageResource(R.drawable.line_short)
@@ -439,7 +439,7 @@ class AppStateLayout @JvmOverloads constructor(
             val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
             var runningTask: RunningTaskInfo? = null
             for (task in runningTasks) {
-                Log.e(TAG, "runningTask ${task.taskId}")
+//                Log.e(TAG, "runningTask ${task.taskId}")
                 if (task.taskId == id) {
                     runningTask = task
                     break
