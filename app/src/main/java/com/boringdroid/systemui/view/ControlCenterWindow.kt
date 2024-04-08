@@ -144,7 +144,7 @@ class ControlCenterWindow(
                     val dataMap = tempMap.get("Data") as Map<String, Any>;
                     val Brightness = StringUtils.ToInt(dataMap.get("Brightness"))
                     val MaxBrightness = StringUtils.ToInt(dataMap.get("MaxBrightness"))
-                    initLightSeekbar(StringUtils.ToInt((Brightness* 100 )/ MaxBrightness) )
+                    initLightSeekbar(StringUtils.ToInt((Brightness * 100) / MaxBrightness))
                 } else if (412 == code) {
                     DeviceUtils.detectBrightness()
                 }
@@ -165,16 +165,11 @@ class ControlCenterWindow(
         lightSeekbar?.setOnSeekBarChangeListener(lightChangeListener)
     }
 
+    var seekProgress = 0;
     private val lightChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            LogTools.i("progress: $progress ")
-            DeviceUtils.setBrightness(progress)
-            Settings.System.putInt(
-                mContext?.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS,
-                progress
-            )
-
+            Log.w(TAG, "progress: $progress ")
+            seekProgress = progress
 //            if (Settings.System.canWrite(mContext)) {
 //                Settings.System.putInt(mContext?.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, progress)
 //            }
@@ -184,7 +179,13 @@ class ControlCenterWindow(
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            Log.w(TAG, "onStopTrackingTouch...." + seekProgress)
+            if (mContext != null) {
+                DeviceUtils.setBrightness(seekProgress, mContext)
+            }
         }
+
+
     }
 
     private fun initVolumeSeekbar() {
