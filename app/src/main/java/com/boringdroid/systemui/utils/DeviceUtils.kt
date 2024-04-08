@@ -18,7 +18,9 @@ import android.util.DisplayMetrics
 import android.view.Display
 import androidx.core.content.ContextCompat
 import com.boringdroid.systemui.Log
+import com.google.gson.Gson
 import com.google.gson.JsonPrimitive
+import com.google.gson.reflect.TypeToken
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call
@@ -221,7 +223,7 @@ object DeviceUtils {
         return if (secondary) context.createDisplayContext(getSecondaryDisplay(context)) else context
     }
 
-    fun detectBrightness(){
+    fun detectBrightness() {
         val client = OkHttpClient()
         val JSON = MediaType.parse("application/json; charset=utf-8")
         val json = "{}"
@@ -244,7 +246,7 @@ object DeviceUtils {
         })
     }
 
-    fun setBrightness(brightness: Int) {
+    fun setBrightness(brightness: Int,context: Context) {
         val client = OkHttpClient()
         val JSON = MediaType.parse("application/json; charset=utf-8")
         val jsonNumber = JsonPrimitive(brightness.toString())
@@ -264,8 +266,20 @@ object DeviceUtils {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                    val responseData = response.body().string()
-                    LogTools.i("setBrightness responseData "+responseData)
+                val responseData = response.body().string()
+                LogTools.i("setBrightness responseData " + responseData)
+                val gson = Gson()
+                val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
+                val tempMap: Map<String, Any> =
+                    gson.fromJson<Map<String, Any>>(responseData, mapType)
+                val code = StringUtils.ToInt(tempMap.get("Code"));
+                if (200 == code) {
+                    Settings.System.putInt(
+                        context?.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS,
+                        brightness
+                    )
+                }
             }
         })
     }
