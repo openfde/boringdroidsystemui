@@ -65,6 +65,8 @@ class ControlCenterWindow(
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
 
+    private var MaxBrightness = 255;
+    private var MaxProgress = 255;
     override fun onClick(v: View?) {
 
     }
@@ -143,10 +145,10 @@ class ControlCenterWindow(
                 if (200 == code) {
                     val dataMap = tempMap.get("Data") as Map<String, Any>;
                     val Brightness = StringUtils.ToInt(dataMap.get("Brightness"))
-                    val MaxBrightness = StringUtils.ToInt(dataMap.get("MaxBrightness"))
-                    initLightSeekbar(StringUtils.ToInt((Brightness * 100) / MaxBrightness))
+                    MaxBrightness = StringUtils.ToInt(dataMap.get("MaxBrightness"))
+                    initLightSeekbar(StringUtils.ToInt((Brightness * 255) / MaxBrightness))
                 } else if (412 == code) {
-                    DeviceUtils.detectBrightness()
+//                    DeviceUtils.detectBrightness()
                 }
             }
         })
@@ -157,10 +159,9 @@ class ControlCenterWindow(
      * The screen backlight brightness between 0 and 255.
      */
     private fun initLightSeekbar(currentBrightness: Int) {
-        val streamMaxVolume = 100
         val streamMinVolume = 0
         lightSeekbar?.min = streamMinVolume
-        lightSeekbar?.max = streamMaxVolume
+        lightSeekbar?.max = MaxProgress
         lightSeekbar?.progress = currentBrightness
         lightSeekbar?.setOnSeekBarChangeListener(lightChangeListener)
     }
@@ -179,9 +180,10 @@ class ControlCenterWindow(
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            Log.w(TAG, "onStopTrackingTouch...." + seekProgress)
+            val progress = StringUtils.ToInt((seekProgress * MaxBrightness) / MaxProgress )
+            Log.w(TAG, "onStopTrackingTouch...." + seekProgress + " ,progress "+progress)
             if (mContext != null) {
-                DeviceUtils.setBrightness(seekProgress, mContext)
+                DeviceUtils.setBrightness(seekProgress,progress, mContext)
             }
         }
 
