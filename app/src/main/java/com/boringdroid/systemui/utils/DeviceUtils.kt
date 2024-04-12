@@ -246,13 +246,11 @@ object DeviceUtils {
         })
     }
 
-    fun setBrightness(brightness: Int,context: Context) {
+    fun setBrightness(brightness: Int,progress:Int,context: Context) {
         val client = OkHttpClient()
         val JSON = MediaType.parse("application/json; charset=utf-8")
-        val jsonNumber = JsonPrimitive(brightness.toString())
+        val jsonNumber = JsonPrimitive(progress.toString())
         val json = "{\"Brightness\":" + jsonNumber + "}"
-
-
         val body = RequestBody.create(JSON, json)
         val request = Request.Builder()
             .url(BASEURL + URL_SET_BRIGHTNESS)
