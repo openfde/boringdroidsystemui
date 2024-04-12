@@ -23,6 +23,16 @@
             <packagename>bf.sgs.hdexp</packagename>
             <defaultvalue>true</defaultvalue>
         </package>
+
+        <package>
+            <packagename>com.tencent.tmgp.s3.sgzzlb</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.tencent.tmgp.luobo4</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
     </keycode>
 
     <keycode>
