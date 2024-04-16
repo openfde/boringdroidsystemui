@@ -65,8 +65,8 @@ class ControlCenterWindow(
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
 
-    private var MaxBrightness = 255;
-    private var MaxProgress = 255;
+    private var MaxBrightness = 100;
+    private var MaxProgress = 100;
     override fun onClick(v: View?) {
 
     }
@@ -118,7 +118,12 @@ class ControlCenterWindow(
             Settings.System.SCREEN_BRIGHTNESS,
             0
         )
-        initLightSeekbar(currentBrightness)
+
+        MaxBrightness =Settings.System.getInt(   mContext?.getContentResolver(),
+            "MAX_BRIGHTNESS",
+            100);
+        initLightSeekbar(StringUtils.ToInt((currentBrightness * 100) / MaxBrightness))
+//        initLightSeekbar(currentBrightness)
         getBrightness();
     }
 
@@ -136,19 +141,28 @@ class ControlCenterWindow(
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body().string()
-                val gson = Gson()
-                val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
-                val tempMap: Map<String, Any> =
-                    gson.fromJson<Map<String, Any>>(responseData, mapType)
-                val code = StringUtils.ToInt(tempMap.get("Code"));
-                if (200 == code) {
-                    val dataMap = tempMap.get("Data") as Map<String, Any>;
-                    val Brightness = StringUtils.ToInt(dataMap.get("Brightness"))
-                    MaxBrightness = StringUtils.ToInt(dataMap.get("MaxBrightness"))
-                    initLightSeekbar(StringUtils.ToInt((Brightness * 255) / MaxBrightness))
-                } else if (412 == code) {
-//                    DeviceUtils.detectBrightness()
+                try {
+                    val responseData = response.body().string()
+                    val gson = Gson()
+                    val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
+                    val tempMap: Map<String, Any> =
+                        gson.fromJson<Map<String, Any>>(responseData, mapType)
+                    val code = StringUtils.ToInt(tempMap.get("Code"));
+                    if (200 == code) {
+                        val dataMap = tempMap.get("Data") as Map<String, Any>;
+                        val Brightness = StringUtils.ToInt(dataMap.get("Brightness"))
+                        MaxBrightness = StringUtils.ToInt(dataMap.get("MaxBrightness"))
+                        Settings.System.putInt(
+                            mContext?.getContentResolver(),
+                            "MAX_BRIGHTNESS",
+                            MaxBrightness)
+
+                        initLightSeekbar(StringUtils.ToInt((Brightness * 100) / MaxBrightness))
+                    } else if (412 == code) {
+    //                    DeviceUtils.detectBrightness()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         })
@@ -171,9 +185,9 @@ class ControlCenterWindow(
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             Log.w(TAG, "progress: $progress ")
             seekProgress = progress
-//            if (Settings.System.canWrite(mContext)) {
+            if (Settings.System.canWrite(mContext)) {
 //                Settings.System.putInt(mContext?.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, progress)
-//            }
+            }
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) {

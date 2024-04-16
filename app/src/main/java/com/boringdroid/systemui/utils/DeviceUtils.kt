@@ -260,23 +260,27 @@ object DeviceUtils {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
-                LogTools.i("setBrightness onFailure()" + e.toString())
+                LogTools.i("setBrightness onFailure()" + e.toString()+",brightness "+brightness +",progress "+progress)
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body().string()
-                LogTools.i("setBrightness responseData " + responseData)
-                val gson = Gson()
-                val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
-                val tempMap: Map<String, Any> =
-                    gson.fromJson<Map<String, Any>>(responseData, mapType)
-                val code = StringUtils.ToInt(tempMap.get("Code"));
-                if (200 == code) {
-                    Settings.System.putInt(
-                        context?.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS,
-                        brightness
-                    )
+                try {
+                    val responseData = response.body().string()
+                    LogTools.i("setBrightness responseData " + responseData +",brightness "+brightness +",progress "+progress)
+                    val gson = Gson()
+                    val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
+                    val tempMap: Map<String, Any> =
+                        gson.fromJson<Map<String, Any>>(responseData, mapType)
+                    val code = StringUtils.ToInt(tempMap.get("Code"));
+                    if (200 == code) {
+                        Settings.System.putInt(
+                            context?.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS,
+                            brightness
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         })
