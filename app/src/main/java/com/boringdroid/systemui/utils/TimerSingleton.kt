@@ -3,6 +3,7 @@ package com.boringdroid.systemui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.net.NetApi
 import com.boringdroid.systemui.view.SystemStateLayout
 import java.util.*
@@ -17,7 +18,7 @@ object TimerSingleton {
     private val timer = Timer()
     var status = 0;
     var listSaved: Array<String>? = null;
-    lateinit var curWifiName :String;
+    lateinit var curWifiName: String;
 
     fun startTimer(context: Context) {
         LogTools.i("-----startTimer-----------------")
@@ -25,9 +26,9 @@ object TimerSingleton {
             override fun run() {
                 val calendar = Calendar.getInstance()
                 val seconds = calendar[Calendar.SECOND]
-                if (seconds % 5 == 0) {
+                if (seconds % (Constant.INTERVAL_TIME / 2) == 0) {
                     status = getWifiStatus(context)
-                } else if (seconds % 10 == 1) {
+                } else if (seconds % Constant.INTERVAL_TIME == 1) {
                     if (status == 1) {
                         getAllSSID(context)
                     }
@@ -53,15 +54,15 @@ object TimerSingleton {
     /**
      * get all ssid
      */
-    fun getAllSSID(context: Context) {
+    fun  getAllSSID(context: Context) {
         getAllSavedSDID(context)
         getCurWifi(context)
         isScaning = true
         try {
             val allSsid = NetApi.getAllSsid(context)
-            LogTools.i("------getAllSSID--------")
             val arrWifis = allSsid.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
                 .toTypedArray()
+            LogTools.i("------arrWifis-------- "+arrWifis.size)
             if (arrWifis != null && arrWifis.size > 0) {
                 WifiUtils.deleteWifiList(context)
                 for (wi in arrWifis) {
@@ -76,12 +77,15 @@ object TimerSingleton {
                         values.put("IS_DEL", "0")
                         if (listSaved?.contains(arrInfo[0]) == true) {
                             values.put("IS_SAVE", "1")
-                        }else{
+                        } else {
                             values.put("IS_SAVE", "0")
                         }
-                        if(!"".equals(StringUtils.ToString(curWifiName)) && curWifiName.equals(arrInfo[0])){
+                        if (!"".equals(StringUtils.ToString(curWifiName)) && curWifiName.equals(
+                                arrInfo[0]
+                            )
+                        ) {
                             values.put("FIELDS1", "1")
-                        }else{
+                        } else {
                             values.put("FIELDS1", "0")
                         }
 
@@ -89,7 +93,7 @@ object TimerSingleton {
                         context.contentResolver.insert(uri, values)
                     }
                 }
-                getAllSavedSDID(context)
+//                getAllSavedSDID(context)
             } else {
                 isScaning = false
             }
@@ -124,7 +128,7 @@ object TimerSingleton {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        getCurWifi(context)
+//        getCurWifi(context)
     }
 
 

@@ -6,4 +6,6 @@ package com.boringdroid.systemui;
 interface IWifiInterface {
 //        List<WifiBean> getAllWifiList();
 
+//       void isWifiEnable();
+
 }

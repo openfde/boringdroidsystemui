@@ -15,6 +15,12 @@ public class WifiUtils {
     public static final String WIFI_URI = "content://com.boringdroid.systemuiprovider.wifi";
 
 
+    /**
+     * query all wifi from db
+     *
+     * @param context
+     * @return
+     */
     public static List<Map<String, Object>> queryAllWifiList(Context context) {
         Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
         Cursor cursor = null;
@@ -47,7 +53,14 @@ public class WifiUtils {
         return list;
     }
 
-
+    /**
+     * query wifi from db where ?
+     *
+     * @param context
+     * @param selection
+     * @param selectionArgs
+     * @return
+     */
     public static List<Map<String, Object>> queryWifiList(Context context, String selection, String[] selectionArgs) {
         Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
         Cursor cursor = null;
@@ -79,6 +92,12 @@ public class WifiUtils {
     }
 
 
+    /**
+     * query current wifi name
+     *
+     * @param context
+     * @return
+     */
     public static String queryCurWifi(Context context) {
         Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
         Cursor cursor = null;
@@ -106,11 +125,22 @@ public class WifiUtils {
 
     }
 
+    /**
+     * delete all wifi list
+     *
+     * @param context
+     */
     public  static void deleteWifiList(Context context){
         Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
         context.getContentResolver().delete(uri, null, null);
     }
 
+    /**
+     * reset wifi list status
+     *
+     * @param context
+     * @return
+     */
     public static int  resetWifiListStatus (Context context) {
         try {
             Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
@@ -127,6 +157,16 @@ public class WifiUtils {
         return  -1;
     }
 
+
+    /**
+     * update wifi status
+     *
+     * @param context
+     * @param selection
+     * @param selectionArgs
+     * @param newValue
+     * @return
+     */
     public static int  updateWifiListStatus (Context context, String selection, String[] selectionArgs,String newValue) {
         try {
             Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
@@ -142,5 +182,4 @@ public class WifiUtils {
         }
         return  -1;
     }
-
 }
