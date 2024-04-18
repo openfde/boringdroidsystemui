@@ -26,7 +26,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
 //            ParseUtils.parseListXML(context);
 //            ParseUtils.parseValueXML(context);
-        }else if(Intent.ACTION_BOOT_COMPLETED){
+        }else if(action.equals(Intent.ACTION_BOOT_COMPLETED)){
             ParseUtils.parseListXML(context);
             ParseUtils.parseValueXML(context);
             TimerSingleton.INSTANCE.startTimer(context);
