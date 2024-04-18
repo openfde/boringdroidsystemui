@@ -60,15 +60,15 @@
             android:exported="true" />
 
         <receiver
-            android:name=".receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="true">
+            android:name=".receiver.BootReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.fde.SYSTEM_INIT_ACTION" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receiver.UninstallReceiver">
+        <receiver android:name=".receiver.UninstallReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
                 <data android:scheme="package" />

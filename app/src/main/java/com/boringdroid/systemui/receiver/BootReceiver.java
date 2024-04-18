@@ -21,8 +21,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-            LogTools.Companion.i("system start up");
+        String action = intent.getAction();
+        if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
             ParseUtils.parseListXML(context);
             ParseUtils.parseValueXML(context);
         }
