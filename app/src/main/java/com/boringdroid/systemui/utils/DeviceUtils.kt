@@ -12,14 +12,24 @@ import android.net.Uri
 import android.os.Build
 import android.os.UserManager
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.util.DisplayMetrics
 
 import android.view.Display
 import androidx.core.content.ContextCompat
 import com.boringdroid.systemui.Log
+import com.google.gson.Gson
+import com.google.gson.JsonPrimitive
+import com.google.gson.reflect.TypeToken
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.File
@@ -40,6 +50,9 @@ object DeviceUtils {
     const val URL_RESTART = "/api/v1/power/restart"
     const val URL_LOCK = "/api/v1/power/lock"
 
+    const val URL_GET_BRIGHTNESS = "/api/v1/brightness"
+    const val URL_SET_BRIGHTNESS = "/api/v1/brightness"
+    const val URL_DETECT_BRIGHTNESS = "/api/v1/brightness/detect"
 
     fun lockScreen(context: Context): Boolean {
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -51,11 +64,13 @@ object DeviceUtils {
         return true
     }
 
-    @JvmStatic fun sendKeyEvent(keycode: Int) {
+    @JvmStatic
+    fun sendKeyEvent(keycode: Int) {
         runAsRoot("input keyevent $keycode")
     }
 
-    @JvmStatic fun sendKeyCode(keyCode: Int) {
+    @JvmStatic
+    fun sendKeyCode(keyCode: Int) {
         object : Thread() {
             override fun run() {
                 try {
@@ -156,7 +171,7 @@ object DeviceUtils {
     }
 
     @JvmStatic
-	fun hasStoragePermission(context: Context?): Boolean {
+    fun hasStoragePermission(context: Context?): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || ContextCompat.checkSelfPermission(
             context!!,
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -170,7 +185,8 @@ object DeviceUtils {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    @JvmStatic fun playEventSound(context: Context?, event: String?) {
+    @JvmStatic
+    fun playEventSound(context: Context?, event: String?) {
         val soundUri =
             PreferenceManager.getDefaultSharedPreferences(context).getString(event, "default")
         if (soundUri == "default") {
@@ -202,9 +218,74 @@ object DeviceUtils {
         return metrics
     }
 
-    @JvmStatic fun getDisplayContext(context: Context, secondary: Boolean): Context {
+    @JvmStatic
+    fun getDisplayContext(context: Context, secondary: Boolean): Context {
         return if (secondary) context.createDisplayContext(getSecondaryDisplay(context)) else context
     }
+
+    fun detectBrightness() {
+        val client = OkHttpClient()
+        val JSON = MediaType.parse("application/json; charset=utf-8")
+        val json = "{}"
+
+        val body = RequestBody.create(JSON, json)
+        val request = Request.Builder()
+            .url(BASEURL + URL_DETECT_BRIGHTNESS)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                LogTools.i("detectBrightness onFailure()" + e.toString())
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body().string()
+            }
+        })
+    }
+
+    fun setBrightness(brightness: Int,progress:Int,context: Context) {
+        val client = OkHttpClient()
+        val JSON = MediaType.parse("application/json; charset=utf-8")
+        val jsonNumber = JsonPrimitive(progress.toString())
+        val json = "{\"Brightness\":" + jsonNumber + "}"
+        val body = RequestBody.create(JSON, json)
+        val request = Request.Builder()
+            .url(BASEURL + URL_SET_BRIGHTNESS)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                LogTools.i("setBrightness onFailure()" + e.toString()+",brightness "+brightness +",progress "+progress)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                try {
+                    val responseData = response.body().string()
+                    LogTools.i("setBrightness responseData " + responseData +",brightness "+brightness +",progress "+progress)
+                    val gson = Gson()
+                    val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
+                    val tempMap: Map<String, Any> =
+                        gson.fromJson<Map<String, Any>>(responseData, mapType)
+                    val code = StringUtils.ToInt(tempMap.get("Code"));
+                    if (200 == code) {
+                        Settings.System.putInt(
+                            context?.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS,
+                            brightness
+                        )
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        })
+    }
+
 
     fun logout() {
         QuietOkHttp.post(BASEURL + URL_LOGOUT)
@@ -223,7 +304,8 @@ object DeviceUtils {
             })
     }
 
-    @JvmStatic fun poweroff() {
+    @JvmStatic
+    fun poweroff() {
         QuietOkHttp.post(BASEURL + URL_POWOFF)
             .setCallbackToMainUIThread(true)
             .execute(object : JsonCallBack<String>() {

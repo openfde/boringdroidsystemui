@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.utils
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.usage.UsageStats
@@ -322,6 +323,7 @@ object AppUtils {
         mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
+    @SuppressLint("SoonBlockedPrivateApi")
     public fun createShortcut(mContext: Context, app: AppData) {
 //        Log.d(AllAppsWindow.TAG, "createShortcut() called with: app = [${app.name}]")
         val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))

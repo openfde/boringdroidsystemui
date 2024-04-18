@@ -26,22 +26,22 @@ object Log {
 
     fun d(tag:String, message: String) {
         if(Debugable){
-            Log.d(TAG, message)
+            Log.d(tag, message)
         }
     }
 
     fun e(tag:String, message: String) {
-        Log.e(TAG, message)
+        Log.e(tag, message)
     }
 
     fun i(tag:String, message: String) {
         if(Debugable){
-            Log.i(TAG, message)
+            Log.i(tag, message)
         }
     }
 
     fun w(tag:String, message: String) {
-        Log.w(TAG, message)
+        Log.w(tag, message)
     }
 
 }
