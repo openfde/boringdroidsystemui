@@ -51,7 +51,7 @@ class NetCenterAdapter(private val context: Context,private val listType:Int , p
             holder.txtContentText.visibility = View.GONE
         }
 
-        LogTools.i(" ,curNet: " + curNet + ",wifiName "+wifiName )
+//        LogTools.i(" ,curNet: " + curNet + ",wifiName "+wifiName )
 
         if(listType.equals(Constant.INT_SAVE) ){
             if(curNet == 1 ){

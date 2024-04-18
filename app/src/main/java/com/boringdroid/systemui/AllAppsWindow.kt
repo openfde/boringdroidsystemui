@@ -177,7 +177,6 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         lp?.x = 60;//location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
 //        lp?.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        LogTools.i("showPowerListMenu width "+lp?.width)
         windowPowerView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
                 windowManager.removeView(windowPowerView)

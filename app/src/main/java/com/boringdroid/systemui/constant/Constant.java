@@ -8,4 +8,6 @@ public class Constant {
     public static final int INT_SAVE = 111;
 
     public static final int INT_UNSAVE = 222;
+
+    public static final int INTERVAL_TIME = 8;
 }

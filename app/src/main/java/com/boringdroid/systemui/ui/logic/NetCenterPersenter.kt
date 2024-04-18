@@ -93,6 +93,7 @@ class NetCenterPersenter(
         recyclerViewUnSave!!.layoutManager =
             LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
         recyclerViewUnSave?.adapter = unSaveAdapter
+        wifiStatus = Settings.Global.getInt(mContext?.contentResolver, "wifi_status");
         isWifiEnable()
 
         switchWifi!!.setOnCheckedChangeListener(object : CompoundButton.OnCheckedChangeListener {
@@ -140,13 +141,36 @@ class NetCenterPersenter(
             override fun run() {
                 val calendar = Calendar.getInstance()
                 val seconds = calendar[Calendar.SECOND]
-                if (wifiStatus == 1 && seconds % 10 == 3) {
+                if (wifiStatus == 1 && seconds % Constant.INTERVAL_TIME == 3) {
                     getAllSsid()
+                }
+
+//                if (seconds % (Constant.INTERVAL_TIME / 2) == 1) {
+//                    handler.post {}
+//                }
+
+                if (seconds % (Constant.INTERVAL_TIME ) == 1) {
+                    NetCtrl.get(mContext,"isWifiEnable",null, object : HttpRequestCallBack {
+                        override fun callBackListener(result: String?) {
+                            wifiStatus = StringUtils.ToInt(result)
+                            isWifiEnable();
+                        }
+
+                        override fun requestFail(errorString: String?, code: Int) {
+                        }
+                    });
                 }
             }
         }
         timer?.schedule(timerTask, (1 * 1000).toLong(), (1 * 1000).toLong())
     }
+
+//    private val handler: Handler = object : Handler(Looper.getMainLooper()) {
+//        override fun handleMessage(msg: Message) {
+//            // update ui
+//            isWifiEnable()
+//        }
+//    }
 
     fun destTimer() {
         if (timer != null) {
@@ -178,28 +202,31 @@ class NetCenterPersenter(
      * wifi is enable ?
      */
     private fun isWifiEnable() {
-        wifiStatus = Settings.Global.getInt(mContext?.contentResolver,"wifi_status");
-        switchWifi?.visibility = View.VISIBLE
+        try {
+            switchWifi?.visibility = View.VISIBLE
 
-        if (wifiStatus === 1) {
-            switchWifi!!.isChecked = true
-            openWifiView()
-            scanWifiList()
-            switchWifi!!.isEnabled = true
-        } else {
-            closeWifiView()
-            switchWifi!!.isChecked = false
-            if (wifiStatus === 2) {
-                Toast.makeText(
-                    mContext,
-                    mContext!!.getString(R.string.fde_no_wifi_module),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-                switchWifi!!.isEnabled = false
+            if (wifiStatus === 1) {
+                switchWifi!!.isChecked = true
+                openWifiView()
+                scanWifiList()
+                switchWifi?.isEnabled = true
             } else {
-                switchWifi!!.isEnabled = true
+                closeWifiView()
+                switchWifi?.isChecked = false
+                if (wifiStatus === 2) {
+                    Toast.makeText(
+                        mContext,
+                        mContext!!.getString(R.string.fde_no_wifi_module),
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    switchWifi?.isEnabled = false
+                } else {
+                    switchWifi?.isEnabled = true
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -230,22 +257,19 @@ class NetCenterPersenter(
     }
 
     private fun scanWifiList() {
-        LogTools.i("scanWifiList........... " )
         showProgressDialog()
         getAllSsid()
     }
 
 
     private fun getAllSsid() {
-
-        NetCtrl.getData(mContext,"save",object : DatabaseRequestCallBack {
+        NetCtrl.getData(mContext, "save", object : DatabaseRequestCallBack {
             override fun callBackListener(result: MutableList<MutableMap<String, Any>>?) {
                 if (result != null) {
                     listSave?.clear()
                     listSave?.addAll(result)
                 };
                 saveAdapter?.notifyDataSetChanged()
-                LogTools.i("listSave " + listSave?.size)
                 hideProgressDialog()
             }
 
@@ -255,14 +279,13 @@ class NetCenterPersenter(
 
         });
 
-        NetCtrl.getData(mContext,"unsave",object : DatabaseRequestCallBack {
+        NetCtrl.getData(mContext, "unsave", object : DatabaseRequestCallBack {
             override fun callBackListener(result: MutableList<MutableMap<String, Any>>?) {
                 if (result != null) {
                     listUnSave?.clear()
                     listUnSave?.addAll(result)
                 };
                 unSaveAdapter?.notifyDataSetChanged()
-                LogTools.i("listUnSave " + listUnSave?.size)
                 hideProgressDialog()
             }
 
@@ -329,7 +352,12 @@ class NetCenterPersenter(
     override fun onItemClick(ssid: String?, password: String?) {
         if (ssid != null && password != null) {
             WifiUtils.resetWifiListStatus(mContext)
-            WifiUtils.updateWifiListStatus(mContext, "WIFI_NAME = ?", arrayOf(ssid),StringUtils.ToString(2));
+            WifiUtils.updateWifiListStatus(
+                mContext,
+                "WIFI_NAME = ?",
+                arrayOf(ssid),
+                StringUtils.ToString(2)
+            );
             getAllSsid();
             connectSsid(ssid, password)
         };
@@ -355,7 +383,12 @@ class NetCenterPersenter(
                         connectActivedWifi(wifiName, 0)
                     } else {
                         WifiUtils.resetWifiListStatus(mContext)
-                        WifiUtils.updateWifiListStatus(mContext, "WIFI_NAME = ?", arrayOf(wifiName),StringUtils.ToString(2));
+                        WifiUtils.updateWifiListStatus(
+                            mContext,
+                            "WIFI_NAME = ?",
+                            arrayOf(wifiName),
+                            StringUtils.ToString(2)
+                        );
                         getAllSsid();
                         connectActivedWifi(wifiName, 1)
                     }

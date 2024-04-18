@@ -100,12 +100,16 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
         wifiBtn?.setOnHoverListener( object :View.OnHoverListener{
             override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
-                val curWifi = WifiUtils.queryCurWifi(context)
-                val status = Settings.Global.getInt(context.contentResolver,"wifi_status");
-                if( curWifi != null && status == 1 ){
-                    wifiBtn?.tooltipText = curWifi;
-                }else{
-                    wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+                try {
+                    val curWifi = WifiUtils.queryCurWifi(context)
+                    val status = Settings.Global.getInt(context.contentResolver,"wifi_status");
+                    if( curWifi != null && status == 1 ){
+                        wifiBtn?.tooltipText = curWifi;
+                    }else{
+                        wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
                 return  false
             }
