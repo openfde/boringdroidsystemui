@@ -60,9 +60,11 @@
             android:exported="true" />
 
         <receiver
-            android:name=".receiver.BootReceiver">
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.fde.SYSTEM_INIT_ACTION" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
