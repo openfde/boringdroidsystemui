@@ -23,6 +23,9 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
+//            ParseUtils.parseListXML(context);
+//            ParseUtils.parseValueXML(context);
+        }else if(Intent.ACTION_BOOT_COMPLETED){
             ParseUtils.parseListXML(context);
             ParseUtils.parseValueXML(context);
         }
