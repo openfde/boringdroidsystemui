@@ -11,6 +11,9 @@ import android.os.Build
 import android.util.Log
 import android.view.WindowManager
 import com.boringdroid.systemui.R
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 
 object Utils {
@@ -115,5 +118,23 @@ object Utils {
 
         return context.getString(R.string.just_now)
 
+    }
+
+    fun executeCommand(command: String?): String? {
+        val output = StringBuilder()
+        try {
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                output.append(line).append("\n")
+            }
+            process.waitFor()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
+        return output.toString()
     }
 }

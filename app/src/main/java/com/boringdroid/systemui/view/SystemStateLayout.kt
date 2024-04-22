@@ -28,27 +28,27 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
 
     //    private var bluetoothBtn:ImageView ?= null
-    private var wifiBtn:ImageView ?= null
-    private var volumeBtn:ImageView ?= null
-    private var batteryBtn:ImageView ?= null
-    private var controlBtn:ImageView ?= null
-    private var homeBtn:LinearLayout ?= null
-    private var dateBtn:TextClock ?= null
+    private var wifiBtn: ImageView? = null
+    private var volumeBtn: ImageView? = null
+    private var batteryBtn: ImageView? = null
+    private var controlBtn: ImageView? = null
+    private var homeBtn: LinearLayout? = null
+    private var dateBtn: TextClock? = null
     private var controlCenterWindow: ControlCenterWindow? = null
     private var netCenterWindow: NetCenterWindow? = null
     private var notificationWindow: NotificationWindow? = null
-    private var screenRecordState:Int = 0
+    private var screenRecordState: Int = 0
 
-    private var notificationBtn: ImageView?= null
-    private var audioPanelVisible:Boolean = false
-    var listener: NotificationListener?= null
-    private val TAG:String = "SystemStateLayout"
+    private var notificationBtn: ImageView? = null
+    private var audioPanelVisible: Boolean = false
+    var listener: NotificationListener? = null
+    private val TAG: String = "SystemStateLayout"
 
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
 
 
-    var isShowDlg :Boolean? =false;
+    var isShowDlg: Boolean? = false;
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -90,28 +90,33 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener { toggleVolume(volumeBtn!!) }
         batteryBtn?.setOnClickListener { batteryClick() }
-        homeBtn?.setOnClickListener{ homeClick()}
-        controlBtn?.setOnClickListener{ toggleVolume(controlBtn!!)}
+        homeBtn?.setOnClickListener { homeClick() }
+        controlBtn?.setOnClickListener { toggleVolume(controlBtn!!) }
 //        if(Settings.Global.getInt(context.contentResolver,"wifi_status") == 1){
 //            wifiBtn?.tooltipText = "已连接";
 //        }else{
 //            wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
 //        }
 
-        wifiBtn?.setOnHoverListener( object :View.OnHoverListener{
+        wifiBtn?.setOnHoverListener(object : View.OnHoverListener {
             override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
                 try {
                     val curWifi = WifiUtils.queryCurWifi(context)
-                    val status = Settings.Global.getInt(context.contentResolver,"wifi_status");
-                    if( curWifi != null && status == 1 ){
-                        wifiBtn?.tooltipText = curWifi;
-                    }else{
+                    val status = Settings.Global.getInt(context.contentResolver, "wifi_status");
+                    var ipAddress =
+                        Settings.Global.getString(context.contentResolver, "ip_address");
+                    if (curWifi != null && status == 1) {
+                        if (ipAddress == null) {
+                            ipAddress = "";
+                        }
+                        wifiBtn?.tooltipText = curWifi + " " + ipAddress;
+                    } else {
                         wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                return  false
+                return false
             }
         });
         volumeBtn?.tooltipText = context.getString(R.string.fde_notification_volume)
@@ -145,9 +150,9 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
 
-    private fun showTips( content:String,right: Float){
-        if(!"".equals(content)){
-            if(isShowDlg == true){
+    private fun showTips(content: String, right: Float) {
+        if (!"".equals(content)) {
+            if (isShowDlg == true) {
                 return;
             }
             val windowWidth = resources.getDimension(R.dimen.wifi_status_window_width).toInt()
@@ -164,13 +169,14 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             layoutParams.gravity = Gravity.BOTTOM or Gravity.RIGHT
             layoutParams.horizontalMargin = right
             layoutParams.verticalMargin = 0.04f
-            windowContentView = LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
-            var txtName :TextView
+            windowContentView =
+                LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
+            var txtName: TextView
             txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
             txtName.setText(content)
-            windowManager?.addView(windowContentView,layoutParams)
-            isShowDlg = true ;
-        }else{
+            windowManager?.addView(windowContentView, layoutParams)
+            isShowDlg = true;
+        } else {
             try {
                 if (windowContentView != null) {
                     windowManager?.removeViewImmediate(windowContentView)
@@ -178,14 +184,14 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             } catch (e: IllegalArgumentException) {
             }
             windowContentView = null
-            isShowDlg = false ;
+            isShowDlg = false;
         }
     }
 
     /**
      * network wifi click
      */
-    private fun wifiClick(){
+    private fun wifiClick() {
 //        android.util.Log.i("bella","-------wifiClick-----------");
 //        showTips("",0.05f)
 //
@@ -203,14 +209,15 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     /**
      * network battery click
      */
-    private  fun batteryClick(){
+    private fun batteryClick() {
 //        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager;
 //        val isCharging = if (batteryManager.isCharging ) "正在充电" else "未充电"
 //        val currentLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
 //        Toast.makeText(context,"batteryClick "+currentLevel + " , "+isCharging,Toast.LENGTH_SHORT).show();
 //       TimerSingleton.stopTimer()
         val intent = Intent()
-        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+        val cn: ComponentName =
+            ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
         intent.component = cn;
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
@@ -234,17 +241,16 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
 
-
-    interface NotificationListener{
+    interface NotificationListener {
         fun hideNotification()
         fun showNotification()
-        fun syncVisible(which :Int)
+        fun syncVisible(which: Int)
     }
 
     fun onNotifyCount(count: Int?) {
         Log.d("TAG", "onNotifyCount() called with: count = $count")
         notificationBtn?.visibility = VISIBLE
-        if(count!! > 0){
+        if (count!! > 0) {
             notificationBtn?.setImageResource(R.drawable.icon_notification_coming)
         } else {
             notificationBtn?.setImageResource(R.drawable.icon_notification)
@@ -252,12 +258,12 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        notificationBtn?.setText(count.toString() + "")
     }
 
-    fun onNotificationPanelVisibleChanged(boolean: Boolean){
+    fun onNotificationPanelVisibleChanged(boolean: Boolean) {
         Utils.notificationPanelVisible = boolean
-        if( boolean ){
-            notificationBtn?.background  = context!!.resources.getDrawable(R.drawable.round_rect_5dp)
-        } else{
-            notificationBtn?.background  = null
+        if (boolean) {
+            notificationBtn?.background = context!!.resources.getDrawable(R.drawable.round_rect_5dp)
+        } else {
+            notificationBtn?.background = null
         }
     }
 

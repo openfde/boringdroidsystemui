@@ -3,10 +3,13 @@ package com.boringdroid.systemui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.provider.Settings
+import android.util.Log
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.net.NetApi
-import com.boringdroid.systemui.view.SystemStateLayout
 import java.util.*
+import java.util.regex.Pattern
+
 
 object TimerSingleton {
 
@@ -25,12 +28,22 @@ object TimerSingleton {
         val task = object : TimerTask() {
             override fun run() {
                 val calendar = Calendar.getInstance()
+                val hour = calendar[Calendar.HOUR]
+                val mintute = calendar[Calendar.MINUTE]
                 val seconds = calendar[Calendar.SECOND]
+                if((hour == 10 ||  hour == 3 || hour == 5) && mintute == 1 && seconds == 1 ){
+                    val urlList = Constant.URL_GITEE_COMPATIBLE_LIST
+                    val urlValue = Constant.URL_GITEE_COMPATIBLE_VALUE
+                    ParseUtils.parseGitXml(context,urlList)
+                    ParseUtils.parseGitXml(context,urlValue)
+                }
+
                 if (seconds % (Constant.INTERVAL_TIME / 2) == 0) {
                     status = getWifiStatus(context)
                 } else if (seconds % Constant.INTERVAL_TIME == 1) {
                     if (status == 1) {
                         getAllSSID(context)
+                        getXml(context)
                     }
                 }
 
@@ -51,10 +64,19 @@ object TimerSingleton {
         timer.cancel()
     }
 
+
+    fun getXml(context: Context) {
+        val thread = Thread {
+//           ParseUtils.parseGiteeXML(context);
+        }
+
+        thread.start()
+    }
+
     /**
      * get all ssid
      */
-    fun  getAllSSID(context: Context) {
+    fun getAllSSID(context: Context) {
         getAllSavedSDID(context)
         getCurWifi(context)
         isScaning = true
@@ -62,7 +84,7 @@ object TimerSingleton {
             val allSsid = NetApi.getAllSsid(context)
             val arrWifis = allSsid.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
                 .toTypedArray()
-            LogTools.i("------arrWifis-------- "+arrWifis.size)
+            LogTools.i("------arrWifis-------- " + arrWifis.size)
             if (arrWifis != null && arrWifis.size > 0) {
                 WifiUtils.deleteWifiList(context)
                 for (wi in arrWifis) {
@@ -138,6 +160,7 @@ object TimerSingleton {
     fun getCurWifi(context: Context) {
         val result = NetApi.getActivedWifi(context)
         curWifiName = result
+        execIpCmd(context)
 //        try {
 //            val uri = Uri.parse(WifiUtils.WIFI_URI + "/WIFI_HISTORY")
 //            val values = ContentValues()
@@ -154,6 +177,22 @@ object TimerSingleton {
 //            e.printStackTrace()
 //        }
         isScaning = false
+    }
+
+    fun execIpCmd(context: Context) {
+        val ifconfigOutput: String? = Utils.executeCommand("ifconfig")
+        val pattern = Pattern.compile("inet addr:(\\S+)\\s+Bcast:(\\S+)\\s+Mask:(\\S+)")
+        val matcher = pattern.matcher(ifconfigOutput)
+
+        //
+        while (matcher.find()) {
+            val ipAddress = matcher.group(1)
+            val broadcastAddress = matcher.group(2)
+            val subnetMask = matcher.group(3)
+            if (broadcastAddress != null && "0.0.0.0" != broadcastAddress) {
+                Settings.Global.putString(context.contentResolver,"ip_address",ipAddress)
+            }
+        }
     }
 
 
