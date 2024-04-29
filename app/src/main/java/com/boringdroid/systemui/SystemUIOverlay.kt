@@ -76,7 +76,8 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
                 // to let all apps button group be center of navigation
                 // bar view.
                 val layoutParams = FrameLayout.LayoutParams(
-                    Utils.dpToPx(statusBar.context, 56),
+                    //Utils.dpToPx(statusBar.context, 56),
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
 //                layoutParams.leftMargin = Utils.dpToPx(pluginContext!!, 12)

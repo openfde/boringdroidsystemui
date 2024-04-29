@@ -2,7 +2,7 @@
 <library xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>isAllowHideDecorCaption</name>
         <package>
             <packagename>com.lemon.lv</packagename>
@@ -15,7 +15,7 @@
         </package>
     </keycode>
 
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>isAllowUnresizeable</name>
         <package>
             <packagename>com.happyelements.AndroidAnimal.qq</packagename>
@@ -38,7 +38,7 @@
         </package>
     </keycode>
 
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>isAllowScreenshotRecord</name>
         <package>
             <packagename>com.jingdong.app.mall</packagename>
@@ -46,7 +46,7 @@
         </package>
     </keycode>
 
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>size</name>
         <package>
             <packagename>com.microsoft.office.word</packagename>
@@ -54,7 +54,7 @@
         </package>
     </keycode>
 
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>minBoundsVisibleWidth</name>
         <package>
             <packagename>com.tencent.wemeet.app</packagename>
@@ -64,7 +64,7 @@
         </package>
     </keycode>
 
-    <keycode>
+    <keycode date="2024-04-23" isdel="0">
         <name>minBoundsVisibleHeight</name>
         <package>
             <packagename>com.tencent.wemeet.app</packagename>

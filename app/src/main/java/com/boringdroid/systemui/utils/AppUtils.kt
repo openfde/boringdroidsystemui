@@ -368,6 +368,7 @@ object AppUtils {
 
 //        ParseUtils.parseListXML(mContext);
 //        ParseUtils.parseValueXML(mContext);
+//        ParseUtils.parseGpsData(mContext);
 
         val intent = Intent()
         val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")

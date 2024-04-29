@@ -34,7 +34,8 @@
             android:name=".ui.CompatibleSetActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.CompatibleListActivity"
+            android:name=".ui.CompatibleSyncActivity"
+            android:theme="@android:style/Theme.Translucent"
             android:exported="false" />
 
         <service
@@ -70,6 +71,11 @@
         <provider
             android:name=".provider.WifiContentProvider"
             android:authorities="com.boringdroid.systemuiprovider.wifi"
+            android:exported="true" />
+
+        <provider
+            android:name=".provider.RegionContentProvider"
+            android:authorities="com.boringdroid.systemuiprovider.region"
             android:exported="true" />
 
         <receiver
