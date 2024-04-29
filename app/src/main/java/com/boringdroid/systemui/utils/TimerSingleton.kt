@@ -3,6 +3,7 @@ package com.boringdroid.systemui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Message
 import android.provider.Settings
 import android.util.Log
 import com.boringdroid.systemui.constant.Constant
@@ -25,17 +26,21 @@ object TimerSingleton {
 
     fun startTimer(context: Context) {
         LogTools.i("-----startTimer-----------------")
+//        val myLooperThread = MyLooperThread(context)
+//        myLooperThread.start()
+
         val task = object : TimerTask() {
             override fun run() {
                 val calendar = Calendar.getInstance()
                 val hour = calendar[Calendar.HOUR]
                 val mintute = calendar[Calendar.MINUTE]
                 val seconds = calendar[Calendar.SECOND]
-                if((hour == 10 ||  hour == 3 || hour == 5) && mintute == 1 && seconds == 1 ){
-                    val urlList = Constant.URL_GITEE_COMPATIBLE_LIST
-                    val urlValue = Constant.URL_GITEE_COMPATIBLE_VALUE
-                    ParseUtils.parseGitXml(context,urlList)
-                    ParseUtils.parseGitXml(context,urlValue)
+                if ((hour == 10 || hour == 2 || hour == 4) && mintute == 19 && seconds == 1) {
+//                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
+//                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_VALUE)
+                    Log.i("bella", "------11111111111111111111111----------")
+//                    val message = Message()
+//                    myLooperThread.handler.sendMessage(message)
                 }
 
                 if (seconds % (Constant.INTERVAL_TIME / 2) == 0) {
@@ -190,7 +195,7 @@ object TimerSingleton {
             val broadcastAddress = matcher.group(2)
             val subnetMask = matcher.group(3)
             if (broadcastAddress != null && "0.0.0.0" != broadcastAddress) {
-                Settings.Global.putString(context.contentResolver,"ip_address",ipAddress)
+                Settings.Global.putString(context.contentResolver, "ip_address", ipAddress)
             }
         }
     }
