@@ -79,42 +79,4 @@ class CompatibleDatabaseHelper(context: Context) :
         db?.execSQL(SYSTEM_CONFIG_CREATE)
         db?.execSQL(REGION_INFO)
     }
-
-    fun addCollect(packageName: String,appName: String,picUrl: String) {
-        val db = this.writableDatabase
-        val values = ContentValues()
-        values.put("PACKAGE_NAME", packageName)
-        values.put("APP_NAME", appName)
-        values.put("PIC_URL", picUrl)
-        db.insert("COLLECT_APP", null, values)
-        db.close()
-    }
-
-    fun deleteCollect(packageName: String) {
-        val db = this.writableDatabase
-        db.delete("COLLECT_APP", "PACKAGE_NAME=?",  arrayOf(packageName))
-        db.close()
-    }
-
-    fun getCollectApps(): List<Collect> {
-        val userList = ArrayList<Collect>()
-        val selectQuery = "SELECT * FROM COLLECT_APP"
-        val db = this.readableDatabase
-        val cursor: Cursor = db.rawQuery(selectQuery, null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(cursor.getColumnIndex("_ID"))
-                val packageName = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"))
-                val appName = cursor.getString(cursor.getColumnIndex("APP_NAME"))
-                val picUrl = cursor.getString(cursor.getColumnIndex("PIC_URL"))
-                userList.add(Collect(id,packageName,appName,picUrl))
-            } while (cursor.moveToNext())
-        }
-
-        cursor.close()
-        db.close()
-        return userList
-    }
-
 }
