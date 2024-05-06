@@ -26,7 +26,6 @@ public class MyLooperThread extends Thread {
             @Override
             public void handleMessage(Message msg) {
                 // 在这里处理消息
-                Log.i("bella", "------handleMessage----------");
                 Intent inte = new Intent();
                 inte.setClass(context, CompatibleSyncActivity.class);
                 inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

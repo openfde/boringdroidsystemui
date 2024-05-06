@@ -11,7 +11,6 @@ import com.boringdroid.systemui.utils.LogTools;
 public class UninstallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("bella","--------UninstallReceiver---------");
         if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             LogTools.Companion.i("packageName "+packageName + " ,getPackageName "+context.getPackageName());

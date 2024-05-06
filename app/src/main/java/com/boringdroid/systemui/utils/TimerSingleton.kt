@@ -38,7 +38,6 @@ object TimerSingleton {
                 if ((hour == 10 || hour == 2 || hour == 4) && mintute == 19 && seconds == 1) {
 //                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
 //                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_VALUE)
-                    Log.i("bella", "------11111111111111111111111----------")
 //                    val message = Message()
 //                    myLooperThread.handler.sendMessage(message)
                 }
