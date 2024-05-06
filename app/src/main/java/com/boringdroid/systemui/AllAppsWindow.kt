@@ -168,12 +168,14 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     fun showPowerListMenu(anchor: View) {
 //        ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
 //        ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
-        val inte = Intent()
-        if (mContext != null) {
-            inte.setClass(mContext, CompatibleSyncActivity::class.java)
-        }
-        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        mContext?.startActivity(inte)
+//        ParseUtils.parseGpsData(mContext);
+
+//        val inte = Intent()
+//        if (mContext != null) {
+//            inte.setClass(mContext, CompatibleSyncActivity::class.java)
+//        }
+//        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        mContext?.startActivity(inte)
 
         windowPowerView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)

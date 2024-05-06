@@ -1,7 +1,9 @@
 package com.boringdroid.systemui.utils;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
@@ -23,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -42,7 +46,6 @@ public class ParseUtils {
 //            InputStream inputStream = context.getResources().openRawResource(R.raw.gpsdata);
             Process process = Runtime.getRuntime().exec("cat " + "/vendor/etc/config/gps.json");
             InputStream inputStream = process.getInputStream();
-
             Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
             String jsonString =  scanner.hasNext() ? scanner.next() : "";
 
@@ -66,7 +69,7 @@ public class ParseUtils {
                         String cityName = city.getJSONArray("name").getString(0); // Get the city name
                         String cityEnName = city.getJSONArray("name").getString(1);
                         String gpsCoordinates = city.getString("gps"); // Get the GPS coordinates
-                        String cityId =  city.getString("id");
+                        String cityId =  "CI_"+k ;//city.getString("id");
 
                         ContentValues values = new ContentValues();
                         values.put("COUNTRY_ID", countryId);
@@ -270,5 +273,5 @@ public class ParseUtils {
             e.printStackTrace();
         }
     }
-
+    
 }
