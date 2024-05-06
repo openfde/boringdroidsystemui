@@ -192,7 +192,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * network wifi click
      */
     private fun wifiClick() {
-//        android.util.Log.i("bella","-------wifiClick-----------");
 //        showTips("",0.05f)
 //
 //        val intent = Intent()
