@@ -41,26 +41,27 @@ import okhttp3.ResponseBody;
 
 public class ParseUtils {
 
-    public  static void parseGpsData(Context context){
+    public static void parseGpsData(Context context) {
         try {
-//            InputStream inputStream = context.getResources().openRawResource(R.raw.gpsdata);
-            Process process = Runtime.getRuntime().exec("cat " + "/vendor/etc/config/gps.json");
-            InputStream inputStream = process.getInputStream();
+            InputStream inputStream = context.getResources().openRawResource(R.raw.gps);
+//            Process process = Runtime.getRuntime().exec("cat " + "/vendor/etc/config/gps.json");
+//            InputStream inputStream = process.getInputStream();
             Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
-            String jsonString =  scanner.hasNext() ? scanner.next() : "";
+            String jsonString = scanner.hasNext() ? scanner.next() : "";
 
             JSONArray chinaData = new JSONArray(jsonString);
             Uri uri = Uri.parse(Constant.REGION_URI + "/REGION_INFO");
-            context.getContentResolver().delete(uri,null,null);
+            context.getContentResolver().delete(uri, null, null);
+            int index = 0;
             for (int i = 0; i < chinaData.length(); i++) {
                 JSONObject china = chinaData.getJSONObject(i);
-                String countryId = "C_00"+i;
+                String countryId = "C_00" + i;
                 String countryName = china.getJSONArray("name").getString(0);
                 String countryEnName = china.getJSONArray("name").getString(1);
                 JSONArray provinces = china.getJSONArray("provinces");
                 for (int j = 0; j < provinces.length(); j++) {
                     JSONObject province = provinces.getJSONObject(j);
-                    String provinceId = "P_00"+j;
+                    String provinceId = "P_00" + i + "00" + j;
                     String provinceName = province.getJSONArray("name").getString(0); // Get the province name
                     String provinceEnName = province.getJSONArray("name").getString(1);
                     JSONArray cities = province.getJSONArray("cities");
@@ -69,7 +70,7 @@ public class ParseUtils {
                         String cityName = city.getJSONArray("name").getString(0); // Get the city name
                         String cityEnName = city.getJSONArray("name").getString(1);
                         String gpsCoordinates = city.getString("gps"); // Get the GPS coordinates
-                        String cityId =  "CI_"+k ;//city.getString("id");
+                        String cityId = "CI_00" + i + "00" + j + "00" + k;
 
                         ContentValues values = new ContentValues();
                         values.put("COUNTRY_ID", countryId);
@@ -94,10 +95,11 @@ public class ParseUtils {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
 
         }
     }
+
     public static void parseListXML(Context context) {
 //        try {
         InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
@@ -229,11 +231,11 @@ public class ParseUtils {
                     } else {
                         Map<String, Object> resMap = CompatibleConfig.queryMapValueData(context, packagename, name);
                         if (resMap == null) {
-                            CompatibleConfig.insertValueData(context, packagename, name, defaultvalue,date);
+                            CompatibleConfig.insertValueData(context, packagename, name, defaultvalue, date);
                         } else {
                             String queryDate = StringUtils.ToString(resMap.get("FIELDS2"));
                             if (!date.equals(queryDate)) {
-                                CompatibleConfig.updateValueDataByKeyCode(context, packagename, name, defaultvalue,date);
+                                CompatibleConfig.updateValueDataByKeyCode(context, packagename, name, defaultvalue, date);
                             }
                         }
                     }
@@ -273,5 +275,5 @@ public class ParseUtils {
             e.printStackTrace();
         }
     }
-    
+
 }
