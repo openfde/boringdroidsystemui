@@ -119,6 +119,10 @@ public class ParseUtils {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
+    public static void parseListXML(Context context) {
+            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
+            parseList(context, inputStream);
     }
 
     public static void parseGitXml(Context context, String url) {
