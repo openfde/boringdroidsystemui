@@ -100,25 +100,6 @@ public class ParseUtils {
         }
     }
 
-    public static void parseListXML(Context context) {
-//        try {
-        InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
-        parseList(context, inputStream);
-//            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-//            String inputLine;
-//            StringBuffer response = new StringBuffer();
-//
-//            while ((inputLine = bufferedReader.readLine()) != null) {
-//                response.append(inputLine);
-//            }
-//            bufferedReader.close();
-//
-//            String xmlResponse = response.toString();
-//            LogTools.Companion.i("xmlResponse222 " + xmlResponse);
-
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
     public static void parseListXML(Context context) {
             InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
