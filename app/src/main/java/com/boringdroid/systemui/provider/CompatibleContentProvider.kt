@@ -7,6 +7,7 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.media.UnsupportedSchemeException
 import android.net.Uri
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.ParseUtils
@@ -24,8 +25,7 @@ class CompatibleContentProvider : ContentProvider() {
     private val CODE_COMPATIBLE_VALUE = 2
     private val CODE_COLLECT_APP = 3
     private val CODE_RECOVERY = 4
-
-
+    private val CODE_SYNC_LIST = 5
 
     init {
         uriMatcher.addURI(
@@ -47,6 +47,11 @@ class CompatibleContentProvider : ContentProvider() {
             "com.boringdroid.systemuiprovider",
             "RECOVERY_VALUE",
             CODE_RECOVERY
+        )
+        uriMatcher.addURI(
+            "com.boringdroid.systemuiprovider",
+            "SYNC_LIST",
+            CODE_SYNC_LIST
         )
         uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_LIST + "/#", 4)
         uriMatcher.addURI("com.boringdroid.systemuiprovider", TABLE_COMPATIBLE_VALUE + "Item", 5)
@@ -121,9 +126,13 @@ class CompatibleContentProvider : ContentProvider() {
         if(uriMatcher.match(uri) == CODE_RECOVERY){
             LogTools.i("---------recovery --------------")
             val packageName = values?.get("PACKAGE_NAME") as String
-            LogTools.i("---------packageName --------------"+packageName)
             ParseUtils.parseValueXML(context,packageName)
-            return null; ;
+            return null;
+        }else if(uriMatcher.match(uri) == CODE_SYNC_LIST){
+            LogTools.i("---------sync list --------------")
+            ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
+            ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_VALUE)
+            return null;
         }
         val db = dbHelper.writableDatabase
 //        LogTools.i("-------insert---------- " + uri.authority + " ,values " + values.toString())

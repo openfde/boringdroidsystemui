@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>isAllowHideDecorCaption</keycode>
         <keydesc>
             {
@@ -23,7 +23,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>isAllowUnresizeable</keycode>
         <keydesc>
             {
@@ -42,7 +42,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>isAllowScreenshotRecord</keycode>
         <keydesc>
             {
@@ -61,7 +61,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>size</keycode>
         <keydesc>
             {
@@ -92,7 +92,7 @@
     </compatible>
 
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>isAllowMuliWindows</keycode>
         <keydesc>
             {
@@ -111,7 +111,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>minBoundsVisibleWidth</keycode>
         <keydesc>
             {
@@ -129,7 +129,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible>
+    <compatible date="2024-04-23" isdel="0">
         <keycode>minBoundsVisibleHeight</keycode>
         <keydesc>
             {

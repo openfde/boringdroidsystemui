@@ -85,6 +85,7 @@
     <string name="hours">小时</string>
     <string name="days">天</string>
     <string name="recording">录制中</string>
-
+    <string name="fde_tips">提示</string>
+    <string name="fde_sync_config_from_gitee">是否从Gitee同步最新配置?</string>
 
 </resources>
