@@ -14,7 +14,7 @@ class CompatibleDatabaseHelper(context: Context) :
     companion object {
         private const val DATABASE_NAME = "compatible.db"
 
-        private const val DATABASE_VERSION = 12
+        private const val DATABASE_VERSION = 13
 
         private const val COMPATIBLE_LIST_CREATE =
             "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -37,6 +37,8 @@ class CompatibleDatabaseHelper(context: Context) :
             "CREATE TABLE  IF NOT EXISTS  SYSTEM_CONFIG ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "KEY_CODE TEXT ,KEY_DESC TEXT , KEY_VALUE TEXT , NOTES TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT,IS_DEL TEXT,  UNIQUE(KEY_CODE));"
 
+        private const val REGION_INFO  ="CREATE TABLE  IF NOT EXISTS  REGION_INFO ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "COUNTRY_ID TEXT ,COUNTRY_NAME TEXT  ,COUNTRY_NAME_EN TEXT  ,PROVINCE_ID TEXT  ,PROVINCE_NAME TEXT, PROVINCE_NAME_EN TEXT ,CITY_ID TEXT  ,CITY_NAME TEXT, CITY_NAME_EN TEXT ,GPS TEXT ,FIELDS1 TEXT,FIELDS2 TEXT ,CREATE_DATE TEXT,EDIT_DATE TEXT,IS_DEL TEXT,  UNIQUE(COUNTRY_NAME,PROVINCE_NAME,CITY_NAME_EN));"
 
         private const val COMPATIBLE_VALUE_INDEX =
             "CREATE INDEX PACKAGE_V_INDEX ON COMPATIBLE_VALUE (PACKAGE_NAME);"
@@ -53,6 +55,8 @@ class CompatibleDatabaseHelper(context: Context) :
         if(oldVersion < 12){
             dropTables(db)
             createTableSQL(db)
+        }else if(oldVersion == 12 && newVersion == 13){
+            db?.execSQL(REGION_INFO)
         }
     }
 
@@ -63,6 +67,7 @@ class CompatibleDatabaseHelper(context: Context) :
         db?.execSQL("DROP TABLE COLLECT_APP");
         db?.execSQL("DROP TABLE WIFI_HISTORY");
         db?.execSQL("DROP TABLE SYSTEM_CONFIG");
+        db?.execSQL("DROP TABLE REGION_INFO");
     }
 
     fun createTableSQL(db: SQLiteDatabase?){
@@ -72,43 +77,6 @@ class CompatibleDatabaseHelper(context: Context) :
         db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
         db?.execSQL(SYSTEM_CONFIG_CREATE)
+        db?.execSQL(REGION_INFO)
     }
-
-    fun addCollect(packageName: String,appName: String,picUrl: String) {
-        val db = this.writableDatabase
-        val values = ContentValues()
-        values.put("PACKAGE_NAME", packageName)
-        values.put("APP_NAME", appName)
-        values.put("PIC_URL", picUrl)
-        db.insert("COLLECT_APP", null, values)
-        db.close()
-    }
-
-    fun deleteCollect(packageName: String) {
-        val db = this.writableDatabase
-        db.delete("COLLECT_APP", "PACKAGE_NAME=?",  arrayOf(packageName))
-        db.close()
-    }
-
-    fun getCollectApps(): List<Collect> {
-        val userList = ArrayList<Collect>()
-        val selectQuery = "SELECT * FROM COLLECT_APP"
-        val db = this.readableDatabase
-        val cursor: Cursor = db.rawQuery(selectQuery, null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(cursor.getColumnIndex("_ID"))
-                val packageName = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"))
-                val appName = cursor.getString(cursor.getColumnIndex("APP_NAME"))
-                val picUrl = cursor.getString(cursor.getColumnIndex("PIC_URL"))
-                userList.add(Collect(id,packageName,appName,picUrl))
-            } while (cursor.moveToNext())
-        }
-
-        cursor.close()
-        db.close()
-        return userList
-    }
-
 }

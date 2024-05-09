@@ -29,16 +29,12 @@ import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.Collect
+import com.boringdroid.systemui.ui.CompatibleSyncActivity
 import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.w3c.dom.NodeList
 import java.lang.ref.WeakReference
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 
 
 class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
@@ -170,10 +166,16 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     }
 
     fun showPowerListMenu(anchor: View) {
-        val urlList = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config.xml";
-        val urlValue = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config_value.xml";
-        ParseUtils.parseGitXml(mContext,urlList)
-        ParseUtils.parseGitXml(mContext,urlValue)
+//        ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
+//        ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
+//        ParseUtils.parseGpsData(mContext);
+
+//        val inte = Intent()
+//        if (mContext != null) {
+//            inte.setClass(mContext, CompatibleSyncActivity::class.java)
+//        }
+//        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        mContext?.startActivity(inte)
 
         windowPowerView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
