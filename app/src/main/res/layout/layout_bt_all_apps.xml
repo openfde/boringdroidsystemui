@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="56dp"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
@@ -27,7 +28,8 @@
     <View
         android:layout_width="2dp"
         android:layout_height="16dp"
+        android:layout_marginLeft="8dp"
         android:background="#33000000"
         android:layout_gravity="center_vertical|right"
         />
-</FrameLayout>
+</LinearLayout>
