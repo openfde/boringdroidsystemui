@@ -99,7 +99,6 @@ public class ParseUtils {
 
         }
     }
-
     public static void parseListXML(Context context) {
             InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
             parseList(context, inputStream);

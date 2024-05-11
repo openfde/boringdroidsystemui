@@ -8,6 +8,7 @@ import android.graphics.drawable.AnimationDrawable
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -88,6 +89,7 @@ class NetCenterPersenter(
             LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
         recyclerViewSave?.adapter = saveAdapter
 
+
         unSaveAdapter =
             mContext?.let { NetCenterAdapter(it, Constant.INT_UNSAVE, listUnSave, this) }
         recyclerViewUnSave!!.layoutManager =
@@ -149,8 +151,8 @@ class NetCenterPersenter(
 //                    handler.post {}
 //                }
 
-                if (seconds % (Constant.INTERVAL_TIME ) == 1) {
-                    NetCtrl.get(mContext,"isWifiEnable",null, object : HttpRequestCallBack {
+                if (seconds % (Constant.INTERVAL_TIME) == 1) {
+                    NetCtrl.get(mContext, "isWifiEnable", null, object : HttpRequestCallBack {
                         override fun callBackListener(result: String?) {
                             wifiStatus = StringUtils.ToInt(result)
                             isWifiEnable();
@@ -270,6 +272,15 @@ class NetCenterPersenter(
                     listSave?.addAll(result)
                 };
                 saveAdapter?.notifyDataSetChanged()
+                val layoutParams: ViewGroup.LayoutParams? = recyclerViewSave?.getLayoutParams()
+                if (listSave?.size!! > 3) {
+                    layoutParams?.height = 200;
+                } else {
+                    layoutParams?.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                }
+
+                recyclerViewSave?.setLayoutParams(layoutParams)
+
                 hideProgressDialog()
             }
 
