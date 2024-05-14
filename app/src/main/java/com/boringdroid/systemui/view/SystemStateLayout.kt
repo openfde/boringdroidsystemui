@@ -14,10 +14,15 @@ import android.widget.*
 import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.net.NetApi
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.WifiUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
@@ -219,9 +224,17 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        intent.component = cn;
 //        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 //        context.startActivity(intent)
-
         netCenterWindow?.ifShowNetCenterView()
         listener?.syncVisible(Utils.WIFIWINDOW_VISIBLE)
+
+
+        GlobalScope.launch(Dispatchers.Main) {
+            // 在IO线程上执行异步操作
+            val result = withContext(Dispatchers.IO) {
+                // 模拟长时间的网络请求或其他耗时操作
+                NetApi.isWifiEnable(context);
+            }
+        }
     }
 
     /**

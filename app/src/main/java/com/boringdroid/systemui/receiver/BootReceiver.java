@@ -3,6 +3,8 @@ package com.boringdroid.systemui.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.utils.CompatibleConfig;
@@ -30,7 +32,7 @@ public class BootReceiver extends BroadcastReceiver {
             ParseUtils.parseListXML(context);
             ParseUtils.parseValueXML(context);
             ParseUtils.parseGpsData(context);
-            TimerSingleton.INSTANCE.startTimer(context);
+//            TimerSingleton.INSTANCE.startTimer(context);
         }
     }
 

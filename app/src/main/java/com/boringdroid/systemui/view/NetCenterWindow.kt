@@ -88,8 +88,6 @@ class NetCenterWindow (private val mContext: Context?) {
         layoutParams.x = marginStart
 
         layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
-
-        Log.d(TAG, "Net center window location (" + layoutParams.x + ", " + layoutParams.y + ")")
         return layoutParams
     }
 
@@ -128,7 +126,6 @@ class NetCenterWindow (private val mContext: Context?) {
     companion object {
         private const val TAG = "NetCenterWindow"
         private const val FADE_DURATION :Long = 120
-
     }
 
     init {
