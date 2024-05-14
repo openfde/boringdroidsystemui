@@ -19,6 +19,7 @@ package com.boringdroid.systemui.net;
 import android.content.Context;
 import android.provider.Settings;
 
+import com.boringdroid.systemui.utils.LogTools;
 import com.boringdroid.systemui.utils.Net;
 
 import java.net.InetAddress;
