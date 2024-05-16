@@ -147,4 +147,22 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isTurnOffSimulatedTouch</keycode>
+        <keydesc>
+            {
+            "en":"Turn off simulated touch",
+            "ch":"关闭模拟触摸"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Turn off simulated touch: Solve the problem of remote control applications being unable to operate the scroll wheel.",
+            "ch":"关闭模拟触摸：解决远控类应用无法操作滚轮的问题。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
 </library>
