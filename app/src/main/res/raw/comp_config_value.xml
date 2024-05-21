@@ -73,4 +73,23 @@
             </defaultvalue>
         </package>
     </keycode>
+
+    <keycode date="2024-04-23" isdel="0">
+        <name>isTurnOffSimulatedTouch</name>
+        <package>
+            <packagename>com.iiordanov.bVNC</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>youqu.android.todesk</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.oray.sunlogin</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+
+    </keycode>
 </library>
