@@ -29,9 +29,14 @@ public class BootReceiver extends BroadcastReceiver {
 //            ParseUtils.parseListXML(context);
 //            ParseUtils.parseValueXML(context);
         }else if(action.equals(Intent.ACTION_BOOT_COMPLETED)){
-            ParseUtils.parseListXML(context);
-            ParseUtils.parseValueXML(context);
-            ParseUtils.parseGpsData(context);
+              new Thread(new Runnable() {
+                  @Override
+                  public void run() {
+                      ParseUtils.parseListXML(context);
+                      ParseUtils.parseValueXML(context);
+                      ParseUtils.parseGpsData(context);
+                  }
+              }).start();
 //            TimerSingleton.INSTANCE.startTimer(context);
         }
     }
