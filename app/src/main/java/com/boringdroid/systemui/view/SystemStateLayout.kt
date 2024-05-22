@@ -229,9 +229,9 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 
         GlobalScope.launch(Dispatchers.Main) {
-            // 在IO线程上执行异步操作
+            // not ui thread
             val result = withContext(Dispatchers.IO) {
-                // 模拟长时间的网络请求或其他耗时操作
+                //
                 NetApi.isWifiEnable(context);
             }
         }
