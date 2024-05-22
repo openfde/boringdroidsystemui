@@ -4,10 +4,9 @@
  */
 package com.boringdroid.systemui.view
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.graphics.PixelFormat
+import android.media.AudioManager
 import android.provider.Settings
 import android.util.AttributeSet
 import android.view.*
@@ -15,13 +14,15 @@ import android.widget.*
 import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.net.NetApi
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.LogTools
-import com.boringdroid.systemui.utils.TimerSingleton
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.WifiUtils
-import java.util.Timer
-import java.util.TimerTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
@@ -46,6 +47,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
+    private var audioManager: AudioManager? = null ;
 
 
     var isShowDlg: Boolean? = false;
@@ -60,6 +62,23 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+
+    private val volumeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val progress = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val streamMaxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            if (progress != null) {
+                if (progress < streamMaxVolume!!.div(3)) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+                } else if (progress < (streamMaxVolume!!.div(3) * 2)) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+                } else {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+                }
+            }
+        }
     }
 
     fun initState() {
@@ -97,6 +116,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        }else{
 //            wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
 //        }
+
+        val filter = IntentFilter()
+        filter.addAction("android.media.VOLUME_CHANGED_ACTION")
+        filter.addAction("android.media.STREAM_MUTE_CHANGED_ACTION")
+        context!!.registerReceiver(volumeReceiver, filter)
 
         wifiBtn?.setOnHoverListener(object : View.OnHoverListener {
             override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
@@ -200,9 +224,17 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        intent.component = cn;
 //        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 //        context.startActivity(intent)
-
         netCenterWindow?.ifShowNetCenterView()
         listener?.syncVisible(Utils.WIFIWINDOW_VISIBLE)
+
+
+        GlobalScope.launch(Dispatchers.Main) {
+            // not ui thread
+            val result = withContext(Dispatchers.IO) {
+                //
+                NetApi.isWifiEnable(context);
+            }
+        }
     }
 
     /**

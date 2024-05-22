@@ -3,9 +3,7 @@ package com.boringdroid.systemui.utils
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
-import android.os.Message
 import android.provider.Settings
-import android.util.Log
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.net.NetApi
 import java.util.*
@@ -14,18 +12,13 @@ import java.util.regex.Pattern
 
 object TimerSingleton {
 
-
-    var isHasScan = false
-
     var isScaning = false;
 
     private val timer = Timer()
-    var status = 0;
     var listSaved: Array<String>? = null;
     lateinit var curWifiName: String;
 
     fun startTimer(context: Context) {
-        LogTools.i("-----startTimer-----------------")
 //        val myLooperThread = MyLooperThread(context)
 //        myLooperThread.start()
 
@@ -35,30 +28,16 @@ object TimerSingleton {
                 val hour = calendar[Calendar.HOUR]
                 val mintute = calendar[Calendar.MINUTE]
                 val seconds = calendar[Calendar.SECOND]
-                if ((hour == 10 || hour == 2 || hour == 4) && mintute == 19 && seconds == 1) {
-//                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
-//                    ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_VALUE)
-//                    val message = Message()
-//                    myLooperThread.handler.sendMessage(message)
-                }
 
                 if (seconds % (Constant.INTERVAL_TIME / 2) == 0) {
-                    status = getWifiStatus(context)
+//                    status = getWifiStatus(context)
                 } else if (seconds % Constant.INTERVAL_TIME == 1) {
+                    var status =  Settings.Global.getInt(context.contentResolver, "wifi_status")
                     if (status == 1) {
                         getAllSSID(context)
-                        getXml(context)
+//                        getXml(context)
                     }
                 }
-
-//                isHasScan = !isHasScan
-//                val status = getWifiStatus(context)
-//                LogTools.i("status "+status + " ,isScan "+isHasScan + ",seconds "+seconds)
-//                Settings.Global.putInt(context.contentResolver,"wifi_status",status);
-//                if(isHasScan && status == 1){
-//                    getAllSSID(context)
-//                }
-
             }
         }
         timer.scheduleAtFixedRate(task, 0, 1 * 1000)
@@ -66,15 +45,6 @@ object TimerSingleton {
 
     fun stopTimer() {
         timer.cancel()
-    }
-
-
-    fun getXml(context: Context) {
-        val thread = Thread {
-//           ParseUtils.parseGiteeXML(context);
-        }
-
-        thread.start()
     }
 
     /**
@@ -119,7 +89,6 @@ object TimerSingleton {
                         context.contentResolver.insert(uri, values)
                     }
                 }
-//                getAllSavedSDID(context)
             } else {
                 isScaning = false
             }

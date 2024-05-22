@@ -9,6 +9,7 @@ import android.os.Environment;
 
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.constant.Constant;
+import com.boringdroid.systemui.data.RawBean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,9 +24,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -100,10 +103,9 @@ public class ParseUtils {
         }
     }
 
-
     public static void parseListXML(Context context) {
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
-            parseList(context, inputStream);
+        InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config);
+        parseList(context, inputStream);
     }
 
     public static void parseGitXml(Context context, String url) {
@@ -259,6 +261,52 @@ public class ParseUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * read all raw file
+     *
+     * @param context
+     * @return
+     */
+    public static List<RawBean> listRawResources(Context context) {
+        List<RawBean> list = new ArrayList<>();
+        try {
+            Field[] fields = R.raw.class.getFields();
+            for (Field field : fields) {
+                int resourceId = field.getInt(null);
+                String resourceName = context.getResources().getResourceEntryName(resourceId);
+                if (resourceName.contains("sql_")) {
+                    RawBean rawBean = new RawBean();
+                    rawBean.setId(StringUtils.ToInt(resourceName.replace("sql_", "")));
+                    rawBean.setResourceId(resourceId);
+                    rawBean.setResourceName(resourceName);
+                    list.add(rawBean);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static String readRawFile(Context context, int resourceId) {
+        InputStream inputStream = context.getResources().openRawResource(resourceId);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String line;
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String fileContent = stringBuilder.toString();
+        return fileContent;
     }
 
 }
