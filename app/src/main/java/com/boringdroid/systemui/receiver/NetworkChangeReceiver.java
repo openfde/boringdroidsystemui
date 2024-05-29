@@ -13,9 +13,14 @@ import com.boringdroid.systemui.utils.SPUtils;
 public class NetworkChangeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        NetApi.isWifiEnable(context);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                NetApi.isWifiEnable(context);
+            }
+        }).start();
     }
 }
