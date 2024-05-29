@@ -18,7 +18,7 @@ class CompatibleDatabaseHelper(private val context: Context) :
     companion object {
         private const val DATABASE_NAME = "compatible.db"
 
-        private const val DATABASE_VERSION = 13
+        private const val DATABASE_VERSION = 14
 
         private const val COMPATIBLE_LIST_CREATE =
             "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +

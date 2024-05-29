@@ -47,7 +47,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
-    private var audioManager: AudioManager? = null ;
+    private var audioManager: AudioManager? = null;
 
 
     var isShowDlg: Boolean? = false;
@@ -70,7 +70,9 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             val progress = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
             val streamMaxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             if (progress != null) {
-                if (progress < streamMaxVolume!!.div(3)) {
+                if (progress == 0) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_none)
+                } else if (progress < streamMaxVolume!!.div(3)) {
                     volumeBtn?.setImageResource(R.drawable.icon_volume_min)
                 } else if (progress < (streamMaxVolume!!.div(3) * 2)) {
                     volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
