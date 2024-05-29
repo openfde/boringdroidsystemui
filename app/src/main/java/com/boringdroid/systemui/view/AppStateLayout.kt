@@ -278,6 +278,12 @@ class AppStateLayout @JvmOverloads constructor(
                 Log.d(TAG, "onTaskStackChanged $info")
                 info?.let { topTask(it) }
             }
+			CoroutineScope(Dispatchers.Main).launch {
+                delay(5000L)
+                val info = AM_WRAPPER.getRunningTask(false)
+                Log.d(TAG, "onTaskStackChanged $info")
+                info?.let { topTask(it) }
+            }
         }
 
         override fun onTaskRemoved(taskId: Int) {
