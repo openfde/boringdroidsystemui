@@ -9,6 +9,7 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
 import android.media.AudioManager
+import android.media.AudioSystem
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.*
@@ -39,6 +40,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.*
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.Objects
 
 
@@ -208,12 +211,15 @@ class ControlCenterWindow(
     }
 
     private fun initVolumeSeekbar() {
-        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        var currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+
+        val curVolume = AudioSystem.getMasterVolume();
+        currentVolume = StringUtils.ToInt(curVolume * streamMaxVolume) ;
         Log.w(
             TAG,
-            "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume"
+            "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume , curVolume :$curVolume"
         )
         volumeSeekbar?.min = streamMinVolume
         volumeSeekbar?.max = streamMaxVolume
@@ -222,7 +228,7 @@ class ControlCenterWindow(
         showVolumeProgress(currentVolume)
     }
 
-    private fun  showVolumeProgress(progress : Int){
+    private fun showVolumeProgress(progress: Int) {
         if (progress == 0) {
             volumeBtn?.setImageResource(R.drawable.icon_volume_none)
             volumeImage?.setImageResource(R.drawable.icon_volume_none)
@@ -240,7 +246,6 @@ class ControlCenterWindow(
 
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            Log.w(TAG, "progress: $progress ")
             val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
             showVolumeProgress(progress)
@@ -250,6 +255,14 @@ class ControlCenterWindow(
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            val max = seekBar?.max ;
+            val progress = seekBar?.progress;
+            val numerator = progress?.let { BigDecimal(it) }
+            val denominator = max?.let { BigDecimal(it) }
+            var result = StringUtils.ToFloat( numerator?.divide(denominator, 2, RoundingMode.HALF_UP))
+
+            Log.w(TAG, "progress: $progress ,formattedResult $result , max $max")
+            AudioSystem.setMasterVolume(result);
         }
     }
 

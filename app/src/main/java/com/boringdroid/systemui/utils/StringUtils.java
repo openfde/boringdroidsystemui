@@ -58,6 +58,14 @@ public class StringUtils {
         }
     }
 
+    public static Float ToFloat(Object ojb) {
+        if (ojb == null) {
+            return 0f;
+        } else {
+            return Float.valueOf(ToString(ojb));
+        }
+    }
+
     /**
      * @param date
      * @param IntegerDigits
