@@ -9,6 +9,7 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
 import android.media.AudioManager
+import android.media.AudioSystem
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.*
@@ -39,6 +40,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.*
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.Objects
 
 
@@ -119,9 +122,11 @@ class ControlCenterWindow(
             0
         )
 
-        MaxBrightness =Settings.System.getInt(   mContext?.getContentResolver(),
+        MaxBrightness = Settings.System.getInt(
+            mContext?.getContentResolver(),
             "MAX_BRIGHTNESS",
-            100);
+            100
+        );
         initLightSeekbar(StringUtils.ToInt((currentBrightness * 100) / MaxBrightness))
 //        initLightSeekbar(currentBrightness)
         getBrightness();
@@ -155,11 +160,12 @@ class ControlCenterWindow(
                         Settings.System.putInt(
                             mContext?.getContentResolver(),
                             "MAX_BRIGHTNESS",
-                            MaxBrightness)
+                            MaxBrightness
+                        )
 
                         initLightSeekbar(StringUtils.ToInt((Brightness * 100) / MaxBrightness))
                     } else if (412 == code) {
-    //                    DeviceUtils.detectBrightness()
+                        //                    DeviceUtils.detectBrightness()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -194,10 +200,10 @@ class ControlCenterWindow(
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            val progress = StringUtils.ToInt((seekProgress * MaxBrightness) / MaxProgress )
-            Log.w(TAG, "onStopTrackingTouch...." + seekProgress + " ,progress "+progress)
+            val progress = StringUtils.ToInt((seekProgress * MaxBrightness) / MaxProgress)
+            Log.w(TAG, "onStopTrackingTouch...." + seekProgress + " ,progress " + progress)
             if (mContext != null) {
-                DeviceUtils.setBrightness(seekProgress,progress, mContext)
+                DeviceUtils.setBrightness(seekProgress, progress, mContext)
             }
         }
 
@@ -205,40 +211,58 @@ class ControlCenterWindow(
     }
 
     private fun initVolumeSeekbar() {
-        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        var currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+
+        val curVolume = AudioSystem.getMasterVolume();
+        currentVolume = StringUtils.ToInt(curVolume * streamMaxVolume) ;
         Log.w(
             TAG,
-            "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume"
+            "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume , curVolume :$curVolume"
         )
         volumeSeekbar?.min = streamMinVolume
         volumeSeekbar?.max = streamMaxVolume
         volumeSeekbar?.progress = currentVolume
         volumeSeekbar?.setOnSeekBarChangeListener(volumeChangeListener)
+        showVolumeProgress(currentVolume)
+    }
+
+    private fun showVolumeProgress(progress: Int) {
+        if (progress == 0) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_none)
+            volumeImage?.setImageResource(R.drawable.icon_volume_none)
+        } else if (progress < volumeSeekbar?.max!!.div(3)) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+            volumeImage?.setImageResource(R.drawable.icon_volume_min)
+        } else if (progress < (volumeSeekbar?.max!!.div(3) * 2)) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+            volumeImage?.setImageResource(R.drawable.icon_volume_mid)
+        } else {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+            volumeImage?.setImageResource(R.drawable.icon_volume_max)
+        }
     }
 
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            Log.w(TAG, "progress: $progress ")
             val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
-            if (progress < volumeSeekbar?.max!!.div(3)) {
-                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
-                volumeImage?.setImageResource(R.drawable.icon_volume_min)
-            } else if (progress < (volumeSeekbar?.max!!.div(3) * 2)) {
-                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
-                volumeImage?.setImageResource(R.drawable.icon_volume_mid)
-            } else {
-                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
-                volumeImage?.setImageResource(R.drawable.icon_volume_max)
-            }
+            showVolumeProgress(progress)
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            val max = seekBar?.max ;
+            val progress = seekBar?.progress;
+            val numerator = progress?.let { BigDecimal(it) }
+            val denominator = max?.let { BigDecimal(it) }
+            var result = StringUtils.ToFloat( numerator?.divide(denominator, 2, RoundingMode.HALF_UP))
+
+            Log.w(TAG, "progress: $progress ,formattedResult $result , max $max")
+            AudioSystem.setMasterVolume(result);
         }
     }
 
