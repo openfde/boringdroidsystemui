@@ -128,7 +128,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
                 try {
                     val curWifi = WifiUtils.queryCurWifi(context)
-                    val status = Settings.Global.getInt(context.contentResolver, "wifi_status");
+                    val status = WifiUtils.getWifiStatus(context)
                     var ipAddress =
                         Settings.Global.getString(context.contentResolver, "ip_address");
                     if (curWifi != null && status == 1) {
