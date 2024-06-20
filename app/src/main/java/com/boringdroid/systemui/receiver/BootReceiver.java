@@ -28,16 +28,15 @@ public class BootReceiver extends BroadcastReceiver {
         if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
 //            ParseUtils.parseListXML(context);
 //            ParseUtils.parseValueXML(context);
-        }else if(action.equals(Intent.ACTION_BOOT_COMPLETED)){
-              new Thread(new Runnable() {
-                  @Override
-                  public void run() {
-                      ParseUtils.parseListXML(context);
-                      ParseUtils.parseValueXML(context);
-                      ParseUtils.parseGpsData(context);
-                  }
-              }).start();
-//            TimerSingleton.INSTANCE.startTimer(context);
+        } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ParseUtils.parseListXML(context);
+                    ParseUtils.parseValueXML(context);
+                    ParseUtils.parseGpsData(context);
+                }
+            }).start();
         }
     }
 
