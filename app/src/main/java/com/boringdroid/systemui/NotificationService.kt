@@ -425,7 +425,7 @@ class NotificationService : NotificationListenerService(),
                 }else if(status == 0){
                     tipText = "wifi"+getString(R.string.fde_unconnect)
                 }else{
-                    tipText = getString(R.string.fde_no_wifi_module);
+//                    tipText = getString(R.string.fde_no_wifi_module);
 
                 }
 //                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();

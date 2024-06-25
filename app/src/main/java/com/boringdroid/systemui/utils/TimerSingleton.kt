@@ -32,7 +32,7 @@ object TimerSingleton {
                 if (seconds % (Constant.INTERVAL_TIME / 2) == 0) {
 //                    status = getWifiStatus(context)
                 } else if (seconds % Constant.INTERVAL_TIME == 1) {
-                    var status =  Settings.Global.getInt(context.contentResolver, "wifi_status")
+                    var status =  WifiUtils.getWifiStatus(context)
                     if (status == 1) {
                         getAllSSID(context)
 //                        getXml(context)

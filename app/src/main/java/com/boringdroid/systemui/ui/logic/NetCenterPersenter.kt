@@ -95,7 +95,7 @@ class NetCenterPersenter(
         recyclerViewUnSave!!.layoutManager =
             LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
         recyclerViewUnSave?.adapter = unSaveAdapter
-        wifiStatus = Settings.Global.getInt(mContext?.contentResolver, "wifi_status");
+        wifiStatus = WifiUtils.getWifiStatus(mContext);
         isWifiEnable()
 
         switchWifi!!.setOnCheckedChangeListener(object : CompoundButton.OnCheckedChangeListener {
@@ -216,12 +216,12 @@ class NetCenterPersenter(
                 closeWifiView()
                 switchWifi?.isChecked = false
                 if (wifiStatus === 2) {
-                    Toast.makeText(
-                        mContext,
-                        mContext!!.getString(R.string.fde_no_wifi_module),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
+//                    Toast.makeText(
+//                        mContext,
+//                        mContext!!.getString(R.string.fde_no_wifi_module),
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
                     switchWifi?.isEnabled = false
                 } else {
                     switchWifi?.isEnabled = true
