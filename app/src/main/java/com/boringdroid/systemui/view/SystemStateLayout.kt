@@ -136,8 +136,14 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                             ipAddress = "";
                         }
                         wifiBtn?.tooltipText = curWifi + " " + ipAddress;
+                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
+                    }else if(status == 2){
+                        wifiBtn?.tooltipText = context.getString(R.string.fde_no_wifi_module)
+//                        wifiBtn?.setImageResource(R.drawable.icon_no_wifi)
+                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
                     } else {
                         wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -145,6 +151,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 return false
             }
         });
+
         volumeBtn?.tooltipText = context.getString(R.string.fde_notification_volume)
         controlBtn?.tooltipText = context.getString(R.string.fde_control_center)
         batteryBtn?.tooltipText = context.getString(R.string.fde_notification_battery)
