@@ -47,7 +47,7 @@
     <string name="fde_no_save">不保存</string>
     <string name="fde_has_connected">已连接</string>
     <string name="fde_has_saved">已保存</string>
-    <string name="fde_no_wifi_module">无网卡，无法操作</string>
+    <string name="fde_no_wifi_module">无Wifi网卡</string>
     <string name="fde_net_mask" >"子网掩码"</string>
     <string name="fde_net_input_mask" >"请输入子网掩码"</string>
     <string name="fde_net_invalid_mask" >"无效的子网掩码"</string>

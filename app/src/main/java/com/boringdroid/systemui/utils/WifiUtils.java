@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.Settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class WifiUtils {
         List<Map<String, Object>> list = new ArrayList<>();
         try {
             ContentResolver contentResolver = context.getContentResolver();
-                cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     Map<String, Object> wifiMap = new HashMap<>();
@@ -121,7 +122,7 @@ public class WifiUtils {
         return result;
     }
 
-    public  static void insertWifiList(Context context){
+    public static void insertWifiList(Context context) {
 
     }
 
@@ -130,7 +131,7 @@ public class WifiUtils {
      *
      * @param context
      */
-    public  static void deleteWifiList(Context context){
+    public static void deleteWifiList(Context context) {
         Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
         context.getContentResolver().delete(uri, null, null);
     }
@@ -141,7 +142,7 @@ public class WifiUtils {
      * @param context
      * @return
      */
-    public static int  resetWifiListStatus (Context context) {
+    public static int resetWifiListStatus(Context context) {
         try {
             Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
             ContentValues values = new ContentValues();
@@ -150,11 +151,11 @@ public class WifiUtils {
                     .update(uri, values, null,
                             null);
             LogTools.Companion.i("updateWifiList res " + res);
-            return  res ;
+            return res;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  -1;
+        return -1;
     }
 
 
@@ -167,7 +168,7 @@ public class WifiUtils {
      * @param newValue
      * @return
      */
-    public static int  updateWifiListStatus (Context context, String selection, String[] selectionArgs,String newValue) {
+    public static int updateWifiListStatus(Context context, String selection, String[] selectionArgs, String newValue) {
         try {
             Uri uri = Uri.parse(WIFI_URI + "/WIFI_HISTORY");
             ContentValues values = new ContentValues();
@@ -176,10 +177,20 @@ public class WifiUtils {
                     .update(uri, values, selection,
                             selectionArgs);
             LogTools.Companion.i("updateWifiList res " + res);
-            return  res ;
+            return res;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  -1;
+        return -1;
+    }
+
+    public static int getWifiStatus(Context context) {
+        try {
+            int status = Settings.Global.getInt(context.getContentResolver(), "wifi_status");
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 2;
     }
 }
