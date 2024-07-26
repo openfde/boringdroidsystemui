@@ -88,4 +88,6 @@
     <string name="fde_tips">提示</string>
     <string name="fde_sync_config_from_gitee">是否从Gitee同步最新配置?</string>
 
+    <string name="output">输出</string>
+    <string name="input">输入</string>
 </resources>
