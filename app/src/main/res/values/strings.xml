@@ -91,4 +91,7 @@
     <string name="recording">录制中</string>
     <string name="fde_tips">Warning</string>
     <string name="fde_sync_config_from_gitee">Do you want to synchronize the latest configuration from Gitee?</string>
+
+    <string name="output">Output</string>
+    <string name="input">Input</string>
 </resources>

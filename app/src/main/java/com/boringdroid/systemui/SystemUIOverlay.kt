@@ -314,6 +314,11 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
     }
 
     override fun syncVisible(which: Int) {
+        Log.w(TAG, "Utils.controlCenterWindoVisible = ${Utils.CONTROLCENTERWINDOW_VISIBLE}")
+        Log.w(TAG, "Utils.NOTIFICATION_VISIBLE = ${Utils.NOTIFICATION_VISIBLE}")
+        Log.w(TAG, "Utils.ALLAPPWINDOW_VISIBLE = ${Utils.ALLAPPWINDOW_VISIBLE}")
+        Log.w(TAG, "Utils.WIFIWINDOW_VISIBLE = ${Utils.WIFIWINDOW_VISIBLE}")
+        Log.w(TAG, "Utils.VOLUMECENTERWINDOW_VISIBLE = ${Utils.VOLUMECENTERWINDOW_VISIBLE}")
             if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
                 systemStateLayout?.hideControlWindow()
             }
@@ -325,6 +330,9 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             }
             if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
                 systemStateLayout?.hideWifiWindow()
+            }
+            if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
+                systemStateLayout?.hideVolumeCenterWindow()
             }
     }
 }
