@@ -14,27 +14,13 @@ import android.os.UserManager
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.DisplayMetrics
-
 import android.view.Display
 import androidx.core.content.ContextCompat
-import com.boringdroid.systemui.Log
 import com.google.gson.Gson
 import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
-import com.xwdz.http.QuietOkHttp
-import com.xwdz.http.callback.JsonCallBack
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
-import java.io.BufferedReader
-import java.io.DataOutputStream
-import java.io.File
-import java.io.IOException
-import java.io.InputStreamReader
+import okhttp3.*
+import java.io.*
 
 object DeviceUtils {
 
@@ -288,72 +274,28 @@ object DeviceUtils {
 
 
     fun logout() {
-        QuietOkHttp.post(BASEURL + URL_LOGOUT)
-            .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
-
-                override fun onSuccess(call: Call, response: String) {
-                    Log.d(
-                        "fde",
-                        "onSuccess() called with: call = [$call], response = [$response]"
-                    )
-                }
-            })
+        val networkUtils =  NetworkUtils();
+        val requestBody = FormBody.Builder().build();
+        networkUtils.postRequest(BASEURL + URL_LOGOUT,requestBody);
     }
 
     @JvmStatic
     fun poweroff() {
-        QuietOkHttp.post(BASEURL + URL_POWOFF)
-            .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
-
-                override fun onSuccess(call: Call, response: String) {
-                    Log.d(
-                        "fde",
-                        "onSuccess() called with: call = [$call], response = [$response]"
-                    )
-                }
-            })
+        val networkUtils =  NetworkUtils();
+        val requestBody = FormBody.Builder().build();
+        networkUtils.postRequest(BASEURL + URL_POWOFF,requestBody);
     }
 
     fun restart() {
-        QuietOkHttp.post(BASEURL + URL_RESTART)
-            .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
-
-                override fun onSuccess(call: Call, response: String) {
-                    Log.d(
-                        "fde",
-                        "onSuccess() called with: call = [$call], response = [$response]"
-                    )
-                }
-            })
+        val networkUtils =  NetworkUtils();
+        val requestBody = FormBody.Builder().build();
+        networkUtils.postRequest(BASEURL + URL_RESTART,requestBody);
     }
 
     fun lock() {
-        QuietOkHttp.post(BASEURL + URL_LOCK)
-            .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
-
-                override fun onSuccess(call: Call, response: String) {
-                    Log.d(
-                        "fde",
-                        "onSuccess() called with: call = [$call], response = [$response]"
-                    )
-                }
-            })
+        val networkUtils =  NetworkUtils();
+        val requestBody = FormBody.Builder().build();
+        networkUtils.postRequest(BASEURL + URL_LOCK,requestBody);
     }
 
     fun getNavBarHeight(context: Context?): Int {
