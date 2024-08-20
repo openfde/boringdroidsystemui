@@ -30,39 +30,18 @@ class VolumeDeviceAdapter(private val context: Context?, private val type: Boole
         return ViewHolder(view)
     }
 
-
     override fun getItemCount(): Int {
         return mAudioDeviceList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val get = mAudioDeviceList.get(position)
-        android.util.Log.d(
-            TAG,
-            "onBindViewHolder() called with: mListener = $mListener, item = $get"
-        )
         if (mAudioDeviceList[position].isSelected == SELECTED && mSelectedPosition == RecyclerView.NO_POSITION) {
             mSelectedPosition = position
             holder.itemView.isSelected = true
         }
         mAudioDeviceList[position].isSelected = position == mSelectedPosition
-        if (type == INPUT) {
-            Log.w(
-                TAG,
-                "INPUT: position = $position, holder.itemView.isSelected = ${holder.itemView.isSelected}"
-            )
-        }
 
         holder.nameTV.text = mAudioDeviceList[position].showName
-//        if (mAudioDeviceList[position].volume == 0F || mAudioDeviceList[position].isMuted) {
-//            holder.iconIV.setImageResource(R.drawable.icon_volume_none)
-//        } else if (mAudioDeviceList[position].volume < (1.0.div(3))) {
-//            holder.iconIV.setImageResource(R.drawable.icon_volume_min)
-//        } else if (mAudioDeviceList[position].volume < (1.0.div(3) * 2)) {
-//            holder.iconIV.setImageResource(R.drawable.icon_volume_mid)
-//        } else {
-//            holder.iconIV.setImageResource(R.drawable.icon_volume_max)
-//        }
         mListener?.setVolumeIcon(
             type,
             mAudioDeviceList[position].volume,
@@ -158,39 +137,8 @@ class VolumeDeviceAdapter(private val context: Context?, private val type: Boole
             mAudioDeviceList[mSelectedPosition].isMuted
         )
         notifyItemChanged(mSelectedPosition)
-        Log.w(TAG, "result = ${result}")
     }
 
-
-    private fun parseDevice(result: String, type: Boolean, isSelected: Boolean): AudioDevice {
-        val deviceInfo = result.split('=')
-        val audioDevice = AudioDevice(deviceInfo[0], deviceInfo[1], type, isSelected)
-        // If the size of the returned data is 4, it means that volume and isMuted exist.
-        if (deviceInfo.size == 4) {
-            audioDevice.volume = deviceInfo[2].toFloat()
-            audioDevice.isMuted = ("1" == deviceInfo[3])
-        }
-        return audioDevice
-    }
-
-    // Returns results such as :
-    // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
-    private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
-        val devicesResult = AudioSystem.getDevs(type)
-        Log.w(TAG, "devicesResult = ${devicesResult}")
-        val audioDeviceList = ArrayList<AudioDevice>()
-        // When there is no device, the result is empty,
-        // then you should return the audioDevices in advance.
-        if (devicesResult == null || devicesResult.isEmpty()) return audioDeviceList
-        val deviceResult = devicesResult.split(';')
-        deviceResult.forEachIndexed { index, device ->
-            audioDeviceList.add(parseDevice(device, type, index == 0))
-        }
-        if (type == INPUT) {
-            Log.w(TAG, "INPUT audioDeviceList.size() = ${audioDeviceList.size}")
-        }
-        return audioDeviceList
-    }
 
     init {
         mAudioDeviceList = getDevices(type)
@@ -203,6 +151,34 @@ class VolumeDeviceAdapter(private val context: Context?, private val type: Boole
         private const val OUTPUT = false
         private const val SELECTED = true
         private const val UNSELECTED = false
+
+
+        fun parseDevice(result: String, type: Boolean, isSelected: Boolean): AudioDevice {
+            val deviceInfo = result.split('=')
+            val audioDevice = AudioDevice(deviceInfo[0], deviceInfo[1], type, isSelected)
+            // If the size of the returned data is 4, it means that volume and isMuted exist.
+            if (deviceInfo.size == 4) {
+                audioDevice.volume = deviceInfo[2].toFloat()
+                audioDevice.isMuted = ("1" == deviceInfo[3])
+            }
+            return audioDevice
+        }
+
+        // Returns results such as :
+        // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
+        fun getDevices(type: Boolean): ArrayList<AudioDevice> {
+            val devicesResult = AudioSystem.getDevs(type)
+            val audioDeviceList = ArrayList<AudioDevice>()
+
+            // When there is no device, the result is empty,
+            // then you should return the audioDevices in advance.
+            if (devicesResult == null || devicesResult.isEmpty()) return audioDeviceList
+            val deviceResult = devicesResult.split(';')
+            deviceResult.forEachIndexed { index, device ->
+                audioDeviceList.add(parseDevice(device, type, index == 0))
+            }
+            return audioDeviceList
+        }
     }
 
     interface DeviceChangeListener {
