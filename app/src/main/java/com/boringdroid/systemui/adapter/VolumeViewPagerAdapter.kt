@@ -14,7 +14,6 @@ class VolumeViewPagerAdapter(
 ) : RecyclerView.Adapter<VolumeViewPagerAdapter.ViewHolder>() {
     val volumeDeviceAdapterList: ArrayList<VolumeDeviceAdapter> = ArrayList()
 
-
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val recyclerview: RecyclerView = view.findViewById(R.id.recyclerView)
     }
@@ -27,18 +26,8 @@ class VolumeViewPagerAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.recyclerview.layoutManager = LinearLayoutManager(context)
         holder.recyclerview.adapter = volumeDeviceAdapterList[position]
-        Log.w(TAG, "volumeDeviceAdapterList.size = ${volumeDeviceAdapterList.size}")
         volumeDeviceAdapterList[position].notifyDataSetChanged()
-//        holder.recyclerView.layoutManager = LinearLayoutManager(holder.recyclerView.context)
-//        holder.recyclerView.adapter = volumeDeviceAdapter
-//        holder.recyclerView.addItemDecoration(
-//            DividerItemDecoration(
-//                context,
-//                DividerItemDecoration.VERTICAL
-//            )
-//        )
     }
-
 
     override fun getItemCount(): Int {
         return volumeDeviceAdapterList.size

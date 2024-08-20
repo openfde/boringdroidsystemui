@@ -61,7 +61,6 @@ class VolumeCenterWindow(
     private var MaxProgress = 100
 
     fun showVolumeCenterWindow() {
-        Log.w(TAG, "showVolumeCenterWindow")
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView =
             LayoutInflater.from(mContext).inflate(R.layout.layout_volume_center, null)
@@ -69,7 +68,6 @@ class VolumeCenterWindow(
         viewPager2 = windowContentView?.findViewById(R.id.viewPager2)
         volumeSeekbar = windowContentView?.findViewById(R.id.seekbar_volume)
         volumeImage = windowContentView?.findViewById(R.id.volumeBtn)
-        Log.w(TAG, "set adapter")
         viewPager2?.adapter = VolumeViewPagerAdapter(mContext)
         // viewpager2 page flip call and pageview drawing timing is not certain, need to be set in advance
         for (index in 0..1) {
@@ -80,7 +78,7 @@ class VolumeCenterWindow(
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 viewPager2Position = position
-                val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2Position)
+                val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2?.currentItem)
                 if (volumeDeviceAdapter?.mListener == null) {
                     volumeDeviceAdapter?.mListener = this@VolumeCenterWindow
                 }
@@ -94,21 +92,19 @@ class VolumeCenterWindow(
         })
 
         volumeImage?.setOnClickListener {
-            val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2Position)
+            val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2?.currentItem)
             volumeDeviceAdapter?.clickMuteIcon()
         }
 
-        Log.e(TAG, "setOnSeekBarChangeListener")
         volumeSeekbar?.min = 0
         volumeSeekbar?.max = 100
         volumeSeekbar?.setOnSeekBarChangeListener(volumeChangeListener)
 
-        // 将 tabLayout 与 viewPager绑定
+        // Bind tabLayout to viewPager
         if (tabLayout != null && viewPager2 != null) {
             TabLayoutMediator(tabLayout!!, viewPager2!!) { tab, position ->
                 tab.text = tabTitleList[position]
             }.attach()
-            Log.w(TAG, "attach")
         }
 
         val cornerRadius = mContext!!.resources.getDimension(R.dimen.control_center_window_radius)
@@ -132,14 +128,12 @@ class VolumeCenterWindow(
         animator.duration = VolumeCenterWindow.FADE_DURATION
         animator.interpolator = LinearInterpolator()
         animator.start()
-        Log.w(TAG, "animator.start()")
 
         shown = true
         Utils.volumeCenterWindowVisible = true
 
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_OUTSIDE) {
-                Log.w(TAG, "volumeCenterWindow dismiss()")
                 dismiss()
             }
             false
@@ -224,7 +218,6 @@ class VolumeCenterWindow(
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             setDeviceVolume(progress, fromUser)
-            Log.w(TAG, "onProgressChanged progress = $progress")
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -232,14 +225,13 @@ class VolumeCenterWindow(
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
             val progress = seekBar?.progress ?: 0
-            Log.w(TAG, "onStopTrackingTouch")
             setDeviceVolume(progress, true)
         }
     }
 
 
     private fun setDeviceVolume(progress: Int, fromUser: Boolean) {
-        val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2Position)
+        val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2?.currentItem)
         val volume = (progress / 100.0).toFloat()
         volumeDeviceAdapter?.setDeviceVolume(volume, fromUser)
     }
@@ -282,14 +274,7 @@ class VolumeCenterWindow(
         isMuted: Boolean,
         imageIcon: ImageView?
     ) {
-        Log.w(
-            TAG,
-            "type = $type, volume = $volume, isMuted = $isMuted, imageIcon = $imageIcon (1.0.div(3)) = ${
-                (1.0.div(3))
-            }"
-        )
         if (volume == 0F || isMuted) {
-            Log.w(TAG, "icon_volume_none")
             imageIcon?.setImageResource(R.drawable.icon_volume_none)
         } else if (volume < (1.0.div(3))) {
             imageIcon?.setImageResource(R.drawable.icon_volume_min)
