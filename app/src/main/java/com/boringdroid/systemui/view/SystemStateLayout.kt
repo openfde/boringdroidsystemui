@@ -38,6 +38,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var controlCenterWindow: ControlCenterWindow? = null
     private var netCenterWindow: NetCenterWindow? = null
     private var notificationWindow: NotificationWindow? = null
+    private var volumeCenterWindow: VolumeCenterWindow? = null
     private var screenRecordState: Int = 0
 
     private var notificationBtn: ImageView? = null
@@ -94,6 +95,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         notificationBtn = findViewById(R.id.notifications_btn)
         netCenterWindow = NetCenterWindow(context)
         controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
+        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
@@ -109,10 +111,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         }
 //        bluetoothBtn?.setOnClickListener { this }
         wifiBtn?.setOnClickListener { wifiClick() }
-        volumeBtn?.setOnClickListener { toggleVolume(volumeBtn!!) }
+        volumeBtn?.setOnClickListener {
+            volumeCenterClick(volumeBtn!!)
+//            controlCenterClick(volumeBtn!!)
+        }
         batteryBtn?.setOnClickListener { batteryClick() }
         homeBtn?.setOnClickListener { homeClick() }
-        controlBtn?.setOnClickListener { toggleVolume(controlBtn!!) }
+        controlBtn?.setOnClickListener { controlCenterClick(controlBtn!!) }
 //        if(Settings.Global.getInt(context.contentResolver,"wifi_status") == 1){
 //            wifiBtn?.tooltipText = "已连接";
 //        }else{
@@ -137,7 +142,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                         }
                         wifiBtn?.tooltipText = curWifi + " " + ipAddress;
                         wifiBtn?.setImageResource(R.drawable.icon_wifi)
-                    }else if(status == 2){
+                    } else if (status == 2) {
                         wifiBtn?.tooltipText = context.getString(R.string.fde_no_wifi_module)
 //                        wifiBtn?.setImageResource(R.drawable.icon_no_wifi)
                         wifiBtn?.setImageResource(R.drawable.icon_wifi)
@@ -166,6 +171,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 Utils.notificationPanelVisible = false
             }
         })
+    }
+
+    private fun volumeCenterClick(volumeBtn: ImageView) {
+        volumeCenterWindow?.ifShowVolumeCenterWindow(volumeBtn)
+        if (Utils.volumeCenterWindowVisible) {
+            listener?.syncVisible(Utils.VOLUMECENTERWINDOW_VISIBLE)
+        }
     }
 
 
@@ -264,7 +276,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
 
-    private fun toggleVolume(imageView: ImageView) {
+    private fun controlCenterClick(imageView: ImageView) {
 //        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
 //        val frameLayout1 = frameLayout.get(0) as FrameLayout
 //        val frameLayout2 = frameLayout1.get(0) as FrameLayout
@@ -318,6 +330,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     fun hideWifiWindow() {
         netCenterWindow?.dismiss()
+    }
+
+    fun hideVolumeCenterWindow() {
+        Log.w(TAG, "hideVolumeCenterWindow")
+        volumeCenterWindow?.dismiss()
     }
 
 }

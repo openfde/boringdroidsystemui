@@ -326,5 +326,8 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
                 systemStateLayout?.hideWifiWindow()
             }
+            if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
+                systemStateLayout?.hideVolumeCenterWindow()
+            }
     }
 }

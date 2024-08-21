@@ -23,11 +23,13 @@ import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.ControlAdapter
 import com.boringdroid.systemui.adapter.ControlAdapter.ControlItemClickListener
+import com.boringdroid.systemui.adapter.VolumeDeviceAdapter
 import com.boringdroid.systemui.constant.ControlConstant.POWER_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.RECORD_SCREEN_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.SETTING_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
+import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.data.Control
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.LogTools
@@ -42,7 +44,6 @@ import okhttp3.*
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.Objects
 
 
 class ControlCenterWindow(
@@ -60,6 +61,7 @@ class ControlCenterWindow(
     private var volumeSeekbar: SeekBar? = null
     private var achor: ImageView? = null
     private var volumeImage: ImageView? = null
+    private var audioDevice: AudioDevice? = null
 
     private var lightSeekbar: SeekBar? = null
     private var mRecyclerView: RecyclerView? = null
@@ -211,12 +213,18 @@ class ControlCenterWindow(
     }
 
     private fun initVolumeSeekbar() {
-        var currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+//        var currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+//        val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+//        val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+//        val curVolume = AudioSystem.getMasterVolume();
+        //        currentVolume = StringUtils.ToInt(curVolume * streamMaxVolume);
 
-        val curVolume = AudioSystem.getMasterVolume();
-        currentVolume = StringUtils.ToInt(curVolume * streamMaxVolume) ;
+        val streamMinVolume = 0
+        val streamMaxVolume = 100
+        val devices = VolumeDeviceAdapter.getDevices(false)
+        if (!devices.isEmpty()) audioDevice = devices[0]
+        var curVolume = audioDevice?.volume ?: 0F
+        val currentVolume = (curVolume * streamMaxVolume).toInt()
         Log.w(
             TAG,
             "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume , curVolume :$curVolume"
@@ -246,8 +254,15 @@ class ControlCenterWindow(
 
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+//            val am = mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+            if (audioDevice != null) {
+                val result = AudioSystem.setDevVolume(
+                    false,
+                    audioDevice!!.physicalName,
+                    (progress?.div(100.0))?.toFloat() ?: 0F
+                )
+            }
             showVolumeProgress(progress)
         }
 
@@ -255,14 +270,21 @@ class ControlCenterWindow(
         }
 
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            val max = seekBar?.max ;
+            val max = seekBar?.max;
             val progress = seekBar?.progress;
             val numerator = progress?.let { BigDecimal(it) }
             val denominator = max?.let { BigDecimal(it) }
-            var result = StringUtils.ToFloat( numerator?.divide(denominator, 2, RoundingMode.HALF_UP))
+            var result =
+                StringUtils.ToFloat(numerator?.divide(denominator, 2, RoundingMode.HALF_UP))
 
             Log.w(TAG, "progress: $progress ,formattedResult $result , max $max")
-            AudioSystem.setMasterVolume(result);
+            if (audioDevice != null) {
+                val result = AudioSystem.setDevVolume(
+                    false,
+                    audioDevice!!.physicalName,
+                    (progress?.div(100.0))?.toFloat() ?: 0F
+                )
+            }
         }
     }
 
@@ -278,9 +300,11 @@ class ControlCenterWindow(
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     mContext?.startActivity(intent)
                 }
+
                 PRINT_SCREEN_CONTROL -> {
                     Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
                 }
+
                 RECORD_SCREEN_CONTROL -> {
                     val launcherComponent: ComponentName = ComponentName(
                         SYSUI_PACKAGE,
@@ -291,6 +315,7 @@ class ControlCenterWindow(
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     mContext?.startActivity(intent)
                 }
+
                 POWER_CONTROL -> {
                     val intent = Intent()
                     val cn: ComponentName =
@@ -299,6 +324,7 @@ class ControlCenterWindow(
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     mContext?.startActivity(intent)
                 }
+
                 SETTING_CONTROL -> {
                     val intent = Intent("android.settings.SETTINGS")
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
