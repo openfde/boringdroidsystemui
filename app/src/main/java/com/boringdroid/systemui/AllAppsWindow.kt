@@ -34,6 +34,7 @@ import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
+import com.boringdroid.systemui.view.VolumeCenterWindow
 import java.lang.ref.WeakReference
 
 
