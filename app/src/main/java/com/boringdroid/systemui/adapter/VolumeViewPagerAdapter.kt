@@ -12,6 +12,7 @@ import com.boringdroid.systemui.R
 class VolumeViewPagerAdapter(
     private val context: Context?
 ) : RecyclerView.Adapter<VolumeViewPagerAdapter.ViewHolder>() {
+    private var isInputReceived = false
     val volumeDeviceAdapterList: ArrayList<VolumeDeviceAdapter> = ArrayList()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -24,6 +25,10 @@ class VolumeViewPagerAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (!isInputReceived && position == INPUT_INDEX) {
+            volumeDeviceAdapterList[INPUT_INDEX].getDevices()
+            isInputReceived = true
+        }
         holder.recyclerview.layoutManager = LinearLayoutManager(context)
         holder.recyclerview.adapter = volumeDeviceAdapterList[position]
         volumeDeviceAdapterList[position].notifyDataSetChanged()
@@ -36,10 +41,13 @@ class VolumeViewPagerAdapter(
     init {
         volumeDeviceAdapterList.add(VolumeDeviceAdapter(context, false))
         volumeDeviceAdapterList.add(VolumeDeviceAdapter(context, true))
+        volumeDeviceAdapterList[OUTPUT_INDEX].getDevices()
     }
 
     companion object {
         private val TAG = "VolumeViewPagerAdapter"
+        private val OUTPUT_INDEX = 0
+        private val INPUT_INDEX = 1
     }
 
 }
