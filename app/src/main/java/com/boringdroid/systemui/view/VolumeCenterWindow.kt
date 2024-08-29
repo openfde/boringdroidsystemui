@@ -6,9 +6,13 @@ import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.media.AudioManager
-import android.providers.settings.SecureSettingsProto.Volume
 import android.util.DisplayMetrics
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewOutlineProvider
+import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -29,8 +33,7 @@ import kotlinx.coroutines.launch
 
 
 class VolumeCenterWindow(
-    private val mContext: Context?,
-    private val volumeBtn: ImageView?
+    private val mContext: Context?, private val volumeBtn: ImageView?
 ) : VolumeDeviceAdapter.DeviceChangeListener {
 
 
@@ -47,7 +50,7 @@ class VolumeCenterWindow(
     private var viewPager2: ViewPager2? = null
     private var adapter: VolumeViewPagerAdapter? = null
     private val tabTitleList =
-        arrayOf(mContext!!.getString(R.string.output), mContext.getString(R.string.input))
+        arrayOf(mContext!!.getString(R.string.output), mContext!!.getString(R.string.input))
     private var viewPager2Position: Int? = null
 
     private var lightSeekbar: SeekBar? = null
@@ -74,22 +77,16 @@ class VolumeCenterWindow(
             val volumeDeviceAdapter = getVolumeDeviceAdapter(index)
             volumeDeviceAdapter?.mListener = this
         }
+
+        // The recyclerView needs to be redrawn every time the page is switched.
         viewPager2?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                viewPager2Position = position
                 val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2?.currentItem)
-                if (volumeDeviceAdapter?.mListener == null) {
-                    volumeDeviceAdapter?.mListener = this@VolumeCenterWindow
-                }
-                // We can't use selectedPosition because the view may not be drawn yet, and selectedPosition may be -1.
-                volumeDeviceAdapter?.mAudioDeviceList?.forEach {
-                    if (it.isSelected) {
-                        setVolumeIcon(it.type, it.volume, it.isMuted)
-                    }
-                }
+                volumeDeviceAdapter?.notifyDataSetChanged()
             }
         })
+
 
         volumeImage?.setOnClickListener {
             val volumeDeviceAdapter = getVolumeDeviceAdapter(viewPager2?.currentItem)
@@ -119,10 +116,7 @@ class VolumeCenterWindow(
         windowManager.addView(windowContentView, layoutParams)
 
         val animator = ObjectAnimator.ofFloat(
-            windowContentView,
-            View.TRANSLATION_Y,
-            windowHeight.toFloat(),
-            0f
+            windowContentView, View.TRANSLATION_Y, windowHeight.toFloat(), 0f
         )
 
         animator.duration = VolumeCenterWindow.FADE_DURATION
@@ -139,7 +133,6 @@ class VolumeCenterWindow(
             false
         }
     }
-
     fun dismiss() {
         if (!shown) {
             return
@@ -149,10 +142,7 @@ class VolumeCenterWindow(
         }
         achor = null
         val animator = ObjectAnimator.ofFloat(
-            windowContentView,
-            View.TRANSLATION_Y,
-            0f,
-            windowHeight.toFloat()
+            windowContentView, View.TRANSLATION_Y, 0f, windowHeight.toFloat()
         )
         animator.duration = VolumeCenterWindow.FADE_DURATION
         animator.interpolator = LinearInterpolator()
@@ -175,8 +165,7 @@ class VolumeCenterWindow(
     }
 
     private fun generateLayoutParams(
-        context: Context?,
-        windowManager: WindowManager
+        context: Context?, windowManager: WindowManager
     ): WindowManager.LayoutParams {
         val resources = context!!.resources
         windowWidth = resources.getDimension(R.dimen.volume_center_window_width).toInt()
@@ -185,19 +174,15 @@ class VolumeCenterWindow(
             windowWidth,
             windowHeight,
             WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.RGBA_8888
         )
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val size = Point()
         windowManager.defaultDisplay.getRealSize(size)
-        val marginStart = resources.getDimension(R.dimen.volume_center_window_margin)
-            .toInt()
-        val marginVertical = resources.getDimension(R.dimen.control_center_window_margin)
-            .toInt()
+        val marginStart = resources.getDimension(R.dimen.volume_center_window_margin).toInt()
+        val marginVertical = resources.getDimension(R.dimen.control_center_window_margin).toInt()
         layoutParams.gravity = Gravity.TOP or Gravity.END
         layoutParams.x = marginStart
         layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
@@ -217,6 +202,7 @@ class VolumeCenterWindow(
 
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            if (!fromUser) return
             setDeviceVolume(progress, fromUser)
         }
 
@@ -236,7 +222,7 @@ class VolumeCenterWindow(
         volumeDeviceAdapter?.setDeviceVolume(volume, fromUser)
     }
 
-    private fun getVolumeDeviceAdapter(position : Int?): VolumeDeviceAdapter? {
+    private fun getVolumeDeviceAdapter(position: Int?): VolumeDeviceAdapter? {
         if (position == null || position == -1) return null
         val volumeViewPagerAdapter = viewPager2?.adapter as VolumeViewPagerAdapter?
         val volumeDeviceAdapterList =
@@ -257,14 +243,13 @@ class VolumeCenterWindow(
     companion object {
         private const val TAG = "VolumeCenterWindow"
         private const val FADE_DURATION: Long = 120
-        private const val INPUT = false
-        private const val OUTPUT = true
+        private const val OUTPUT = false
+        private const val INPUT = true
     }
 
     override fun setVolumeIcon(type: Boolean, volume: Float, isMuted: Boolean) {
-        val progress = (volume * 100).toInt()
-        volumeSeekbar?.progress = progress
-        if (type == INPUT) setVolumeIcon(type, volume, isMuted, volumeBtn)
+//        Log.w(TAG, "type = $type, isMuted = $isMuted")
+        if (type == OUTPUT) setVolumeIcon(type, volume, isMuted, volumeBtn)
         setVolumeIcon(type, volume, isMuted, volumeImage)
     }
 
@@ -283,5 +268,10 @@ class VolumeCenterWindow(
         } else {
             imageIcon?.setImageResource(R.drawable.icon_volume_max)
         }
+    }
+
+    override fun setSeekBar(volume: Float) {
+        val progress = (volume * 100).toInt()
+        volumeSeekbar?.progress = progress
     }
 }
