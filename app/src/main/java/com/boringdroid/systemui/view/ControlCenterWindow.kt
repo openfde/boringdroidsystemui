@@ -222,13 +222,9 @@ class ControlCenterWindow(
         val streamMinVolume = 0
         val streamMaxVolume = 100
         val devices = VolumeDeviceAdapter.getDevices(false)
-        if (!devices.isEmpty()) audioDevice = devices[0]
+        if (devices.isNotEmpty()) audioDevice = devices[0]
         var curVolume = audioDevice?.volume ?: 0F
         val currentVolume = (curVolume * streamMaxVolume).toInt()
-        Log.w(
-            TAG,
-            "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume , curVolume :$curVolume"
-        )
         volumeSeekbar?.min = streamMinVolume
         volumeSeekbar?.max = streamMaxVolume
         volumeSeekbar?.progress = currentVolume
