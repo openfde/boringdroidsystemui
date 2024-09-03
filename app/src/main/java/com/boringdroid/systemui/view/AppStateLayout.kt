@@ -87,7 +87,7 @@ class AppStateLayout @JvmOverloads constructor(
             val runningTaskInfo = runningTaskInfos[i]
             if(isLauncher(context, runningTaskInfo.topActivity)){
                 var taskThumbnail  = AM_WRAPPER.getTaskThumbnail(runningTaskInfo.taskId, false)
-                Log.d(TAG, "initTasks() called:" + taskThumbnail)
+                Log.e(TAG, "initTasks() called:" + taskThumbnail)
             }
             if (shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
                 continue
@@ -109,35 +109,39 @@ class AppStateLayout @JvmOverloads constructor(
 
     fun shouldIgnoreTopTask(componentName: ComponentName?): Boolean {
         if (componentName == null) {
-            Log.d(TAG, "Ignore invalid component name")
+            Log.e(TAG, "Ignore invalid component name")
             return true
         }
         val packageName = componentName.packageName
         if ("android" == packageName) {
-            Log.d(TAG, "Ignore android")
+            Log.e(TAG, "Ignore android")
             return true
         }
         if (isSpecialLauncher(packageName)) {
-            Log.d(TAG, "Ignore launcher $packageName")
+            Log.e(TAG, "Ignore launcher $packageName")
             return true
         }
         if (context != null && packageName.startsWith(context.packageName)) {
-            Log.d(TAG, "Ignore self $packageName")
+            Log.e(TAG, "Ignore self $packageName")
             return true
         }
         if (isLauncher(context, componentName)) {
-            Log.d(TAG, "Ignore launcher $componentName")
+            Log.e(TAG, "Ignore launcher $componentName")
             return true
         }
         if (packageName.startsWith("com.android.systemui")) {
-            Log.d(TAG, "Ignore systemui $packageName")
+            Log.e(TAG, "Ignore systemui $packageName")
             return true
         }
-        Log.d(TAG, "Don't ignore top task $packageName")
+//        Log.e(TAG, "Don't ignore top task $packageName")
         return false
     }
 
     private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
+
+        Log.e(TAG, "toptask info:${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}, " +
+                "${runningTaskInfo.taskDescription?.label}," +
+                "${runningTaskInfo.taskDescription?.icon}" )
 
         if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
             return
@@ -146,10 +150,6 @@ class AppStateLayout @JvmOverloads constructor(
         val packageName = getRunningTaskInfoPackageName(runningTaskInfo)
         if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
             taskAdapter!!.setTopTaskId(-1)
-            Log.d(
-                "fde",
-                "notifyDataSetChanged: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
-            )
             taskAdapter.notifyDataSetChanged()
             return
         }
@@ -163,14 +163,12 @@ class AppStateLayout @JvmOverloads constructor(
             val infoList = launchApps.getActivityList(packageName, userHandle)
             if(runningTaskInfo.taskDescription != null
                 && runningTaskInfo!!.taskDescription!!.label != null
-                && runningTaskInfo!!.taskDescription!!.label.contains("Fusion")
+                && (runningTaskInfo!!.taskDescription!!.label.contains("Fusion")
+                        || runningTaskInfo!!.taskDescription!!.label.contains("FDE"))
             ){
                 taskInfo.label = runningTaskInfo!!.taskDescription!!.label
                 taskInfo.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
-                Log.d(
-                    "fde",
-                    "taskDescription: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
-                )
+                Log.e(TAG,"set icon runningTaskInfo = ${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}")
             }
             if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
                 taskInfo.icon = infoList[0]!!.getIcon(0)
@@ -193,11 +191,7 @@ class AppStateLayout @JvmOverloads constructor(
         tasks.add(if (index >= 0) index else tasks.size, taskInfo)
         taskAdapter!!.setData(tasks)
         taskAdapter.setTopTaskId(taskInfo.id)
-        Log.d(TAG, "Top task $taskInfo")
-        Log.d(
-            "fde",
-            "notifyDataSetChanged first: runningTaskInfo = $runningTaskInfo, skipIgnoreCheck = $skipIgnoreCheck"
-        )
+        Log.e(TAG, "Top task $taskInfo")
         taskAdapter.notifyDataSetChanged()
     }
 
@@ -222,7 +216,7 @@ class AppStateLayout @JvmOverloads constructor(
         intent.addCategory(Intent.CATEGORY_HOME)
         val resolveInfos = context.packageManager.queryIntentActivities(intent, 0)
         for (resolveInfo in resolveInfos) {
-            Log.d(TAG, "Found launcher $resolveInfo")
+//            Log.e(TAG, "Found launcher $resolveInfo")
             if (resolveInfo?.activityInfo == null) {
                 continue
             }
@@ -244,20 +238,20 @@ class AppStateLayout @JvmOverloads constructor(
 
         override fun onTaskCreated(taskId: Int, componentName: ComponentName?) {
             super.onTaskCreated(taskId, componentName)
-            Log.d(TAG, "huyang onTaskCreated $taskId, cm $componentName")
+            Log.e(TAG, "huyang onTaskCreated $taskId, cm $componentName")
             onTaskStackChanged()
         }
 
         override fun onTaskMovedToFront(taskId: Int) {
             super.onTaskMovedToFront(taskId)
-            Log.d(TAG, "huyang onTaskMoveToFront taskId $taskId")
+            Log.e(TAG, "huyang onTaskMoveToFront taskId $taskId")
             onTaskStackChanged()
         }
 
 
         override fun onTaskMovedToFront(taskInfo: RunningTaskInfo) {
             super.onTaskMovedToFront(taskInfo)
-            Log.d(TAG, "huyang onTaskMovedToFront $taskInfo numactivity:${taskInfo.numActivities}")
+            Log.e(TAG, "huyang onTaskMovedToFront $taskInfo numactivity:${taskInfo.numActivities}")
             onTaskStackChanged()
         }
 
@@ -275,20 +269,18 @@ class AppStateLayout @JvmOverloads constructor(
             CoroutineScope(Dispatchers.Main).launch {
                 delay(300L)
                 val info = AM_WRAPPER.getRunningTask(false)
-                Log.d(TAG, "onTaskStackChanged $info")
+                Log.e(TAG, "onTaskStackChanged $info")
                 info?.let { topTask(it) }
             }
-			CoroutineScope(Dispatchers.Main).launch {
-                delay(5000L)
-                val info = AM_WRAPPER.getRunningTask(false)
-                Log.d(TAG, "onTaskStackChanged $info")
-                info?.let { topTask(it) }
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(2000L)
+                initTasks()
             }
         }
 
         override fun onTaskRemoved(taskId: Int) {
             super.onTaskRemoved(taskId)
-            Log.d(TAG, "huyang onTaskRemoved $taskId")
+            Log.e(TAG, "onTaskRemoved $taskId")
             removeTask(taskId)
         }
     }
@@ -310,12 +302,8 @@ class AppStateLayout @JvmOverloads constructor(
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            Log.d(
-                TAG,
-                "onBindViewHolder() called with: holder = $holder, position = $position"
-            )
+//            Log.e(TAG,"onBindViewHolder() called with: holder = $holder, position = $position")
             val taskInfo = tasks[position]
-            val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
             val packageName = taskInfo.packageName
             holder.iconIV.setImageDrawable(taskInfo.icon)
             if (topTaskId == (taskInfo.id)) {
@@ -365,7 +353,7 @@ class AppStateLayout @JvmOverloads constructor(
             val clickListener = object : OnClickListener {
                 override fun onClick(v: View?) {
                     listener?.syncVisible(Utils.ALL_INVISIBLE)
-                    Log.d(TAG, "onClick() called ${taskInfo.packageName}")
+                    Log.e(TAG, "onClick() called ${taskInfo.packageName}")
                     if(!isShowing(taskInfo.id)){
                         showApplicationWindow(taskInfo)
                     } else {
