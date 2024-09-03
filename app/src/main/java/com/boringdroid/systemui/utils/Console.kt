@@ -4,7 +4,7 @@ import android.util.Log
 
 object Log {
     private const val TAG = "Console"
-    private const val Debugable = true
+    private const val Debugable = false
 
     private fun generateLog(from: String, vararg message: Any) : String {
         var log = ""
