@@ -8,7 +8,10 @@
             <packagename>com.lemon.lv</packagename>
             <defaultvalue>true</defaultvalue>
         </package>
-
+        <package>
+            <packagename>com.fde.x11</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
         <package>
             <packagename>com.tencent.wemeet.app</packagename>
             <defaultvalue>true</defaultvalue>
