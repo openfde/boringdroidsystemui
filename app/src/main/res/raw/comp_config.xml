@@ -165,4 +165,25 @@
         </notes>
         <optionjson>[]</optionjson>
     </compatible>
+
+    <compatible date="2024-09-29" isdel="0">
+        <keycode>isAllowRealDisplaySize</keycode>
+        <keydesc>
+            {
+            "en":"Window size limit",
+            "ch":"限制应用内窗口大小"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Limit the screen size used for pop-ups within the app to the current size of the app window.",
+            "ch":"限制应用内弹窗使用的屏幕尺寸为当前应用窗口尺寸。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+
 </library>
