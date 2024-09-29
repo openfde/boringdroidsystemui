@@ -95,4 +95,12 @@
         </package>
 
     </keycode>
+
+    <keycode date="2024-09-29" isdel="0">
+        <name>isAllowRealDisplaySize</name>
+        <package>
+            <packagename>com.taobao.idlefish</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
 </library>
