@@ -79,4 +79,9 @@
     <dimen name="volume_list_height">150dp</dimen>
     <dimen name="volume_loading_height">300dp</dimen>
 
+    <dimen name="ime_switch_window_width">180dp</dimen>
+    <dimen name="ime_switch_window_height">110dp</dimen>
+    <dimen name="ime_switch_window_margin">240dp</dimen>
+    <dimen name="item_ime_height">40dp</dimen>
+    <dimen name="ime_window_padding">15dp</dimen>
 </resources>
