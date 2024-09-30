@@ -24,12 +24,15 @@ object Utils {
     @JvmField var wifiWindowVisible = false
     @JvmField var shouldPlayChargeComplete = false
     @JvmField var volumeCenterWindowVisible = false
+    @JvmField var imeSwitchWindoVisible = false
+
     const val ALL_INVISIBLE:Int = 0x1111
     const val NOTIFICATION_VISIBLE:Int = 1
     const val ALLAPPWINDOW_VISIBLE:Int = 2
     const val CONTROLCENTERWINDOW_VISIBLE:Int = 4
     const val WIFIWINDOW_VISIBLE:Int = 8
     const val VOLUMECENTERWINDOW_VISIBLE : Int = 16
+    const val IMESWITCHWINDOW_VISIBLE : Int = 32
 
     @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
