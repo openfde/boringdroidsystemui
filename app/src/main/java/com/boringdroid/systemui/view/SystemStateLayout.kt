@@ -4,19 +4,33 @@
  */
 package com.boringdroid.systemui.view
 
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.media.AudioManager
 import android.provider.Settings
 import android.util.AttributeSet
-import android.view.*
-import android.widget.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextClock
+import android.widget.TextView
 import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.net.NetApi
 import com.boringdroid.systemui.utils.DeviceUtils
-import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.WifiUtils
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +43,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
 
     //    private var bluetoothBtn:ImageView ?= null
+    private var imeBtn: ImageView? = null
     private var wifiBtn: ImageView? = null
     private var volumeBtn: ImageView? = null
     private var batteryBtn: ImageView? = null
@@ -37,6 +52,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var dateBtn: TextClock? = null
     private var controlCenterWindow: ControlCenterWindow? = null
     private var netCenterWindow: NetCenterWindow? = null
+    private var imeSwitchWindow: ImeSwitchWindow? = null
     private var notificationWindow: NotificationWindow? = null
     private var volumeCenterWindow: VolumeCenterWindow? = null
     private var screenRecordState: Int = 0
@@ -86,6 +102,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     fun initState() {
 //        bluetoothBtn = findViewById(R.id.bluetooth_btn)
+        imeBtn = findViewById(R.id.imeswitch_btn)
         wifiBtn = findViewById(R.id.wifi_btn)
         homeBtn = findViewById(R.id.layout_home)
         dateBtn = findViewById(R.id.date_btn)
@@ -94,6 +111,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         netCenterWindow = NetCenterWindow(context)
+        imeSwitchWindow = ImeSwitchWindow(context)
         controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
         volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
@@ -169,6 +187,54 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             if (Utils.notificationPanelVisible) {
                 listener?.hideNotification()
                 Utils.notificationPanelVisible = false
+            }
+        })
+
+        imeBtn?.setOnClickListener {
+            imeSwitchClick(imeBtn!!)
+//            val intent = Intent(Settings.ACTION_SETTINGS)
+//            intent.putExtra(Settings.EXTRA_SUB_ID, 3)
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            context!!.startActivity(intent)
+//            val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//            imm.switchToLastInputMethod(null);
+        }
+        getInputMethod()
+        registInputMethodChange()
+    }
+
+    private fun imeSwitchClick(imageView: ImageView) {
+        imeSwitchWindow?.ifShowImeSwitchView()
+        if (Utils.imeSwitchWindoVisible) {
+            listener?.syncVisible(Utils.IMESWITCHWINDOW_VISIBLE)
+        }
+
+    }
+
+    private fun registInputMethodChange() {
+        val receiver = InputMethodChangeReceiver()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_INPUT_METHOD_CHANGED)
+        context!!.registerReceiver(receiver, filter)
+    }
+
+    inner class InputMethodChangeReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_INPUT_METHOD_CHANGED) {
+                this@SystemStateLayout.getInputMethod()
+            }
+        }
+    }
+
+    private fun getInputMethod() {
+        val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val currentInputMethod =
+            Settings.Secure.getString(context!!.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD)
+        val inputMethodList: List<InputMethodInfo> = imm.enabledInputMethodList
+        inputMethodList.forEach({
+            if(currentInputMethod == it.id){
+                imeBtn?.visibility = View.VISIBLE
+                imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
             }
         })
     }
@@ -262,11 +328,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * network battery click
      */
     private fun batteryClick() {
-//        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager;
-//        val isCharging = if (batteryManager.isCharging ) "正在充电" else "未充电"
-//        val currentLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS)
-//        Toast.makeText(context,"batteryClick "+currentLevel + " , "+isCharging,Toast.LENGTH_SHORT).show();
-//       TimerSingleton.stopTimer()
         val intent = Intent()
         val cn: ComponentName =
             ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
@@ -277,19 +338,10 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private fun controlCenterClick(imageView: ImageView) {
-//        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
-//        val frameLayout1 = frameLayout.get(0) as FrameLayout
-//        val frameLayout2 = frameLayout1.get(0) as FrameLayout
         controlCenterWindow?.ifShowControlCenterView(imageView)
         if (Utils.controlCenterWindoVisible) {
             listener?.syncVisible(Utils.CONTROLCENTERWINDOW_VISIBLE)
         }
-//        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//        audioManager.adjustStreamVolume(
-//            AudioManager.STREAM_MUSIC,
-//            AudioManager.ADJUST_SAME,
-//            AudioManager.FLAG_SHOW_UI
-//        )
     }
 
 
@@ -335,6 +387,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     fun hideVolumeCenterWindow() {
         Log.w(TAG, "hideVolumeCenterWindow")
         volumeCenterWindow?.dismiss()
+    }
+
+    fun hideImeSwitchWindow() {
+        Log.w(TAG, "hideVolumeCenterWindow")
+        imeSwitchWindow?.dismiss()
     }
 
 }

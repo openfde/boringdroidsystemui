@@ -26,6 +26,15 @@
 <!--        android:layout_margin="5dp"-->
 <!--        android:padding="5dp"-->
 <!--        android:src="@drawable/ic_bluetooth_off" />-->
+    <ImageView
+        android:id="@+id/imeswitch_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/input_delete"
+        android:visibility="gone"
+        />
 
     <ImageView
         android:id="@+id/wifi_btn"

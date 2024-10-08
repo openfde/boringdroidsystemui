@@ -329,5 +329,8 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
             if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
                 systemStateLayout?.hideVolumeCenterWindow()
             }
+            if(Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0 ){
+                systemStateLayout?.hideImeSwitchWindow()
+            }
     }
 }
