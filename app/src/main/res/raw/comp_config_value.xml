@@ -103,4 +103,76 @@
             <defaultvalue>true</defaultvalue>
         </package>
     </keycode>
+
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.jingdong.app.mall</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.ss.android.article.news</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.zhihu.android</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.xingin.xhs</packagename>
+            <defaultvalue>false</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.sina.weibo</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.moji.mjweather</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.kuaishou.nebula</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>ctrip.android.view</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.Qunar</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+    <keycode date="2024-10-12" isdel="0">
+        <name>enableMagicWindow</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
 </library>
