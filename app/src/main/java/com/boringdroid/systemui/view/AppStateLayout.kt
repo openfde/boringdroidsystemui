@@ -169,12 +169,8 @@ class AppStateLayout @JvmOverloads constructor(
                 taskInfo.label = runningTaskInfo!!.taskDescription!!.label
                 taskInfo.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
                 Log.d(TAG,"set icon runningTaskInfo = ${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}")
-            }
-            if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
+            } else if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
                 taskInfo.icon = infoList[0]!!.getIcon(0)
-                val shortcutConfigActivityIntent =
-                    launchApps.getShortcutConfigActivityList(packageName, userHandle)
-
                 break
             }
         }
