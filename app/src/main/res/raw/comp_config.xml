@@ -185,5 +185,24 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible date="2024-10-12" isdel="0">
+        <keycode>enableMagicWindow</keycode>
+        <keydesc>
+            {
+            "en":"Magic Window",
+            "ch":"平行视界"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"To display multiple windows of one application by enabling magic window",
+            "ch":"启用平行视界，可以平行显示同一个应用的多个窗口"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
 
 </library>
