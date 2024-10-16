@@ -9,6 +9,7 @@ import android.media.UnsupportedSchemeException
 import android.net.Uri
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
+import com.boringdroid.systemui.utils.CompatibleConfig
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.ParseUtils
 
@@ -127,6 +128,7 @@ class CompatibleContentProvider : ContentProvider() {
             LogTools.i("---------recovery --------------")
             val packageName = values?.get("PACKAGE_NAME") as String
             ParseUtils.parseValueXML(context,packageName)
+            CompatibleConfig.readAllValue2Properties(context)
             return null;
         }else if(uriMatcher.match(uri) == CODE_SYNC_LIST){
             LogTools.i("---------sync list --------------")
