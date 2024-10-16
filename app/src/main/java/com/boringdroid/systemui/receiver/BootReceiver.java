@@ -35,6 +35,7 @@ public class BootReceiver extends BroadcastReceiver {
                     ParseUtils.parseListXML(context);
                     ParseUtils.parseValueXML(context);
                     ParseUtils.parseGpsData(context);
+                    CompatibleConfig.readAllValue2Properties(context);
                 }
             }).start();
         }
