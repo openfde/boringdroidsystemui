@@ -34,8 +34,9 @@ public class BootReceiver extends BroadcastReceiver {
                 public void run() {
                     ParseUtils.parseListXML(context);
                     ParseUtils.parseValueXML(context);
-                    ParseUtils.parseGpsData(context);
                     CompatibleConfig.readAllValue2Properties(context);
+                    CompatibleConfig.setSystemProperty("fde.boot_completed", "1");
+                    ParseUtils.parseGpsData(context);
                 }
             }).start();
         }

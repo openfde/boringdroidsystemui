@@ -278,12 +278,6 @@ public class CompatibleConfig {
             e.printStackTrace();
         }
     }
-
-
-
-    public static void updateValue2Properties(Context context){
-
-    }
     public static void  readAllValue2Properties(Context context){
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
         Cursor cursor = null;
