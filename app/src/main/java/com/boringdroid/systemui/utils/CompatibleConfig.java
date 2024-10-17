@@ -5,7 +5,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.SystemProperties;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -267,7 +269,53 @@ public class CompatibleConfig {
         return list;
     }
 
+    public static void setSystemProperty(String key, String value) {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method setMethod = systemPropertiesClass.getDeclaredMethod("set", String.class, String.class);
+            setMethod.invoke(null, key, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void  readAllValue2Properties(Context context){
+        Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_VALUE");
+        Cursor cursor = null;
+        String selection = null;
+        String[] selectionArgs = null;
+        try {
 
+            ContentResolver contentResolver = context.getContentResolver();
+            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
+                    String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
+                    String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
+                    String EDIT_DATE = cursor.getString(cursor.getColumnIndex("EDIT_DATE"));
+                    String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
+                    String NOTES = cursor.getString(cursor.getColumnIndex("NOTES"));
+                    String FIELDS1 = cursor.getString(cursor.getColumnIndex("FIELDS1"));
+                    String IS_DEL = cursor.getString(cursor.getColumnIndex("IS_DEL"));
+
+                    String key = PACKAGE_NAME+"_"+KEY_CODE ;
+                    String value = VALUE ;
+                    if("1".equals(IS_DEL)){
+                        value = "";
+                    }
+                    LogTools.Companion.i("readAllValue2Properties key "+key + ",value "+value);
+                    setSystemProperty(key,value);
+                } while (cursor.moveToNext());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
     public static Map<String, Object> queryListDataByKeyCode(Context context, String keyCode) {
         Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_LIST");
         Map<String, Object> resMap = null;
