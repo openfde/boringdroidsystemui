@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.SystemProperties;
 
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.utils.CompatibleConfig;
@@ -27,15 +28,12 @@ public class BootReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
 //            ParseUtils.parseListXML(context);
-//            ParseUtils.parseValueXML(context);
+            LogTools.Companion.i(" onReceive SYSTEM_INIT_ACTION............" );
         } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     ParseUtils.parseListXML(context);
-                    ParseUtils.parseValueXML(context);
-                    CompatibleConfig.readAllValue2Properties(context);
-                    CompatibleConfig.setSystemProperty("fde.boot_completed", "1");
                     ParseUtils.parseGpsData(context);
                 }
             }).start();
