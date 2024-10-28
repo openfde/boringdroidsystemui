@@ -78,6 +78,7 @@
     <string name="fde_control_center">"control center"</string>
     <string name="wifi_string">WIFI</string>
     <string name="printscreen_string">PrintScreen</string>
+    <string name="printscreen_region_string">PrintScreenRegion</string>
     <string name="recordscreen_string">ScreenRecord</string>
     <string name="savepower_string">PowerSave</string>
     <string name="setting_string">Setting</string>
