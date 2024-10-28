@@ -1,34 +1,25 @@
 package com.boringdroid.systemui.utils;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.constant.Constant;
 import com.boringdroid.systemui.data.RawBean;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -187,32 +178,33 @@ public class ParseUtils {
             e.printStackTrace();
         }
     }
-
-    public static void parseValueXML(Context context) {
-        InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value);
-        parseValue(context, inputStream);
-    }
-
     public static void parseValue(Context context, InputStream inputStream) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(inputStream);
             Element rootElement = document.getDocumentElement();
-            NodeList keycodeList = document.getElementsByTagName("keycode");
+            NodeList itemList = document.getElementsByTagName("item");
 
-            for (int i = 0; i < keycodeList.getLength(); i++) {
-                Element keycodeElement = (Element) keycodeList.item(i);
-                String date = keycodeElement.getAttribute("date");
+
+
+            for (int i = 0; i < itemList.getLength(); i++) {
+                Element keycodeElement = (Element) itemList.item(i);
+                String date = keycodeElement.getAttribute("updatedate");
                 String isdel = keycodeElement.getAttribute("isdel");
-                String name = keycodeElement.getElementsByTagName("name").item(0).getTextContent();
+                String name = keycodeElement.getAttribute("keycode");
+                Map<String, Object> keyMap = CompatibleConfig.queryMapValueDataByKey(context, name);
+                if(keyMap == null){
+                    //if keycode is not , code have update
+                    continue;
+                }
                 NodeList packageList = keycodeElement.getElementsByTagName("package");
                 for (int j = 0; j < packageList.getLength(); j++) {
                     Element packageElement = (Element) packageList.item(j);
                     String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
                     String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
                     LogTools.Companion.i("name " + name + ",packagename " + packagename + ",date  " + date + ",isDel " + isdel);
-                    if ("1".equals(isdel)) {
+                    if ("true".equals(isdel)) {
                         // if delete
                         CompatibleConfig.updateValueDataByKeyCode(context, name);
                     } else {
@@ -220,7 +212,7 @@ public class ParseUtils {
                         if (resMap == null) {
                             CompatibleConfig.insertValueData(context, packagename, name, defaultvalue, date);
                         } else {
-                            String queryDate = StringUtils.ToString(resMap.get("FIELDS2"));
+                            String queryDate = StringUtils.ToString(resMap.get("FIELDS1"));
                             if (!date.equals(queryDate)) {
                                 CompatibleConfig.updateValueDataByKeyCode(context, packagename, name, defaultvalue, date);
                             }
@@ -234,34 +226,6 @@ public class ParseUtils {
         }
     }
 
-    public static void parseValueXML(Context context, String recoPackageName) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            InputStream inputStream = context.getResources().openRawResource(R.raw.comp_config_value);
-            Document document = builder.parse(inputStream);
-            Element rootElement = document.getDocumentElement();
-            NodeList keycodeList = document.getElementsByTagName("keycode");
-
-            for (int i = 0; i < keycodeList.getLength(); i++) {
-                Element keycodeElement = (Element) keycodeList.item(i);
-                String name = keycodeElement.getElementsByTagName("name").item(0).getTextContent();
-                NodeList packageList = keycodeElement.getElementsByTagName("package");
-                for (int j = 0; j < packageList.getLength(); j++) {
-                    Element packageElement = (Element) packageList.item(j);
-                    String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
-                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
-                    LogTools.Companion.i("name " + name + ",packagename " + packagename + ",defaultvalue  " + defaultvalue + ",recoPackageName " + recoPackageName);
-                    if (packagename.equals(recoPackageName)) {
-                        CompatibleConfig.insertUpdateValueData(context, packagename, name, defaultvalue);
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * read all raw file

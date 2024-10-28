@@ -11,12 +11,14 @@ public class Constant {
 
     public static final int INTERVAL_TIME = 8;
 
-    public static final String URL_GITEE_COMPATIBLE_LIST = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config.xml";
-    public static final String URL_GITEE_COMPATIBLE_VALUE = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config_value.xml";
+    //public static final String URL_GITEE_COMPATIBLE_LIST = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config.xml";
+    public static final String URL_GITEE_COMPATIBLE_LIST = "https://gitee.com/openfde/fde_compatible_config_file/releases/download/list/comp_config.xml";
+//    public static final String URL_GITEE_COMPATIBLE_VALUE = "https://gitee.com/openfde/fde_compatible_config_file/raw/fde_w/comp_config_value.xml";
+    public static final String URL_GITEE_COMPATIBLE_VALUE = "https://gitee.com/openfde/fde_compatible_config_file/releases/download/1.0/comp_config_value.xml";
 
-    public static final String URL_GITHUB_COMPATIBLE_LIST = "https://raw.githubusercontent.com/openfde/fde_compatible_config_file/fde_w/comp_config.xml";
-    public static final String URL_GITHUB_COMPATIBLE_VALUE = "https://raw.githubusercontent.com/openfde/fde_compatible_config_file/fde_w/comp_config_value.xml";
-
+//    public static final String URL_GITHUB_COMPATIBLE_LIST = "https://raw.githubusercontent.com/openfde/fde_compatible_config_file/fde_w/comp_config.xml";
+//    public static final String URL_GITHUB_COMPATIBLE_VALUE = "https://raw.githubusercontent.com/openfde/fde_compatible_config_file/fde_w/comp_config_value.xml";
+    public static final String URL_GITHUB_COMPATIBLE_VALUE = "https://github.com/openfde/fde_compatible_config_file/releases/download/fde_compatible_config_file/comp_config_value.xml";
     public static final String REGION_URI = "content://com.boringdroid.systemuiprovider.region";
 
 }
