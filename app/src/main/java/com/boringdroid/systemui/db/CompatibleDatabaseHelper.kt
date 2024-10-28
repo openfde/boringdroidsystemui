@@ -24,10 +24,6 @@ class CompatibleDatabaseHelper(private val context: Context) :
             "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_LIST ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "KEY_CODE TEXT ,KEY_DESC TEXT  ,DEFAULT_VALUE TEXT  ,OPTION_JSON TEXT, NOTES TEXT,INPUT_TYPE TEXT,CREATE_DATE TEXT,IS_DEL TEXT, UNIQUE( KEY_CODE));"
 
-        private const val COMPATIBLE_VALUE_CREATE =
-            "CREATE TABLE  IF NOT EXISTS  COMPATIBLE_VALUE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "PACKAGE_NAME TEXT ,KEY_CODE TEXT  ,VALUE TEXT  , NOTES TEXT,EDIT_DATE TEXT,FIELDS1 TEXT,FIELDS2 TEXT,IS_DEL TEXT,  UNIQUE(PACKAGE_NAME, KEY_CODE));"
-
         private const val COLLECT_CREATE =
             "CREATE TABLE  IF NOT EXISTS  COLLECT_APP ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "PACKAGE_NAME TEXT ,APP_NAME TEXT  ,PIC_URL TEXT  ,IS_COLLECT TEXT  ,CREATE_DATE TEXT, IS_DEL TEXT, UNIQUE(PACKAGE_NAME));"
@@ -83,7 +79,6 @@ class CompatibleDatabaseHelper(private val context: Context) :
 
     fun dropTables(db: SQLiteDatabase?) {
         db?.execSQL("DROP TABLE COMPATIBLE_LIST");
-        db?.execSQL("DROP TABLE COMPATIBLE_VALUE");
         db?.execSQL("DROP TABLE COLLECT_APP");
         db?.execSQL("DROP TABLE WIFI_HISTORY");
         db?.execSQL("DROP TABLE SYSTEM_CONFIG");
@@ -92,7 +87,6 @@ class CompatibleDatabaseHelper(private val context: Context) :
 
     fun createTableSQL(db: SQLiteDatabase?) {
         db?.execSQL(COMPATIBLE_LIST_CREATE);
-        db?.execSQL(COMPATIBLE_VALUE_CREATE);
         db?.execSQL(COMPATIBLE_VALUE_INDEX)
         db?.execSQL(COLLECT_CREATE)
         db?.execSQL(WIFI_HISTORY_CREATE)
