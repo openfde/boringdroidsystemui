@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.constant.ControlConstant.POWER_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_CONTROL
+import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_REGION_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.RECORD_SCREEN_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.SETTING_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
@@ -27,6 +28,8 @@ class ControlAdapter (private val context: Context) :
         controls.add(Control(WIFI_CONTROL, R.drawable.icon_wifi, R.drawable.icon_wifi_checked,  R.string.wifi_string,
             R.drawable.bg_control_icon, R.drawable.bg_control_icon_checked,false))
         controls.add(Control(PRINT_SCREEN_CONTROL,  R.drawable.icon_printscreen, R.drawable.icon_printscreen, R.string.printscreen_string,
+            R.drawable.bg_control_icon, R.drawable.bg_control_icon_checked,false))
+        controls.add(Control(PRINT_SCREEN_REGION_CONTROL,  R.drawable.icon_printscreen_region, R.drawable.icon_printscreen_region, R.string.printscreen_region_string,
             R.drawable.bg_control_icon, R.drawable.bg_control_icon_checked,false))
         controls.add(Control(RECORD_SCREEN_CONTROL, R.drawable.icon_recordscreen, R.drawable.icon_recordscreen_checked,R.string.recordscreen_string,
             R.drawable.bg_control_icon, R.drawable.bg_control_icon_checked,false))

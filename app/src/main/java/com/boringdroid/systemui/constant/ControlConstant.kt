@@ -6,4 +6,5 @@ object ControlConstant {
      const val RECORD_SCREEN_CONTROL:Int =   2
      const val POWER_CONTROL:Int =           3
      const val SETTING_CONTROL:Int =         4
+     const val PRINT_SCREEN_REGION_CONTROL:Int =    5
 }

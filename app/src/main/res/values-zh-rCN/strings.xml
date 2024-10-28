@@ -73,7 +73,8 @@
     <string name="fde_control_center">"控制中心"</string>
 
     <string name="wifi_string">无线网络</string>
-    <string name="printscreen_string">截图</string>
+    <string name="printscreen_string">截屏</string>
+    <string name="printscreen_region_string">区域截图</string>
     <string name="recordscreen_string">录屏</string>
     <string name="savepower_string">省电模式</string>
     <string name="setting_string">设置</string>
