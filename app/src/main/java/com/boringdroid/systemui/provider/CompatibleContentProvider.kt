@@ -102,7 +102,7 @@ class CompatibleContentProvider : ContentProvider() {
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
        if(uriMatcher.match(uri) == CODE_SYNC_LIST){
             LogTools.i("---------sync list --------------")
-            ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
+//            ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_LIST)
             ParseUtils.parseGitXml(context, Constant.URL_GITEE_COMPATIBLE_VALUE)
             return null;
         }
