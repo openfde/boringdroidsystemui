@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.media.UnsupportedSchemeException
 import android.net.Uri
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
@@ -98,7 +99,7 @@ class RegionContentProvider : ContentProvider() {
         try {
             when (uriMatcher.match(uri)) {
                 CODE_REGION_INFO -> {
-                    id = db.insert(TABLE_REGION_INFO, null, values)
+                    id = db.insertWithOnConflict(TABLE_REGION_INFO, null, values,SQLiteDatabase.CONFLICT_REPLACE)
                 }
                 else -> {
                     throw UnsupportedSchemeException("error ")
@@ -152,6 +153,11 @@ class RegionContentProvider : ContentProvider() {
                 throw UnsupportedSchemeException("error ")
             }
         }
+    }
+
+    override fun shutdown() {
+        dbHelper.close()
+        super.shutdown()
     }
 
 }

@@ -5,10 +5,10 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.media.UnsupportedSchemeException
 import android.net.Uri
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
-import com.boringdroid.systemui.utils.LogTools
 
 class WifiContentProvider : ContentProvider() {
     private lateinit var dbHelper: CompatibleDatabaseHelper
@@ -91,10 +91,10 @@ class WifiContentProvider : ContentProvider() {
         try {
             when (uriMatcher.match(uri)) {
                 CODE_WIFI_HISTORY -> {
-                    id = db.insert(TABLE_WIFI_HISTORY, null, values)
+                    id = db.insertWithOnConflict(TABLE_WIFI_HISTORY, null, values, SQLiteDatabase.CONFLICT_REPLACE)
                 }
                 CODE_SYSTEM_CONFIG -> {
-                    id = db.insert(TABLE_SYSTEM_CONFIG, null, values)
+                    id = db.insertWithOnConflict(TABLE_SYSTEM_CONFIG, null, values,SQLiteDatabase.CONFLICT_REPLACE)
                 }else ->{
                 }
             }
@@ -165,4 +165,8 @@ class WifiContentProvider : ContentProvider() {
         }
     }
 
+    override fun shutdown() {
+        dbHelper.close()
+        super.shutdown()
+    }
 }
