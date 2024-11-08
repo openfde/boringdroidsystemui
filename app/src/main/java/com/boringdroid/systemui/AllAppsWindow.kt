@@ -25,16 +25,15 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.*
 import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.Collect
-import com.boringdroid.systemui.ui.CompatibleSyncActivity
 import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
-import com.boringdroid.systemui.view.VolumeCenterWindow
 import java.lang.ref.WeakReference
 
 
@@ -167,9 +166,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     }
 
     fun showPowerListMenu(anchor: View) {
-//        ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
-//        ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
-//        ParseUtils.parseGpsData(mContext);
+//        Thread {
+//            ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
+//            ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
+//            ParseUtils.parseGpsData(mContext);
+//        }.start()
 
 //        val inte = Intent()
 //        if (mContext != null) {

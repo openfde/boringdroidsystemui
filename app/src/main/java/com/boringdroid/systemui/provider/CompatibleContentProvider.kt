@@ -5,11 +5,11 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.media.UnsupportedSchemeException
 import android.net.Uri
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.db.CompatibleDatabaseHelper
-import com.boringdroid.systemui.utils.CompatibleConfig
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.ParseUtils
 
@@ -111,10 +111,10 @@ class CompatibleContentProvider : ContentProvider() {
         var id: Long? = 0;
         when (uriMatcher.match(uri)) {
             CODE_COMPATIBLE_LIST -> {
-                id = db.insert(TABLE_COMPATIBLE_LIST, null, values)
+                id = db.insertWithOnConflict(TABLE_COMPATIBLE_LIST, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
             CODE_COLLECT_APP -> {
-                id = db.insert(TABLE_COLLECT_APP, null, values)
+                id = db.insertWithOnConflict(TABLE_COLLECT_APP, null, values, SQLiteDatabase.CONFLICT_REPLACE)
             }
         }
 //        LogTools.i("-------insert----------id $id")
@@ -180,5 +180,10 @@ class CompatibleContentProvider : ContentProvider() {
                 throw UnsupportedSchemeException("error ")
             }
         }
+    }
+
+    override fun shutdown() {
+        dbHelper.close()
+        super.shutdown()
     }
 }

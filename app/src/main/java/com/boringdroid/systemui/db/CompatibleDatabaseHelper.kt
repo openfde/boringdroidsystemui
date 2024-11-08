@@ -1,16 +1,10 @@
 package com.boringdroid.systemui.db
 
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
-import com.boringdroid.systemui.data.Collect
-import com.boringdroid.systemui.data.RawBean
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.ParseUtils
-import java.io.InputStream
 
 
 class CompatibleDatabaseHelper(private val context: Context) :
