@@ -77,6 +77,7 @@ object Utils {
         object : Thread() {
             override fun run() {
                 try {
+                    sleep(400)
                     val inst = Instrumentation()
                     inst.sendKeyDownUpSync(keyCode)
                 } catch (e: Exception) {

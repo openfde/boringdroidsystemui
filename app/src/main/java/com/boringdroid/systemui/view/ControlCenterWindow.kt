@@ -10,6 +10,9 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.media.AudioManager
 import android.media.AudioSystem
+import android.os.Handler
+import android.os.Looper
+import com.android.internal.util.ScreenshotHelper
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.*
@@ -26,6 +29,7 @@ import com.boringdroid.systemui.adapter.ControlAdapter.ControlItemClickListener
 import com.boringdroid.systemui.adapter.VolumeDeviceAdapter
 import com.boringdroid.systemui.constant.ControlConstant.POWER_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_CONTROL
+import com.boringdroid.systemui.constant.ControlConstant.PRINT_SCREEN_REGION_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.RECORD_SCREEN_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.SETTING_CONTROL
 import com.boringdroid.systemui.constant.ControlConstant.WIFI_CONTROL
@@ -299,6 +303,26 @@ class ControlCenterWindow(
 
                 PRINT_SCREEN_CONTROL -> {
                     Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
+                }
+
+                PRINT_SCREEN_REGION_CONTROL -> {
+                    val handler = Handler(Looper.getMainLooper())
+                    val screenshotHelper = ScreenshotHelper(mContext)
+                    object : Thread() {
+                        override fun run() {
+                            try {
+                                sleep(400)
+                                screenshotHelper.takeScreenshot(
+                                    2,
+                                    false,
+                                    false,
+                                    2, handler, null
+                                )
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }.start()
                 }
 
                 RECORD_SCREEN_CONTROL -> {
