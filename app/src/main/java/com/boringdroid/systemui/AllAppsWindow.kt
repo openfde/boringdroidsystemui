@@ -34,6 +34,10 @@ import com.boringdroid.systemui.utils.*
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 
 
@@ -327,23 +331,19 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         refreshCollectList()
     }
 
-    private fun refreshCollectList() {
-        var items = CollectUtils.queryListData(mContext)
-        var allApps = appLoaderTask.allApps
-//        val equalProperties = allApps.zip(items).filterNot  { (app1, app2) -> app1.packageName == app2.packageName  }
-        var list: MutableList<AppData> = mutableListOf()
-        if(items !=null){
-            for (app in allApps) {
-                for (item in items) {
-                    if (app.packageName.equals(item.packageName)) {
-                        list.add(app)
-                    }
-                }
-            }
-        }
-        collectAppsLayout!!.setData(list)
-    }
+    private val uiScope = CoroutineScope(Dispatchers.Main)
 
+    private fun refreshCollectList() {
+        uiScope.launch {
+            val list: MutableList<AppData> = withContext(Dispatchers.Default) {
+                val items = CollectUtils.queryListData(mContext) ?: emptyList()
+                val allApps = appLoaderTask.allApps ?: emptyList()
+                val itemPackageNames = items.map { it.packageName }.toHashSet()
+                allApps.filter { it.packageName in itemPackageNames }.toMutableList()
+            }
+            collectAppsLayout?.setData(list)
+        }
+    }
 
     fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
         windowCollectView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
