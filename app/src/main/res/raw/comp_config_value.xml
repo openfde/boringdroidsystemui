@@ -175,4 +175,12 @@
         </package>
     </keycode>
 
+    <keycode date="2024-12-05" isdel="0">
+        <name>enabledResourceFixedLayout</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue> { width = 720,height = 1080 }</defaultvalue>
+        </package>
+    </keycode>
+
 </library>
