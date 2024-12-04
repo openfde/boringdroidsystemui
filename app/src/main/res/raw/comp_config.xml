@@ -204,5 +204,31 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible date="2024-12-05" isdel="0">
+        <keycode>enabledResourceFixedLayout</keycode>
+        <keydesc>
+            {
+            "en":"apply resource resolution",
+            "ch":"应用资源分辨率"
+            }
+        </keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"apply resource resolution:  Addressing Layout Display Issues for Certain Applications (e.g., WeChat) at System-Preset Resolutions",
+            "ch":"应用资源分辨率：解决部分应用（如微信）在系统预设的分辨率下布局显示过大或过小。"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "720",
+            "height": "1080"
+            },{
+            "width": "1080",
+            "height": "1920"
+            }
+            ]</optionjson>
+    </compatible>
+
 
 </library>
