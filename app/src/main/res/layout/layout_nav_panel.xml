@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.boringdroid.systemui.SystemStateLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/system_tray"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentRight="true"
+    android:layout_centerVertical="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+
+
+<!--    <ImageView-->
+<!--        android:id="@+id/pin_btn"-->
+<!--        android:layout_width="35dp"-->
+<!--        android:layout_height="35dp"-->
+<!--        android:layout_margin="5dp"-->
+<!--        android:background="@drawable/circle_white"-->
+<!--        android:padding="8dp"-->
+<!--        android:src="@drawable/ic_unpin" />-->
+
+
+<!--    <ImageView-->
+<!--        android:id="@+id/bluetooth_btn"-->
+<!--        android:layout_width="35dp"-->
+<!--        android:layout_height="35dp"-->
+<!--        android:layout_margin="5dp"-->
+<!--        android:padding="5dp"-->
+<!--        android:src="@drawable/ic_bluetooth_off" />-->
+    <ImageView
+        android:id="@+id/imeswitch_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/input_delete"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/wifi_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_wifi" />
+
+    <ImageView
+        android:id="@+id/volume_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_volume" />
+
+    <ImageView
+        android:id="@+id/battery_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_battery_chargeing_100" />
+
+    <ImageView
+        android:id="@+id/control_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_control" />
+
+    <ImageView
+        android:id="@+id/notifications_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/icon_notification"
+        />
+
+    <TextClock
+        android:id="@+id/date_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:format12Hour="MM/dd hh:mm a"
+        android:format24Hour="MM/dd HH:mm"
+        android:layout_marginRight="10dp"
+        android:textColor="@android:color/black" />
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/layout_home"-->
+<!--        android:layout_width="20dp"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="horizontal">-->
+<!--        <View-->
+<!--            android:layout_width="1dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:background="#F1C7C7C7"/>-->
+<!--    </LinearLayout>-->
+</com.boringdroid.systemui.SystemStateLayout>

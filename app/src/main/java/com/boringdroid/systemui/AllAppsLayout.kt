@@ -6,6 +6,7 @@ import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -22,6 +23,7 @@ constructor(
     private val appListAdapter: AppListAdapter
 
     fun setData(apps: List<AppData?>?) {
+//        Log.d(TAG, "setData() called with: apps = $apps")
         appListAdapter.setData(apps)
         appListAdapter.notifyDataSetChanged()
     }
@@ -39,6 +41,7 @@ constructor(
             parent: ViewGroup,
             viewType: Int,
         ): ViewHolder {
+//            Log.d(TAG, "onCreateViewHolder() called with: parent = $parent, viewType = $viewType")
             val appInfoLayout =
                 LayoutInflater.from(context).inflate(R.layout.layout_app_info, parent, false)
                     as ViewGroup
@@ -49,12 +52,13 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
+//            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position = $position")
             val appData = apps[position]
-            holder.iconIV.setImageDrawable(appData!!.icon)
-            holder.nameTV.text = appData.name
+            holder.iconIV?.setImageDrawable(appData!!.icon)
+            holder.nameTV?.text = appData?.name
             holder.appInfoLayout.setOnClickListener {
                 val intent = Intent()
-                intent.component = appData.componentName
+                intent.component = appData?.componentName
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
                 if (handler != null) {
@@ -82,8 +86,8 @@ constructor(
             RecyclerView.ViewHolder(
                 appInfoLayout,
             ) {
-            val iconIV: ImageView = appInfoLayout.findViewById(R.id.app_info_icon)
-            val nameTV: TextView = appInfoLayout.findViewById(R.id.app_info_name)
+            val iconIV = appInfoLayout.findViewById<ImageView?>(R.id.app_info_icon)
+            val nameTV = appInfoLayout.findViewById<TextView?>(R.id.app_info_name)
         }
 
         companion object {
@@ -93,6 +97,7 @@ constructor(
 
     companion object {
         private const val NUMBER_OF_COLUMNS = 5
+        private const val TAG = "AllAppsLayout"
     }
 
     init {

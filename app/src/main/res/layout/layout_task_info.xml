@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="44dp"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
@@ -10,6 +10,7 @@
 
     <ImageView
         android:id="@+id/iv_task_info_icon"
+        android:layout_marginTop="5dp"
         android:layout_width="@dimen/task_info_icon_size"
         android:layout_height="@dimen/task_info_icon_size"
         android:layout_gravity="center_horizontal"

@@ -10,8 +10,8 @@
         android:layout_width="@dimen/nav_button_size"
         android:layout_height="@dimen/nav_button_size"
         android:layout_gravity="center_vertical"
-        android:background="@android:color/transparent"
+        android:background="@drawable/bg_dock"
         android:scaleType="center"
-        android:src="@drawable/bt_all_apps"
+        android:src="@drawable/icon_all_apps"
         tools:ignore="ContentDescription" />
 </FrameLayout>

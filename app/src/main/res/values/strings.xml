@@ -2,4 +2,98 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="system_ui_overlay_name" translatable="false">Boringdroid SystemUI overlay</string>
     <string name="system_ui_debug_name">BoringdroidSystemUIDebug</string>
+
+    <string name="compatible_set">Compatible Set</string>
+    <string name="user">User</string>
+    <string name="search">Search...</string>
+    <string name="power_off">Power off</string>
+    <string name="restart">Restart</string>
+    <string name="soft_restart">Soft restart</string>
+    <string name="lock">Log Out</string>
+    <string name="pin">Pin</string>
+    <string name="move">Move</string>
+
+    <!--User context menu-->
+    <string name="users">Users</string>
+    <string name="files">Files</string>
+    <string name="settings">Settings</string>
+    <string name="dock_settings">Settings</string>
+    <string name="open">open</string>
+    <string name="todesk">create a shortcut</string>
+    <string name="compatible_config">compatible config</string>
+    <string name="uninstall">uninstall</string>
+    <string name="close">Close</string>
+    <string name="hide">Minimize</string>
+    <string name="minimize">Minimize</string>
+
+    <string name="tablet_mode_on">Tablet mode on</string>
+    <string name="tablet_mode_off">Tablet mode off</string>
+    <string name="silenced_notifications">Silenced notifications for this app</string>
+    <string name="notifications">Notifications</string>
+    <string name="popups_disabled">Notification pop-ups disabled</string>
+
+    <string name="fde_wifi_name">"Network SSID"</string>
+    <string name="fde_wifi_password">"password"</string>
+    <string name="fde_enter_wifi_name">"Enter Network SSID"</string>
+    <string name="fde_enter_wifi_password">"Enter password"</string>
+    <string name="fde_wifi">WIFI</string>
+    <string name="fde_ethernet">Ethernet</string>
+    <string name="fde_ethernet_and_wifi">Ethernet and WIFI</string>
+    <string name="fde_add_wifi">ADD NETWORK</string>
+    <string name="fde_manuals_add_wifi">ADD NETWORK...</string>
+    <string name="fde_choose_nearby_wifi">AVAILABLE NETWORKS</string>
+    <string name="fde_btn_cancel">Cancel</string>
+    <string name="fde_btn_confirm">OK</string>
+    <string name="fde_btn_operating_error">You are operating too fast</string>
+    <string name="fde_scanning">Scanning</string>
+    <string name="fde_connecting">Connecting</string>
+    <string name="fde_forget">Forget</string>
+    <string name="fde_del_network">delete network</string>
+    <string name="fde_unconnect">disconnect network</string>
+    <string name="fde_no_save">Do not save</string>
+    <string name="fde_has_connected">connected</string>
+    <string name="fde_has_saved">saved</string>
+    <string name="fde_no_wifi_module">no wifi module</string>
+    <string name="fde_net_mask" >"mask"</string>
+    <string name="fde_net_input_mask" >"enter mask"</string>
+    <string name="fde_net_invalid_mask" >"invalid mask"</string>
+    <string name="fde_save">Save</string>
+    <string name="fde_input_hint">please input data</string>
+    <string name="fde_collect">collect</string>
+    <string name="fde_uncollect">cancel Favorite</string>
+    <string name="fde_lock_screen">Lock Screen</string>
+    <string name="fde_log_off">Log Off</string>
+    <string name="fde_restart">Restart</string>
+    <string name="fde_shutdown">Shutdown</string>
+    <string name="fde_search">Search App</string>
+    <string name="fde_more_net_setting">more net settings</string>
+    <string name="fde_not_open_wifi">please open wifi</string>
+    <string name="fde_has_saved_wifi">Network saved</string>
+    <string name="fde_has_nosaved_wifi">Other networks</string>
+    <string name="fde_app_name_title">appName</string>
+
+    <string name="fde_notification_battery">"battery management"</string>
+    <string name="fde_notification_volume">"volume management"</string>
+    <string name="fde_notification_network">"network management"</string>
+    <string name="fde_notification_message">"notice management"</string>
+    <string name="fde_control_center">"control center"</string>
+    <string name="wifi_string">WIFI</string>
+    <string name="printscreen_string">PrintScreen</string>
+    <string name="printscreen_region_string">PrintScreenRegion</string>
+    <string name="recordscreen_string">ScreenRecord</string>
+    <string name="savepower_string">PowerSave</string>
+    <string name="setting_string">Setting</string>
+
+    <string name="cleartext">Clear</string>
+    <string name="no_notification">No Notification</string>
+    <string name="just_now">Now</string>
+    <string name="minute">minutes</string>
+    <string name="hours">hours</string>
+    <string name="days">days</string>
+    <string name="recording">recording</string>
+    <string name="fde_tips">Warning</string>
+    <string name="fde_sync_config_from_gitee">Do you want to synchronize the latest configuration from Gitee?</string>
+
+    <string name="output">Output</string>
+    <string name="input">Input</string>
 </resources>

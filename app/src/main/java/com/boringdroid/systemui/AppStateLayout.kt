@@ -11,8 +11,10 @@ import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.UserManager
 import android.util.AttributeSet
 import android.util.Log
@@ -21,12 +23,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import kotlin.math.abs
 
@@ -90,7 +97,7 @@ constructor(
             return true
         }
         if (isSpecialLauncher(packageName)) {
-            Log.d(TAG, "Ignore launcher $packageName")
+//            Log.d(TAG, "Ignore launcher $packageName")
             return true
         }
         if (context != null && packageName.startsWith(context.packageName)) {
@@ -109,10 +116,17 @@ constructor(
         return false
     }
 
-    private fun topTask(
-        runningTaskInfo: RunningTaskInfo,
-        skipIgnoreCheck: Boolean = false,
-    ) {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
+
+        Log.d(TAG, "toptask info:${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}, " +
+                "${runningTaskInfo.taskDescription?.label}," +
+                "${runningTaskInfo.taskDescription?.icon}" )
+
+        if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
+            return
+        }
+
         val packageName = getRunningTaskInfoPackageName(runningTaskInfo)
         if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
             taskAdapter!!.setTopTaskId(-1)
@@ -127,20 +141,25 @@ constructor(
         val userHandles = userManager.userProfiles
         for (userHandle in userHandles) {
             val infoList = launchApps.getActivityList(packageName, userHandle)
-            if (infoList.size > 0 && infoList[0] != null) {
+            if(runningTaskInfo.taskDescription != null
+                && runningTaskInfo!!.taskDescription!!.label != null
+                && (runningTaskInfo!!.taskDescription!!.label.contains("Fusion")
+                        || runningTaskInfo!!.taskDescription!!.label.contains("FDE"))
+            ){
+//                taskInfo.label = runningTaskInfo!!.taskDescription!!.label
+                taskInfo.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
+                Log.d(TAG,"set icon runningTaskInfo = ${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}")
+            } else if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
                 taskInfo.icon = infoList[0]!!.getIcon(0)
                 break
             }
         }
         var icon = taskInfo.icon
         icon =
-            if (icon == null && context != null) {
-                context.getDrawable(R.mipmap.default_icon_round)
-            } else {
-                icon
-            }
+            if (icon == null && context != null)
+                context.getDrawable(R.mipmap.default_icon_round) else icon
         if (icon == null) {
-            Log.e(TAG, "$packageName's icon is null, context $context")
+            Log.d(TAG, "$packageName's icon is null, context $context")
         }
         taskInfo.icon = icon
         val index = tasks.indexOf(taskInfo)
@@ -176,7 +195,7 @@ constructor(
         intent.addCategory(Intent.CATEGORY_HOME)
         val resolveInfos = context.packageManager.queryIntentActivities(intent, 0)
         for (resolveInfo in resolveInfos) {
-            Log.d(TAG, "Found launcher $resolveInfo")
+//            Log.d(TAG, "Found launcher $resolveInfo")
             if (resolveInfo?.activityInfo == null) {
                 continue
             }
@@ -193,6 +212,7 @@ constructor(
     }
 
     private inner class AppStateListener : TaskStackChangeListener {
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onTaskCreated(
             taskId: Int,
             componentName: ComponentName?,
@@ -202,22 +222,32 @@ constructor(
             onTaskStackChanged()
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onTaskMovedToFront(taskId: Int) {
             super.onTaskMovedToFront(taskId)
             Log.d(TAG, "onTaskMoveToFront taskId $taskId")
             onTaskStackChanged()
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onTaskMovedToFront(taskInfo: RunningTaskInfo) {
             super.onTaskMovedToFront(taskInfo)
             Log.d(TAG, "onTaskMovedToFront $taskInfo")
             onTaskStackChanged()
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onTaskStackChanged() {
             super.onTaskStackChanged()
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(300L)
+                val info = AM_WRAPPER.getRunningTask(false)
+                Log.d(TAG, "onTaskStackChanged $info")
+                info?.let { topTask(it) }
+            }
+
             val info = AM_WRAPPER.getRunningTask(false)
-            Log.d(TAG, "onTaskStackChanged $info")
+            Log.d(TAG, "onTaskStackChanged ${info.taskId} ${info.topActivity}")
             info?.let { topTask(it) }
         }
 
@@ -242,21 +272,23 @@ constructor(
         ): ViewHolder {
             val taskInfoLayout =
                 LayoutInflater.from(context).inflate(R.layout.layout_task_info, parent, false)
-                    as ViewGroup
+                        as ViewGroup
             return ViewHolder(taskInfoLayout)
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onBindViewHolder(
             holder: ViewHolder,
             position: Int,
         ) {
+            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position = $position , topTaskId = $topTaskId")
             val taskInfo = tasks[position]
             val packageName = taskInfo.packageName
-            holder.iconIV.setImageDrawable(taskInfo.icon)
+            holder.iconIV?.setImageDrawable(taskInfo.icon)
             if (taskInfo.id == topTaskId) {
-                holder.highLightLineTV.setImageResource(R.drawable.line_long)
+                holder.highLightLineTV?.setImageResource(R.drawable.line_long)
             } else {
-                holder.highLightLineTV.setImageResource(R.drawable.line_short)
+                holder.highLightLineTV?.setImageResource(R.drawable.line_short)
             }
             var label: CharSequence? = packageName
             try {
@@ -270,19 +302,26 @@ constructor(
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(TAG, "Failed to get label for $packageName")
             }
-            holder.iconIV.tag = taskInfo.id
-            holder.iconIV.tooltipText = label
-            holder.iconIV.setOnClickListener {
-                systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
-                context.sendBroadcast(
-                    Intent("com.boringdroid.systemui.CLOSE_RECENTS"),
-                )
+
+            holder.iconIV?.tag = taskInfo.id
+            holder.iconIV?.tooltipText = label
+            holder.iconIV?.setOnClickListener {
+                Log.d(TAG, "onBindViewHolder() called isShowing:${isShowing(taskInfo.id)}")
+                if(isShowing(taskInfo.id)){
+                    systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
+                } else {
+                    systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
+                    context.sendBroadcast(
+                        Intent("com.boringdroid.systemui.CLOSE_RECENTS"),
+                    )
+                }
+
             }
-            holder.iconIV.setOnLongClickListener { v: View ->
+            holder.iconIV?.setOnLongClickListener { v: View ->
                 val item = ClipData.Item(TAG_TASK_ICON)
                 val dragData = ClipData(TAG_TASK_ICON, arrayOf("unknown"), item)
                 val shadow: DragShadowBuilder = DragDropShadowBuilder(v)
-                holder.iconIV.setOnDragListener(
+                holder.iconIV?.setOnDragListener(
                     DragDropCloseListener(
                         dragCloseThreshold,
                         dragCloseThreshold,
@@ -295,6 +334,19 @@ constructor(
                 v.startDragAndDrop(dragData, shadow, null, DRAG_FLAG_GLOBAL)
                 true
             }
+        }
+
+        private fun isShowing(id: Int): Boolean {
+            val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
+            var runningTask: RunningTaskInfo? = null
+            for (task in runningTasks) {
+//                Log.d(TAG, "runningTask ${task.taskId}")
+                if (task.taskId == id) {
+                    runningTask = task
+                    break
+                }
+            }
+            return runningTask?.isVisible() ?: false
         }
 
         override fun getItemCount(): Int {
@@ -317,8 +369,8 @@ constructor(
 
         private class ViewHolder(taskInfoLayout: ViewGroup) :
             RecyclerView.ViewHolder(taskInfoLayout) {
-            val iconIV: ImageView = taskInfoLayout.findViewById(R.id.iv_task_info_icon)
-            val highLightLineTV: ImageView = taskInfoLayout.findViewById(R.id.iv_highlight_line)
+            val iconIV = taskInfoLayout.findViewById<ImageView>(R.id.iv_task_info_icon)
+            val highLightLineTV = taskInfoLayout.findViewById<ImageView>(R.id.iv_highlight_line)
         }
 
         companion object {

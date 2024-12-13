@@ -4,20 +4,25 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
+import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.android.systemui.plugins.OverlayPlugin
@@ -34,6 +39,7 @@ class SystemUIOverlay : OverlayPlugin {
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var clockAndStatus: ViewGroup? = null
+    private var systemStatus: SystemStateLayout? = null
     private var appStateLayout: AppStateLayout? = null
     private var btAllApps: View? = null
     private var allAppsWindow: AllAppsWindow? = null
@@ -62,9 +68,14 @@ class SystemUIOverlay : OverlayPlugin {
         statusBar: View,
         navBar: View?,
     ) {
-        Log.d(TAG, "setup status bar $statusBar, nav bar $navBar")
+        statusBar.visibility = View.GONE
+        Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
         if (navBarButtonGroupId > 0 && navBar != null) {
+            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.system_bar_background_opaque))
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
+//            buttonGroup.setBackgroundColor(pluginContext!!.getColor(R.color.black))
+
+//            Log.d(TAG, "setup() called with: measuredWidth = $measuredWidth, buttonGroup = $buttonGroup")
             if (buttonGroup is ViewGroup) {
                 navBarButtonGroup = buttonGroup
                 // We must set the height to match parent programmatically
@@ -85,38 +96,53 @@ class SystemUIOverlay : OverlayPlugin {
                 if (oldAppStateLayout != null) {
                     buttonGroup.removeView(oldAppStateLayout)
                 }
+
+
                 appStateLayout!!.tag = TAG_APP_STATE_LAYOUT
                 // The first item is all apps group.
                 // The next three item is back button, home button, recents button.
                 // So we should add app state layout to the 5th, index 4.
-                buttonGroup.addView(appStateLayout, 4, layoutParams)
+                layoutParams.marginStart = 10
+                buttonGroup.addView(appStateLayout,  1, layoutParams)
                 appStateLayout!!.initTasks()
+
                 val oldClockAndStatus =
                     buttonGroup.findViewWithTag<View>(TAG_CLOCK_AND_STATUS_GROUP)
                 if (oldClockAndStatus != null) {
                     buttonGroup.removeView(oldClockAndStatus)
                 }
-                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
-                val layoutParams1 =
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                    )
-                layoutParams1.gravity = Gravity.END
-                layoutParams1.width = FrameLayout.LayoutParams.WRAP_CONTENT
-                layoutParams1.height = FrameLayout.LayoutParams.MATCH_PARENT
-                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
-                clockAndStatus!!.layoutParams = layoutParams1
-                buttonGroup.addView(clockAndStatus)
-                val clockTextView = buttonGroup.findViewById<TextView>(R.id.clock)
-                val batteryBar = buttonGroup.findViewById<ProgressBar>(R.id.progressBar)
-                val wifiBar = buttonGroup.findViewById<ImageView>(R.id.progressBarWifi)
-                val batteryText = buttonGroup.findViewById<TextView>(R.id.textViewBatteryPercent)
-                val clockAndStatus =
-                    this.pluginContext?.let {
-                        ClockAndStatus(clockTextView, batteryBar, batteryText, wifiBar, it)
-                    }
-                clockAndStatus?.startUpdatingTimeAndStatus()
+//                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
+//                val systemStateLayoutParams = FrameLayout.LayoutParams(
+//                    FrameLayout.LayoutParams.WRAP_CONTENT,
+//                    FrameLayout.LayoutParams.MATCH_PARENT
+//                )
+//                systemStateLayoutParams.gravity = Gravity.RIGHT
+//                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
+////                clockAndStatus!!.layoutParams = layoutParams1
+//                buttonGroup.addView(clockAndStatus, 3,systemStateLayoutParams)
+//                val clockTextView = buttonGroup.findViewById<TextView>(R.id.clock)
+//                val batteryBar = buttonGroup.findViewById<ProgressBar>(R.id.progressBar)
+//                val wifiBar = buttonGroup.findViewById<ImageView>(R.id.progressBarWifi)
+//                val batteryText = buttonGroup.findViewById<TextView>(R.id.textViewBatteryPercent)
+//                val clockAndStatus =
+//                    this.pluginContext?.let {
+//                        ClockAndStatus(clockTextView, batteryBar, batteryText, wifiBar, it)
+//                    }
+//                clockAndStatus?.startUpdatingTimeAndStatus()
+
+                val oldSystemStatus =
+                    buttonGroup.findViewWithTag<View>(TAG_SYSTEM_STATUS_GROUP)
+                if (oldSystemStatus != null) {
+                    buttonGroup.removeView(oldSystemStatus)
+                }
+                systemStatus!!.tag = TAG_SYSTEM_STATUS_GROUP
+                val systemStateParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                systemStateParams.gravity = Gravity.RIGHT
+                buttonGroup.addView(systemStatus, 3,systemStateParams)
+
             }
         }
     }
@@ -131,15 +157,20 @@ class SystemUIOverlay : OverlayPlugin {
 
     override fun onCreate(
         sysUIContext: Context,
-        pluginContext: Context,
+        pluginContext_1: Context,
     ) {
         systemUIContext = sysUIContext
-        this.pluginContext = pluginContext
+        pluginContext = pluginContext_1
         navBarButtonGroupId =
             sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
+//        Log.d(
+//            TAG,
+//            "onCreate() called with: sysUIContext = $sysUIContext, pluginContext = $pluginContext"
+//        )
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        systemStatus = initSystemStatusLayout(this.pluginContext, systemStatus)
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
@@ -148,10 +179,11 @@ class SystemUIOverlay : OverlayPlugin {
         initializeTuningServiceSettingKeys(resolver, tunerKeyObserver)
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter)
+        systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
     }
 
     override fun onDestroy() {
+//        Log.d(TAG, "onDestroy() called")
         if (systemUIContext != null) {
             try {
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
@@ -226,15 +258,98 @@ class SystemUIOverlay : OverlayPlugin {
                 as ViewGroup
     }
 
+    private fun initSystemStatusLayout(
+        context: Context?,
+        systemStatus: SystemStateLayout?
+    ): SystemStateLayout? {
+
+        if (context == null) {
+            throw IllegalArgumentException("Context cannot be null")
+        }
+        val inflater = LayoutInflater.from(context).cloneInContext(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+                if (name == "com.boringdroid.systemui.SystemStateLayout") {
+                    try {
+                        val clazz = Class.forName(name, true, SystemStateLayout::class.java.classLoader)
+                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
+                            .newInstance(context, attrs) as View
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                return null
+            }
+
+            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+                return onCreateView(name, context, attrs)
+            }
+        }
+        val inflate = inflater.inflate(R.layout.layout_nav_panel, null)
+        if (inflate is SystemStateLayout) {
+            Log.d(TAG, "initSystemStatusLayout: return $inflate")
+            return systemStatus ?: inflate
+        } else {
+            throw IllegalStateException("Failed to inflate SystemStateLayout from layout file")
+        }
+    }
+
+
     @SuppressLint("InflateParams")
     private fun initializeAppStateLayout(
         context: Context?,
         appStateLayout: AppStateLayout?,
     ): AppStateLayout {
-        return appStateLayout
-            ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
-                as AppStateLayout
+
+        // 确保上下文不为空
+        if (context == null) {
+            throw IllegalArgumentException("Context cannot be null")
+        }
+
+        // 创建自定义的 LayoutInflater.Factory
+        val inflater = LayoutInflater.from(context).cloneInContext(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+                if (name == "com.boringdroid.systemui.AppStateLayout") {
+                    try {
+                        val clazz = Class.forName(name, true, AppStateLayout::class.java.classLoader)
+                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
+                            .newInstance(context, attrs) as View
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                return null
+            }
+
+            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+                return onCreateView(name, context, attrs)
+            }
+        }
+
+        // 使用自定义的 Factory 加载布局
+        val inflate = inflater.inflate(R.layout.layout_app_state, null)
+
+        // 检查 inflate 是否为 AppStateLayout 类型
+        if (inflate is AppStateLayout) {
+            Log.d(TAG, "initializeAppStateLayout: return $inflate")
+            return appStateLayout ?: inflate
+        } else {
+            throw IllegalStateException("Failed to inflate AppStateLayout from layout file")
+        }
     }
+
+
+//    @SuppressLint("InflateParams")
+//    private fun initializeAppStateLayout(
+//        context: Context?,
+//        appStateLayout: AppStateLayout?,
+//    ): AppStateLayout {
+//        return appStateLayout
+//            ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
+//                    as AppStateLayout
+//    }
+
 
     private fun onTunerChange(uri: Uri) {
         val keyName = uri.lastPathSegment
@@ -264,6 +379,7 @@ class SystemUIOverlay : OverlayPlugin {
         private const val ACTION_PLUGIN_CHANGED = "com.android.systemui.action.PLUGIN_CHANGED"
         private const val TAG_ALL_APPS_GROUP = "tag-bt-all-apps-group"
         private const val TAG_CLOCK_AND_STATUS_GROUP = "tag-clock-and-status-group"
+        private const val TAG_SYSTEM_STATUS_GROUP = "tag-system-status-group"
         private const val TAG_APP_STATE_LAYOUT = "tag-app-state-layout"
     }
 }

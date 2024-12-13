@@ -6,11 +6,13 @@ import android.content.pm.LauncherApps
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.UserManager
+import android.util.Log
 import java.lang.ref.WeakReference
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     companion object {
         private val WORK_THREAD = HandlerThread("app-loader-thread")
+        private const val TAG = "AppLoaderTask"
 
         init {
             WORK_THREAD.start()
@@ -42,6 +44,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
             appData.componentName = info.componentName
             appData.packageName = info.applicationInfo.packageName
             appData.icon = info.getIcon(0)
+//            Log.d(TAG, "run() called $appData")
             loaderAllApps.add(appData)
         }
         loaderAllApps.sortWith { appDataOne: AppData, appDataTwo: AppData ->
@@ -50,6 +53,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
             )
         }
         val target = target
+//        Log.d(TAG, "run() called")
         target?.sendEmptyMessage(HandlerConstant.H_LOAD_SUCCEED)
     }
 
