@@ -60,16 +60,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }
         val layoutParams = generateLayoutParams(mContext, windowManager)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null) as RelativeLayout?
-        val layoutParams1 =RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT)
-        layoutParams1.topMargin = mContext?.resources?.getDimension(R.dimen.all_apps_margin_vertical)!!.toInt()
-        layoutParams1.bottomMargin = mContext.resources?.getDimension(R.dimen.all_apps_margin_vertical)!!.toInt()
-        layoutParams1.rightMargin = mContext.resources?.getDimension(R.dimen.all_apps_margin_horizontal)!!.toInt()
-        layoutParams1.leftMargin = mContext.resources?.getDimension(R.dimen.all_apps_margin_horizontal)!!.toInt()
-        allAppsLayout = AllAppsLayout(mContext)
-        val root: RelativeLayout? = windowContentView?.findViewById<RelativeLayout>(R.id.root)
-//        val view = windowContentView!!.findViewById(R.id.all_apps_layout) as View
-//        allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
-        root!!.addView(allAppsLayout, layoutParams1)
+        allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
         allAppsLayout!!.handler = handler
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
@@ -115,16 +106,16 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         }
         var target:ViewRootImpl = view.parent as ViewRootImpl
 
-            Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
-            if (target is ViewRootImpl) {
-                val blurDrawable =target.createBackgroundBlurDrawable()
+        Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
+        if (target is ViewRootImpl) {
+            val blurDrawable =target.createBackgroundBlurDrawable()
 //                val blurDrawable = getBackgroundBlurRadius(target, radius)
-                val realDrawable = view.background
-                val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
-                view.background = layerDrawable
-                Log.d(TAG, "setBackgroundBlurRadius: success $radius")
-                return
-            }
+            val realDrawable = view.background
+            val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
+            view.background = layerDrawable
+            Log.d(TAG, "setBackgroundBlurRadius: success $radius")
+            return
+        }
 //            target = target.parent
     }
 
@@ -167,8 +158,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                 windowHeight,
                 WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL ,
+                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL ,
                 PixelFormat.RGB_565,
             )
         val displayMetrics = DisplayMetrics()

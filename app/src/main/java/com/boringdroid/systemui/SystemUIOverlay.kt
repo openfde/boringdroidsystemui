@@ -46,6 +46,7 @@ class SystemUIOverlay : OverlayPlugin {
     private var navBarButtonGroupId = -1
     private var resolver: ContentResolver? = null
     private val tunerKeys: MutableList<String> = ArrayList()
+    private val classLoader = SystemUIOverlay::class.java.classLoader
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private val closeSystemDialogsReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
@@ -111,25 +112,6 @@ class SystemUIOverlay : OverlayPlugin {
                 if (oldClockAndStatus != null) {
                     buttonGroup.removeView(oldClockAndStatus)
                 }
-//                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
-//                val systemStateLayoutParams = FrameLayout.LayoutParams(
-//                    FrameLayout.LayoutParams.WRAP_CONTENT,
-//                    FrameLayout.LayoutParams.MATCH_PARENT
-//                )
-//                systemStateLayoutParams.gravity = Gravity.RIGHT
-//                clockAndStatus!!.tag = TAG_CLOCK_AND_STATUS_GROUP
-////                clockAndStatus!!.layoutParams = layoutParams1
-//                buttonGroup.addView(clockAndStatus, 3,systemStateLayoutParams)
-//                val clockTextView = buttonGroup.findViewById<TextView>(R.id.clock)
-//                val batteryBar = buttonGroup.findViewById<ProgressBar>(R.id.progressBar)
-//                val wifiBar = buttonGroup.findViewById<ImageView>(R.id.progressBarWifi)
-//                val batteryText = buttonGroup.findViewById<TextView>(R.id.textViewBatteryPercent)
-//                val clockAndStatus =
-//                    this.pluginContext?.let {
-//                        ClockAndStatus(clockTextView, batteryBar, batteryText, wifiBar, it)
-//                    }
-//                clockAndStatus?.startUpdatingTimeAndStatus()
-
                 val oldSystemStatus =
                     buttonGroup.findViewWithTag<View>(TAG_SYSTEM_STATUS_GROUP)
                 if (oldSystemStatus != null) {
@@ -161,12 +143,8 @@ class SystemUIOverlay : OverlayPlugin {
     ) {
         systemUIContext = sysUIContext
         pluginContext = pluginContext_1
-        navBarButtonGroupId =
-            sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
-//        Log.d(
-//            TAG,
-//            "onCreate() called with: sysUIContext = $sysUIContext, pluginContext = $pluginContext"
-//        )
+        navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
+        loadCustomViewsWithInflater(pluginContext!!)
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
@@ -180,6 +158,45 @@ class SystemUIOverlay : OverlayPlugin {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
+    }
+
+    private fun loadCustomViewsWithInflater(context: Context) {
+        if (context == null) {
+            throw IllegalArgumentException("Context cannot be null")
+        }
+        val inflater = LayoutInflater.from(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(
+                parent: View?,
+                name: String,
+                context: Context,
+                attrs: AttributeSet
+            ): View? {
+                return createCustomView(name, context, attrs)
+            }
+
+            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+                return createCustomView(name, context, attrs)
+            }
+
+            private fun createCustomView(name: String, context: Context, attrs: AttributeSet): View? {
+                try {
+                    if(name.contains(context.packageName)){
+                        val clazz =
+                            Class.forName(name, true, classLoader)
+                        return clazz.getConstructor(
+                            Context::class.java,
+                            AttributeSet::class.java
+                        )
+                            .newInstance(context, attrs) as View
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to create view for name: $name", e)
+                    return null
+                }
+                return null
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -255,100 +272,27 @@ class SystemUIOverlay : OverlayPlugin {
     ): ViewGroup {
         return clockAndStatus
             ?: LayoutInflater.from(context).inflate(R.layout.layout_clock_and_status, null)
-                as ViewGroup
+                    as ViewGroup
     }
 
     private fun initSystemStatusLayout(
         context: Context?,
         systemStatus: SystemStateLayout?
     ): SystemStateLayout? {
-
-        if (context == null) {
-            throw IllegalArgumentException("Context cannot be null")
-        }
-        val inflater = LayoutInflater.from(context).cloneInContext(context)
-        inflater.factory2 = object : LayoutInflater.Factory2 {
-            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-                if (name == "com.boringdroid.systemui.SystemStateLayout") {
-                    try {
-                        val clazz = Class.forName(name, true, SystemStateLayout::class.java.classLoader)
-                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
-                            .newInstance(context, attrs) as View
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                return null
-            }
-
-            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
-                return onCreateView(name, context, attrs)
-            }
-        }
-        val inflate = inflater.inflate(R.layout.layout_nav_panel, null)
-        if (inflate is SystemStateLayout) {
-            Log.d(TAG, "initSystemStatusLayout: return $inflate")
-            return systemStatus ?: inflate
-        } else {
-            throw IllegalStateException("Failed to inflate SystemStateLayout from layout file")
-        }
+        return systemStatus
+            ?: LayoutInflater.from(context).inflate(R.layout.layout_nav_panel, null)
+                    as SystemStateLayout
     }
-
 
     @SuppressLint("InflateParams")
     private fun initializeAppStateLayout(
         context: Context?,
         appStateLayout: AppStateLayout?,
     ): AppStateLayout {
-
-        // 确保上下文不为空
-        if (context == null) {
-            throw IllegalArgumentException("Context cannot be null")
-        }
-
-        // 创建自定义的 LayoutInflater.Factory
-        val inflater = LayoutInflater.from(context).cloneInContext(context)
-        inflater.factory2 = object : LayoutInflater.Factory2 {
-            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-                if (name == "com.boringdroid.systemui.AppStateLayout") {
-                    try {
-                        val clazz = Class.forName(name, true, AppStateLayout::class.java.classLoader)
-                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
-                            .newInstance(context, attrs) as View
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                return null
-            }
-
-            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
-                return onCreateView(name, context, attrs)
-            }
-        }
-
-        // 使用自定义的 Factory 加载布局
-        val inflate = inflater.inflate(R.layout.layout_app_state, null)
-
-        // 检查 inflate 是否为 AppStateLayout 类型
-        if (inflate is AppStateLayout) {
-            Log.d(TAG, "initializeAppStateLayout: return $inflate")
-            return appStateLayout ?: inflate
-        } else {
-            throw IllegalStateException("Failed to inflate AppStateLayout from layout file")
-        }
+        return appStateLayout
+            ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
+                    as AppStateLayout
     }
-
-
-//    @SuppressLint("InflateParams")
-//    private fun initializeAppStateLayout(
-//        context: Context?,
-//        appStateLayout: AppStateLayout?,
-//    ): AppStateLayout {
-//        return appStateLayout
-//            ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
-//                    as AppStateLayout
-//    }
 
 
     private fun onTunerChange(uri: Uri) {
@@ -374,7 +318,6 @@ class SystemUIOverlay : OverlayPlugin {
 
     companion object {
         private const val TAG = "SystemUIOverlay"
-
         // Copied from systemui source code, please keep it update to source code.
         private const val ACTION_PLUGIN_CHANGED = "com.android.systemui.action.PLUGIN_CHANGED"
         private const val TAG_ALL_APPS_GROUP = "tag-bt-all-apps-group"
