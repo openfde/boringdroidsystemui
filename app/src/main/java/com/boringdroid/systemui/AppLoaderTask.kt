@@ -6,7 +6,8 @@ import android.content.pm.LauncherApps
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.UserManager
-import android.util.Log
+import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.data.AppData
 import java.lang.ref.WeakReference
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {

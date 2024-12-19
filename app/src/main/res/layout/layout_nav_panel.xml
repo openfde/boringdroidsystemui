@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.boringdroid.systemui.SystemStateLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.boringdroid.systemui.view.SystemStateLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/system_tray"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -97,4 +97,4 @@
 <!--            android:layout_height="match_parent"-->
 <!--            android:background="#F1C7C7C7"/>-->
 <!--    </LinearLayout>-->
-</com.boringdroid.systemui.SystemStateLayout>
+</com.boringdroid.systemui.view.SystemStateLayout>

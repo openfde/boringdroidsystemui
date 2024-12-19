@@ -8,7 +8,6 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -19,14 +18,11 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.view.AppStateLayout
+import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
@@ -34,8 +30,8 @@ import kotlin.collections.ArrayList
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin {
-    private var pluginContext: Context? = null
-    private var systemUIContext: Context? = null
+    public var pluginContext: Context? = null
+    public var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var clockAndStatus: ViewGroup? = null
@@ -173,7 +169,7 @@ class SystemUIOverlay : OverlayPlugin {
         systemStatus = initSystemStatusLayout(this.pluginContext, systemStatus)
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
-        allAppsWindow = AllAppsWindow(this.pluginContext)
+        allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
         btAllApps!!.setOnClickListener(allAppsWindow)
         resolver = sysUIContext.contentResolver
         initializeTuningServiceSettingKeys(resolver, tunerKeyObserver)
@@ -269,7 +265,7 @@ class SystemUIOverlay : OverlayPlugin {
         val inflater = LayoutInflater.from(context).cloneInContext(context)
         inflater.factory2 = object : LayoutInflater.Factory2 {
             override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-                if (name == "com.boringdroid.systemui.SystemStateLayout") {
+                if (name == "com.boringdroid.systemui.view.SystemStateLayout") {
                     try {
                         val clazz = Class.forName(name, true, SystemStateLayout::class.java.classLoader)
                         return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
@@ -310,7 +306,7 @@ class SystemUIOverlay : OverlayPlugin {
         val inflater = LayoutInflater.from(context).cloneInContext(context)
         inflater.factory2 = object : LayoutInflater.Factory2 {
             override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-                if (name == "com.boringdroid.systemui.AppStateLayout") {
+                if (name == "com.boringdroid.systemui.view.AppStateLayout") {
                     try {
                         val clazz = Class.forName(name, true, AppStateLayout::class.java.classLoader)
                         return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
