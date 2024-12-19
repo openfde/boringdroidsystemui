@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.content.Intent
@@ -6,12 +6,14 @@ import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.AppData
+import com.boringdroid.systemui.HandlerConstant
+import com.boringdroid.systemui.R
 
 class AllAppsLayout
 @JvmOverloads

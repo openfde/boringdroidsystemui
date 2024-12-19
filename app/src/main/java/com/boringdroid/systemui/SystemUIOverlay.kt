@@ -1,14 +1,15 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -19,27 +20,29 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
+import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AllAppsWindow
+import com.boringdroid.systemui.view.AppStateLayout
+import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin {
+class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     private var pluginContext: Context? = null
     private var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var clockAndStatus: ViewGroup? = null
-    private var systemStatus: SystemStateLayout? = null
+    private var systemStateLayout: SystemStateLayout? = null
     private var appStateLayout: AppStateLayout? = null
     private var btAllApps: View? = null
     private var allAppsWindow: AllAppsWindow? = null
@@ -47,6 +50,9 @@ class SystemUIOverlay : OverlayPlugin {
     private var resolver: ContentResolver? = null
     private val tunerKeys: MutableList<String> = ArrayList()
     private val classLoader = SystemUIOverlay::class.java.classLoader
+    private var mNm: NotificationManager? = null
+    private var dynamicReceiver: DynamicReceiver? = null
+
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private val closeSystemDialogsReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
@@ -72,7 +78,7 @@ class SystemUIOverlay : OverlayPlugin {
         statusBar.visibility = View.GONE
         Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
         if (navBarButtonGroupId > 0 && navBar != null) {
-            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.system_bar_background_opaque))
+            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_bg))
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
 //            buttonGroup.setBackgroundColor(pluginContext!!.getColor(R.color.black))
 
@@ -117,13 +123,14 @@ class SystemUIOverlay : OverlayPlugin {
                 if (oldSystemStatus != null) {
                     buttonGroup.removeView(oldSystemStatus)
                 }
-                systemStatus!!.tag = TAG_SYSTEM_STATUS_GROUP
+                systemStateLayout!!.tag = TAG_SYSTEM_STATUS_GROUP
                 val systemStateParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
                 systemStateParams.gravity = Gravity.RIGHT
-                buttonGroup.addView(systemStatus, 3,systemStateParams)
+                buttonGroup.addView(systemStateLayout, 3,systemStateParams)
+                systemStateLayout!!.initState()
 
             }
         }
@@ -148,7 +155,8 @@ class SystemUIOverlay : OverlayPlugin {
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
-        systemStatus = initSystemStatusLayout(this.pluginContext, systemStatus)
+        systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
+        systemStateLayout?.listener = this
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext)
@@ -158,7 +166,26 @@ class SystemUIOverlay : OverlayPlugin {
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
+        grantNmnPermission()
+        val notificationServiceEnable = isNotificationServiceEnable()
+        Log.d(TAG,"onCreate() called with: sysUIContext = $sysUIContext, notificationServiceEnable = $notificationServiceEnable")
+        dynamicReceiver = DynamicReceiver(systemStateLayout)
+        var intentFilter  = IntentFilter()
+        intentFilter.addAction(SERVICE_ACTION)
+        pluginContext?.registerReceiver(dynamicReceiver, intentFilter);
     }
+
+    private fun grantNmnPermission() {
+        val method = "setNotificationListenerAccessGranted"
+        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
+        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
+        M.invoke(mNm, component, true)
+    }
+
+    private fun isNotificationServiceEnable(): Boolean {
+        return NotificationManagerCompat.getEnabledListenerPackages(systemUIContext!!.applicationContext).contains(systemUIContext!!.getPackageName())
+    }
+
 
     private fun loadCustomViewsWithInflater(context: Context) {
         if (context == null) {
@@ -324,5 +351,46 @@ class SystemUIOverlay : OverlayPlugin {
         private const val TAG_CLOCK_AND_STATUS_GROUP = "tag-clock-and-status-group"
         private const val TAG_SYSTEM_STATUS_GROUP = "tag-system-status-group"
         private const val TAG_APP_STATE_LAYOUT = "tag-app-state-layout"
+    }
+
+    override fun showNotification() {
+        Log.w("SysteUIOverlay","showNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "SHOW_NOTIF_PANEL"
+            )
+        )
+    }
+
+    override fun hideNotification() {
+        Log.w("SysteUIOverlay","hideNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "HIDE_NOTIF_PANEL"
+            )
+        )
+    }
+
+    override fun syncVisible(which: Int) {
+        if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
+            systemStateLayout?.hideControlWindow()
+        }
+        if( (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
+            hideNotification()
+        }
+        if(Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0  ){
+            allAppsWindow?.dismiss()
+        }
+        if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
+            systemStateLayout?.hideWifiWindow()
+        }
+        if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
+            systemStateLayout?.hideVolumeCenterWindow()
+        }
+        if(Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0 ){
+            systemStateLayout?.hideImeSwitchWindow()
+        }
     }
 }

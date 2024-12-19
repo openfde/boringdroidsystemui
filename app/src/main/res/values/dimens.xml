@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="nav_button_size">30dp</dimen>
-    <dimen name="all_apps_window_width">500dp</dimen>
-    <dimen name="all_apps_window_height">400dp</dimen>
+    <dimen name="nav_button_size">32dp</dimen>
+    <dimen name="all_apps_window_width">754dp</dimen>
+    <dimen name="all_apps_window_height">604dp</dimen>
     <dimen name="all_apps_item_spacing_horizontal">10dp</dimen>
     <dimen name="all_apps_item_spacing_vertical">10dp</dimen>
     <dimen name="all_apps_item_width">70dp</dimen>
-    <dimen name="all_apps_item_height">70dp</dimen>
+    <dimen name="all_apps_item_height">48dp</dimen>
+    <dimen name="collect_app_icon_size">32dp</dimen>
     <dimen name="all_apps_corner_radius">8dp</dimen>
-    <dimen name="app_info_name_text_size">13sp</dimen>
-    <dimen name="app_info_icon_width">30dp</dimen>
-    <dimen name="app_info_icon_height">30dp</dimen>
+    <dimen name="app_info_name_text_size">14sp</dimen>
+    <dimen name="app_collect_name_text_size">16sp</dimen>
+    <dimen name="app_info_icon_width">32dp</dimen>
+    <dimen name="app_info_icon_height">32dp</dimen>
+    <dimen name="app_info_icon_size">28dp</dimen>
     <dimen name="all_apps_margin_vertical">20dp</dimen>
+    <dimen name="all_apps_margin_vertical_bottom">20dp</dimen>
     <dimen name="all_apps_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_horizontal">10dp</dimen>
     <dimen name="all_apps_window_margin_vertical">10dp</dimen>
     <dimen name="task_info_icon_size">26dp</dimen>
-    <dimen name="line_long_width">30dp</dimen>
+    <dimen name="line_long_width">12dp</dimen>
     <dimen name="line_long_height">2dp</dimen>
-    <dimen name="line_short_width">15dp</dimen>
+    <dimen name="line_short_width">12dp</dimen>
     <dimen name="line_short_height">2dp</dimen>
     <dimen name="iv_highlight_line_margin_top">5dp</dimen>
-    <dimen name="task_info_item_padding_horizontal">5dp</dimen>
+    <dimen name="task_info_item_padding_horizontal">7dp</dimen>
     <dimen name="all_apps_padding_vertical">5dp</dimen>
     <dimen name="all_apps_padding_horizontal">5dp</dimen>
-
     <dimen name="control_bt_size">50dp</dimen>
 
     <dimen name="wifi_status_window_width">100dp</dimen>

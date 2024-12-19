@@ -1,28 +1,24 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.PixelFormat
 import android.media.AudioManager
 import android.provider.Settings
 import android.util.AttributeSet
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextClock
-import android.widget.TextView
 import androidx.core.view.get
+import com.boringdroid.systemui.R
+import com.boringdroid.systemui.utils.Utils
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
@@ -100,18 +96,19 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
 //        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
-//        notificationBtn?.setOnClickListener {
-//            Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
-//            if (Utils.notificationPanelVisible) {
-//                listener?.hideNotification()
-//                Utils.notificationPanelVisible = false
-//            } else {
-//                listener?.showNotification()
-//                Utils.notificationPanelVisible = true
-//                listener?.syncVisible(Utils.NOTIFICATION_VISIBLE)
-//            }
-////            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
-//        }
+        Log.d(TAG, "initState() called")
+        notificationBtn?.setOnClickListener {
+            Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
+            if (Utils.notificationPanelVisible) {
+                listener?.hideNotification()
+                Utils.notificationPanelVisible = false
+            } else {
+                listener?.showNotification()
+                Utils.notificationPanelVisible = true
+                listener?.syncVisible(Utils.NOTIFICATION_VISIBLE)
+            }
+//            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
+        }
 //        bluetoothBtn?.setOnClickListener { this }
         wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener {
@@ -164,16 +161,16 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         controlBtn?.tooltipText = context.getString(R.string.fde_control_center)
         batteryBtn?.tooltipText = context.getString(R.string.fde_notification_battery)
         notificationBtn?.tooltipText = context.getString(R.string.fde_notification_message)
-        removeHorizontalMargin()
+//        removeHorizontalMargin()
 
-        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
-        frameLayout.setOnClickListener(View.OnClickListener {
+//        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
+//        frameLayout.setOnClickListener(View.OnClickListener {
 //            controlCenterWindow?.dismiss()
 //            if (Utils.notificationPanelVisible) {
 //                listener?.hideNotification()
 //                Utils.notificationPanelVisible = false
 //            }
-        })
+//        })
 
         imeBtn?.setOnClickListener {
             imeSwitchClick(imeBtn!!)
@@ -233,8 +230,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private fun removeHorizontalMargin() {
-        val viewGroup = (parent as FrameLayout).parent.parent.parent as FrameLayout
-        val layoutParams = viewGroup.get(0).layoutParams as FrameLayout.LayoutParams
+        val viewGroup = (parent as LinearLayout).parent.parent.parent as LinearLayout
+        val layoutParams = viewGroup.get(0).layoutParams as LinearLayout.LayoutParams
         layoutParams.leftMargin = 0
         layoutParams.rightMargin = 0
         layoutParams.marginStart = 0

@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
@@ -24,6 +24,10 @@ import android.view.ViewRootImpl
 import android.view.WindowManager
 import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
+import com.boringdroid.systemui.AppLoaderTask
+import com.boringdroid.systemui.HandlerConstant
+import com.boringdroid.systemui.R
+import com.boringdroid.systemui.ReflectUtils
 import java.lang.ref.WeakReference
 
 

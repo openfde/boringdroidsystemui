@@ -1,4 +1,4 @@
-package com.boringdroid.systemui
+package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
@@ -30,6 +30,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import com.boringdroid.systemui.R
+import com.boringdroid.systemui.TaskInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -119,7 +121,8 @@ constructor(
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
 
-        Log.d(TAG, "toptask info:${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}, " +
+        Log.d(
+            TAG, "toptask info:${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}, " +
                 "${runningTaskInfo.taskDescription?.label}," +
                 "${runningTaskInfo.taskDescription?.icon}" )
 

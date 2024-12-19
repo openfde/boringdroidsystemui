@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <compatible>
+        <keycode>isAllowHideDecorCaption</keycode>
+        <keydesc>{
+            "en":"Allow to hide the title bar",
+            "ch":"允许隐藏标题栏"
+            }</keydesc>
+        <defaultvalue>false</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"test text",
+            "ch":"测试文本"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible>
+        <keycode>isAllowMuliWindows</keycode>
+        <keydesc>
+            {
+            "en":"Allow multiple windows",
+            "ch":"允许多窗口"
+            }</keydesc>
+        <defaultvalue>false</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"VNC wether allow muti windows or not.",
+            "ch":"VNC应用是否允许多窗口"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+
+    <compatible>
+        <keycode>maxWidth</keycode>
+        <keydesc>
+            {
+            "en":"Maximum resolution width",
+            "ch":"最大分辨率宽"
+            }</keydesc>
+        <defaultvalue>1080</defaultvalue>
+        <inputtype>input</inputtype>
+        <notes>
+            {
+            "en":"test text",
+            "ch":"测试文本"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+
+    <compatible>
+        <keycode>pixel</keycode>
+        <keydesc> {
+            "en":"resolution",
+            "ch":"分辨率"
+            }</keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"readme",
+            "ch":"说明文档"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "1080",
+            "height": "1920"
+            },
+            {
+            "width": "1000",
+            "height": "2000"
+            }
+            ]</optionjson>
+    </compatible>
+
+
+    <compatible>
+        <keycode>maxWindowsNum</keycode>
+        <keydesc>
+            {
+            "en":"Maximum number of windows",
+            "ch":"最大窗口数量"
+            }</keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"readme",
+            "ch":"说明文档"
+            }
+        </notes>
+        <optionjson>[{
+            "value": "10"
+            },
+            {
+            "value": "20"
+            },
+            {
+            "value": "30"
+            }
+            ]</optionjson>
+    </compatible>
+
+
+</library>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:padding="7dp"
+	android:orientation="vertical">
+
+	<LinearLayout
+        android:id="@+id/pin_entry_pin"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+
+		<ImageView
+			android:layout_height="16dp"
+			android:layout_width="16dp"
+			android:src="@drawable/ic_pin"
+			android:id="@+id/pin_entry_iv"
+			android:visibility="gone"
+			android:gravity="center_vertical"
+			android:background="@drawable/white_circle" />
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:text="@string/pin"
+			android:textSize="14sp"
+			android:textColor="@color/app_black_dark"
+			android:layout_gravity="center_vertical"
+			android:layout_marginHorizontal="6dp"
+			android:id="@+id/pin_entry_tv" />
+
+	</LinearLayout>
+
+	<LinearLayout
+        android:id="@+id/pin_entry_move"
+        android:visibility="gone"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="6dp">
+
+		<ImageView
+            android:layout_height="32dp"
+            android:layout_width="32dp"
+            android:src="@drawable/ic_arrow_back"
+            android:id="@+id/pin_entry_left"
+			android:visibility="gone"
+            android:background="@drawable/circle"
+			android:padding="5dp"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:text="@string/move"
+			android:textSize="14sp"
+			android:textColor="#1A1A1A"
+			android:layout_marginStart="6dp"
+			android:layout_marginEnd="6dp"/>
+        
+        <ImageView
+            android:layout_height="32dp"
+            android:layout_width="32dp"
+			android:visibility="gone"
+            android:src="@drawable/ic_arrow_right"
+            android:id="@+id/pin_entry_right"
+            android:background="@drawable/circle"
+			android:padding="5dp"/>
+
+	</LinearLayout>
+
+</LinearLayout>
+

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<library
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isAllowHideDecorCaption</keycode>
+        <keydesc>
+            {
+            "en":"App icon display repair",
+            "ch":"应用内图标显示修复"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Application icon display fix: Solve the issue of incomplete display of application icons in non-full-screen mode.",
+            "ch":"应用内图标显示修复：解决非全屏模式下应用内图标显示不全。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isAllowUnresizeable</keycode>
+        <keydesc>
+            {
+            "en":"Application window fixed maximization",
+            "ch":"应用窗口固定最大化"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+             "en":"Application window fixed maximization: Solve the problem of some gaming applications unable to display and operate in non-full-screen mode.",
+             "ch":"应用窗口固定最大化：解决非全屏模式下部分游戏类应用无法显示和操作。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isAllowScreenshotRecord</keycode>
+        <keydesc>
+            {
+            "en":"Remove screenshot recording restrictions",
+            "ch":"解除截图录屏限制"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Remove screenshot and screen recording restrictions: Resolve the issue of certain application interfaces being unable to be captured or recorded.",
+            "ch":"解除截图录屏限制：解决应用部分界面无法截图和录屏。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>size</keycode>
+        <keydesc>
+            {
+            "en":"Apply virtual resolution",
+            "ch":"应用虚拟分辨率"
+            }
+        </keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"Application virtual resolution ratio: Addressing the limitation of certain application functionalities being restricted under the system's default resolution ratio.",
+            "ch":"应用虚拟分辨率：解决部分应用在系统预设的分辨率下内部某些功能被限制使用。"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "1920",
+            "height": "1080"
+            },
+            {
+            "width": "1600",
+            "height": "900"
+            }, {
+            "width": "800",
+            "height": "600"
+            }
+            ]</optionjson>
+    </compatible>
+
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isAllowMuliWindows</keycode>
+        <keydesc>
+            {
+            "en":"Linux apps support for multiple windows",
+            "ch":"融合应用支持多窗口"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Open fusion application in multi window mode, only valid for Linux",
+            "ch":"多窗口模式打开融合应用，仅对Linux有效"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>minBoundsVisibleWidth</keycode>
+        <keydesc>
+            {
+            "en":"Minimum width of application window",
+            "ch":"应用窗口最小宽度"
+            }</keydesc>
+        <defaultvalue>48</defaultvalue>
+        <inputtype>input</inputtype>
+        <notes>
+            {
+            "en":"Minimum width of application window: The minimum adjustable width of the application window in freeform window mode",
+            "ch":"应用窗口最小宽度: 自由窗口模式下应用窗口可调整的最小宽度"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>minBoundsVisibleHeight</keycode>
+        <keydesc>
+            {
+            "en":"Minimum height of application window",
+            "ch":"应用窗口最小高度"
+            }</keydesc>
+        <defaultvalue>32</defaultvalue>
+        <inputtype>input</inputtype>
+        <notes>
+            {
+            "en":"Minimum height of application window: The minimum adjustable height of the application window in freeform window mode",
+            "ch":"应用窗口最小高度: 自由窗口模式下应用窗口可调整的最小高度"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-04-23" isdel="0">
+        <keycode>isTurnOffSimulatedTouch</keycode>
+        <keydesc>
+            {
+            "en":"Turn off simulated touch",
+            "ch":"关闭模拟触摸"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Turn off simulated touch: Solve the problem of remote control applications being unable to operate the scroll wheel.",
+            "ch":"关闭模拟触摸：解决远控类应用无法操作滚轮的问题。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-09-29" isdel="0">
+        <keycode>isAllowRealDisplaySize</keycode>
+        <keydesc>
+            {
+            "en":"Window size limit",
+            "ch":"限制应用内窗口大小"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Limit the screen size used for pop-ups within the app to the current size of the app window.",
+            "ch":"限制应用内弹窗使用的屏幕尺寸为当前应用窗口尺寸。"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-10-12" isdel="0">
+        <keycode>enableMagicWindow</keycode>
+        <keydesc>
+            {
+            "en":"Magic Window",
+            "ch":"平行视界"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"To display multiple windows of one application by enabling magic window",
+            "ch":"启用平行视界，可以平行显示同一个应用的多个窗口"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
+    <compatible date="2024-12-05" isdel="0">
+        <keycode>enabledResourceFixedLayout</keycode>
+        <keydesc>
+            {
+            "en":"apply resource resolution",
+            "ch":"应用资源分辨率"
+            }
+        </keydesc>
+        <defaultvalue>1</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"apply resource resolution:  Addressing Layout Display Issues for Certain Applications (e.g., WeChat) at System-Preset Resolutions",
+            "ch":"应用资源分辨率：解决部分应用（如微信）在系统预设的分辨率下布局显示过大或过小。"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "720",
+            "height": "1080"
+            },{
+            "width": "1080",
+            "height": "1920"
+            }
+            ]</optionjson>
+    </compatible>
+
+
+</library>

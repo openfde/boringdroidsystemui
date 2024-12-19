@@ -148,10 +148,10 @@ class ClockAndStatus(
                 else -> R.drawable.ic_wifi_signal_1
             }
         val drawable = ContextCompat.getDrawable(context, wifiLevelResourceId)
-        drawable?.setColorFilter(
-            ContextCompat.getColor(context, R.color.wifi_strength_color),
-            PorterDuff.Mode.SRC_IN
-        )
+//        drawable?.setColorFilter(
+//            ContextCompat.getColor(context, R.color.wifi_strength_color),
+//            PorterDuff.Mode.SRC_IN
+//        )
         return drawable
     }
 }

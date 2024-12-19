@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="all_apps_btn_fill_color">@android:color/holo_blue_light</color>
-    <color name="highlight_line_color">@android:color/holo_blue_light</color>
+    <color name="highlight_line_color">@color/theme_blue</color>
+    <color name="no_highlight_line_color">#61000000</color>
     <color name="bg_app_info_pressed_color">@android:color/darker_gray</color>
     <color name="bg_app_info_hovered_color">@android:color/darker_gray</color>
-    <color name="wifi_strength_color">#ffffff</color>
-    <color name="system_bar_background_opaque">#FFF0F2F5</color>
-
     <color name="seed">#2b69e2</color>
     <color name="md_theme_light_primary">#0456CF</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
@@ -71,7 +69,7 @@
     <color name="red">#E53935</color>
     <color name="green">#00897B</color>
     <color name="blue"> #1E88E5 </color>
-    <color name="fde_bg">#AAF0F2F5</color>
+    <color name="fde_bg">#F0F2F5</color>
     <color name="fde_edit_bg">#E6E6E6</color>
     <color name="fde_wifi_title"> #262626</color>
 
@@ -90,4 +88,5 @@
     <color name="white">#fff</color>
     <color name="black">#000</color>
     <color name="bord_gray">#D6D6D6</color>
+
 </resources>

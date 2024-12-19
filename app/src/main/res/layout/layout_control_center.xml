@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/control_center_window_width"
+    android:background="@color/control_center_bg"
+    android:layout_height="@dimen/control_center_window_height">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:nestedScrollingEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seekbar_volume"
+        android:layout_width="326dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="22dp"
+        android:progressDrawable="@drawable/seekbar_bg"
+        android:splitTrack="false"
+        android:thumb="@drawable/sb_thumb"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_volume"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_volume"
+        app:layout_constraintTop_toTopOf="@+id/iv_volume" />
+
+    <SeekBar
+        android:id="@+id/seekbar_light"
+        android:layout_width="326dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="28dp"
+        android:progressDrawable="@drawable/seekbar_bg"
+        android:splitTrack="false"
+        android:thumb="@drawable/sb_thumb"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+    <ImageView
+        android:id="@+id/iv_volume"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:splitTrack="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_volume" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="@+id/iv_volume"
+        app:layout_constraintTop_toBottomOf="@+id/iv_volume"
+        android:src="@drawable/icon_light" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<library xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <keycode>
+        <name>isAllowMuliWindows</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>false</defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.android.gallery3d</packagename>
+            <defaultvalue>true</defaultvalue>
+        </package>
+    </keycode>
+
+    <keycode>
+        <name>size</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>
+                {   width=1600  , height=900  }
+            </defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.android.gallery3d</packagename>
+            <defaultvalue>
+                {width=1920,height=1080}
+            </defaultvalue>
+        </package>
+    </keycode>
+
+
+    <keycode>
+        <name>minBoundsVisibleWidth</name>
+        <package>
+            <packagename>com.tencent.mm</packagename>
+            <defaultvalue>
+                48
+            </defaultvalue>
+        </package>
+
+        <package>
+            <packagename>com.android.gallery3d</packagename>
+            <defaultvalue>
+                60
+            </defaultvalue>
+        </package>
+    </keycode>
+
+
+</library>
