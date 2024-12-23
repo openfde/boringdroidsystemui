@@ -10,6 +10,7 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -34,7 +35,6 @@ import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.AppUtils
-import com.boringdroid.systemui.utils.CollectUtils
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.ReflectUtils
 import com.boringdroid.systemui.utils.SPUtils
@@ -42,9 +42,6 @@ import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsLayout
 import com.boringdroid.systemui.view.CollectAppsLayout
 import com.boringdroid.systemui.view.TestActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 
 
@@ -357,20 +354,10 @@ class AllAppsWindow(private val mContext: Context?,private val sContext: Context
                 } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
                     if (!isSystem) {
                         if (sContext != null) {
-                            LogTools.i("uninstallApp.........2.")
-//                            AppUtils.uninstallApp(sContext, appData)
-//                            val intent = Intent()
-//                            val cn: ComponentName? = ComponentName.unflattenFromString("com.boringdroid.systemui/.view\$TestActivity")
-//                            intent.component = cn;
-//                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                            mContext.startActivity(intent)
-
-                            val intent = Intent()
-                            intent.setClass(mContext, TestActivity::class.java)
+                            val intent = Intent(Intent.ACTION_DELETE)
+                            intent.setData(Uri.parse("package:" + appData.packageName))
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             mContext.startActivity(intent)
-                        }else{
-                            LogTools.i("uninstallApp....null......")
                         }
                     }
                 }

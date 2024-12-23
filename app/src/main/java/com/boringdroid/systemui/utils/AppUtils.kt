@@ -325,7 +325,6 @@ object AppUtils {
 
     @SuppressLint("SoonBlockedPrivateApi")
     public fun createShortcut(mContext: Context, app: AppData) {
-//        Log.d(AllAppsWindow.TAG, "createShortcut() called with: app = [${app.name}]")
         val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
         val shortcutManager: ShortcutManager? =
             mContext?.getSystemService(ShortcutManager::class.java)
@@ -370,10 +369,11 @@ object AppUtils {
 //        ParseUtils.parseGpsData(mContext);
 
         val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")
+        val cn: ComponentName? =
+            ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")
         intent.component = cn;
-        intent.putExtra("appName",appName)
-        intent.putExtra("packageName",packageName)
+        intent.putExtra("appName", appName)
+        intent.putExtra("packageName", packageName)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         mContext.startActivity(intent)
     }

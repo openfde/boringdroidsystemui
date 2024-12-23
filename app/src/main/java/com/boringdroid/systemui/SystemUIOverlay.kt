@@ -1,6 +1,7 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -26,7 +27,7 @@ import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
+
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin {
@@ -288,6 +289,10 @@ class SystemUIOverlay : OverlayPlugin {
         } else {
             throw IllegalStateException("Failed to inflate SystemStateLayout from layout file")
         }
+
+        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val keyguardLock = keyguardManager.newKeyguardLock(Context.KEYGUARD_SERVICE)
+        keyguardLock.disableKeyguard()
     }
 
 
