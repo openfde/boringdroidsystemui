@@ -114,9 +114,9 @@ class NotificationWindow(
             .toInt()
         val marginVertical = resources.getDimension(R.dimen.control_center_window_margin)
             .toInt()
-        layoutParams.gravity = Gravity.TOP or Gravity.END
+        layoutParams.gravity = Gravity.TOP or Gravity.RIGHT
         layoutParams.x = marginStart
-        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
+        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 5
         Log.d(TAG, "Notification window location (" + layoutParams.x + ", " + layoutParams.y + ")")
         return layoutParams
     }

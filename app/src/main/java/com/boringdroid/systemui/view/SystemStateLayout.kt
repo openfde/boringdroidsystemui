@@ -334,13 +334,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun onNotifyCount(count: Int?) {
-//        Log.d("TAG", "onNotifyCount() called with: count = $count")
-//        notificationBtn?.visibility = VISIBLE
-//        if (count!! > 0) {
-//            notificationBtn?.setImageResource(R.drawable.icon_notification_coming)
-//        } else {
-//            notificationBtn?.setImageResource(R.drawable.icon_notification)
-//        }
+        Log.d("TAG", "onNotifyCount() called with: count = $count")
+        notificationBtn?.visibility = VISIBLE
+        if (count!! > 0) {
+            notificationBtn?.setImageResource(R.drawable.icon_notification_coming)
+        } else {
+            notificationBtn?.setImageResource(R.drawable.icon_notification)
+        }
 //        notificationBtn?.setText(count.toString() + "")
     }
 

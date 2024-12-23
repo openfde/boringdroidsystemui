@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -179,8 +180,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     private fun grantNmnPermission() {
 //        val method = "setNotificationListenerAccessGranted"
 //        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
-//        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
+        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
 //        M.invoke(mNm, component, true)
+        val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
+        if (systemService != null) {
+            val nm = systemService as NotificationManager
+            nm.setNotificationListenerAccessGranted(component, true)
+        }
     }
 
     private fun isNotificationServiceEnable(): Boolean {

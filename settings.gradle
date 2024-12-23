@@ -30,4 +30,5 @@ dependencyResolutionManagement {
 }
 
 include ':app'
+include ':restrictionbypass'
 rootProject.name = "BoringdroidSystemUI"
