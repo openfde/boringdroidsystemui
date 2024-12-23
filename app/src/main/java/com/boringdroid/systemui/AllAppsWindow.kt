@@ -243,6 +243,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     private fun notifyLoadSucceed() {
         allAppsLayout!!.setData(appLoaderTask.allApps)
+        collectAppsLayout!!.setData(appLoaderTask.allApps)
     }
 
     private class H(allAppsWindow: AllAppsWindow?) : Handler() {
