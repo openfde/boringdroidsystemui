@@ -3,11 +3,14 @@ package com.boringdroid.systemui
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -22,8 +25,22 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewOutlineProvider
 import android.view.ViewRootImpl
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
+import com.boringdroid.systemui.adapter.AppActionsAdapter
+import com.boringdroid.systemui.constant.HandlerConstant
+import com.boringdroid.systemui.data.Action
+import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.LogTools
+import com.boringdroid.systemui.utils.ReflectUtils
+import com.boringdroid.systemui.utils.SPUtils
+import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AllAppsLayout
+import com.boringdroid.systemui.view.CollectAppsLayout
 import java.lang.ref.WeakReference
 
 
@@ -31,6 +48,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val windowManager: WindowManager
     private var windowContentView: RelativeLayout? = null
     private var allAppsLayout: AllAppsLayout? = null
+    private var collectAppsLayout: CollectAppsLayout? = null
+
     private var shown = false
     private val appLoaderTask: AppLoaderTask
     private val handler = H(this)
@@ -59,9 +78,43 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             return
         }
         val layoutParams = generateLayoutParams(mContext, windowManager)
+        windowContentView =
+            LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null) as RelativeLayout?
+        val layoutParams1 = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        layoutParams1.topMargin =
+            mContext?.resources?.getDimension(R.dimen.all_apps_margin_vertical)!!.toInt()
+        layoutParams1.bottomMargin =
+            mContext.resources?.getDimension(R.dimen.all_apps_margin_vertical)!!.toInt()
+        layoutParams1.rightMargin =
+            mContext.resources?.getDimension(R.dimen.all_apps_margin_horizontal)!!.toInt()
+        layoutParams1.leftMargin =
+            mContext.resources?.getDimension(R.dimen.all_apps_margin_horizontal)!!.toInt()
+
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_all_apps, null) as RelativeLayout?
-        allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
+        allAppsLayout = AllAppsLayout(mContext)
+        collectAppsLayout = CollectAppsLayout(mContext)
+
+        allAppsLayout?.setWindow(this)
+        collectAppsLayout?.setWindow(this)
+
+        val rootAllApp: LinearLayout? =
+            windowContentView?.findViewById<LinearLayout>(R.id.relative_all_apps)
+        val rootCollectApp: LinearLayout? =
+            windowContentView?.findViewById<LinearLayout>(R.id.relative_collect_apps)
+//        val view = windowContentView!!.findViewById(R.id.all_apps_layout) as View
+//        allAppsLayout = windowContentView!!.findViewById(R.id.all_apps_layout)
+
+//        val viewA: View? = windowContentView?.findViewById(R.id.all_apps_layout)
+//        allAppsLayout= viewA as? AllAppsLayout
+        rootAllApp!!.addView(allAppsLayout, layoutParams1)
+        rootCollectApp!!.addView(collectAppsLayout, layoutParams1)
+
         allAppsLayout!!.handler = handler
+        collectAppsLayout!!.handler = handler
+
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
@@ -83,7 +136,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         windowContentView!!.clipToOutline = true
 //        mWindowBackgroundDrawable = mContext.getDrawable(R.drawable.window_background)
         windowManager.addView(windowContentView, layoutParams)
-        setBackgroundBlurRadius(windowContentView, mBackgroundBlurRadius)
+//        setBackgroundBlurRadius(windowContentView, mBackgroundBlurRadius)
         Log.d(TAG, "onClick() called with: windowContentView = $windowContentView parent = ${windowContentView?.parent}")
         appLoaderTask.start()
         shown = true
@@ -238,6 +291,82 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     companion object {
         private const val TAG = "AllAppsWindow"
     }
+
+    private fun refreshCollectList() {
+        collectAppsLayout!!.setData(appLoaderTask.allApps)
+    }
+
+
+    fun showUserContextMenu(anchor: View, appData: AppData, isCollect: Boolean) {
+        LogTools.i("showUserContextMenu " + appData)
+        val windowCollectView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
+        val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
+//        SystemuiColorUtils.applyMainColor(mContext, sp, windowCollectView)
+        lp?.gravity = Gravity.TOP or Gravity.LEFT
+        val touch = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        val focus = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        lp?.flags = focus or touch
+        val location = IntArray(2)
+        anchor.getLocationOnScreen(location)
+        lp?.x = location[0]
+        lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
+        windowCollectView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
+            if (p2.action == MotionEvent.ACTION_OUTSIDE) {
+                windowManager.removeView(windowCollectView)
+            }
+            false
+        }
+        val applicationInfo = mContext.packageManager.getApplicationInfo(appData.packageName!!, 0)
+        val flagInfo = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
+//        val isSystem = applicationInfo.flags and flagInfo != 0
+        val isSystem =
+            applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+        val actionsLv = windowCollectView?.findViewById<ListView>(R.id.tasks_lv)
+        val actions = ArrayList<Action?>()
+
+        val  hasCollect = SPUtils.getUserInfo(mContext,appData.packageName)
+        if ("".equals(hasCollect)) {
+            actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+        } else {
+            actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
+        }
+
+        actions.add(Action(0, mContext.getString(R.string.todesk)))
+
+        if (!isSystem) {
+            actions.add(Action(0, mContext.getString(R.string.uninstall)))
+        }else{
+            actions.add(Action(-1, mContext.getString(R.string.uninstall)))
+        }
+        actionsLv?.adapter = AppActionsAdapter(mContext, actions)
+        actionsLv?.onItemClickListener =
+            AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
+                val action = p1.getItemAtPosition(p3) as Action
+                if (action.text.equals(mContext.getString(R.string.fde_collect))) {
+                    SPUtils.putUserInfo(mContext,appData.packageName,"1");
+                    refreshCollectList()
+                } else if (action.text.equals(mContext.getString(R.string.fde_uncollect))) {
+                    SPUtils.putUserInfo(mContext,appData.packageName,"");
+                    refreshCollectList()
+                } else if (action.text.equals(mContext.getString(R.string.todesk))) {
+                    AppUtils.createShortcut(mContext, appData)
+                } else if (action.text.equals(mContext.getString(R.string.uninstall))) {
+                    if (!isSystem) {
+                            val intent = Intent(Intent.ACTION_DELETE)
+                            intent.setData(Uri.parse("package:" + appData.packageName))
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            mContext.startActivity(intent)
+
+                    }
+                }
+                if(windowCollectView !=null){
+                    windowManager.removeView(windowCollectView)
+                }
+            }
+        windowCollectView?.setBackground(mContext.getDrawable(R.drawable.round_rect))
+        windowManager.addView(windowCollectView, lp)
+    }
+
 
     init {
         windowManager = mContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager

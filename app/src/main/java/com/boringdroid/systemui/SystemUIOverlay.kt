@@ -1,6 +1,7 @@
 package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -8,7 +9,6 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -19,23 +19,20 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.view.AppStateLayout
+import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
+
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin {
-    private var pluginContext: Context? = null
-    private var systemUIContext: Context? = null
+    public var pluginContext: Context? = null
+    public var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
     private var btAllAppsGroup: ViewGroup? = null
     private var clockAndStatus: ViewGroup? = null
@@ -279,9 +276,44 @@ class SystemUIOverlay : OverlayPlugin {
         context: Context?,
         systemStatus: SystemStateLayout?
     ): SystemStateLayout? {
+
         return systemStatus
             ?: LayoutInflater.from(context).inflate(R.layout.layout_nav_panel, null)
                     as SystemStateLayout
+
+        if (context == null) {
+            throw IllegalArgumentException("Context cannot be null")
+        }
+        val inflater = LayoutInflater.from(context).cloneInContext(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+                if (name == "com.boringdroid.systemui.view.SystemStateLayout") {
+                    try {
+                        val clazz = Class.forName(name, true, SystemStateLayout::class.java.classLoader)
+                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
+                            .newInstance(context, attrs) as View
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                return null
+            }
+
+            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+                return onCreateView(name, context, attrs)
+            }
+        }
+        val inflate = inflater.inflate(R.layout.layout_nav_panel, null)
+        if (inflate is SystemStateLayout) {
+            Log.d(TAG, "initSystemStatusLayout: return $inflate")
+            return systemStatus ?: inflate
+        } else {
+            throw IllegalStateException("Failed to inflate SystemStateLayout from layout file")
+        }
+
+        val keyguardManager = context?.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val keyguardLock = keyguardManager.newKeyguardLock(Context.KEYGUARD_SERVICE)
+        keyguardLock?.disableKeyguard()
     }
 
     @SuppressLint("InflateParams")
@@ -292,6 +324,43 @@ class SystemUIOverlay : OverlayPlugin {
         return appStateLayout
             ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
                     as AppStateLayout
+
+        // 确保上下文不为空
+        if (context == null) {
+            throw IllegalArgumentException("Context cannot be null")
+        }
+
+        // 创建自定义的 LayoutInflater.Factory
+        val inflater = LayoutInflater.from(context).cloneInContext(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+                if (name == "com.boringdroid.systemui.view.AppStateLayout") {
+                    try {
+                        val clazz = Class.forName(name, true, AppStateLayout::class.java.classLoader)
+                        return clazz.getConstructor(Context::class.java, AttributeSet::class.java)
+                            .newInstance(context, attrs) as View
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                return null
+            }
+
+            override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+                return onCreateView(name, context, attrs)
+            }
+        }
+
+        // 使用自定义的 Factory 加载布局
+        val inflate = inflater.inflate(R.layout.layout_app_state, null)
+
+        // 检查 inflate 是否为 AppStateLayout 类型
+        if (inflate is AppStateLayout) {
+            Log.d(TAG, "initializeAppStateLayout: return $inflate")
+            return appStateLayout ?: inflate
+        } else {
+            throw IllegalStateException("Failed to inflate AppStateLayout from layout file")
+        }
     }
 
 
