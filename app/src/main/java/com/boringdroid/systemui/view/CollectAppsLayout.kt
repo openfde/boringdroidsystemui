@@ -74,22 +74,6 @@ class CollectAppsLayout @JvmOverloads constructor(
                 } else {
                     LogTools.e("appData is null ....")
                 }
-
-
-
-
-                val thread = Thread {
-                    var list = FdeDataBase.getInstance(context).collectAppDao().allCollectApp
-                    LogTools.i("setOnContextClickListener ....list   " + list)
-
-                    FdeDataBase.getInstance(context).compatibleListDao().allCompatibleList;
-                    FdeDataBase.getInstance(context).regionInfoDao().allAddress;
-                    FdeDataBase.getInstance(context).systemConfigDao().allSystemConfigList;
-                    FdeDataBase.getInstance(context).wifiHistoryDao().allwifiHistory;
-
-                }
-                thread.start()
-
                 false
             })
         }

@@ -17,257 +17,12 @@ import java.util.Map;
 
 public class CompatibleConfig {
     public static final String COMPATIBLE_URI = "content://com.boringdroid.systemuiprovider";
-    public static final String COMPATIBLE_VALUE_URI = "content://com.android.compatibleprovider";
 
-    public static Map<String, Object> queryMapValueData(Context context, String packageName, String keycode) {
-        Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-        Cursor cursor = null;
-        Map<String, Object> result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? AND IS_DEL != 1";
-        String[] selectionArgs = {packageName, keycode};
-        try {
-            ContentResolver contentResolver = context.getContentResolver();
-            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
-                String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
-                String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
-                String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
-                String EDIT_DATE = cursor.getString(cursor.getColumnIndex("EDIT_DATE"));
-                String FIELDS1 = cursor.getString(cursor.getColumnIndex("FIELDS1"));
-                result = new HashMap<>();
-                result.put("_ID", _ID);
-                result.put("PACKAGE_NAME", PACKAGE_NAME);
-                result.put("KEY_CODE", KEY_CODE);
-                result.put("VALUE", VALUE);
-                result.put("FIELDS1",FIELDS1);
-                result.put("EDIT_DATE", EDIT_DATE);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return result;
-    }
-
-    public static Map<String, Object> queryMapValueDataByKey(Context context, String keycode) {
-        Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-        Cursor cursor = null;
-        Map<String, Object> result = null;
-        String selection = " KEY_CODE = ? AND IS_DEL != 1";
-        String[] selectionArgs = {keycode};
-        try {
-            ContentResolver contentResolver = context.getContentResolver();
-            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
-                String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
-                String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
-                String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
-                String EDIT_DATE = cursor.getString(cursor.getColumnIndex("EDIT_DATE"));
-                String FIELDS1 = cursor.getString(cursor.getColumnIndex("FIELDS1"));
-                result = new HashMap<>();
-                result.put("_ID", _ID);
-                result.put("PACKAGE_NAME", PACKAGE_NAME);
-                result.put("KEY_CODE", KEY_CODE);
-                result.put("VALUE", VALUE);
-                result.put("FIELDS1",FIELDS1);
-                result.put("EDIT_DATE", EDIT_DATE);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return result;
-    }
-    public static Map<String, Object> queryMapValueDataHasDel(Context context, String packageName, String keycode) {
-        Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-        Cursor cursor = null;
-        Map<String, Object> result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? ";
-        String[] selectionArgs = {packageName, keycode};
-        try {
-            ContentResolver contentResolver = context.getContentResolver();
-            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
-                String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
-                String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
-                String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
-                String EDIT_DATE = cursor.getString(cursor.getColumnIndex("EDIT_DATE"));
-                result = new HashMap<>();
-                result.put("_ID", _ID);
-                result.put("PACKAGE_NAME", PACKAGE_NAME);
-                result.put("KEY_CODE", KEY_CODE);
-                result.put("VALUE", VALUE);
-                result.put("EDIT_DATE", EDIT_DATE);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return result;
-    }
-
-    public static String queryValueData(Context context, String packageName, String keycode) {
-        Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-        Cursor cursor = null;
-        String result = null;
-        String selection = "PACKAGE_NAME = ? AND KEY_CODE = ? AND IS_DEL != 1";
-        String[] selectionArgs = {packageName, keycode};
-        try {
-            ContentResolver contentResolver = context.getContentResolver();
-            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex("VALUE"));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        return result;
-    }
-
-    public static void insertValueData(Context context, String packageName, String keycode, String value,String updateDate) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            ContentValues values = new ContentValues();
-            String curTime = getCurDateTime();
-            values.put("PACKAGE_NAME", packageName);
-            values.put("KEY_CODE", keycode);
-            values.put("VALUE", value);
-            values.put("IS_DEL", "0");
-            values.put("CREATE_DATE",curTime);
-            values.put("EDIT_DATE", curTime);
-            if("".equals(updateDate)){
-                updateDate = curTime ;
-            }
-            values.put("FIELDS1", updateDate);
-            Uri resUri = context.getContentResolver()
-                    .insert(uri, values);
-            LogTools.Companion.i("insertValueData resUri " + resUri.getPath());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void insertUpdateValueData(Context context, String packageName, String keycode, String value) {
-        Map<String, Object> result = queryMapValueDataHasDel(context, packageName, keycode);
-        if (result == null) {
-            insertValueData(context, packageName, keycode, value,"");
-        } else {
-            updateValueData(context, packageName, keycode, value);
-        }
-    }
-
-    public static int updateValueData(Context context, String packageName, String keycode, String newValue) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            ContentValues values = new ContentValues();
-            values.put("VALUE", newValue);
-            values.put("IS_DEL", "0");
-            values.put("FIELDS1", getCurDateTime());
-            values.put("EDIT_DATE",  getCurDateTime());
-            String selection = "PACKAGE_NAME = ? AND KEY_CODE = ?";
-            String[] selectionArgs = {packageName, keycode};
-            int res = context.getContentResolver()
-                    .update(uri, values, selection,
-                            selectionArgs);
-            LogTools.Companion.i("updateValueData res " + res);
-            return res;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public static int updateValueDataByKeyCode(Context context, String keyCode) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            ContentValues values = new ContentValues();
-            values.put("IS_DEL", "1");
-            String selection = "KEY_CODE = ? ";
-            String[] selectionArgs = { keyCode };
-            int res = context.getContentResolver()
-                    .update(uri, values, selection,
-                            selectionArgs);
-            return res;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public static int updateValueDataByKeyCode(Context context,String packagename, String keyCode, String defaultvalue ,String updateDate) {
-        deleteValueDataByKeyCode(context,keyCode);
-        insertValueData(context,packagename,keyCode,defaultvalue,updateDate);
-        return -1;
-    }
-
-    public  static  void deleteValueDataByKeyCode(Context context ,String keyCode){
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            String selection = "KEY_CODE = ?";
-            String[] selectionArgs = {keyCode};
-            int res = context.getContentResolver().delete(uri, selection, selectionArgs);
-            LogTools.Companion.i("deleteValueDataByKeyCode res " + res);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deleteValueData(Context context, String packageName, String keycode) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            String selection = "PACKAGE_NAME = ? AND KEY_CODE = ?";
-            String[] selectionArgs = {packageName, keycode};
-            int res = context.getContentResolver().delete(uri, selection, selectionArgs);
-            LogTools.Companion.i("deleteValueData res " + res);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void deleteValueData(Context context, String packageName) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            String selection = "PACKAGE_NAME = ?";
-            String[] selectionArgs = {packageName};
-            int res = context.getContentResolver().delete(uri, selection, selectionArgs);
-            LogTools.Companion.i("deleteValueData res " + res);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void cleanAllValueData(Context context) {
-        try {
-            Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-            String selection = null;
-            String[] selectionArgs = null;
-            int res = context.getContentResolver().delete(uri, selection, selectionArgs);
-            LogTools.Companion.i("cleanValueData res " + res);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * SystemProperties
+     * @param key
+     * @param value
+     */
     public static void setSystemProperty(String key, String value) {
         try {
             Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
@@ -275,40 +30,6 @@ public class CompatibleConfig {
             setMethod.invoke(null, key, value);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-    public static void  readAllValue2Properties(Context context){
-        Uri uri = Uri.parse(COMPATIBLE_VALUE_URI + "/COMPATIBLE_VALUE");
-        Cursor cursor = null;
-        String selection = "PACKAGE_NAME IS NOT NULL GROUP BY  PACKAGE_NAME";
-        String[] selectionArgs = null;
-        try {
-
-            ContentResolver contentResolver = context.getContentResolver();
-            cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int _ID = cursor.getInt(cursor.getColumnIndex("_ID"));
-                    String PACKAGE_NAME = cursor.getString(cursor.getColumnIndex("PACKAGE_NAME"));
-                    String KEY_CODE = cursor.getString(cursor.getColumnIndex("KEY_CODE"));
-                    String VALUE = cursor.getString(cursor.getColumnIndex("VALUE"));
-                    String IS_DEL = cursor.getString(cursor.getColumnIndex("IS_DEL"));
-
-                    String key = PACKAGE_NAME+"_"+KEY_CODE ;
-                    String value = VALUE ;
-                    if("1".equals(IS_DEL)){
-                        value = "";
-                    }
-                    LogTools.Companion.i("readAllValue2Properties key "+key + ",value "+value);
-                    setSystemProperty(key,value);
-                } while (cursor.moveToNext());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 
@@ -319,7 +40,6 @@ public class CompatibleConfig {
         String selection = "IS_DEL != 1";
         String[] selectionArgs = {};
         try {
-
             ContentResolver contentResolver = context.getContentResolver();
             cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -362,7 +82,7 @@ public class CompatibleConfig {
         String selection = "KEY_CODE = ? AND IS_DEL != 1";
         String[] selectionArgs = {keyCode};
         try {
-            LogTools.Companion.i("queryListDataByKeyCode "+keyCode);
+            LogTools.Companion.i("queryListDataByKeyCode " + keyCode);
             ContentResolver contentResolver = context.getContentResolver();
             cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
@@ -399,7 +119,7 @@ public class CompatibleConfig {
             ContentValues values = new ContentValues();
             values.put("IS_DEL", "1");
             String selection = "KEY_CODE = ? ";
-            String[] selectionArgs = { keyCode };
+            String[] selectionArgs = {keyCode};
             int res = context.getContentResolver()
                     .update(uri, values, selection,
                             selectionArgs);
@@ -410,9 +130,9 @@ public class CompatibleConfig {
         return -1;
     }
 
-    public static int updateListDataByKeyCode(Context context,String keyCode, String keyDesc, String optionJson, String inputType, String notes, String defaultValue,String updateDate) {
-        deleteListDataByKeyCode(context,keyCode);
-        insertListData(context,keyCode,keyDesc,optionJson,inputType,notes,defaultValue,updateDate);
+    public static int updateListDataByKeyCode(Context context, String keyCode, String keyDesc, String optionJson, String inputType, String notes, String defaultValue, String updateDate) {
+        deleteListDataByKeyCode(context, keyCode);
+        insertListData(context, keyCode, keyDesc, optionJson, inputType, notes, defaultValue, updateDate);
         return -1;
     }
 
@@ -428,7 +148,7 @@ public class CompatibleConfig {
         }
     }
 
-    public static void insertListData(Context context, String keycode, String keyDesc, String optionJson, String inputType, String notes, String defaultValue,String updateDate) {
+    public static void insertListData(Context context, String keycode, String keyDesc, String optionJson, String inputType, String notes, String defaultValue, String updateDate) {
         try {
             Uri uri = Uri.parse(COMPATIBLE_URI + "/COMPATIBLE_LIST");
             ContentValues values = new ContentValues();
