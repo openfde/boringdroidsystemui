@@ -1,4 +1,4 @@
-package com.boringdroid.systemui;
+package com.boringdroid.systemui.utils;
 
 public class ReflectUtils {
 

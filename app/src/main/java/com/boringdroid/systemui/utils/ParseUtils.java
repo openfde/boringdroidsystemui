@@ -111,6 +111,7 @@ public class ParseUtils {
                     client.newCall(request).enqueue(new okhttp3.Callback() {
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
+                            LogTools.Companion.i("onResponse..............");
                             if (response.isSuccessful()) {
                                 ResponseBody responseBody = response.body();
                                 if (responseBody != null) {
@@ -126,6 +127,7 @@ public class ParseUtils {
 
                         @Override
                         public void onFailure(Call call, IOException e) {
+                            LogTools.Companion.e("onFailure.............. "+e.toString());
                             e.printStackTrace();
                         }
                     });
@@ -179,51 +181,50 @@ public class ParseUtils {
         }
     }
     public static void parseValue(Context context, InputStream inputStream) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(inputStream);
-            Element rootElement = document.getDocumentElement();
-            NodeList itemList = document.getElementsByTagName("item");
-
-
-
-            for (int i = 0; i < itemList.getLength(); i++) {
-                Element keycodeElement = (Element) itemList.item(i);
-                String date = keycodeElement.getAttribute("updatedate");
-                String isdel = keycodeElement.getAttribute("isdel");
-                String name = keycodeElement.getAttribute("keycode");
-                Map<String, Object> keyMap = CompatibleConfig.queryMapValueDataByKey(context, name);
-                if(keyMap == null){
-                    //if keycode is not , code have update
-                    continue;
-                }
-                NodeList packageList = keycodeElement.getElementsByTagName("package");
-                for (int j = 0; j < packageList.getLength(); j++) {
-                    Element packageElement = (Element) packageList.item(j);
-                    String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
-                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
-                    LogTools.Companion.i("name " + name + ",packagename " + packagename + ",date  " + date + ",isDel " + isdel);
-                    if ("true".equals(isdel)) {
-                        // if delete
-                        CompatibleConfig.updateValueDataByKeyCode(context, name);
-                    } else {
-                        Map<String, Object> resMap = CompatibleConfig.queryMapValueData(context, packagename, name);
-                        if (resMap == null) {
-                            CompatibleConfig.insertValueData(context, packagename, name, defaultvalue, date);
-                        } else {
-                            String queryDate = StringUtils.ToString(resMap.get("FIELDS1"));
-                            if (!date.equals(queryDate)) {
-                                CompatibleConfig.updateValueDataByKeyCode(context, packagename, name, defaultvalue, date);
-                            }
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//            DocumentBuilder builder = factory.newDocumentBuilder();
+//            Document document = builder.parse(inputStream);
+//            Element rootElement = document.getDocumentElement();
+//            NodeList itemList = document.getElementsByTagName("item");
+//
+//            for (int i = 0; i < itemList.getLength(); i++) {
+//                Element keycodeElement = (Element) itemList.item(i);
+//                String date = keycodeElement.getAttribute("updatedate");
+//                String isdel = keycodeElement.getAttribute("isdel");
+//                String name = keycodeElement.getAttribute("keycode");
+//                Map<String, Object> keyMap = CompatibleConfig.queryMapValueDataByKey(context, name);
+//                if(keyMap == null){
+//                    //if keycode is not , code have update
+//                    continue;
+//                }
+//                NodeList packageList = keycodeElement.getElementsByTagName("package");
+//                for (int j = 0; j < packageList.getLength(); j++) {
+//                    Element packageElement = (Element) packageList.item(j);
+//                    String packagename = packageElement.getElementsByTagName("packagename").item(0).getTextContent();
+//                    String defaultvalue = packageElement.getElementsByTagName("defaultvalue").item(0).getTextContent().replaceAll("\\s", "");
+//                    LogTools.Companion.i("name: " + name + "   ,packagename: " + packagename + "    ,date:  " + date + "    ,isDel: " + isdel);
+//                    if ("true".equals(isdel)) {
+//                        // if delete
+//                        CompatibleConfig.updateValueDataByKeyCode(context, name);
+//                    } else {
+//                        Map<String, Object> resMap = CompatibleConfig.queryMapValueData(context, packagename, name);
+//                        if (resMap == null) {
+//                            CompatibleConfig.insertValueData(context, packagename, name, defaultvalue, date);
+//                        } else {
+//                            String queryDate = StringUtils.ToString(resMap.get("FIELDS1"));
+//                            if (!date.equals(queryDate)) {
+//                                CompatibleConfig.updateValueDataByKeyCode(context, packagename, name, defaultvalue, date);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            LogTools.Companion.e("Exception: " +e.toString());
+//        }
     }
 
 

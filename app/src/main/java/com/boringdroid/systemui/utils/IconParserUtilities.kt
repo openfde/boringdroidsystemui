@@ -24,7 +24,7 @@ class IconParserUtilities( /*
         } catch (e: PackageManager.NameNotFoundException) {
             try {
                 val packageInfo = pm.getPackageInfo(packageName!!, 0)
-                packageInfo.applicationInfo?.loadIcon(pm)
+                packageInfo?.applicationInfo?.loadIcon(pm)
             } catch (e2: PackageManager.NameNotFoundException) {
                 context.getDrawable(android.R.drawable.sym_def_app_icon)
             }

@@ -2,6 +2,7 @@ package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -33,7 +34,7 @@ import com.boringdroid.systemui.view.SystemStateLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
+
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
@@ -172,14 +173,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         dynamicReceiver = DynamicReceiver(systemStateLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
-        pluginContext?.registerReceiver(dynamicReceiver, intentFilter);
+        pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED);
     }
 
     private fun grantNmnPermission() {
-        val method = "setNotificationListenerAccessGranted"
-        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
-        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
-        M.invoke(mNm, component, true)
+//        val method = "setNotificationListenerAccessGranted"
+//        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
+//        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
+//        M.invoke(mNm, component, true)
     }
 
     private fun isNotificationServiceEnable(): Boolean {

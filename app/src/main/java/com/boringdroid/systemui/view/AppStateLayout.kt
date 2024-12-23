@@ -63,6 +63,7 @@ constructor(
         super.onDetachedFromWindow()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun initTasks() {
         val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
         for (i in runningTaskInfos.indices.reversed()) {

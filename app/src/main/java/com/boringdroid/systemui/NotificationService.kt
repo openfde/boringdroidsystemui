@@ -89,6 +89,7 @@ class NotificationService : NotificationListenerService(),
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "onCreate() called")
         sp = PreferenceManager.getDefaultSharedPreferences(this)
         preferLastDisplay = sp!!.getBoolean("prefer_last_display", false)
         context = DeviceUtils.getDisplayContext(this, preferLastDisplay)

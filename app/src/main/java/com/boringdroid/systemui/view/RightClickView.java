@@ -2,13 +2,12 @@ package com.boringdroid.systemui.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
-
+import android.util.Log;
 import androidx.annotation.Nullable;
 
-;
+import com.boringdroid.systemui.utils.LogTools;
 
 public class RightClickView extends LinearLayout {
 

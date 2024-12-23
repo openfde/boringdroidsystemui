@@ -15,7 +15,7 @@ public class UninstallReceiver extends BroadcastReceiver {
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             LogTools.Companion.i("packageName "+packageName + " ,getPackageName "+context.getPackageName());
             if (packageName.equals(context.getPackageName())) {
-                CollectUtils.deleteCollectData(context,packageName);
+//                CollectUtils.deleteCollectData(context,packageName);
             }
         }
     }

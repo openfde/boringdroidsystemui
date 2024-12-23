@@ -3,7 +3,7 @@ package com.boringdroid.systemui.utils
 import android.util.Log
 
 class LogTools {
-    public companion object {
+    companion object {
         val TAG = "bellaSystemUI"
 
         fun d(msg: String?) {
