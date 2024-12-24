@@ -11,7 +11,6 @@
         android:layout_width="@dimen/nav_button_size"
         android:layout_height="@dimen/nav_button_size"
         app:cardCornerRadius="64dp"
-        android:layout_marginLeft="12dp"
         app:cardElevation="4dp"
         android:layout_gravity="center_vertical"
         >

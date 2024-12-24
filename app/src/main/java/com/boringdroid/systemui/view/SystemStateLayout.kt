@@ -33,7 +33,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var dateBtn: TextClock? = null
 //    private var controlCenterWindow: ControlCenterWindow? = null
 //    private var netCenterWindow: NetCenterWindow? = null
-//    private var imeSwitchWindow: ImeSwitchWindow? = null
+    private var imeSwitchWindow: ImeSwitchWindow? = null
 //    private var notificationWindow: NotificationWindow? = null
 //    private var volumeCenterWindow: VolumeCenterWindow? = null
     private var screenRecordState: Int = 0
@@ -46,6 +46,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
     private var audioManager: AudioManager? = null;
+    private var notificationCount: Int? = 0
 
 
     var isShowDlg: Boolean? = false;
@@ -91,12 +92,12 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn = findViewById(R.id.battery_btn)
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
+        Log.d(TAG, "initState() context: $context")
 //        netCenterWindow = NetCenterWindow(context)
-//        imeSwitchWindow = ImeSwitchWindow(context)
+        imeSwitchWindow = ImeSwitchWindow(context)
 //        controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
 //        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
-        Log.d(TAG, "initState() called")
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
@@ -186,10 +187,10 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun imeSwitchClick(imageView: ImageView) {
-//        imeSwitchWindow?.ifShowImeSwitchView()
-//        if (Utils.imeSwitchWindoVisible) {
-//            listener?.syncVisible(Utils.IMESWITCHWINDOW_VISIBLE)
-//        }
+        imeSwitchWindow?.ifShowImeSwitchView()
+        if (Utils.imeSwitchWindoVisible) {
+            listener?.syncVisible(Utils.IMESWITCHWINDOW_VISIBLE)
+        }
 
     }
 
@@ -334,6 +335,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun onNotifyCount(count: Int?) {
+        notificationCount = count
         Log.d("TAG", "onNotifyCount() called with: count = $count")
         notificationBtn?.visibility = VISIBLE
         if (count!! > 0) {
@@ -345,12 +347,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun onNotificationPanelVisibleChanged(boolean: Boolean) {
-//        Utils.notificationPanelVisible = boolean
-//        if (boolean) {
-//            notificationBtn?.background = context!!.resources.getDrawable(R.drawable.round_rect_5dp)
-//        } else {
-//            notificationBtn?.background = null
-//        }
+        Utils.notificationPanelVisible = boolean
+        if (boolean) {
+            notificationBtn?.background = context!!.resources.getDrawable(R.drawable.round_rect_5dp)
+        } else {
+            notificationBtn?.background = null
+        }
+        onNotifyCount(notificationCount)
     }
 
     fun onScreenRecordStateChange(state: Int) {

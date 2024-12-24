@@ -80,7 +80,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         statusBar.visibility = View.GONE
         Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
         if (navBarButtonGroupId > 0 && navBar != null) {
-            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_bg))
+            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_bg_d8))
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
 //            buttonGroup.setBackgroundColor(pluginContext!!.getColor(R.color.black))
 
@@ -133,7 +133,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
                 systemStateParams.gravity = Gravity.RIGHT
                 buttonGroup.addView(systemStateLayout, 3,systemStateParams)
                 systemStateLayout!!.initState()
-
+                Utils.setBackgroundBlurRadius(navBar.parent as View, 20)
             }
         }
     }

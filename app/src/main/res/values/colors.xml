@@ -73,6 +73,7 @@
     <color name="green">#00897B</color>
     <color name="blue"> #1E88E5 </color>
     <color name="fde_bg">#E9EEF5</color>
+    <color name="fde_bg_d8">#D8F0F2F5</color>
     <color name="fde_edit_bg">#E6E6E6</color>
     <color name="fde_wifi_title"> #262626</color>
 

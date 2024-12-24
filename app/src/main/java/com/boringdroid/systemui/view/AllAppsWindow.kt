@@ -150,28 +150,24 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             return
         }
         Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, radius = $radius")
-        if (view is ViewGroup) {
-            val viewGroup = view
-            val lp = WindowManager.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            // 这是添加高斯模糊背景，
-            val blurView: View = View(viewGroup.context)
-//                    blurView.setBlurLayerColor(viewGroup.context.resources.getColor(R.color.blur_color))
-            viewGroup.background = null
-            viewGroup.addView(blurView, 0, lp)
-        }
+//        if (view is ViewGroup) {
+//            val viewGroup = view
+//            val lp = WindowManager.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+//            // 这是添加高斯模糊背景，
+//            val blurView = View(viewGroup.context)
+//            viewGroup.background = null
+//            viewGroup.addView(blurView, 0, lp)
+//        }
         var target:ViewRootImpl = view.parent as ViewRootImpl
-
         Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
         if (target is ViewRootImpl) {
-            val blurDrawable =target.createBackgroundBlurDrawable()
-//                val blurDrawable = getBackgroundBlurRadius(target, radius)
+            val blurDrawable = target.createBackgroundBlurDrawable()
             val realDrawable = view.background
             val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
             view.background = layerDrawable
             Log.d(TAG, "setBackgroundBlurRadius: success $radius")
             return
         }
-//            target = target.parent
     }
 
     private fun getBackgroundBlurRadius(target: ViewRootImpl, radius: Int): Drawable {

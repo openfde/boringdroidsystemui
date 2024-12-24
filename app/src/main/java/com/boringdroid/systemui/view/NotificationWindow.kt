@@ -86,6 +86,7 @@ class NotificationWindow(
             listener.cancelAllNotifications()
         })
         updateIfNotify(false)
+        Utils.setBackgroundBlurRadius(windowContentView!!, 20)
     }
 
     private fun generateLayoutParams(

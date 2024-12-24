@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.utils
 
+import android.annotation.TargetApi
 import android.app.Instrumentation
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,8 +8,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewRootImpl
 import android.view.WindowManager
 import com.boringdroid.systemui.R
 import java.io.BufferedReader
@@ -33,6 +39,7 @@ object Utils {
     const val WIFIWINDOW_VISIBLE:Int = 8
     const val VOLUMECENTERWINDOW_VISIBLE : Int = 16
     const val IMESWITCHWINDOW_VISIBLE : Int = 32
+    const val TAG = "Utils"
 
     @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
@@ -48,6 +55,32 @@ object Utils {
         layoutParams.width = Math.min(displayWidth, width)
         layoutParams.height = Math.min(displayHeight, height)
         return layoutParams
+    }
+
+    @TargetApi(value = 31)
+    @JvmStatic fun setBackgroundBlurRadius(view: View?, radius: Int) {
+        if (view == null) {
+            return
+        }
+        Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, radius = $radius")
+//        if (view is ViewGroup) {
+//            val viewGroup = view
+//            val lp = WindowManager.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+//            // 这是添加高斯模糊背景，
+//            val blurView = View(viewGroup.context)
+//            viewGroup.background = null
+//            viewGroup.addView(blurView, 0, lp)
+//        }
+        var target = view.parent
+        Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
+        if (target is ViewRootImpl) {
+            val blurDrawable = target.createBackgroundBlurDrawable()
+            val realDrawable = view.background
+            val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
+            view.background = layerDrawable
+            Log.d(TAG, "setBackgroundBlurRadius: success $radius")
+            return
+        }
     }
 
     @JvmStatic fun makeWindowParams(width: Int, height: Int): WindowManager.LayoutParams? {
