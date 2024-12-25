@@ -18,6 +18,7 @@ import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.view.RightClickView.RightClickListener
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.utils.LogTools
+import com.boringdroid.systemui.utils.SPUtils
 
 class CollectAppsLayout @JvmOverloads constructor(
     context: Context,
@@ -27,7 +28,8 @@ class CollectAppsLayout @JvmOverloads constructor(
     private val appListAdapter: AppListAdapter
     private lateinit var appsWindow: AllAppsWindow
     fun setData(apps: List<AppData?>?) {
-        appListAdapter.setData(apps)
+        var collApps = apps?.filter { "1".equals(SPUtils.getUserInfo(context, it?.packageName)) }
+        appListAdapter.setData(collApps)
         appListAdapter.notifyDataSetChanged()
     }
 
