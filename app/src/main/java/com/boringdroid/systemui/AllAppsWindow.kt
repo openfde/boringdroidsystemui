@@ -53,8 +53,8 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private var restartBtn: ImageButton? = null
     private var logoutBtn: ImageButton? = null
     private var lockBtn: ImageButton? = null
-    private var imgSetting : ImageView? = null
-    private var imgPower : ImageView? = null
+    private var imgSetting: ImageView? = null
+    private var imgPower: ImageView? = null
     private var searchEt: EditText? = null
     private var allAppsLayout: AllAppsLayout? = null
     private var collectAppsLayout: CollectAppsLayout? = null
@@ -66,7 +66,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
     private var list: MutableList<Collect>? = null
-    var listener: SystemStateLayout.NotificationListener?= null
+    var listener: SystemStateLayout.NotificationListener? = null
 
 
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
@@ -206,7 +206,12 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val actions = ArrayList<Action?>()
 
 
-        actions.add(Action(R.drawable.icon_lock_screen, mContext.getString(R.string.fde_lock_screen)))
+        actions.add(
+            Action(
+                R.drawable.icon_lock_screen,
+                mContext.getString(R.string.fde_lock_screen)
+            )
+        )
         actions.add(Action(R.drawable.icon_log_off, mContext.getString(R.string.fde_log_off)))
         actions.add(Action(R.drawable.icon_restart, mContext.getString(R.string.fde_restart)))
         actions.add(Action(R.drawable.icon_shutdown, mContext.getString(R.string.fde_shutdown)))
@@ -295,20 +300,20 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         return layoutParams
     }
 
-    fun dismissChild(){
+    fun dismissChild() {
         hidePowerMenu()
         try {
-            if(windowCollectView != null){
+            if (windowCollectView != null) {
                 windowManager.removeViewImmediate(windowCollectView)
             }
 
-            if(windowPowerView != null){
+            if (windowPowerView != null) {
                 windowManager.removeViewImmediate(windowPowerView)
             }
         } catch (e: Exception) {
         }
-        windowCollectView = null ;
-        windowPowerView = null ;
+        windowCollectView = null;
+        windowPowerView = null;
     }
 
     fun dismiss() {
@@ -335,13 +340,13 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
 
     private fun refreshCollectList() {
         uiScope.launch {
-            val list: MutableList<AppData> = withContext(Dispatchers.Default) {
-                val items = CollectUtils.queryListData(mContext) ?: emptyList()
-                val allApps = appLoaderTask.allApps ?: emptyList()
-                val itemPackageNames = items.map { it.packageName }.toHashSet()
-                allApps.filter { it.packageName in itemPackageNames }.toMutableList()
-            }
-            collectAppsLayout?.setData(list)
+//            val list: MutableList<AppData> = withContext(Dispatchers.Default) {
+//                val items = CollectUtils.queryListData(mContext) ?: emptyList()
+//                val allApps = appLoaderTask.allApps ?: emptyList()
+//                val itemPackageNames = items.map { it.packageName }.toHashSet()
+//                allApps.filter { it.packageName in itemPackageNames }.toMutableList()
+//            }
+            collectAppsLayout?.setData(appLoaderTask.allApps)
         }
     }
 
@@ -371,16 +376,22 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         val actionsLv = windowCollectView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
 
-        if (isCollect) {
-            val isAppCollected = CollectUtils.queryCollectDataByPackageName(mContext,appData.packageName);
-            if(isAppCollected !=null){
-                actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
-            }else{
-                actions.add(Action(0, mContext.getString(R.string.fde_collect)))
-            }
+        val isAppCollected = SPUtils.getUserInfo(mContext, appData.packageName)
+        if ("".equals(isAppCollected)) {
+            actions.add(Action(0, mContext.getString(R.string.fde_collect)))
         } else {
             actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
         }
+
+//        uiScope.launch {
+//            val isAppCollected =
+//                CollectUtils.queryCollectDataByPackageName(mContext, appData.packageName);
+//            if (isAppCollected != null) {
+//                actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
+//            } else {
+//                actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+//            }
+//        }
 
         actions.add(Action(0, mContext.getString(R.string.todesk)))
 
@@ -392,7 +403,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         )
         if (!isSystem) {
             actions.add(Action(0, mContext.getString(R.string.uninstall)))
-        }else{
+        } else {
             actions.add(Action(-1, mContext.getString(R.string.uninstall)))
         }
         actionsLv?.adapter = AppActionsAdapter(mContext, actions)
@@ -400,22 +411,15 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_collect))) {
-//                    val intent = Intent()
-//                    intent.component = appData.componentName
-//                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                    mContext.startActivity(intent)
-//                    if (handler != null) {
-//                        handler!!.sendEmptyMessage(HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
-//                    } else {
-//                        Log.e(TAG, "Won't send dismiss event because of handler is null")
-//                    }
-                    val packageName = appData.packageName
-                    var appName = appData.name
-                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "0");
+//                    val packageName = appData.packageName
+//                    var appName = appData.name
+//                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "0");
+                    SPUtils.putUserInfo(mContext, appData.packageName, "1");
                     refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.fde_uncollect))) {
-                    val packageName = appData.packageName
-                    CollectUtils.deleteCollectData(mContext,packageName)
+//                    val packageName = appData.packageName
+//                    CollectUtils.deleteCollectData(mContext,packageName)
+                    SPUtils.putUserInfo(mContext, appData.packageName, "");
                     refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.todesk))) {
                     AppUtils.createShortcut(mContext, appData)
@@ -427,11 +431,11 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                     val packageNam = appData.componentName?.packageName
                     val appNam = appData.name
                     if (packageNam != null && appNam != null) {
-                        AppUtils.toConpatiblePage(mContext, packageNam,appNam)
+                        AppUtils.toConpatiblePage(mContext, packageNam, appNam)
                     }
                     listener?.syncVisible(Utils.ALL_INVISIBLE)
                 }
-                if(windowCollectView !=null){
+                if (windowCollectView != null) {
                     windowManager.removeView(windowCollectView)
                 }
             }
@@ -451,6 +455,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                         }
                     }
                 )
+
                 HandlerConstant.H_DISMISS_ALL_APPS_WINDOW -> runMethodSafely(
                     object : RunAllAppsWindowMethod {
                         override fun run(allAppsWindow: AllAppsWindow?) {
@@ -458,6 +463,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
                         }
                     }
                 )
+
                 else -> {
                     // Do nothing
                 }
