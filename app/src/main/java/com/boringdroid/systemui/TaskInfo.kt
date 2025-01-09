@@ -9,6 +9,8 @@ class TaskInfo {
     private var realActivityComponentName: ComponentName? = null
     var packageName: String? = null
     var icon: Drawable? = null
+    var label:String ? = null
+
 
     fun setBaseActivityComponentName(baseActivityComponentName: ComponentName?) {
         this.baseActivityComponentName = baseActivityComponentName
@@ -32,12 +34,15 @@ class TaskInfo {
 
     override fun toString(): String {
         return ("Task id " +
-            id +
-            ", origin " +
-            baseActivityComponentName +
-            ", real " +
-            realActivityComponentName +
-            ", package " +
-            packageName)
+                id +
+                ", origin " +
+                baseActivityComponentName +
+                ", real " +
+                realActivityComponentName +
+                ", package " +
+                packageName +
+                ", label " +
+                label
+                )
     }
 }

@@ -133,6 +133,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
                 systemStateParams.gravity = Gravity.RIGHT
                 buttonGroup.addView(systemStateLayout, 3,systemStateParams)
                 systemStateLayout!!.initState()
+                val view = navBar.parent as ViewGroup
+                val layoutParams1 = view.layoutParams
+                layoutParams1.height = 20
+                view.layoutParams = layoutParams1
                 Utils.setBackgroundBlurRadius(navBar.parent as View, 20)
             }
         }
@@ -157,6 +161,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        appStateLayout?.listener = this
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         appStateLayout!!.reloadActivityManager(systemUIContext)

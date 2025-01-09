@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.Canvas
@@ -19,10 +20,16 @@ import android.os.UserManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.DragEvent
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.ListView
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +39,10 @@ import com.android.systemui.shared.system.TaskStackChangeListener
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
+import com.boringdroid.systemui.adapter.AppStateActionsAdapter
+import com.boringdroid.systemui.data.Action
+import com.boringdroid.systemui.utils.SystemuiColorUtils
+import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -46,12 +57,15 @@ constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : RecyclerView(context, attrs, defStyleAttr) {
+    lateinit var listener: SystemStateLayout.NotificationListener
     private val activityManager: ActivityManager
     private val appStateListener = AppStateListener()
     private val launchApps: LauncherApps
     private val userManager: UserManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
     private val taskAdapter: TaskAdapter?
+    private var contextView:View ?= null
+    private val windowManager:WindowManager
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -65,6 +79,7 @@ constructor(
 
     @RequiresApi(Build.VERSION_CODES.Q)
     fun initTasks() {
+        taskAdapter?.listener = listener
         val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
         for (i in runningTaskInfos.indices.reversed()) {
             val runningTaskInfo = runningTaskInfos[i]
@@ -262,13 +277,15 @@ constructor(
         }
     }
 
-    private class TaskAdapter(private val context: Context, dragCloseThreshold: Int) :
+    private class TaskAdapter(private val context: Context, dragCloseThreshold: Int, private val am: ActivityManager, private val contextView :View) :
         Adapter<TaskAdapter.ViewHolder>() {
         private val tasks: MutableList<TaskInfo> = ArrayList()
         private var systemUIActivityManager: ActivityManager
         private val packageManager: PackageManager
         private var topTaskId = -1
         private val dragCloseThreshold: Int
+        lateinit var listener: SystemStateLayout.NotificationListener
+        val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         override fun onCreateViewHolder(
             parent: ViewGroup,
@@ -294,6 +311,22 @@ constructor(
             } else {
                 holder.highLightLineTV?.setImageResource(R.drawable.line_short)
             }
+            val hoverListener = object :View.OnHoverListener {
+                override fun onHover(v: View?, event: MotionEvent?): Boolean {
+                    val what = event?.action
+                    when (what) {
+                        MotionEvent.ACTION_HOVER_ENTER -> {
+                            holder.layoutTask.setBackgroundResource(R.drawable.round_rect_8dp)
+                        }
+
+                        MotionEvent.ACTION_HOVER_EXIT -> {
+                            holder.layoutTask.setBackgroundResource(R.drawable.round_rect_8dp_00)
+                        }
+                    }
+                    return false
+                }
+            }
+            holder.mask.setOnHoverListener(hoverListener)
             var label: CharSequence? = packageName
             try {
                 label =
@@ -306,39 +339,118 @@ constructor(
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(TAG, "Failed to get label for $packageName")
             }
+            if(taskInfo.label != null){
+                label = taskInfo.label
+            }
 
             holder.iconIV?.tag = taskInfo.id
             holder.iconIV?.tooltipText = label
-            holder.iconIV?.setOnClickListener {
-                Log.d(TAG, "onBindViewHolder() called isShowing:${isShowing(taskInfo.id)}")
-                if(isShowing(taskInfo.id)){
-                    systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
-                } else {
-                    systemUIActivityManager.moveTaskToFront(taskInfo.id, 0)
-                    context.sendBroadcast(
-                        Intent("com.boringdroid.systemui.CLOSE_RECENTS"),
-                    )
+            val contextListener = object : OnContextClickListener {
+                override fun onContextClick(v: View?): Boolean {
+                    listener?.syncVisible(Utils.ALL_INVISIBLE)
+                    if (contextView != null && contextView?.isAttachedToWindow!!) {
+                        windowManager.removeView(contextView)
+                    }
+                    showUserContextMenu(holder.iconIV, taskInfo)
+                    return true
                 }
+            }
+            val clickListener = object : OnClickListener {
+                override fun onClick(v: View?) {
+                    listener?.syncVisible(Utils.ALL_INVISIBLE)
+                    com.boringdroid.systemui.Log.d(TAG, "onClick() called ${taskInfo.packageName}")
+                    if(!isShowing(taskInfo.id)){
+                        showApplicationWindow(taskInfo)
+                    } else {
+                        systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
+                    }
+                    if (contextView != null && contextView?.isAttachedToWindow!!) {
+                        windowManager.removeView(contextView)
+                    }
 
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(300L)
+                        notifyDataSetChanged()
+                    }
+                }
             }
-            holder.iconIV?.setOnLongClickListener { v: View ->
-                val item = ClipData.Item(TAG_TASK_ICON)
-                val dragData = ClipData(TAG_TASK_ICON, arrayOf("unknown"), item)
-                val shadow: DragShadowBuilder = DragDropShadowBuilder(v)
-                holder.iconIV?.setOnDragListener(
-                    DragDropCloseListener(
-                        dragCloseThreshold,
-                        dragCloseThreshold,
-                    ) { taskId: Int? ->
-                        AM_WRAPPER.removeTask(
-                            taskId!!,
-                        )
-                    },
-                )
-                v.startDragAndDrop(dragData, shadow, null, DRAG_FLAG_GLOBAL)
-                true
-            }
+//            holder.iconIV?.setOnLongClickListener { v: View ->
+//                val item = ClipData.Item(TAG_TASK_ICON)
+//                val dragData = ClipData(TAG_TASK_ICON, arrayOf("unknown"), item)
+//                val shadow: DragShadowBuilder = DragDropShadowBuilder(v)
+//                holder.iconIV?.setOnDragListener(
+//                    DragDropCloseListener(
+//                        dragCloseThreshold,
+//                        dragCloseThreshold,
+//                    ) { taskId: Int? ->
+//                        AM_WRAPPER.removeTask(
+//                            taskId!!,
+//                        )
+//                    },
+//                )
+//                v.startDragAndDrop(dragData, shadow, null, DRAG_FLAG_GLOBAL)
+//                true
+//            }
+            holder.layoutTask.setOnContextClickListener(contextListener)
+            holder.iconIV.setOnContextClickListener( contextListener)
+            holder.layoutTask.setOnClickListener( clickListener)
+            holder.iconIV.setOnClickListener( clickListener)
         }
+
+        private fun showApplicationWindow(taskInfo: TaskInfo){
+            com.boringdroid.systemui.Log.e(TAG, "showApplicationWindow ${taskInfo}")
+            systemUIActivityManager.moveTaskToFront(taskInfo.id, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+        }
+
+        private fun showUserContextMenu(anchor: View, taskInfo: TaskInfo) {
+            val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, context!!, true)
+            SystemuiColorUtils.applyMainColor(context, null, contextView)
+            lp?.gravity = Gravity.TOP or Gravity.LEFT
+            lp?.flags =
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+            val location = IntArray(2)
+            anchor.getLocationOnScreen(location)
+            lp?.x = location[0]
+            val marginVertical = context.resources.getDimension(R.dimen.control_center_window_margin)
+                .toInt()
+            lp?.y = location[1] - anchor.measuredHeight - marginVertical * 13
+            contextView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
+                if (p2.action == MotionEvent.ACTION_OUTSIDE) {
+                    windowManager.removeView(contextView)
+                }
+                false
+            }
+            val applicationInfo = context.packageManager.getApplicationInfo(taskInfo.packageName!!, 0)
+            val isSystem = applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            val actionsLv = contextView?.findViewById<ListView>(R.id.tasks_lv)
+            val actions = ArrayList<Action?>()
+            var isShowing =  isShowing(taskInfo.id)
+            if( isShowing!!){
+                actions.add(Action(0, context.getString(R.string.minimize)))
+            } else{
+                actions.add(Action(0, context.getString(R.string.open)))
+            }
+            actions.add(Action(0, context.getString(R.string.close)))
+//            if(!isSystem){
+//                actions.add(Action(0, context.getString(R.string.uninstall)))
+//            }
+            actionsLv?.adapter = AppStateActionsAdapter(context, actions)
+            actionsLv?.onItemClickListener =
+                AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
+                    val action = p1.getItemAtPosition(p3) as Action
+                    if (action.text.equals(context.getString(R.string.open))) {
+                        showApplicationWindow(taskInfo)
+                    } else if (action.text.equals(context.getString(R.string.close))) {
+                        systemUIActivityManager.moveTaskToBack(false, taskInfo.id)
+                    } else if (action.text.equals(context.getString(R.string.minimize))){
+                        systemUIActivityManager.moveTaskToBack(true, taskInfo.id)
+                    }
+                    windowManager.removeView(contextView)
+                }
+            contextView.setBackground(context.getDrawable(R.drawable.round_rect))
+            windowManager.addView(contextView, lp)
+        }
+
 
         private fun isShowing(id: Int): Boolean {
             val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
@@ -373,8 +485,10 @@ constructor(
 
         private class ViewHolder(taskInfoLayout: ViewGroup) :
             RecyclerView.ViewHolder(taskInfoLayout) {
-            val iconIV = taskInfoLayout.findViewById<ImageView>(R.id.iv_task_info_icon)
-            val highLightLineTV = taskInfoLayout.findViewById<ImageView>(R.id.iv_highlight_line)
+            val iconIV: ImageView = taskInfoLayout.findViewById(R.id.iv_task_info_icon)!!
+            val highLightLineTV: ImageView = taskInfoLayout.findViewById(R.id.iv_highlight_line)!!
+            val layoutTask: FrameLayout = taskInfoLayout.findViewById(R.id.layoutTask)!!
+            val mask: View = taskInfoLayout.findViewById(R.id.mask)!!
         }
 
         companion object {
@@ -472,7 +586,10 @@ constructor(
         layoutManager = manager
         setHasFixedSize(true)
         val appInfoIconWidth = context.resources.getDimensionPixelSize(R.dimen.app_info_icon_width)
-        taskAdapter = TaskAdapter(context, (appInfoIconWidth * 5))
+        contextView = LayoutInflater.from(context).inflate(R.layout.task_list, null)
+        taskAdapter = TaskAdapter(context, (appInfoIconWidth * 5), activityManager, contextView!!)
         adapter = taskAdapter
+        windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
     }
 }

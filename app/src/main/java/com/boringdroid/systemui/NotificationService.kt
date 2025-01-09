@@ -151,7 +151,7 @@ class NotificationService : NotificationListenerService(),
         val filter = IntentFilter()
         filter.addAction("com.fde.action.NOTIFICATION_PANEL_CHANG")
         filter.addAction("com.fde.action.NETWORK_PANEL_CHANG")
-        registerReceiver(dockReceiver, filter)
+        registerReceiver(dockReceiver, filter, RECEIVER_EXPORTED)
         Log.d(TAG, "activeNotifications:" + activeNotifications.size)
         notificationWindow = NotificationWindow(context, this)
     }
