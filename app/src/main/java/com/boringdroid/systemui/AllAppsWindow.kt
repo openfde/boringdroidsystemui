@@ -339,13 +339,21 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
     private fun refreshCollectList() {
+
         uiScope.launch {
-//            val list: MutableList<AppData> = withContext(Dispatchers.Default) {
-//                val items = CollectUtils.queryListData(mContext) ?: emptyList()
-//                val allApps = appLoaderTask.allApps ?: emptyList()
-//                val itemPackageNames = items.map { it.packageName }.toHashSet()
-//                allApps.filter { it.packageName in itemPackageNames }.toMutableList()
-//            }
+            var flag = SPUtils.getIntUserInfo(mContext, "finishFlag");
+            if (flag == 0) {
+                val list: MutableList<AppData> = withContext(Dispatchers.Default) {
+                    val items = CollectUtils.queryListData(mContext) ?: emptyList()
+                    val allApps = appLoaderTask.allApps ?: emptyList()
+                    val itemPackageNames = items.map { it.packageName }.toHashSet()
+                    allApps.filter { it.packageName in itemPackageNames }.toMutableList()
+                }
+                list.forEach { appData ->
+                    SPUtils.putUserInfo(mContext, appData.packageName, "1");
+                }
+            }
+            SPUtils.putIntUserInfo(mContext, "finishFlag", 1);
             collectAppsLayout?.setData(appLoaderTask.allApps)
         }
     }
