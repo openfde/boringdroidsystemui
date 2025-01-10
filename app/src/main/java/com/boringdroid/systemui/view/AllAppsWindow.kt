@@ -224,7 +224,7 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
         // TODO: Looks like the heightPixels is incorrect, so we use multi margin to
         //  achieve looks-fine vertical margin of window. Figure out the real reason
         //  of this problem, and fix it.
-        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 4
+        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 6
         Log.d(TAG, "All apps window location (" + layoutParams.x + ", " + layoutParams.y + ")")
         return layoutParams
     }

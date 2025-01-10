@@ -77,7 +77,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         statusBar: View,
         navBar: View?,
     ) {
-        statusBar.visibility = View.GONE
+//        statusBar.visibility = View.GONE
         Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
         if (navBarButtonGroupId > 0 && navBar != null) {
             navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_bg_d8))

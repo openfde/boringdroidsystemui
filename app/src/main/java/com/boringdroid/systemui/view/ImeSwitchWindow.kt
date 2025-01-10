@@ -180,7 +180,7 @@ class ImeSwitchWindow (private val mContext: Context?) {
         layoutParams.gravity = Gravity.TOP or Gravity.END
         layoutParams.x = marginStart
 
-        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 5
+        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 8
         return layoutParams
     }
 

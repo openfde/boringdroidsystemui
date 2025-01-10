@@ -117,7 +117,7 @@ class NotificationWindow(
             .toInt()
         layoutParams.gravity = Gravity.TOP or Gravity.RIGHT
         layoutParams.x = marginStart
-        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 5
+        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 8
         Log.d(TAG, "Notification window location (" + layoutParams.x + ", " + layoutParams.y + ")")
         return layoutParams
     }
