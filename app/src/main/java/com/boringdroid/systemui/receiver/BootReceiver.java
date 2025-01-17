@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.SystemProperties;
+import android.util.Log;
 
 import com.boringdroid.systemui.R;
 import com.boringdroid.systemui.utils.CompatibleConfig;
@@ -23,9 +24,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class BootReceiver extends BroadcastReceiver {
+    private static final String TAG = "BootReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d(TAG, "onReceive():  context :" + context + ", action :" + action + "");
         if (action.equals("com.fde.SYSTEM_INIT_ACTION")) {
 //            ParseUtils.parseListXML(context);
             LogTools.Companion.i(" onReceive SYSTEM_INIT_ACTION............" );
@@ -37,6 +41,7 @@ public class BootReceiver extends BroadcastReceiver {
                     ParseUtils.parseGpsData(context);
                 }
             }).start();
+            XserverHelper.startServer(context);
         }
     }
 
