@@ -30,6 +30,8 @@ import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.net.NetApi
+import com.boringdroid.systemui.receiver.UninstallReceiver
+import com.boringdroid.systemui.receiver.XserverHelper
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.WifiUtils
@@ -40,7 +42,7 @@ import kotlinx.coroutines.withContext
 
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
-    LinearLayout(context, attrs) {
+    LinearLayout(context, attrs), XserverHelper.XserverStateListener {
 
     //    private var bluetoothBtn:ImageView ?= null
     private var imeBtn: ImageView? = null
@@ -48,6 +50,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var volumeBtn: ImageView? = null
     private var batteryBtn: ImageView? = null
     private var controlBtn: ImageView? = null
+    private var xserverBtn: ImageView? = null
     private var homeBtn: LinearLayout? = null
     private var dateBtn: TextClock? = null
     private var controlCenterWindow: ControlCenterWindow? = null
@@ -105,6 +108,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         imeBtn = findViewById(R.id.imeswitch_btn)
         wifiBtn = findViewById(R.id.wifi_btn)
         homeBtn = findViewById(R.id.layout_home)
+        xserverBtn = findViewById(R.id.xserver_btn)
         dateBtn = findViewById(R.id.date_btn)
         volumeBtn = findViewById(R.id.volume_btn)
         batteryBtn = findViewById(R.id.battery_btn)
@@ -201,6 +205,15 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         }
         getInputMethod()
         registInputMethodChange()
+        if (!XserverHelper.isAppInstalled(context, XserverHelper.X11_PACKAGE_NAME)) {
+            updateState(XserverHelper.STATE_UNINTALLED, -1)
+        } else {
+            updateState(XserverHelper.STATE_INTALLED, -1)
+            XserverHelper.startServer(context)
+        }
+        xserverBtn?.setOnClickListener(View.OnClickListener {
+            XserverHelper.startAppList(context)
+        })
     }
 
     private fun imeSwitchClick(imageView: ImageView) {
@@ -392,6 +405,21 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     fun hideImeSwitchWindow() {
         Log.w(TAG, "hideVolumeCenterWindow")
         imeSwitchWindow?.dismiss()
+    }
+
+    override fun updateState(state: Int, loading: Int) {
+        Log.d(TAG, "updateState() called with: state = $state, loading = $loading")
+        when (state) {
+            XserverHelper.STATE_UNINTALLED ->{
+                xserverBtn?.visibility = GONE
+            }
+            XserverHelper.STATE_INTALLED ->{
+                xserverBtn?.visibility = VISIBLE
+            }
+            XserverHelper.STATE_RUNNING ->{
+
+            }
+        }
     }
 
 }

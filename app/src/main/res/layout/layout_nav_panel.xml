@@ -77,6 +77,16 @@
         android:src="@drawable/icon_notification"
         />
 
+    <ImageView
+        android:id="@+id/xserver_btn"
+        android:layout_width="@dimen/systemstate_icon_size"
+        android:layout_height="@dimen/systemstate_icon_size"
+        android:scaleType="fitXY"
+        android:padding="@dimen/system_state_icon_padding"
+        android:src="@drawable/xserver_icon"
+        android:visibility="gone"
+        />
+
     <TextClock
         android:id="@+id/date_btn"
         android:layout_width="wrap_content"

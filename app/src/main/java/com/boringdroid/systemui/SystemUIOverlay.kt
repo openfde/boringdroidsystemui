@@ -28,6 +28,7 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.SystemStateLayout
@@ -163,7 +164,17 @@ class SystemUIOverlay : OverlayPlugin , SystemStateLayout.NotificationListener{
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         pluginContext.registerReceiver(dynamicReceiver, intentFilter);
+        registPackageUpdate()
+    }
 
+    private fun registPackageUpdate() {
+        var filter = IntentFilter()
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED)
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
+        filter.addDataScheme("package")
+        val receiver = UninstallReceiver(systemStateLayout)
+        pluginContext?.registerReceiver(receiver, filter)
     }
 
     private fun grantNmnPermission() {
