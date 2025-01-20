@@ -82,9 +82,11 @@
         android:layout_width="@dimen/systemstate_icon_size"
         android:layout_height="@dimen/systemstate_icon_size"
         android:scaleType="fitXY"
-        android:padding="@dimen/system_state_icon_padding"
-        android:src="@drawable/xserver_icon"
-        android:visibility="gone"
+        android:paddingTop="9dp"
+        android:paddingHorizontal="7dp"
+        android:paddingBottom="5dp"
+        android:src="@drawable/linux_idle"
+        android:visibility="visible"
         />
 
     <TextClock
