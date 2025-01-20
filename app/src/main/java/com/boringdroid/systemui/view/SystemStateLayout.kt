@@ -30,8 +30,8 @@ import androidx.core.view.get
 import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.net.NetApi
-import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
+import com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.WifiUtils
@@ -205,15 +205,34 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         }
         getInputMethod()
         registInputMethodChange()
-        if (!XserverHelper.isAppInstalled(context, XserverHelper.X11_PACKAGE_NAME)) {
-            updateState(XserverHelper.STATE_UNINTALLED, -1)
-        } else {
-            updateState(XserverHelper.STATE_INTALLED, -1)
-            XserverHelper.startServer(context)
-        }
+        checkXserverStatus()
         xserverBtn?.setOnClickListener(View.OnClickListener {
             XserverHelper.startAppList(context)
+//            val running = XserverHelper.isXserviceRunning(context)
+//            Log.e(TAG, "is xserver running:" + running)
         })
+        XserverHelper.listenXserverStatus(context,this)
+        val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
+        val timeTickReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == Intent.ACTION_TIME_TICK) {
+                    Log.e(TAG, "onReceive: " + intent.action)
+                    checkXserverStatus()
+                }
+            }
+        }
+        context.registerReceiver(timeTickReceiver, tickFilter)
+    }
+
+    private fun checkXserverStatus() {
+        if (!XserverHelper.isAppInstalled(context, XserverHelper.X11_PACKAGE_NAME)) {
+            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED)
+        } else if(XserverHelper.isXserviceRunning(context)){
+            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED)
+        } else {
+            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED)
+            XserverHelper.startServer(context)
+        }
     }
 
     private fun imeSwitchClick(imageView: ImageView) {
@@ -408,18 +427,23 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun updateState(state: Int, loading: Int) {
-        Log.d(TAG, "updateState() called with: state = $state, loading = $loading")
+        Log.e(TAG, "updateState() called with: state = $state, loading = $loading")
         when (state) {
             XserverHelper.STATE_UNINTALLED ->{
                 xserverBtn?.visibility = GONE
             }
             XserverHelper.STATE_INTALLED ->{
                 xserverBtn?.visibility = VISIBLE
-            }
-            XserverHelper.STATE_RUNNING ->{
-
+                xserverBtn?.setImageResource(R.drawable.linux_idle)
+                xserverBtn?.tooltipText = null
             }
         }
+        if(state > XserverHelper.STATE_INTALLED){
+            xserverBtn?.visibility = VISIBLE
+            xserverBtn?.setImageResource(R.drawable.linux_running)
+            xserverBtn?.tooltipText = context.resources.getString(R.string.runing_preffix) + state
+        }
+
     }
 
 }

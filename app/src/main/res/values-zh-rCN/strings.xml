@@ -91,4 +91,6 @@
 
     <string name="output">输出</string>
     <string name="input">输入</string>
+    <string name="runing_preffix">"运行中: "</string>
+
 </resources>

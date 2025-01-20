@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.receiver;
 
+import static com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED;
 import static com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME;
 
 import android.content.BroadcastReceiver;
@@ -23,7 +24,7 @@ public class UninstallReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "onReceive: action:" + intent.getAction());
+//        Log.d(TAG, "onReceive: action:" + intent.getAction());
         if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             LogTools.Companion.i("packageName "+packageName + " ,getPackageName "+context.getPackageName());
@@ -37,14 +38,14 @@ public class UninstallReceiver extends BroadcastReceiver {
             if (!packageName.equals(X11_PACKAGE_NAME)) {
                 return;
             }
-            listener.updateState(XserverHelper.STATE_INTALLED, -1);
+            listener.updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED);
             XserverHelper.startServer(context);
         } else if(intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)){
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             if (!packageName.equals(X11_PACKAGE_NAME)) {
                 return;
             }
-            listener.updateState(XserverHelper.STATE_UNINTALLED, -1);
+            listener.updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED);
         }
         //check for x11 service end
     }
