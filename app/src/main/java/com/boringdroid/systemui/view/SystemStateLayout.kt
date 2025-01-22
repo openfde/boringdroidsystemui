@@ -31,6 +31,7 @@ import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.net.NetApi
 import com.boringdroid.systemui.receiver.XserverHelper
+import com.boringdroid.systemui.receiver.XserverHelper.CLIENT_NUM_UNDEFINED
 import com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
@@ -226,11 +227,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun checkXserverStatus() {
         if (!XserverHelper.isAppInstalled(context, XserverHelper.X11_PACKAGE_NAME)) {
-            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED)
+            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
         } else if(XserverHelper.isXserviceRunning(context)){
-            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED)
+//            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
         } else {
-            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED)
+            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
             XserverHelper.startServer(context)
         }
     }
@@ -426,8 +427,8 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         imeSwitchWindow?.dismiss()
     }
 
-    override fun updateState(state: Int, loading: Int) {
-        Log.e(TAG, "updateState() called with: state = $state, loading = $loading")
+    override fun updateState(state: Int, loading: Int, client: Int) {
+//        Log.e(TAG, "updateState() called with: state = $state, loading = $loading, client = $client")
         when (state) {
             XserverHelper.STATE_UNINTALLED ->{
                 xserverBtn?.visibility = GONE
@@ -435,13 +436,18 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
             XserverHelper.STATE_INTALLED ->{
                 xserverBtn?.visibility = VISIBLE
                 xserverBtn?.setImageResource(R.drawable.linux_idle)
-                xserverBtn?.tooltipText = null
+                xserverBtn?.tooltipText = context.resources.getString(R.string.runing_preffix, state)
             }
         }
         if(state > XserverHelper.STATE_INTALLED){
             xserverBtn?.visibility = VISIBLE
             xserverBtn?.setImageResource(R.drawable.linux_running)
-            xserverBtn?.tooltipText = context.resources.getString(R.string.runing_preffix) + state
+            val tip: String = if (client > 0) {
+                context.resources.getString(R.string.client_preffix, state, client )
+            } else {
+                context.resources.getString(R.string.runing_preffix, state)
+            }
+            xserverBtn?.tooltipText = tip
         }
 
     }

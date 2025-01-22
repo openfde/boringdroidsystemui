@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.receiver;
 
+import static com.boringdroid.systemui.receiver.XserverHelper.CLIENT_NUM_UNDEFINED;
 import static com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED;
 import static com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME;
 
@@ -38,14 +39,14 @@ public class UninstallReceiver extends BroadcastReceiver {
             if (!packageName.equals(X11_PACKAGE_NAME)) {
                 return;
             }
-            listener.updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED);
+            listener.updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED);
             XserverHelper.startServer(context);
         } else if(intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)){
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             if (!packageName.equals(X11_PACKAGE_NAME)) {
                 return;
             }
-            listener.updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED);
+            listener.updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED);
         }
         //check for x11 service end
     }

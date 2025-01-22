@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,13 +27,14 @@ public class XserverHelper {
     public static final String X11_SERVICE_STATUS_ACTION = "com.fde.x11.ACTION_X_SERVICE_STATUS";
     public static final String ACTION_X_MAIN_WINDOW_SIZE = "action_x_main_window_size";
     public static final String X_MAIN_WINDOW_SIZE = "x_main_window_size";
+    public static final String X_CLIENT_SIZE = "x_client_size";
     public static final int STATE_UNINTALLED = -1;
     public static final int STATE_INTALLED = 0;
     public static final int STATE_RUNNING = 1;
     public static final int STATE_RUNNING_WITH_LOADING = 2;
     public static final int STATE_RUNNING_OVERLOAD = 3;
     public static final int LOADING_UNDEFINED = -1;
-
+    public static final int CLIENT_NUM_UNDEFINED = -1;
     //xserver version record for external call
     public static final int DISPLAY_ID = 1001;
     public static final String APPLIST_EXPORT_FROM_VERSION = "1.2.2";
@@ -45,12 +48,18 @@ public class XserverHelper {
         if(!XserverHelper.isAppInstalled(context, X11_PACKAGE_NAME)){
             return;
         }
-        Intent xservice = new Intent();
-        xservice.setPackage(X11_PACKAGE_NAME);
-        ComponentName componentName = new ComponentName(X11_PACKAGE_NAME, X11_SERVICE_FULL_NAME);
-        xservice.setComponent(componentName);
-//        Log.d(TAG, "launch " + X11_SERVICE_NAME );
-        context.startService(xservice);
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent xservice = new Intent();
+                xservice.setPackage(X11_PACKAGE_NAME);
+                ComponentName componentName = new ComponentName(X11_PACKAGE_NAME, X11_SERVICE_FULL_NAME);
+                xservice.setComponent(componentName);
+                Log.d(TAG, "launch " + X11_SERVICE_NAME );
+                context.startService(xservice);
+            }
+        }, 2000);
     }
 
     public static boolean isAppInstalled(Context context, String packageName) {
@@ -94,7 +103,7 @@ public class XserverHelper {
 
     public interface XserverStateListener{
 
-        void updateState(int state, int loading);
+        void updateState(int state, int loading, int clientNum);
 
     }
 
@@ -108,12 +117,13 @@ public class XserverHelper {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(TextUtils.equals(intent.getAction(), ACTION_X_MAIN_WINDOW_SIZE)){
-                int size = intent.getIntExtra(X_MAIN_WINDOW_SIZE, 0);
-                Log.d(TAG, "onReceive():  size :" + size + ", intent :" + intent.getAction() + "");
-                if(size > 0){
-                    listener.updateState(size, LOADING_UNDEFINED);
+                int windowNum = intent.getIntExtra(X_MAIN_WINDOW_SIZE, 0);
+                int clientNum = intent.getIntExtra(X_CLIENT_SIZE, 0);
+                Log.d(TAG, "onReceive():  windowNum :" + windowNum + ", intent :" + intent.getAction() + "");
+                if(windowNum > 0){
+                    listener.updateState(windowNum, LOADING_UNDEFINED, clientNum);
                 } else {
-                    listener.updateState(STATE_INTALLED, LOADING_UNDEFINED);
+                    listener.updateState(STATE_INTALLED, LOADING_UNDEFINED, clientNum);
                 }
             }
         }
