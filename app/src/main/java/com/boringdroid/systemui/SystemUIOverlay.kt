@@ -80,7 +80,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
 //        statusBar.visibility = View.GONE
         Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
         if (navBarButtonGroupId > 0 && navBar != null) {
-            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_bg_d8))
+            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
 //            buttonGroup.setBackgroundColor(pluginContext!!.getColor(R.color.black))
 
