@@ -91,6 +91,7 @@
 
     <string name="output">输出</string>
     <string name="input">输入</string>
-    <string name="runing_preffix">"运行中: "</string>
+    <string name="runing_preffix">"运行窗口: %d "</string>
+    <string name="client_preffix">"运行客户端: %d \n 运行窗口: %d "</string>
 
 </resources>
