@@ -3,7 +3,9 @@ package com.boringdroid.systemui.utils
 import android.Manifest
 import android.app.Instrumentation
 import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
@@ -26,6 +28,8 @@ object DeviceUtils {
 
 
     const val BASIP = "127.0.0.1"
+
+    //    const val BASIP = "localhost"
     const val BASEURL = "http://$BASIP:18080"
     const val URL_GETALLAPP = "/api/v1/apps"
     const val URL_STARTAPP = "/api/v1/vnc"
@@ -232,7 +236,7 @@ object DeviceUtils {
         })
     }
 
-    fun setBrightness(brightness: Int,progress:Int,context: Context) {
+    fun setBrightness(brightness: Int, progress: Int, context: Context) {
         val client = OkHttpClient()
         val JSON = MediaType.parse("application/json; charset=utf-8")
         val jsonNumber = JsonPrimitive(progress.toString())
@@ -246,13 +250,13 @@ object DeviceUtils {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
-                LogTools.i("setBrightness onFailure()" + e.toString()+",brightness "+brightness +",progress "+progress)
+                LogTools.i("setBrightness onFailure()" + e.toString() + ",brightness " + brightness + ",progress " + progress)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 try {
                     val responseData = response.body().string()
-                    LogTools.i("setBrightness responseData " + responseData +",brightness "+brightness +",progress "+progress)
+                    LogTools.i("setBrightness responseData " + responseData + ",brightness " + brightness + ",progress " + progress)
                     val gson = Gson()
                     val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
                     val tempMap: Map<String, Any> =
@@ -274,28 +278,42 @@ object DeviceUtils {
 
 
     fun logout() {
-        val networkUtils =  NetworkUtils();
+        val networkUtils = NetworkUtils();
         val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_LOGOUT,requestBody);
+        networkUtils.postRequest(BASEURL + URL_LOGOUT, requestBody);
+    }
+
+    fun gotoNetWork(context: Context, flag: String) {
+        val intent = Intent()
+        val componentName2 = ComponentName(
+            "com.fde.fde_linux_app_launcher",
+            "com.fde.fde_linux_app_launcher.MainActivity"
+        )
+        intent.setComponent(componentName2)
+        intent.putExtra("openParams", flag)
+        intent.putExtra("fromOther", "Launcher")
+        intent.putExtra("vnc_activity_name", "name")
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     @JvmStatic
     fun poweroff() {
-        val networkUtils =  NetworkUtils();
+        val networkUtils = NetworkUtils();
         val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_POWOFF,requestBody);
+        networkUtils.postRequest(BASEURL + URL_POWOFF, requestBody);
     }
 
     fun restart() {
-        val networkUtils =  NetworkUtils();
+        val networkUtils = NetworkUtils();
         val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_RESTART,requestBody);
+        networkUtils.postRequest(BASEURL + URL_RESTART, requestBody);
     }
 
     fun lock() {
-        val networkUtils =  NetworkUtils();
+        val networkUtils = NetworkUtils();
         val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_LOCK,requestBody);
+        networkUtils.postRequest(BASEURL + URL_LOCK, requestBody);
     }
 
     fun getNavBarHeight(context: Context?): Int {

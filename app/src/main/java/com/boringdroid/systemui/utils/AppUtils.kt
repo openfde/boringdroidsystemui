@@ -317,6 +317,7 @@ object AppUtils {
     }
 
     public fun uninstallApp(mContext: Context, appData: AppData) {
+        LogTools.i("uninstallApp2  "+appData.packageName)
         val packageUri = Uri.parse("package:${appData.packageName}")
         val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
         mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

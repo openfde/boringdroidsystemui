@@ -39,7 +39,8 @@ import java.lang.ref.WeakReference
 import com.boringdroid.systemui.R;
 
 
-class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
+class AllAppsWindow(private val mContext: Context?, private val sContext: Context?) :
+    View.OnClickListener {
     private val windowManager: WindowManager
     private var windowContentView: View? = null
     private var windowPowerView: View? = null
@@ -220,13 +221,17 @@ class AllAppsWindow(private val mContext: Context?) : View.OnClickListener {
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_lock_screen))) {
-                    DeviceUtils.lock()
+                    DeviceUtils.gotoNetWork(mContext,"lock")
+//                    DeviceUtils.lock()
                 } else if (action.text.equals(mContext.getString(R.string.fde_log_off))) {
-                    DeviceUtils.logout()
+                    DeviceUtils.gotoNetWork(mContext,"logout")
+//                    DeviceUtils.logout()
                 } else if (action.text.equals(mContext.getString(R.string.fde_restart))) {
-                    DeviceUtils.restart()
+                    DeviceUtils.gotoNetWork(mContext,"restart")
+//                    DeviceUtils.restart()
                 } else if (action.text.equals(mContext.getString(R.string.fde_shutdown))) {
-                    DeviceUtils.poweroff()
+                    DeviceUtils.gotoNetWork(mContext,"poweroff")
+//                    DeviceUtils.poweroff()
                 }
                 windowManager.removeView(windowPowerView)
             }
