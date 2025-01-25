@@ -2,7 +2,6 @@ package com.boringdroid.systemui.utils
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.app.PendingIntent
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.ComponentName
@@ -10,20 +9,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.ShortcutInfo
-import android.content.pm.ShortcutManager
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.boringdroid.systemui.AppTask
 import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.App
 import com.boringdroid.systemui.data.AppData
 import java.io.*
 import java.util.*
-
 
 object AppUtils {
     const val PINNED_LIST = "pinned.lst"
@@ -318,6 +317,7 @@ object AppUtils {
     }
 
     public fun uninstallApp(mContext: Context, appData: AppData) {
+        LogTools.i("uninstallApp2  "+appData.packageName)
         val packageUri = Uri.parse("package:${appData.packageName}")
         val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
         mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -325,27 +325,46 @@ object AppUtils {
 
     @SuppressLint("SoonBlockedPrivateApi")
     public fun createShortcut(mContext: Context, app: AppData) {
-        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-        val shortcutManager: ShortcutManager? =
-            mContext?.getSystemService(ShortcutManager::class.java)
-        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-            val launchIntentForPackage: Intent = mContext?.getPackageManager()
-                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
-            launchIntentForPackage.action = Intent.ACTION_MAIN
-            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
-                .setLongLabel(app.name!!)
-                .setShortLabel(app.name!!)
-                .setIcon(icon)
-                .setIntent(launchIntentForPackage)
-                .build()
-            val pinnedShortcutCallbackIntent =
-                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
-            val successCallback = PendingIntent.getBroadcast(
-                mContext, 0,
-                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+//                Log.d("TAG", "createShortcut() called with: app = [${app.name}]")
+//        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+//        val shortcutManager: ShortcutManager? =
+//            mContext?.getSystemService(ShortcutManager::class.java)
+//        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+//            val launchIntentForPackage: Intent = mContext?.getPackageManager()
+//                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
+//            launchIntentForPackage.action = Intent.ACTION_MAIN
+//            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
+//                .setLongLabel(app.name!!)
+//                .setShortLabel(app.name!!)
+//                .setIcon(icon)
+//                .setIntent(launchIntentForPackage)
+//                .build()
+//            val pinnedShortcutCallbackIntent =
+//                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+//            val successCallback = PendingIntent.getBroadcast(
+//                mContext, 0,
+//                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+//            )
+//            shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
+//        }
+
+        val shortcut = ShortcutInfoCompat.Builder(mContext, "myshortcutid")
+            .setShortLabel("Website")
+            .setLongLabel("Open the website")
+            .setIcon(IconCompat.createWithResource(mContext, R.drawable.round_rect))
+            .setIntent(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.abc.com/")
+                )
             )
-            shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
-        }
+            .build()
+
+        ShortcutManagerCompat.pushDynamicShortcut(mContext, shortcut)
+
+
+
+
     }
 
     public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {

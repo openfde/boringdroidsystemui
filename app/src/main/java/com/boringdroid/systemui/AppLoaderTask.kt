@@ -59,7 +59,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     }
 
     @Synchronized
-    fun start() {
+    fun start(s: String) {
         stopped = false
         handler.post(this)
     }

@@ -11,11 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.db.FdeDataBase
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.SPUtils
 
