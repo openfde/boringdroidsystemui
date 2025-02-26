@@ -204,6 +204,25 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible date="2025-02-25" isdel="0">
+        <keycode>doNotAllowRunningInTheBackground</keycode>
+        <keydesc>
+            {
+            "en":"Do not allow running in the background",
+            "ch":"不允许后台运行"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Do not allow running in the background: Resolves the issue where certain applications such as Carrot Fantasy 4 cannot be reopened after being closed",
+            "ch":"不允许后台运行：解决部分应用（如保卫萝卜4）关闭后无法再打开问题"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
+
     <compatible date="2024-12-05" isdel="0">
         <keycode>enabledResourceFixedLayout</keycode>
         <keydesc>
