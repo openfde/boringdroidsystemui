@@ -2,7 +2,6 @@ package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
-import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -11,19 +10,24 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
+import android.graphics.PixelFormat
+import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -32,6 +36,7 @@ import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.SystemStateLayout
+import com.boringdroid.systemui.view.TopBarLayout
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
@@ -45,6 +50,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     private var btAllAppsGroup: ViewGroup? = null
     private var clockAndStatus: ViewGroup? = null
     private var systemStateLayout: SystemStateLayout? = null
+    private var topBarLayout: TopBarLayout? = null
     private var appStateLayout: AppStateLayout? = null
     private var btAllApps: View? = null
     private var allAppsWindow: AllAppsWindow? = null
@@ -54,6 +60,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     private val classLoader = SystemUIOverlay::class.java.classLoader
     private var mNm: NotificationManager? = null
     private var dynamicReceiver: DynamicReceiver? = null
+    private var status: ViewGroup ?= null
+
+
 
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private val closeSystemDialogsReceiver: BroadcastReceiver =
@@ -73,18 +82,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
             }
         }
 
+
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
         statusBar: View,
         navBar: View?,
     ) {
-//        statusBar.visibility = View.GONE
-        Log.d(TAG, "setup() called with: statusBar = $statusBar, parent = ${statusBar.parent}")
-        if (navBarButtonGroupId > 0 && navBar != null) {
+        Log.d(TAG, "setup() called with: statusBar = ${statusBar}, navBar = ${navBar}")
+        status = statusBar as ViewGroup
+        if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
             navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
             val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
-//            buttonGroup.setBackgroundColor(pluginContext!!.getColor(R.color.black))
-
-//            Log.d(TAG, "setup() called with: measuredWidth = $measuredWidth, buttonGroup = $buttonGroup")
             if (buttonGroup is ViewGroup) {
                 navBarButtonGroup = buttonGroup
                 // We must set the height to match parent programmatically
@@ -140,15 +148,69 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
                 Utils.setBackgroundBlurRadius(navBar.parent as View, 20)
             }
         }
+        generateTopBar()
+//        fakegerateTopBar()
     }
 
-    override fun holdStatusBarOpen(): Boolean {
-        return false
+
+    private fun generateTopBar() {
+//        status?.removeAllViews()
+        pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
+//        val statusBar = LayoutInflater.from(pluginContext).inflate(R.layout.layout_topbar, status as ViewGroup, false)
+//        val windowManager = pluginContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+//        val resources = pluginContext!!.resources
+//        val windowWidth = 1920 //resources.getDimension(R.dimen.all_apps_window_width).toInt()
+//        val windowHeight = 28 //resources.getDimension(R.dimen.all_apps_window_height).toInt()
+//        val layoutParams =
+//            FrameLayout.LayoutParams(
+//                FrameLayout.LayoutParams.MATCH_PARENT,
+//                FrameLayout.LayoutParams.MATCH_PARENT,
+//            )
+//        val displayMetrics = DisplayMetrics()
+//        windowManager.defaultDisplay.getMetrics(displayMetrics)
+//        val size = Point()
+//        windowManager.defaultDisplay.getRealSize(size)
+//        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal)
+//            .toInt()
+//        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical)
+//            .toInt()
+//        layoutParams.gravity = Gravity.TOP or Gravity.START
+//        status?.addView(statusBar, layoutParams)
+        status?.addView(topBarLayout)
+        topBarLayout!!.initState()
     }
 
-    override fun setCollapseDesired(collapseDesired: Boolean) {
-        // Do nothing
+
+    private fun fakegerateTopBar() {
+        val windowManager = pluginContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val resources = pluginContext!!.resources
+        val windowWidth = resources.getDimension(R.dimen.top_bar_layout_width).toInt()
+        val windowHeight = resources.getDimension(R.dimen.top_bar_layout_height).toInt()
+        val layoutParams = WindowManager.LayoutParams(
+            windowWidth,
+            windowHeight,
+            2041,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.RGB_565
+        )
+//        val displayMetrics = DisplayMetrics()
+//        windowManager.defaultDisplay.getMetrics(displayMetrics)
+//        val size = Point()
+//        windowManager.defaultDisplay.getRealSize(size)
+//        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal)
+//            .toInt()
+//        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical)
+//            .toInt()
+        layoutParams.gravity = Gravity.TOP or Gravity.START
+        layoutParams.x = 0
+        layoutParams.y = 0
+//        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
+        windowManager.addView(topBarLayout, layoutParams)
+        topBarLayout!!.initState()
     }
+
 
     override fun onCreate(
         sysUIContext: Context,
@@ -164,6 +226,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         appStateLayout?.listener = this
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
+        topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
+
         appStateLayout!!.reloadActivityManager(systemUIContext)
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
@@ -238,6 +302,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         }
     }
 
+
+    override fun holdStatusBarOpen(): Boolean {
+        return false
+    }
+
+    override fun setCollapseDesired(collapseDesired: Boolean) {
+        // Do nothing
+    }
+
     override fun onDestroy() {
 //        Log.d(TAG, "onDestroy() called")
         if (systemUIContext != null) {
@@ -259,6 +332,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
             }
         }
         pluginContext = null
+        status?.removeAllViews()
     }
 
     @SuppressLint("PrivateApi")
@@ -323,6 +397,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
                     as SystemStateLayout
     }
 
+    private fun initTopBarLayout(
+        context: Context?,
+        topBarLayout: TopBarLayout?
+    ): TopBarLayout? {
+        return topBarLayout
+            ?: LayoutInflater.from(context).inflate(R.layout.layout_topbar, null)
+                    as TopBarLayout
+    }
+
     @SuppressLint("InflateParams")
     private fun initializeAppStateLayout(
         context: Context?,
@@ -331,6 +414,46 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         return appStateLayout
             ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
                     as AppStateLayout
+    }
+
+    fun traverseAndPrint(view: View?, level: Int) {
+        // 打印当前View的信息
+        if (view != null) {
+            printViewInfo(view, level)
+        }
+
+        // 如果当前View是ViewGroup，则递归遍历其子View
+        if (view is ViewGroup) {
+            val viewGroup = view
+            val childCount = viewGroup.childCount
+            for (i in 0 until childCount) {
+                val child = viewGroup.getChildAt(i)
+                traverseAndPrint(child, level + 1) // 递归遍历子View，层级加1
+            }
+        }
+    }
+
+    private fun printViewInfo(view: View, level: Int) {
+        // 获取View的类名
+        val className = view.javaClass.simpleName
+
+        // 获取View的ID（如果有的话）
+        var id = "NO_ID"
+        if (view.id != View.NO_ID &&  view.id >=  100) {
+            id = view.context.resources.getResourceName(view.id)
+        }
+        // 获取View的边界
+        val location = IntArray(2)
+        view.getLocationOnScreen(location)
+        val x = location[0]
+        val y = location[1]
+        val width = view.width
+        val height = view.height
+        if(className.contains("keyguard_header")){
+        }
+        // 打印信息，使用缩进表示层级
+        val indent = ">-".repeat(level) // 根据层级生成缩进
+        Log.d(TAG, indent + level + " " + className + " {" + id + "} Bounds: [" + x + "," + y + "-" + (x + width) + "," + (y + height) + "] + visibility = ${view.visibility}")
     }
 
 

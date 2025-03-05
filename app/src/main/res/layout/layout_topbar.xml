@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.boringdroid.systemui.view.TopBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="@dimen/top_bar_layout_height"
+    android:layout_width="@dimen/top_bar_layout_width"
+    android:gravity="center_vertical"
+    >
+    <TextClock
+        android:id="@+id/date_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:format12Hour="MM/dd hh:mm a"
+        android:format24Hour="MM/dd HH:mm"
+        android:textColor="@android:color/black" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical"
+        >
+        <ImageView
+            android:id="@+id/imeswitch_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/input_delete"
+            android:layout_toLeftOf="@id/wifi_btn"
+            />
+
+        <ImageView
+            android:id="@+id/wifi_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_wifi"
+            />
+
+        <ImageView
+            android:id="@+id/volume_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_volume"
+            />
+
+        <ImageView
+            android:id="@+id/battery_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_battery_chargeing_100"
+            />
+        <ImageView
+            android:id="@+id/search_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_search"
+            />
+        <ImageView
+            android:id="@+id/control_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_control"
+            />
+
+        <ImageView
+            android:id="@+id/notifications_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/icon_notification"
+            />
+        <ImageView
+            android:id="@+id/about_btn"
+            android:layout_width="@dimen/topbar_icon_size"
+            android:layout_height="@dimen/topbar_icon_size"
+            android:scaleType="fitXY"
+            android:padding="@dimen/topbar_icon_padding"
+            android:src="@drawable/power"
+            />
+        
+        <LinearLayout
+            android:id="@+id/desktop_btn"
+            android:layout_width="1dp"
+            android:layout_height="24dp">
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#1a000000"/>
+        </LinearLayout>
+
+        
+    </LinearLayout>
+
+
+
+</com.boringdroid.systemui.view.TopBarLayout>
+

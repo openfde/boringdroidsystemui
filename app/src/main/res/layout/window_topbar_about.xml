@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="380dp"
+    android:layout_height="466dp"
+    android:id="@+id/root_rl"
+    android:background="#c7FAFAFA"
+    android:layout_gravity="center">
+
+    <ImageView
+        android:id="@+id/icon_iv"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="48dp"
+        android:src="@drawable/icon_all_apps"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
+        android:layout_below="@+id/icon_iv"
+        android:id="@+id/device_tv"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="24sp"
+        android:textColor="#ff292929"
+        android:text="D2000"
+        />
+
+    <ImageView
+        android:id="@+id/close_iv"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/icon_close" />
+
+    <TextView
+        android:id="@+id/version_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#ff6C717A"
+        android:textSize="15sp"
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/device_tv"
+        android:layout_centerHorizontal="true"
+        android:text="OpenFDE OS 版本 2.0.1" />
+</RelativeLayout>

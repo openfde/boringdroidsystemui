@@ -1,0 +1,199 @@
+package com.boringdroid.systemui.view
+
+import android.animation.ObjectAnimator
+import android.content.Context
+import android.graphics.Outline
+import android.graphics.PixelFormat
+import android.os.Handler
+import android.util.Log
+import android.view.*
+import android.view.WindowManager
+
+open class AbsTopPopWindow(
+     private val context: Context,
+     private val width: Int,
+     private val height: Int,
+     var winGravity: Int,
+     var layoutResId: Int
+) {
+    companion object {
+        const val POPUP_WINDOW_RADIUS = 12
+        const val FADE_DURATION: Long = 120
+        const val TAG:String = "AbsTopPopWindow"
+        const val TYPE_POWER: Int = 1
+        const val TYPE_CONTROL: Int = 2
+
+    }
+
+    private var shown = false
+    var offsetX = 0
+    var offsetY = 0
+    var elevation = 0
+    private var windowManager: WindowManager? = null
+    protected var mContentView: View? = null
+    protected var provider: ViewOutlineProvider? = null
+    protected var enter: ObjectAnimator? = null
+    protected var exit: ObjectAnimator? = null
+    private val handler = Handler()
+    private var dismissListener: WindowDismissListener ?= null
+
+    open fun showPopupWindow() {
+        if (mContentView == null) {
+            windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            mContentView = LayoutInflater.from(context).inflate(layoutResId, null)
+            mContentView?.elevation = elevation.toFloat()
+            mContentView?.outlineProvider = provider
+            mContentView?.clipToOutline = true
+            val params = generateLayoutParams(context, windowManager!!)
+            windowManager?.addView(mContentView, params)
+            mContentView?.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                    dismiss()
+                }
+                false
+            }
+        }
+        shown = true
+    }
+
+    fun setDismissListener(dismissListener: WindowDismissListener){
+        this.dismissListener = dismissListener
+    }
+
+    fun getWidth(): Int {
+        return width
+    }
+
+    fun getHeight(): Int {
+        return height
+    }
+
+    fun getContext(): Context{
+        return context
+    }
+
+    private fun removeViews() {
+        try {
+            windowManager?.removeViewImmediate(mContentView)
+        } catch (e: IllegalArgumentException) {
+            Log.e("popwindow", "Catch exception when remove control window：$e")
+        }
+        mContentView = null
+    }
+
+    open fun dismiss() {
+        Log.d(TAG, "dismiss() called")
+        dismissListener?.onWindowDismiss()
+        exit?.start()
+        handler.removeCallbacksAndMessages(null)
+        handler.postDelayed(this::removeViews, FADE_DURATION)
+        shown = false
+    }
+
+    fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
+        return WindowManager.LayoutParams(
+            width,
+            height,
+            WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.RGBA_8888
+        ).apply {
+            this.gravity = winGravity
+            this.x = offsetX
+            this.y = offsetY
+        }
+    }
+
+    fun getContentView(): View? {
+        return mContentView
+    }
+
+    interface WindowDismissListener {
+        fun onWindowDismiss();
+    }
+
+    class Builder(
+        private val context: Context,
+        private val width: Int,
+        private val height: Int,
+        private val layoutResId: Int
+    ) {
+        private var x = 0
+        private var y = 0
+        private var gravity = Gravity.TOP or Gravity.START
+        private var elevation = 0
+        private var enter: ObjectAnimator? = null
+        private var exit: ObjectAnimator? = null
+        private var provider: ViewOutlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, POPUP_WINDOW_RADIUS.toFloat())
+            }
+        }
+
+        fun gravity(gravity: Int): Builder {
+            this.gravity = gravity
+            return this
+        }
+
+        fun locate(x: Int, y: Int): Builder {
+            this.x = x
+            this.y = y
+            return this
+        }
+
+        fun elevation(elevation: Int): Builder {
+            this.elevation = elevation
+            return this
+        }
+
+        fun provider(provider: ViewOutlineProvider): Builder {
+            this.provider = provider
+            return this
+        }
+
+        fun animate(enter: ObjectAnimator?, exit: ObjectAnimator?): Builder {
+            this.enter = enter
+            this.exit = exit
+            return this
+        }
+
+        fun build(type: Int): AbsTopPopWindow {
+            when (type){
+                TYPE_POWER->{
+                    return TopBarPowerWindow(context, width, height, gravity, layoutResId).apply {
+                        this.provider = this@Builder.provider
+                        this.offsetX = this@Builder.x
+                        this.offsetY = this@Builder.y
+                        this.elevation = this@Builder.elevation
+                        this.enter = this@Builder.enter
+                        this.exit = this@Builder.exit
+                    }
+                }
+                TYPE_CONTROL->{
+                    return TopBarControlWindow(context, width, height, gravity, layoutResId).apply {
+                        this.provider = this@Builder.provider
+                        this.offsetX = this@Builder.x
+                        this.offsetY = this@Builder.y
+                        this.elevation = this@Builder.elevation
+                        this.enter = this@Builder.enter
+                        this.exit = this@Builder.exit
+                    }
+                }
+                else -> {
+                    return AbsTopPopWindow(context, width, height, gravity, layoutResId).apply {
+                        this.provider = this@Builder.provider
+                        this.offsetX = this@Builder.x
+                        this.offsetY = this@Builder.y
+                        this.elevation = this@Builder.elevation
+                        this.enter = this@Builder.enter
+                        this.exit = this@Builder.exit
+                    }
+                }
+            }
+        }
+    }
+}
+
+

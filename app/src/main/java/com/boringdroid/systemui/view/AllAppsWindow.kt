@@ -24,8 +24,10 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.view.View.OnApplyWindowInsetsListener
 import android.widget.*
 import com.boringdroid.systemui.AppLoaderTask
+import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.AppActionsAdapter
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.Action
@@ -36,7 +38,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
-import com.boringdroid.systemui.R;
 
 
 class AllAppsWindow(private val mContext: Context?, private val sContext: Context?) :
@@ -165,6 +166,11 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
                     "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count"
                 )
             }
+        })
+
+        windowContentView?.setOnApplyWindowInsetsListener(OnApplyWindowInsetsListener { v, insets ->
+            Log.d(TAG, "onClick() called with: v = $v, insets = $insets")
+            insets
         })
     }
 
