@@ -28,6 +28,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.contains
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -154,6 +155,11 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
 
 
     private fun generateTopBar() {
+        status?.apply {
+            if(status?.childCount != 0){
+               status?.removeAllViews()
+            }
+        }
 //        status?.removeAllViews()
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
 //        val statusBar = LayoutInflater.from(pluginContext).inflate(R.layout.layout_topbar, status as ViewGroup, false)
@@ -312,7 +318,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     }
 
     override fun onDestroy() {
-//        Log.d(TAG, "onDestroy() called")
+        Log.d(TAG, "onDestroy() status:$status")
         if (systemUIContext != null) {
             try {
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
