@@ -167,11 +167,6 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
                 )
             }
         })
-
-        windowContentView?.setOnApplyWindowInsetsListener(OnApplyWindowInsetsListener { v, insets ->
-            Log.d(TAG, "onClick() called with: v = $v, insets = $insets")
-            insets
-        })
     }
 
     fun showPowerListMenu(anchor: View) {

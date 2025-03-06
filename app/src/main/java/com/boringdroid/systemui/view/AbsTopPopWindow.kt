@@ -8,23 +8,29 @@ import android.os.Handler
 import android.util.Log
 import android.view.*
 import android.view.WindowManager
+import android.widget.ImageView
 
 open class AbsTopPopWindow(
-     private val context: Context,
-     private val width: Int,
-     private val height: Int,
-     var winGravity: Int,
-     var layoutResId: Int
+    private val context: Context,
+    private val width: Int,
+    private val height: Int,
+    var winGravity: Int,
+    var layoutResId: Int
 ) {
     companion object {
         const val POPUP_WINDOW_RADIUS = 12
         const val FADE_DURATION: Long = 120
         const val TAG:String = "AbsTopPopWindow"
-        const val TYPE_POWER: Int = 1
-        const val TYPE_CONTROL: Int = 2
-
     }
 
+    sealed class WindowType {
+        object Power : WindowType()
+        object Control : WindowType()
+        object Default : WindowType()
+    }
+
+
+    var enterView: ImageView? = null
     private var shown = false
     var offsetX = 0
     var offsetY = 0
@@ -90,7 +96,7 @@ open class AbsTopPopWindow(
         shown = false
     }
 
-    fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
+    private fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             width,
             height,
@@ -108,6 +114,10 @@ open class AbsTopPopWindow(
 
     fun getContentView(): View? {
         return mContentView
+    }
+
+    fun isShowing(): Boolean {
+        return shown
     }
 
     interface WindowDismissListener {
@@ -159,40 +169,23 @@ open class AbsTopPopWindow(
             return this
         }
 
-        fun build(type: Int): AbsTopPopWindow {
-            when (type){
-                TYPE_POWER->{
-                    return TopBarPowerWindow(context, width, height, gravity, layoutResId).apply {
-                        this.provider = this@Builder.provider
-                        this.offsetX = this@Builder.x
-                        this.offsetY = this@Builder.y
-                        this.elevation = this@Builder.elevation
-                        this.enter = this@Builder.enter
-                        this.exit = this@Builder.exit
-                    }
-                }
-                TYPE_CONTROL->{
-                    return TopBarControlWindow(context, width, height, gravity, layoutResId).apply {
-                        this.provider = this@Builder.provider
-                        this.offsetX = this@Builder.x
-                        this.offsetY = this@Builder.y
-                        this.elevation = this@Builder.elevation
-                        this.enter = this@Builder.enter
-                        this.exit = this@Builder.exit
-                    }
-                }
-                else -> {
-                    return AbsTopPopWindow(context, width, height, gravity, layoutResId).apply {
-                        this.provider = this@Builder.provider
-                        this.offsetX = this@Builder.x
-                        this.offsetY = this@Builder.y
-                        this.elevation = this@Builder.elevation
-                        this.enter = this@Builder.enter
-                        this.exit = this@Builder.exit
-                    }
-                }
+        fun build(type: WindowType): AbsTopPopWindow {
+            val window = when (type) {
+                is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId)
+                is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId)
+                is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId)
+            }
+
+            return window.apply {
+                this.provider = this@Builder.provider
+                this.offsetX = this@Builder.x
+                this.offsetY = this@Builder.y
+                this.elevation = this@Builder.elevation
+                this.enter = this@Builder.enter
+                this.exit = this@Builder.exit
             }
         }
+
     }
 }
 

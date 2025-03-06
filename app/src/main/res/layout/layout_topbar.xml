@@ -24,7 +24,6 @@
             android:id="@+id/imeswitch_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
             android:src="@drawable/input_delete"
             android:layout_toLeftOf="@id/wifi_btn"
@@ -34,25 +33,22 @@
             android:id="@+id/wifi_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
-            android:src="@drawable/icon_wifi"
+            android:src="@drawable/icon_wifi_unselect_full"
             />
 
         <ImageView
             android:id="@+id/volume_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
-            android:src="@drawable/icon_volume"
+            android:src="@drawable/icon_volume_top_max"
             />
 
         <ImageView
             android:id="@+id/battery_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
             android:src="@drawable/icon_battery_chargeing_100"
             />
@@ -60,7 +56,6 @@
             android:id="@+id/search_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
             android:src="@drawable/icon_search"
             />
@@ -79,15 +74,14 @@
             android:layout_height="@dimen/topbar_icon_size"
             android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
-            android:src="@drawable/icon_notification"
+            android:src="@drawable/icon_notification_red"
             />
         <ImageView
             android:id="@+id/about_btn"
             android:layout_width="@dimen/topbar_icon_size"
             android:layout_height="@dimen/topbar_icon_size"
-            android:scaleType="fitXY"
             android:padding="@dimen/topbar_icon_padding"
-            android:src="@drawable/power"
+            android:src="@drawable/icon_power"
             />
         
         <LinearLayout

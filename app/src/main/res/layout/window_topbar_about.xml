@@ -5,8 +5,13 @@
     android:layout_width="380dp"
     android:layout_height="466dp"
     android:id="@+id/root_rl"
-    android:background="#c7FAFAFA"
-    android:layout_gravity="center">
+    >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#c7FAFAFA"
+        android:layout_gravity="center"
+        />
 
     <ImageView
         android:id="@+id/icon_iv"

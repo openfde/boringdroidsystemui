@@ -10,6 +10,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.Utils
 
 class TopBarPowerWindow (
     context: Context,
@@ -115,11 +116,12 @@ class TopBarPowerWindow (
     private fun showAboutWindow() {
         val width = getContext().resources.getDimension(R.dimen.top_bar_about_width).toInt()
         val height = getContext().resources.getDimension(R.dimen.top_bar_about_height).toInt()
-        var powerWindow: AbsTopPopWindow  = AbsTopPopWindow.Builder(getContext(), width, height, R.layout.window_topbar_about)
+        var powerWindow: AbsTopPopWindow  = Builder(getContext(), width, height, R.layout.window_topbar_about)
             .gravity(Gravity.CENTER)
-            .build(-1)
+            .build(WindowType.Default)
         powerWindow.showPopupWindow()
         val contentView = powerWindow.getContentView()
+        Utils.setBackgroundBlurRadius(contentView, 100)
         if(contentView != null){
             var close: View? = contentView.findViewById(R.id.close_iv)
             close?.setOnClickListener(View.OnClickListener {

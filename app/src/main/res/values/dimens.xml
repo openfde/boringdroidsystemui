@@ -97,5 +97,8 @@
     <dimen name="top_bar_about_height">466dp</dimen>
     <dimen name="top_bar_control_width">376dp</dimen>
     <dimen name="top_bar_control_height">434dp</dimen>
+    <dimen name="elevation_control_panel">3dp</dimen>
+    <dimen name="radius_control_panel">12dp</dimen>
+    <dimen name="card_elevation_control_panel">10dp</dimen>
 
 </resources>
