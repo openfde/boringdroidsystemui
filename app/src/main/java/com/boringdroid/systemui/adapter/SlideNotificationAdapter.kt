@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.NotificationService
@@ -20,14 +21,14 @@ import com.boringdroid.systemui.utils.Utils
 class SlideNotificationAdapter(
     private val context: Context,
     private var notifications: Array<StatusBarNotification>?,
-    private val listener: NotificationService,
+    private val listener: NotificationService?,
 ) : RecyclerView.Adapter<SlideNotificationAdapter.ViewHolder>(){
     var notificationList: ArrayList<StatusBarNotification> ? = null
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val controlInfoLayout = LayoutInflater.from(context)
-            .inflate(R.layout.layout_notification_info, parent, false) as ViewGroup
+            .inflate(R.layout.layout_notification_item, parent, false) as ViewGroup
         return ViewHolder(controlInfoLayout)
     }
 
@@ -84,7 +85,39 @@ class SlideNotificationAdapter(
         holder.elapsedTv.text = computeElapsedTime
         val actions = notification?.actions
         holder.elapsedTv.visibility = View.VISIBLE
-        holder.bind(sbn, listener)
+        Utils.setBackgroundBlurRadius(holder.root as View, 70)
+        holder.root.setOnHoverListener(hoverListener)
+//        holder.bind(sbn, listener)
+    }
+
+    val hoverListener = View.OnHoverListener { v, event ->
+        val what = event?.action
+        when (what) {
+            MotionEvent.ACTION_HOVER_ENTER -> {
+                hoverEnter(v)
+            }
+
+            MotionEvent.ACTION_HOVER_EXIT -> {
+                hoverExit(v)
+            }
+        }
+        false
+    }
+
+    private fun hoverExit(v: View?) {
+        v?.setBackgroundResource(R.drawable.round_rect_10dp_bf)
+        val close = v?.findViewById<ImageView>(R.id.iv_close)
+        val elapsed = v?.findViewById<View>(R.id.tv_elapsed)
+        close?.visibility = View.GONE
+        elapsed?.visibility = View.VISIBLE
+    }
+
+    private fun hoverEnter(v: View?) {
+        v?.setBackgroundResource(R.drawable.round_rect_10dp_fa)
+        val close = v?.findViewById<ImageView>(R.id.iv_close)
+        val elapsed = v?.findViewById<View>(R.id.tv_elapsed)
+        close?.visibility = View.VISIBLE
+        elapsed?.visibility = View.GONE
     }
 
     interface OnNotificationClickListener {
@@ -101,6 +134,7 @@ class SlideNotificationAdapter(
         val titleTv: TextView = appInfoLayout.findViewById(R.id.tv_title)!!
         val contentTv: TextView = appInfoLayout.findViewById(R.id.tv_content)!!
         val closeIv: ImageView = appInfoLayout.findViewById(R.id.iv_close)!!
+        val root: RelativeLayout = appInfoLayout.findViewById(R.id.root)!!
 
         fun bind(notification: StatusBarNotification,
                  listener: NotificationService) {
@@ -147,8 +181,11 @@ class SlideNotificationAdapter(
             val toMutableList = notifications?.toMutableList()
             notificationList?.clear()
             if (toMutableList != null) {
-                notificationList?.addAll(toMutableList)
+                for(i in 1..10){
+                    notificationList?.addAll(toMutableList)
+                }
             }
+
             notificationList?.stream()?.sorted { o1, o2 ->
                 (o1?.postTime ?: 0L).compareTo(o2?.postTime ?: 0L)
             }

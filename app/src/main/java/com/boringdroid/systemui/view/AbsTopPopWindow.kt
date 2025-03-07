@@ -11,9 +11,9 @@ import android.view.WindowManager
 import android.widget.ImageView
 
 open class AbsTopPopWindow(
-    private val context: Context,
-    private val width: Int,
-    private val height: Int,
+    private var context: Context,
+    private var width: Int,
+    private var height: Int,
     var winGravity: Int,
     var layoutResId: Int
 ) {
@@ -24,6 +24,7 @@ open class AbsTopPopWindow(
     }
 
     sealed class WindowType {
+        object Notification : WindowType()
         object Power : WindowType()
         object Control : WindowType()
         object Default : WindowType()
@@ -112,6 +113,28 @@ open class AbsTopPopWindow(
         }
     }
 
+    fun updateLayoutParams(width: Int, height: Int, x: Int, y: Int, gravity: Int){
+        this.width = width
+        this.height = height
+        this.offsetX = x
+        this.offsetY = y
+        this.winGravity = gravity
+        if(windowManager != null && mContentView != null){
+            val params = generateLayoutParams(context, windowManager!!)
+            windowManager?.updateViewLayout(mContentView, params)
+        }
+    }
+
+    fun updateLayoutParams(width: Int, height: Int){
+        this.width = width
+        this.height = height
+        if(windowManager != null && mContentView != null){
+            Log.d(TAG, "updateLayoutParams() called with: width = $width, height = $height")
+            val params = generateLayoutParams(context, windowManager!!)
+            windowManager?.updateViewLayout(mContentView, params)
+        }
+    }
+
     fun getContentView(): View? {
         return mContentView
     }
@@ -136,7 +159,7 @@ open class AbsTopPopWindow(
         private var elevation = 0
         private var enter: ObjectAnimator? = null
         private var exit: ObjectAnimator? = null
-        private var provider: ViewOutlineProvider = object : ViewOutlineProvider() {
+        private var provider: ViewOutlineProvider? = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
                 outline.setRoundRect(0, 0, view.width, view.height, POPUP_WINDOW_RADIUS.toFloat())
             }
@@ -158,7 +181,7 @@ open class AbsTopPopWindow(
             return this
         }
 
-        fun provider(provider: ViewOutlineProvider): Builder {
+        fun provider(provider: ViewOutlineProvider?): Builder {
             this.provider = provider
             return this
         }
@@ -171,6 +194,7 @@ open class AbsTopPopWindow(
 
         fun build(type: WindowType): AbsTopPopWindow {
             val window = when (type) {
+                is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId)

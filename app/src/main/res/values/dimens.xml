@@ -101,4 +101,10 @@
     <dimen name="radius_control_panel">12dp</dimen>
     <dimen name="card_elevation_control_panel">10dp</dimen>
 
+    <dimen name="top_bar_notification_width">406dp</dimen>
+    <dimen name="top_bar_notification_height_item">150dp</dimen>
+    <dimen name="top_bar_notification_height_devide">8dp</dimen>
+    <dimen name="top_bar_notification_margin_vert">13dp</dimen>
+
+
 </resources>

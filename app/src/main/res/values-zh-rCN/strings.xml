@@ -93,4 +93,8 @@
 
     <string name="output">输出</string>
     <string name="input">输入</string>
+    <string name="about_string">关于本机</string>
+    <string name="system_setting_string">系统设置</string>
+    <string name="sleep_string">睡眠</string>
+    <string name="message_count">共 %d 条消息</string>
 </resources>

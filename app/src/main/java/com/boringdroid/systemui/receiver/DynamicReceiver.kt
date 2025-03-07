@@ -6,20 +6,15 @@ import android.content.Intent
 import android.util.Log
 import com.boringdroid.systemui.NotificationService
 import com.boringdroid.systemui.view.SystemStateLayout
+import com.boringdroid.systemui.view.TopBarLayout
 
 
-class DynamicReceiver (private val systemStateLayout: SystemStateLayout?) : BroadcastReceiver(){
-
-    public var service: NotificationService?= null
-
-    constructor ( service: NotificationService):this( null){
-        this.service = service
-    }
+class DynamicReceiver (private val systemStateLayout: SystemStateLayout?, topBarLayout: TopBarLayout?) : BroadcastReceiver(){
 
 
     override fun onReceive(context: Context, intent: Intent) {
         val type = intent.getIntExtra("type",-1)
-        Log.d(TAG, "onReceive() called with: type = $type")
+//        Log.d(TAG, "onReceive() called with: type = $type")
         when(type){
             TYEP_COUNT_NOTIFY ->{
                 systemStateLayout?.onNotifyCount(intent.getIntExtra("count",0))

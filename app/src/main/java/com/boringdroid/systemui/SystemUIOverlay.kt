@@ -38,13 +38,14 @@ import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
+import com.boringdroid.systemui.view.TopBarNotificationWindow
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.stream.Collectors
 
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
+class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener{
     private var pluginContext: Context? = null
     private var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
@@ -89,6 +90,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         statusBar: View,
         navBar: View?,
     ) {
+//        topBarLayout?.let {
+//            status?.contains(it)
+//            return
+//        }
         Log.d(TAG, "setup() called with: statusBar = ${statusBar}, navBar = ${navBar}")
         status = statusBar as ViewGroup
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
@@ -157,33 +162,20 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
     private fun generateTopBar() {
         status?.apply {
             if(status?.childCount != 0){
-               status?.removeAllViews()
+//               status?.removeAllViews()
             }
         }
-//        status?.removeAllViews()
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
-//        val statusBar = LayoutInflater.from(pluginContext).inflate(R.layout.layout_topbar, status as ViewGroup, false)
-//        val windowManager = pluginContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-//        val resources = pluginContext!!.resources
-//        val windowWidth = 1920 //resources.getDimension(R.dimen.all_apps_window_width).toInt()
-//        val windowHeight = 28 //resources.getDimension(R.dimen.all_apps_window_height).toInt()
-//        val layoutParams =
-//            FrameLayout.LayoutParams(
-//                FrameLayout.LayoutParams.MATCH_PARENT,
-//                FrameLayout.LayoutParams.MATCH_PARENT,
-//            )
-//        val displayMetrics = DisplayMetrics()
-//        windowManager.defaultDisplay.getMetrics(displayMetrics)
-//        val size = Point()
-//        windowManager.defaultDisplay.getRealSize(size)
-//        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal)
-//            .toInt()
-//        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical)
-//            .toInt()
-//        layoutParams.gravity = Gravity.TOP or Gravity.START
-//        status?.addView(statusBar, layoutParams)
         status?.addView(topBarLayout)
-        topBarLayout!!.initState()
+        Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
+        if(topBarLayout?.inited != true){
+            topBarLayout?.initState()
+            topBarLayout?.notificationListener = this
+            topBarLayout?.setOnClickListener{
+                Log.d(TAG, "topBarLayout() called")
+            }
+            topBarLayout?.systemUIContext = systemUIContext
+        }
     }
 
 
@@ -215,6 +207,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
 //        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
         windowManager.addView(topBarLayout, layoutParams)
         topBarLayout!!.initState()
+
     }
 
 
@@ -246,7 +239,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
         Log.d(TAG,"onCreate() called with: sysUIContext = $sysUIContext, notificationServiceEnable = $notificationServiceEnable")
-        dynamicReceiver = DynamicReceiver(systemStateLayout)
+        dynamicReceiver = DynamicReceiver(systemStateLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED);
@@ -261,6 +254,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         if (systemService != null) {
             val nm = systemService as NotificationManager
             nm.setNotificationListenerAccessGranted(component, true)
+            Log.d(TAG, "grantNmnPermission() nm{${nm.activeNotifications.size}}")
         }
     }
 
@@ -351,7 +345,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
             val getMethod =
                 systemPropertiesClass.getMethod("get", String::class.java, String::class.java)
             val tunerKeys = getMethod.invoke(null, "persist.sys.bd.tunerkeys", "") as String
-            Log.d(TAG, "Got tuner keys $tunerKeys")
+//            Log.d(TAG, "Got tuner keys $tunerKeys")
             val tunerKeyList =
                 Arrays.stream(tunerKeys.split("--").toTypedArray())
                     .map { obj: String -> obj.trim { it <= ' ' } }
@@ -533,5 +527,31 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener{
         if(Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0 ){
             systemStateLayout?.hideImeSwitchWindow()
         }
+    }
+
+    override fun hideNotificationWindow() {
+        Log.w("SysteUIOverlay","showNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "SHOW_NOTIF_PANEL"
+            )
+        )
+
+    }
+
+    override fun showNotificationWindow() {
+        Log.w("SysteUIOverlay","hideNotification")
+        systemUIContext?.sendBroadcast(
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
+                "action",
+                "HIDE_NOTIF_PANEL"
+            )
+        )
+    }
+
+    override fun syncVisibleWindow(which: Int) {
+
+
     }
 }

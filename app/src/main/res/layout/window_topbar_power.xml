@@ -18,7 +18,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="关于本机"
+        android:text="@string/about_string"
         />
     <TextView
         android:id="@+id/setting_tv"
@@ -32,7 +32,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="系统设置"
+        android:text="@string/system_setting_string"
         />
     
     <View
@@ -55,7 +55,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="睡眠"
+        android:text="@string/sleep_string"
         />
 
     <TextView
@@ -70,7 +70,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="关机"
+        android:text="@string/fde_shutdown"
         />
     <TextView
         android:id="@+id/reboot_tv"
@@ -84,7 +84,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="重启"
+        android:text="@string/fde_restart"
         />
     <View
         android:layout_marginVertical="5dp"
@@ -105,7 +105,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="注销"
+        android:text="@string/fde_log_off"
         />
     <TextView
         android:id="@+id/lock_tv"
@@ -119,7 +119,7 @@
         android:textSize="14sp"
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
-        android:text="锁屏"
+        android:text="@string/fde_lock_screen"
         />
 
 

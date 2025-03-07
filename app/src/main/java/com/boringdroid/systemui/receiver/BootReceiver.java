@@ -3,6 +3,7 @@ package com.boringdroid.systemui.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 
 import com.boringdroid.systemui.utils.LogTools;
 import com.boringdroid.systemui.utils.ParseUtils;

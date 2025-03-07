@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="@dimen/notification_window_width"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    >
+
+    <RelativeLayout
+        android:id="@+id/top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginEnd="16dp"
+        >
+        <TextView
+            android:id="@+id/count_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textColor="#ff292929"
+            android:textSize="16sp"
+            android:text="共5条消息"
+            />
+        <TextView
+            android:id="@+id/clear_tv"
+            android:layout_width="64dp"
+            android:layout_height="28dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:textColor="#ff292929"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:text="清空"
+            android:background="@drawable/notification_ellipse"
+            android:shadowColor="#1a000000"
+            android:shadowDx="0"
+            android:shadowDy="3"
+            />
+    </RelativeLayout>
+
+
+    <com.boringdroid.systemui.view.NotificationListView
+        android:id="@+id/notification_rv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/all_apps_margin_horizontal"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="13dp"
+        android:background="@android:color/transparent"
+        android:layout_below="@+id/top"
+        android:scrollbars="vertical" />
+
+</RelativeLayout>

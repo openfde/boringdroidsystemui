@@ -5,7 +5,6 @@ package com.boringdroid.systemui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.Instrumentation
 import android.app.Notification
 import android.app.PendingIntent.CanceledException
 import android.content.BroadcastReceiver
@@ -17,12 +16,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.PorterDuff
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.transition.Slide
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -48,12 +45,21 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_SCREEN_NOTIFY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_KEY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_LIST_KEY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_CONNECT
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_CREATE
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_REMOVE
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_TYPE_KEY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_UPDATE_COUNT
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.IconParserUtilities
-import com.boringdroid.systemui.utils.ColorUtils
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.view.NotificationWindow
+import com.boringdroid.systemui.view.TopBarNotificationWindow
 
 class NotificationService : NotificationListenerService(),
     NotificationAdapter.OnNotificationClickListener,
@@ -78,6 +84,8 @@ class NotificationService : NotificationListenerService(),
     private var preferLastDisplay = false
     private var iconParserUtilities: IconParserUtilities? = null
     private var notificationWindow: NotificationWindow? = null
+    private var topBarNotificationWindow: TopBarNotificationWindow? = null
+
 
     private var y = 0
     private var x = 0
@@ -151,23 +159,41 @@ class NotificationService : NotificationListenerService(),
         val filter = IntentFilter()
         filter.addAction("com.fde.action.NOTIFICATION_PANEL_CHANG")
         filter.addAction("com.fde.action.NETWORK_PANEL_CHANG")
+        filter.addAction(NOTIFI_AQUIRE_ACTION)
         registerReceiver(dockReceiver, filter, RECEIVER_EXPORTED)
         Log.d(TAG, "activeNotifications:" + activeNotifications.size)
         notificationWindow = NotificationWindow(context, this)
+        broadcastNotifications(NOTIFI_ACTION_CREATE)
     }
+
+    private fun broadcastNotifications(type: Int) {
+        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type)
+                .putExtra(NOTIFICATION_LIST_KEY, activeNotifications)
+        )
+    }
+
+    private fun broadcastNotification(type: Int, sbn: StatusBarNotification) {
+        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type)
+                .putExtra(NOTIFICATION_KEY, sbn)
+        )
+    }
+
 
     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "onListenerConnected() called")
+        broadcastNotifications(NOTIFI_ACTION_CONNECT)
         updateNotificationCount()
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         super.onNotificationRemoved(sbn)
         Log.d(TAG, "onNotificationRemoved() called with: sbn = $sbn")
+        broadcastNotification(NOTIFI_ACTION_REMOVE, sbn)
         updateNotificationCount()
         if (Utils.notificationPanelVisible) updateNotificationPanel()
     }
+
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         Log.d(TAG, "onNotificationPosted() called with: sbn = $sbn")
@@ -360,10 +386,12 @@ class NotificationService : NotificationListenerService(),
             Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY)
                 .putExtra("count", count)
         )
+        broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
     }
 
     fun showNotificationPanel() {
         notificationWindow?.ifShowNotificationWindow(context, activeNotifications)
+        Log.d(TAG, "showNotificationPanel() called activeNotifications{$activeNotifications[0]}")
         Utils.notificationPanelVisible = true
         if(notificationLayout?.visibility == View.VISIBLE){
             notificationLayout?.visibility = View.GONE
@@ -417,7 +445,8 @@ class NotificationService : NotificationListenerService(),
             val action = p2.getStringExtra("action")
             android.util.Log.i("sanycrm","onReceive  "+action)
             Log.w("DockServiceReceiver","onReceive action: $action")
-            if (action.equals("SHOW_NOTIF_PANEL")) showNotificationPanel()
+            if (action.equals("SHOW_NOTIF_PANEL"))
+                showNotificationPanel()
             else if(action.equals("com.fde.action.NETWORK_PANEL_CHANG")){
                 val status = p2.getIntExtra("status",-1)
                 var tipText = "";
@@ -427,12 +456,12 @@ class NotificationService : NotificationListenerService(),
                     tipText = "wifi"+getString(R.string.fde_unconnect)
                 }else{
 //                    tipText = getString(R.string.fde_no_wifi_module);
-
                 }
 //                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
-            }else {
+            }else if(p2.action.equals(NOTIFI_AQUIRE_ACTION)){
+                broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
+            } else {
                 hideNotificationPanel()
-//                hideTipsDialog()
             }
         }
     }
@@ -453,4 +482,5 @@ class NotificationService : NotificationListenerService(),
     override fun onNotificationCancelClicked(notification: StatusBarNotification, item: View?) {
         cancelNotification(notification.key)
     }
+
 }

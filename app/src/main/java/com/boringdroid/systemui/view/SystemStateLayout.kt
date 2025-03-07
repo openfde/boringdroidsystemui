@@ -336,7 +336,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     fun onNotifyCount(count: Int?) {
         notificationCount = count
-        Log.d("TAG", "onNotifyCount() called with: count = $count")
+//        Log.d("TAG", "onNotifyCount() called with: count = $count")
         notificationBtn?.visibility = VISIBLE
         if (count!! > 0) {
             notificationBtn?.setImageResource(R.drawable.icon_notification_coming)
