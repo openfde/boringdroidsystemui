@@ -47,11 +47,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/all_apps_margin_horizontal"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="13dp"
-        android:background="@android:color/transparent"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="@dimen/top_bar_notification_fade_length"
         android:layout_below="@+id/top"
-        android:scrollbars="vertical" />
+        android:scrollbars="none"
+        />
 
 </RelativeLayout>

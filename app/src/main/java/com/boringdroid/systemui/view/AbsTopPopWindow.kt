@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.*
 import android.view.WindowManager
@@ -24,6 +25,7 @@ open class AbsTopPopWindow(
     }
 
     sealed class WindowType {
+        object SingleNotification : WindowType()
         object Notification : WindowType()
         object Power : WindowType()
         object Control : WindowType()
@@ -41,10 +43,11 @@ open class AbsTopPopWindow(
     protected var provider: ViewOutlineProvider? = null
     protected var enter: ObjectAnimator? = null
     protected var exit: ObjectAnimator? = null
-    private val handler = Handler()
+    val handler = Handler(Looper.getMainLooper())
     private var dismissListener: WindowDismissListener ?= null
 
     open fun showPopupWindow() {
+        shown = true
         if (mContentView == null) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mContentView = LayoutInflater.from(context).inflate(layoutResId, null)
@@ -60,7 +63,6 @@ open class AbsTopPopWindow(
                 false
             }
         }
-        shown = true
     }
 
     fun setDismissListener(dismissListener: WindowDismissListener){
@@ -79,7 +81,7 @@ open class AbsTopPopWindow(
         return context
     }
 
-    private fun removeViews() {
+    fun removeViews() {
         try {
             windowManager?.removeViewImmediate(mContentView)
         } catch (e: IllegalArgumentException) {
@@ -143,6 +145,13 @@ open class AbsTopPopWindow(
         return shown
     }
 
+    fun clear() {
+        if(mContentView != null && windowManager != null
+            && mContentView!!.isAttachedToWindow){
+            windowManager?.removeViewImmediate(mContentView)
+        }
+    }
+
     interface WindowDismissListener {
         fun onWindowDismiss();
     }
@@ -194,6 +203,7 @@ open class AbsTopPopWindow(
 
         fun build(type: WindowType): AbsTopPopWindow {
             val window = when (type) {
+                is WindowType.SingleNotification -> SingleNotificationWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId)
                 is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId)

@@ -3,11 +3,14 @@ package com.boringdroid.systemui.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.annotation.RequiresApi
 
 class NotificationReceiver(private val listener: NotificationUpdater)
     : BroadcastReceiver() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
         val type = intent?.getIntExtra(NOTIFI_ACTION_TYPE_KEY, 0)
@@ -38,6 +41,9 @@ class NotificationReceiver(private val listener: NotificationUpdater)
             NOTIFI_ACTION_REMOVE->{
                 listener.updateClick(ACTIONTYPE.NOTIFI_ACTION_REMOVE, notification)
             }
+            NOTIFI_ACTION_POST->{
+                listener.postNotification(notification)
+            }
         }
     }
 
@@ -55,7 +61,7 @@ class NotificationReceiver(private val listener: NotificationUpdater)
         const val NOTIFI_ACTION_LONG_CLICK = 5
         const val NOTIFI_ACTION_CANCEL_CLICK = 6
         const val NOTIFI_ACTION_REMOVE = 7
-
+        const val NOTIFI_ACTION_POST = 8
     }
 
     sealed class ACTIONTYPE {
@@ -78,4 +84,6 @@ interface NotificationUpdater {
     fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?)
     fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?)
     fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: StatusBarNotification?)
+    fun postNotification(notification: StatusBarNotification?)
+
 }

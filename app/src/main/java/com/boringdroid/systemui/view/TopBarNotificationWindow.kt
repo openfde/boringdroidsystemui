@@ -1,5 +1,7 @@
 package com.boringdroid.systemui.view
 
+import android.app.NotificationManager
+import android.app.PendingIntent.CanceledException
 import android.content.Context
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -9,6 +11,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.SystemUIOverlay
+import com.boringdroid.systemui.SystemUIOverlay.Companion
+import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.utils.Utils
 
@@ -18,12 +23,14 @@ class TopBarNotificationWindow(
     height: Int,
     gravity: Int,
     layoutResId: Int)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId), View.OnClickListener {
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId), View.OnClickListener,
+    OnNotificationItemClickListener {
 
     companion object {
         const val WINDOW_PADDING_TOP = 8
         const val WINDOW_PADDING_RIGHT = 0
         const val TAG:String = "TopBarNotificationWindow"
+        const val MAX_NOTIFICATIONS_ONE_SCREEN : Int = 7
     }
 
     private var mRecyclerView: RecyclerView? = null
@@ -33,10 +40,16 @@ class TopBarNotificationWindow(
     var systemUIContext: Context? = null
     private var notifications: Array<StatusBarNotification> ? = null
     private var rootRl:RelativeLayout ? = null
+    private var nm: NotificationManager ? = null
 
     override fun showPopupWindow() {
         super.showPopupWindow()
         initViews()
+        val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
+        if (systemService != null) {
+            nm = systemService as NotificationManager
+            Log.d(TAG, "showPopupWindow nm:$nm")
+        }
     }
 
 
@@ -44,25 +57,56 @@ class TopBarNotificationWindow(
         mRecyclerView = mContentView?.findViewById(R.id.notification_rv)
         countTv = mContentView?.findViewById(R.id.count_tv)
         clearTv = mContentView?.findViewById(R.id.clear_tv)
+        clearTv?.setOnClickListener(this)
         rootRl = mContentView?.findViewById(R.id.root_rl)
         notificationAdapter = SlideNotificationAdapter(getContext(), notifications, null)
+        notificationAdapter?.itemClickListener = this
         mRecyclerView?.adapter = notificationAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(getContext())
+    }
 
+    override fun onItemClick(sbn: StatusBarNotification, item: View?) {
+        val notification = sbn.notification
+        if (notification.contentIntent != null) {
+            dismiss()
+            try {
+                notification.contentIntent.send()
+                if (sbn.isClearable) {
+                    nm?.cancel(sbn.id)
+                }
+            } catch (e: CanceledException) {
+                Log.d(TAG, "cancel notification: e:$e")
+            }
+        }
+    }
+
+    override fun onItemCancelClick(sbn: StatusBarNotification, item: View?) {
+        Log.d(TAG, "onItemCancelClick() called with: sbn = $sbn, item = $item")
+        dismiss()
+        nm?.cancel(sbn.id)
     }
 
 
     override fun onClick(v: View?) {
-
-
+        if(clearTv == v){
+            dismiss()
+            nm?.cancelAll()
+        }
     }
 
     fun setNotifications(notifications: Array<StatusBarNotification>?) {
         Log.d(TAG, "setNotifications() called with: notifications = $notifications")
         this.notifications = notifications
         notificationAdapter?.notifyData(notifications)
-        val notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size
+        var notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size
+//        notificationSize = 5
         countTv?.text = String.format(getContext().getString(R.string.message_count), notificationSize)
+        if(notificationSize >= MAX_NOTIFICATIONS_ONE_SCREEN){
+            mRecyclerView?.setFadingEdgeLength(getContext().resources.getDimension(R.dimen.top_bar_notification_fade_length)
+                .toInt())
+        } else {
+            mRecyclerView?.setFadingEdgeLength(0)
+        }
     }
 
     interface WindowListener {
@@ -70,4 +114,6 @@ class TopBarNotificationWindow(
         fun showNotificationWindow()
         fun syncVisibleWindow(which: Int)
     }
+
+
 }

@@ -50,6 +50,7 @@ import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICA
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_CONNECT
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_CREATE
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_POST
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_REMOVE
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_TYPE_KEY
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_UPDATE_COUNT
@@ -210,6 +211,7 @@ class NotificationService : NotificationListenerService(),
         } else if (Utils.notificationPanelVisible) {
             updateNotificationPanel()
         } else {
+            broadcastNotification(NOTIFI_ACTION_POST,sbn)
             val notification = sbn.notification
             if (notification.contentView == null) {
                 val extras = notification.extras

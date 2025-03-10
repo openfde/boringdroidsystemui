@@ -2,6 +2,7 @@ package com.boringdroid.systemui.adapter
 
 import android.app.Notification
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,12 +19,14 @@ import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.IconParserUtilities
 import com.boringdroid.systemui.utils.Utils
 
+
 class SlideNotificationAdapter(
     private val context: Context,
     private var notifications: Array<StatusBarNotification>?,
     private val listener: NotificationService?,
 ) : RecyclerView.Adapter<SlideNotificationAdapter.ViewHolder>(){
     var notificationList: ArrayList<StatusBarNotification> ? = null
+    var itemClickListener: OnNotificationItemClickListener ? = null
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -86,23 +89,56 @@ class SlideNotificationAdapter(
         val actions = notification?.actions
         holder.elapsedTv.visibility = View.VISIBLE
         Utils.setBackgroundBlurRadius(holder.root as View, 70)
-        holder.root.setOnHoverListener(hoverListener)
-//        holder.bind(sbn, listener)
+        holder.root.setOnClickListener{ itemClickListener?.onItemClick(sbn, holder.root)}
+        holder.closeIv.setOnClickListener{ itemClickListener?.onItemCancelClick(sbn, holder.closeIv) }
+        holder.root.setOnGenericMotionListener { view, event ->
+            Log.d(TAG, "onBindViewHolder, event = $event")
+            when (event.action) {
+                MotionEvent.ACTION_HOVER_EXIT -> {
+                    if (isTouchInsideView(event, holder.closeIv)) {
+//                        hoverEnter(view)
+                    } else {
+                        hoverExit(view)
+                    }
+                }
+                else ->{
+                    hoverEnter(view)
+
+                }
+            }
+            false
+        }
+
+    }
+
+    private fun isTouchInsideView(event: MotionEvent, view: View): Boolean {
+        val x = event.x
+        val y = event.y
+        // seams event hover not work in background drawable state hover, must in  onGenericMotion and it should conflict with view include itself when child is a buttom
+        return x >= 320 && x <= 360  && y >= 0 && y <= 36
     }
 
     val hoverListener = View.OnHoverListener { v, event ->
         val what = event?.action
+        Log.d(TAG, "null() called with: v = $v, event = $event")
         when (what) {
             MotionEvent.ACTION_HOVER_ENTER -> {
                 hoverEnter(v)
             }
 
             MotionEvent.ACTION_HOVER_EXIT -> {
+                event.x < v.x + v.width - 5
                 hoverExit(v)
             }
         }
         false
     }
+    val closeHoverListener = View.OnHoverListener { v, event ->
+        val viewGroup = v.parent as ViewGroup
+        hoverEnter(viewGroup)
+        false
+    }
+
 
     private fun hoverExit(v: View?) {
         v?.setBackgroundResource(R.drawable.round_rect_10dp_bf)
@@ -164,10 +200,10 @@ class SlideNotificationAdapter(
                     return false
                 }
             }
-            closeIv.setOnHoverListener(closeHoverListener)
-            closeIv.setOnClickListener(View.OnClickListener {
-                listener.cancelNotification(notification.key )
-            })
+//            closeIv.setOnHoverListener(closeHoverListener)
+            closeIv.setOnClickListener {
+                listener.cancelNotification(notification.key)
+            }
             if(notification.isClearable){
                 closeIv.visibility = View.VISIBLE
             }else{
@@ -181,11 +217,11 @@ class SlideNotificationAdapter(
             val toMutableList = notifications?.toMutableList()
             notificationList?.clear()
             if (toMutableList != null) {
-                for(i in 1..10){
-                    notificationList?.addAll(toMutableList)
-                }
+                notificationList?.addAll(toMutableList)
+//                for(i in 1..5){
+//                    notificationList?.addAll(toMutableList)
+//                }
             }
-
             notificationList?.stream()?.sorted { o1, o2 ->
                 (o1?.postTime ?: 0L).compareTo(o2?.postTime ?: 0L)
             }
@@ -201,4 +237,9 @@ class SlideNotificationAdapter(
         val toMutableList = notifications?.toMutableList()
         notificationList = toMutableList as ArrayList<StatusBarNotification>?
     }
+}
+
+interface OnNotificationItemClickListener {
+    fun onItemClick(sbn: StatusBarNotification, item: View?)
+    fun onItemCancelClick(sbn: StatusBarNotification, item: View?)
 }
