@@ -23,6 +23,7 @@
             android:textColor="#ff292929"
             android:textSize="16sp"
             android:text="共5条消息"
+            style="@style/style_55"
             />
         <TextView
             android:id="@+id/clear_tv"
@@ -38,6 +39,7 @@
             android:shadowColor="#1a000000"
             android:shadowDx="0"
             android:shadowDy="3"
+            style="@style/style_55"
             />
     </RelativeLayout>
 

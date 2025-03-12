@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="style_35">
+        <item name="fontFamily">@font/alibaba_puhui_35_thin_35_thin</item>
+    </style>
+    <style name="style_45">
+        <item name="fontFamily">@font/alibaba_puhui_45_light_45_light</item>
+    </style>
+    <style name="style_55">
+        <item name="fontFamily">@font/alibaba_puhui_55_regular_55_regular</item>
+    </style>
+    <style name="style_55b">
+        <item name="fontFamily">@font/alibaba_puhui_55_regular_85_bold</item>
+    </style>
+    <style name="style_65">
+        <item name="fontFamily">@font/alibaba_puhui_65_medium_65_medium</item>
+    </style>
+    <style name="style_75">
+        <item name="fontFamily">@font/alibaba_puhui_75_semibold_75_semibold</item>
+    </style>
+    <style name="style_95">
+        <item name="fontFamily">@font/alibaba_puhui_95_extrabold_95_extrabold</item>
+    </style>
+    <style name="style_105">
+        <item name="fontFamily">@font/alibaba_puhui_105_heavy_105_heavy</item>
+    </style>
+</resources>

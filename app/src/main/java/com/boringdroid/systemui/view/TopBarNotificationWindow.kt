@@ -48,7 +48,6 @@ class TopBarNotificationWindow(
         val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {
             nm = systemService as NotificationManager
-            Log.d(TAG, "showPopupWindow nm:$nm")
         }
     }
 
@@ -81,7 +80,6 @@ class TopBarNotificationWindow(
     }
 
     override fun onItemCancelClick(sbn: StatusBarNotification, item: View?) {
-        Log.d(TAG, "onItemCancelClick() called with: sbn = $sbn, item = $item")
         dismiss()
         nm?.cancel(sbn.id)
     }

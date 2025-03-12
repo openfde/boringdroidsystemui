@@ -100,4 +100,5 @@
     <string name="system_setting_string">Setting</string>
     <string name="sleep_string">Sleep</string>
     <string name="message_count">%d Messages</string>
+    <string name="app_list">app list</string>
 </resources>

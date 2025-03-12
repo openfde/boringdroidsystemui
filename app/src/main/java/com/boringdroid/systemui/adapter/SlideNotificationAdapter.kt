@@ -92,7 +92,6 @@ class SlideNotificationAdapter(
         holder.root.setOnClickListener{ itemClickListener?.onItemClick(sbn, holder.root)}
         holder.closeIv.setOnClickListener{ itemClickListener?.onItemCancelClick(sbn, holder.closeIv) }
         holder.root.setOnGenericMotionListener { view, event ->
-            Log.d(TAG, "onBindViewHolder, event = $event")
             when (event.action) {
                 MotionEvent.ACTION_HOVER_EXIT -> {
                     if (isTouchInsideView(event, holder.closeIv)) {

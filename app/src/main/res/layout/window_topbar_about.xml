@@ -32,6 +32,7 @@
         android:textSize="24sp"
         android:textColor="#ff292929"
         android:text="D2000"
+        style="@style/style_55"
         />
 
     <ImageView
@@ -52,5 +53,6 @@
         android:layout_marginTop="15dp"
         android:layout_below="@id/device_tv"
         android:layout_centerHorizontal="true"
+        style="@style/style_55"
         android:text="OpenFDE OS 版本 2.0.1" />
 </RelativeLayout>

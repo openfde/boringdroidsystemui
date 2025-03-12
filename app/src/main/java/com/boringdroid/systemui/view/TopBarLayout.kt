@@ -56,12 +56,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
     private var audioManager: AudioManager? = null
+    private var notificationWindow:SingleNotificationWindow ? = null
     private var notificationsWindow:TopBarNotificationWindow? = null
     private var powerWindow:TopBarPowerWindow? = null
     private var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<StatusBarNotification>? = null
-    private var notificationWindow: SingleNotificationWindow ? = null
 
     val windowList: MutableList<AbsTopPopWindow> by lazy {
         mutableListOf()
@@ -136,10 +136,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         val height_devide = context.resources.getDimension(R.dimen.top_bar_notification_height_devide).toInt()
         val notificationSize =  if (notifications.isNullOrEmpty()) 1 else notifications!!.size
         var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
-        Log.d(TAG, "calculateNotificationHeight() called $height")
         // 128 means navi + statusbr + space
         height = if (height > size.y - 128) (size.y - 128) else height
-        Log.d(TAG, "calculateNotificationHeight: notifications:{$height}")
         return height
     }
 
@@ -216,7 +214,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     override fun onClick(v: View?) {
         windowList.forEach { window ->
-            Log.d(TAG, "onClick() called with: window = $window")
             if(window.isShowing()){
                 window.dismiss()
                 return
@@ -232,7 +229,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?) {
-        Log.d(TAG, "updateState() called with: type = $type, notifications = ${notifications?.size}")
         this.notifications = notifications
         val width = notificationsWindow?.getWidth()
         if (width != null) {
@@ -243,7 +239,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?) {
-        Log.d(TAG, "updateCount() called with: type = $type, notifications = ${notifications?.size}")
+        val count =  if (notifications.isNullOrEmpty()) 0 else notifications!!.size
+        if(count > 0){
+            notificationBtn?.setImageResource(R.drawable.icon_notification_red)
+        } else {
+            notificationBtn?.setImageResource(R.drawable.icon_notification)
+        }
         val width = notificationsWindow?.getWidth()
         if (width != null) {
             notificationsWindow?.updateLayoutParams(width,  calculateNotificationHeight())
@@ -252,7 +253,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: StatusBarNotification?) {
-        Log.d(TAG, "updateClick() called with: type = $type, notification = $notification")
     }
 
     override fun postNotification(sbn: StatusBarNotification?) {
@@ -260,7 +260,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         if (notification?.contentView == null) {
             notificationWindow?.postNotificaton(sbn)
         }
-        Log.d(TAG, "postNotification() called with: notification = $notification")
     }
 
 

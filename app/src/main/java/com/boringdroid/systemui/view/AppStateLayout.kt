@@ -136,12 +136,6 @@ constructor(
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
-//
-//        Log.d(
-//            TAG, "toptask info:${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}, " +
-//                "${runningTaskInfo.taskDescription?.label}," +
-//                "${runningTaskInfo.taskDescription?.icon}" )
-
         if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
             return
         }
@@ -152,11 +146,10 @@ constructor(
             taskAdapter.notifyDataSetChanged()
             return
         }
-        val taskInfo = TaskInfo()
-        taskInfo.id = runningTaskInfo.id
-        taskInfo.setBaseActivityComponentName(runningTaskInfo.baseActivity)
-        taskInfo.setRealActivityComponentName(runningTaskInfo.topActivity)
-        taskInfo.packageName = packageName
+        val taskInfo = packageName?.let { TaskInfo(it, packageName) }
+        taskInfo?.id = runningTaskInfo.id
+        taskInfo?.setBaseActivityComponentName(runningTaskInfo.baseActivity)
+        taskInfo?.setRealActivityComponentName(runningTaskInfo.topActivity)
         val userHandles = userManager.userProfiles
         for (userHandle in userHandles) {
             val infoList = launchApps.getActivityList(packageName, userHandle)
@@ -166,26 +159,28 @@ constructor(
                         || runningTaskInfo!!.taskDescription!!.label.contains("FDE"))
             ){
 //                taskInfo.label = runningTaskInfo!!.taskDescription!!.label
-                taskInfo.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
+                taskInfo?.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
 //                Log.d(TAG,"set icon runningTaskInfo = ${runningTaskInfo.taskId}, ${runningTaskInfo.topActivity}")
-            } else if (taskInfo.icon == null && infoList.size > 0 && infoList[0] != null) {
-                taskInfo.icon = infoList[0]!!.getIcon(0)
+            } else if (taskInfo?.icon == null && infoList.size > 0 && infoList[0] != null) {
+                taskInfo?.icon = infoList[0]!!.getIcon(0)
                 break
             }
         }
-        var icon = taskInfo.icon
+        var icon = taskInfo?.icon
         icon =
             if (icon == null && context != null)
                 context.getDrawable(R.mipmap.default_icon_round) else icon
         if (icon == null) {
 //            Log.d(TAG, "$packageName's icon is null, context $context")
         }
-        taskInfo.icon = icon
+        taskInfo?.icon = icon
         val index = tasks.indexOf(taskInfo)
         tasks.remove(taskInfo)
-        tasks.add(if (index >= 0) index else tasks.size, taskInfo)
+        if (taskInfo != null) {
+            tasks.add(if (index >= 0) index else tasks.size, taskInfo)
+        }
         taskAdapter!!.setData(tasks)
-        taskAdapter.setTopTaskId(taskInfo.id)
+        taskInfo?.id?.let { taskAdapter.setTopTaskId(it) }
 //        Log.d(TAG, "Top task $taskInfo")
         taskAdapter.notifyDataSetChanged()
     }

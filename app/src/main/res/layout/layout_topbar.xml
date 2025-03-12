@@ -12,7 +12,10 @@
         android:gravity="center_vertical"
         android:format12Hour="MM/dd hh:mm a"
         android:format24Hour="MM/dd HH:mm"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        style="@style/style_35"
+        />
 
     <LinearLayout
         android:layout_width="wrap_content"

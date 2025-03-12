@@ -34,6 +34,7 @@
             android:textSize="14sp"
             android:textColor="#73000000"
             android:layout_marginTop="14dp"
+            style="@style/style_55"
             />
         <TextView
             android:id="@+id/tv_elapsed"
@@ -46,6 +47,7 @@
             android:textColor="#73000000"
             android:visibility="gone"
             android:layout_alignParentRight="true"
+            style="@style/style_55"
             />
         <TextView
             android:id="@+id/tv_title"
@@ -58,6 +60,7 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginLeft="44dp"
+            style="@style/style_55"
             />
         <TextView
             android:id="@+id/tv_content"
@@ -71,6 +74,7 @@
             android:textColor="#E6000000"
             android:textSize="14sp"
             android:layout_below="@id/tv_title"
+            style="@style/style_55"
             />
         <ImageView
             android:id="@+id/iv_close"

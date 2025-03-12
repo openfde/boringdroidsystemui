@@ -97,4 +97,5 @@
     <string name="system_setting_string">系统设置</string>
     <string name="sleep_string">睡眠</string>
     <string name="message_count">共 %d 条消息</string>
+    <string name="app_list">所有应用</string>
 </resources>

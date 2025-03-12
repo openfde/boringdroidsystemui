@@ -19,6 +19,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/about_string"
+        style="@style/style_55"
         />
     <TextView
         android:id="@+id/setting_tv"
@@ -33,6 +34,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/system_setting_string"
+        style="@style/style_55"
         />
     
     <View
@@ -56,6 +58,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/sleep_string"
+        style="@style/style_55"
         />
 
     <TextView
@@ -71,6 +74,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/fde_shutdown"
+        style="@style/style_55"
         />
     <TextView
         android:id="@+id/reboot_tv"
@@ -85,6 +89,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/fde_restart"
+        style="@style/style_55"
         />
     <View
         android:layout_marginVertical="5dp"
@@ -106,6 +111,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/fde_log_off"
+        style="@style/style_55"
         />
     <TextView
         android:id="@+id/lock_tv"
@@ -120,6 +126,7 @@
         android:lineSpacingExtra="5.2sp"
         android:gravity="left|center_vertical"
         android:text="@string/fde_lock_screen"
+        style="@style/style_55"
         />
 
 

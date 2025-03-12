@@ -11,14 +11,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
 import android.graphics.PixelFormat
-import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.AttributeSet
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -28,7 +26,6 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.view.contains
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -36,6 +33,7 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTIO
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
+import com.boringdroid.systemui.view.DockAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
@@ -62,109 +60,48 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val classLoader = SystemUIOverlay::class.java.classLoader
     private var mNm: NotificationManager? = null
     private var dynamicReceiver: DynamicReceiver? = null
+    private var dockAppsGroup: ViewGroup? = null
+    private var dockAppsLayout: DockAppsLayout? = null
     private var status: ViewGroup ?= null
-
-
-
+    private var navi: ViewGroup ?= null
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
-    private val closeSystemDialogsReceiver: BroadcastReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(
-                context: Context,
-                intent: Intent,
-            ) {
-                Log.d(TAG, "receive intent $intent")
-                if (allAppsWindow == null) {
-                    return
-                }
-                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS != intent.action) {
-                    return
-                }
-                allAppsWindow!!.dismiss()
-            }
-        }
-
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
         statusBar: View,
         navBar: View?,
     ) {
-//        topBarLayout?.let {
-//            status?.contains(it)
-//            return
-//        }
-        Log.d(TAG, "setup() called with: statusBar = ${statusBar}, navBar = ${navBar}")
+        Log.d(TAG, "setup this = $this,  statusBar = ${statusBar}, navBar = ${navBar}")
         status = statusBar as ViewGroup
+        navi = navBar as ViewGroup
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
-            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
-            val buttonGroup = navBar.findViewById<View>(navBarButtonGroupId)
-            if (buttonGroup is ViewGroup) {
-                navBarButtonGroup = buttonGroup
-                // We must set the height to match parent programmatically
-                // to let all apps button group be center of navigation
-                // bar view.
-                val layoutParams =
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                    )
-                val oldBtAllAppsGroup = buttonGroup.findViewWithTag<View>(TAG_ALL_APPS_GROUP)
-                if (oldBtAllAppsGroup != null) {
-                    buttonGroup.removeView(oldBtAllAppsGroup)
-                }
-                btAllAppsGroup!!.tag = TAG_ALL_APPS_GROUP
-                buttonGroup.addView(btAllAppsGroup, 0, layoutParams)
-                val oldAppStateLayout = buttonGroup.findViewWithTag<View>(TAG_APP_STATE_LAYOUT)
-                if (oldAppStateLayout != null) {
-                    buttonGroup.removeView(oldAppStateLayout)
-                }
-
-
-                appStateLayout!!.tag = TAG_APP_STATE_LAYOUT
-                // The first item is all apps group.
-                // The next three item is back button, home button, recents button.
-                // So we should add app state layout to the 5th, index 4.
-                layoutParams.marginStart = 10
-                buttonGroup.addView(appStateLayout,  1, layoutParams)
-                appStateLayout!!.initTasks()
-
-                val oldClockAndStatus =
-                    buttonGroup.findViewWithTag<View>(TAG_CLOCK_AND_STATUS_GROUP)
-                if (oldClockAndStatus != null) {
-                    buttonGroup.removeView(oldClockAndStatus)
-                }
-                val oldSystemStatus =
-                    buttonGroup.findViewWithTag<View>(TAG_SYSTEM_STATUS_GROUP)
-                if (oldSystemStatus != null) {
-                    buttonGroup.removeView(oldSystemStatus)
-                }
-                systemStateLayout!!.tag = TAG_SYSTEM_STATUS_GROUP
-                val systemStateParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-                systemStateParams.gravity = Gravity.RIGHT
-                buttonGroup.addView(systemStateLayout, 3,systemStateParams)
-                systemStateLayout!!.initState()
-                val view = navBar.parent as ViewGroup
-                val layoutParams1 = view.layoutParams
-                layoutParams1.height = 20
-                view.layoutParams = layoutParams1
-                Utils.setBackgroundBlurRadius(navBar.parent as View, 20)
-            }
+//            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
+            updateNaviDock()
         }
+        status?.visibility = View.VISIBLE
+//        traverseAndPrint(status, 0)
+        status?.removeAllViews()
         generateTopBar()
-//        fakegerateTopBar()
+    }
+    fun updateNaviDock() {
+        val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
+        layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
+        layoutParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+        navi?.layoutParams = layoutParams
+        val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+        navi?.removeAllViews()
+        navi?.addView(dockAppsGroup, dockParams)
+        dockAppsLayout?.initApps()
+        dockAppsGroup?.setOnClickListener{
+            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
+            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
+            traverseAndPrint(navi!!, 0)
+            navi?.background = null
+        }
     }
 
-
-    private fun generateTopBar() {
-        status?.apply {
-            if(status?.childCount != 0){
-//               status?.removeAllViews()
-            }
-        }
+    fun generateTopBar() {
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
         status?.addView(topBarLayout)
         Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
@@ -172,44 +109,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             topBarLayout?.initState()
             topBarLayout?.notificationListener = this
             topBarLayout?.setOnClickListener{
-                Log.d(TAG, "topBarLayout() called")
             }
             topBarLayout?.systemUIContext = systemUIContext
         }
     }
-
-
-    private fun fakegerateTopBar() {
-        val windowManager = pluginContext!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val resources = pluginContext!!.resources
-        val windowWidth = resources.getDimension(R.dimen.top_bar_layout_width).toInt()
-        val windowHeight = resources.getDimension(R.dimen.top_bar_layout_height).toInt()
-        val layoutParams = WindowManager.LayoutParams(
-            windowWidth,
-            windowHeight,
-            2041,
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.RGB_565
-        )
-//        val displayMetrics = DisplayMetrics()
-//        windowManager.defaultDisplay.getMetrics(displayMetrics)
-//        val size = Point()
-//        windowManager.defaultDisplay.getRealSize(size)
-//        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal)
-//            .toInt()
-//        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical)
-//            .toInt()
-        layoutParams.gravity = Gravity.TOP or Gravity.START
-        layoutParams.x = 0
-        layoutParams.y = 0
-//        layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical
-        windowManager.addView(topBarLayout, layoutParams)
-        topBarLayout!!.initState()
-
-    }
-
 
     override fun onCreate(
         sysUIContext: Context,
@@ -220,14 +123,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
+        dockAppsGroup = initializeDockAppsGroup(this.pluginContext, dockAppsGroup)
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
+        dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
         appStateLayout?.listener = this
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
-
         appStateLayout!!.reloadActivityManager(systemUIContext)
+        dockAppsLayout!!.reloadActivityManager(systemUIContext)
+
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
         btAllApps!!.setOnClickListener(allAppsWindow)
@@ -238,7 +144,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
-        Log.d(TAG,"onCreate() called with: sysUIContext = $sysUIContext, notificationServiceEnable = $notificationServiceEnable")
         dynamicReceiver = DynamicReceiver(systemStateLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
@@ -246,15 +151,11 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     private fun grantNmnPermission() {
-//        val method = "setNotificationListenerAccessGranted"
-//        val M = NotificationManager::class.java.getMethod(method, ComponentName::class.java , Boolean::class.javaPrimitiveType)
         val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
-//        M.invoke(mNm, component, true)
         val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {
             val nm = systemService as NotificationManager
             nm.setNotificationListenerAccessGranted(component, true)
-            Log.d(TAG, "grantNmnPermission() nm{${nm.activeNotifications.size}}")
         }
     }
 
@@ -302,12 +203,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
     }
 
-
     override fun holdStatusBarOpen(): Boolean {
-        return false
+        Log.d(TAG, "holdStatusBarOpen() called")
+        return true
     }
 
     override fun setCollapseDesired(collapseDesired: Boolean) {
+        Log.d(TAG, "setCollapseDesired() called with: collapseDesired = $collapseDesired")
         // Do nothing
     }
 
@@ -336,10 +238,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     @SuppressLint("PrivateApi")
-    private fun initializeTuningServiceSettingKeys(
-        resolver: ContentResolver?,
-        observer: ContentObserver,
-    ) {
+    private fun initializeTuningServiceSettingKeys(resolver: ContentResolver?,observer: ContentObserver,) {
         try {
             val systemPropertiesClass = Class.forName("android.os.SystemProperties")
             val getMethod =
@@ -379,6 +278,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     @SuppressLint("InflateParams")
+    private fun initializeDockAppsGroup(
+        context: Context?,
+        dockAppsGroup: ViewGroup?,
+    ): ViewGroup {
+        return dockAppsGroup
+            ?: LayoutInflater.from(context).inflate(R.layout.dock_apps_layout, null) as ViewGroup
+    }
+
+    @SuppressLint("InflateParams")
     private fun initializeClockAndStatus(
         context: Context?,
         clockAndStatus: ViewGroup?,
@@ -405,6 +313,16 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             ?: LayoutInflater.from(context).inflate(R.layout.layout_topbar, null)
                     as TopBarLayout
     }
+
+    private fun initDockAppsLayout(
+        context: Context?,
+        dockAppsLayout: DockAppsLayout?
+    ): DockAppsLayout? {
+        return dockAppsLayout
+            ?: LayoutInflater.from(context).inflate(R.layout.dock_apps_layout, null)
+                    as DockAppsLayout
+    }
+
 
     @SuppressLint("InflateParams")
     private fun initializeAppStateLayout(
@@ -507,6 +425,23 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             )
         )
     }
+
+    private val closeSystemDialogsReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context,
+                intent: Intent,
+            ) {
+                Log.d(TAG, "receive intent $intent")
+                if (allAppsWindow == null) {
+                    return
+                }
+                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS != intent.action) {
+                    return
+                }
+                allAppsWindow!!.dismiss()
+            }
+        }
 
     override fun syncVisible(which: Int) {
         if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
