@@ -30,6 +30,7 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
@@ -120,6 +121,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     ) {
         systemUIContext = sysUIContext
         pluginContext = pluginContext_1
+        SPUtils.pluginContext = systemUIContext
         navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)

@@ -2,9 +2,44 @@ package com.boringdroid.systemui.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.boringdroid.systemui.TaskInfo;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class SPUtils {
-    private static String USER_INFO = "user_info";
+    private static final String USER_INFO = "user_info";
+    private static final String DOCK_APP = "dock_app";
+    private static final String PERSIST_DOCK_APPS = "persist_dock_apps";
+    private static final String TAG = "SPUtils";
+    public static Context pluginContext;
+
+
+    public static void updatePersistDockApp(List<TaskInfo> apps){
+        String packages = arrayToString(apps);
+        Log.d(TAG, "updatePersistDockApp: " + packages);
+        SharedPreferences shared_dock_app = pluginContext.getSharedPreferences(DOCK_APP, pluginContext.MODE_PRIVATE);
+        shared_dock_app.edit().putString(PERSIST_DOCK_APPS, packages).commit();
+    }
+
+    public static String arrayToString(List<TaskInfo> apps) {
+        String result = apps.stream().map(app -> app.getPackageName()).collect(Collectors.joining(","));
+        return result;
+    }
+
+    public static String[] stringToArray(String appsString) {
+        return appsString.split(",");
+    }
+
+    public static String[] getPersistDockApp(){
+        SharedPreferences shared_dock_app = pluginContext.getSharedPreferences(DOCK_APP, pluginContext.MODE_PRIVATE);
+        String apps = shared_dock_app.getString(PERSIST_DOCK_APPS, "com.android.allapp,com.android.settings,com.android.documentsui");
+        Log.d(TAG, "getPersistDockApp() returned: " + apps);
+        return stringToArray(apps);
+    }
 
     public static String getUserInfo(Context context, String key) {
         SharedPreferences shared_user_info = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);

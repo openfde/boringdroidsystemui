@@ -2,14 +2,17 @@ package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.LauncherApps
 import android.os.UserManager
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.DockAppAdapter
 import com.boringdroid.systemui.provider.DockAppsProvider
@@ -20,7 +23,10 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : RecyclerView(context, attrs, defStyleAttr), DockAppsProvider.DockTaskViewUpdater, DockAppItemDecoration.AppClassify{
+) : RecyclerView(context, attrs, defStyleAttr),
+    DockAppsProvider.DockTaskViewUpdater,
+    DockAppItemDecoration.AppClassify,
+    DockAppAdapter.DockItemClickListener {
 
     private val activityManager: ActivityManager
     private val launchApps: LauncherApps
@@ -63,6 +69,7 @@ constructor(
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
         dockAppAdapter?.setData(tasks)
+        dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChanged()
         dockProvider?.registerTaskStackListener()
 //        val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
@@ -117,6 +124,37 @@ constructor(
 
     override fun classifyActive(): Int {
         return dockProvider.getActiveSize()
+    }
+
+    override fun onItemClick(action: String, taskInfo: TaskInfo) {
+        when(action){
+            resources.getString(R.string.exit) ->{
+                activityManager.moveTaskToBack(false, taskInfo.id)
+            }
+            resources.getString(R.string.open) ->{
+                if(!TextUtils.isEmpty(taskInfo.packageName)){
+                    val launchIntent = taskInfo.packageName?.let { it1 ->
+                        context.packageManager.getLaunchIntentForPackage(
+                            it1
+                        )
+                    }
+                    launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(launchIntent)
+                }
+            }
+            resources.getString(R.string.show) ->{
+                activityManager.moveTaskToFront(taskInfo.id, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+            }
+            resources.getString(R.string.minimize) ->{
+                activityManager.moveTaskToBack(true, taskInfo.id)
+            }
+            resources.getString(R.string.pin) ->{
+                dockProvider.pin(taskInfo)
+            }
+            resources.getString(R.string.unpin) ->{
+                dockProvider.unpin(taskInfo)
+            }
+        }
     }
 
 }

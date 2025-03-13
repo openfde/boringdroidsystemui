@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="@dimen/dock_context_width"
+    android:layout_height="wrap_content"
+    android:background="@drawable/round_rect_8dp_d1"
+    android:paddingVertical="9dp"
+    >
+
+    <TextView
+        android:id="@+id/window_tv"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginHorizontal="@dimen/top_text_margin"
+        android:paddingHorizontal="@dimen/top_text_padding"
+        android:layout_centerVertical="true"
+        android:textColor="#e6000000"
+        android:textSize="14sp"
+        android:lineSpacingExtra="5.2sp"
+        android:gravity="left|center_vertical"
+        android:text="@string/minimize"
+        style="@style/style_55"
+        />
+    <TextView
+        android:id="@+id/dock_tv"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginHorizontal="@dimen/top_text_margin"
+        android:paddingHorizontal="@dimen/top_text_padding"
+        android:layout_centerVertical="true"
+        android:textColor="#e6000000"
+        android:textSize="14sp"
+        android:lineSpacingExtra="5.2sp"
+        android:gravity="left|center_vertical"
+        android:text="@string/pin"
+        style="@style/style_55"
+        />
+    
+    <View
+        android:id="@+id/divide"
+        android:layout_marginVertical="5dp"
+        android:layout_width="130dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="10dp"
+        android:background="#1a000000"
+        />
+
+    <TextView
+        android:id="@+id/exit_tv"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginHorizontal="@dimen/top_text_margin"
+        android:paddingHorizontal="@dimen/top_text_padding"
+        android:layout_centerVertical="true"
+        android:textColor="#e6000000"
+        android:textSize="14sp"
+        android:lineSpacingExtra="5.2sp"
+        android:gravity="left|center_vertical"
+        android:text="@string/exit"
+        style="@style/style_55"
+        />
+
+
+
+</LinearLayout>

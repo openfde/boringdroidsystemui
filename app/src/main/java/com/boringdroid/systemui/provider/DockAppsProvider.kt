@@ -18,6 +18,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.TaskInfo.Companion.DOCK_TYPE_NORMAL
 import com.boringdroid.systemui.TaskInfo.Companion.DOCK_TYPE_PERSISIT
+import com.boringdroid.systemui.utils.SPUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +28,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     private val TAG: String = "DockAppsProvider"
     val packageManager: PackageManager
-    private val persistApps =  arrayOf("com.android.allapp","com.android.settings","com.android.documentsui")
     private val appstateListener: AppStateListener
     private val launchApps: LauncherApps
     private val userManager: UserManager
@@ -54,6 +54,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     fun providePersistApps() : MutableList<TaskInfo>{
         val apps: MutableList<TaskInfo> = ArrayList()
+        val persistApps = SPUtils.getPersistDockApp()
         val allTask = TaskInfo(persistApps[0], persistApps[0])
         allTask.icon = context.resources.getDrawable(R.drawable.icon_menu)
         allTask.action = ACTION_DOCK_OVERVIEW
@@ -87,6 +88,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 task.componentName = componentName
                 task.dockType = type
             }
+            Log.d(TAG, "generateTaskInf: ${task.packageName}")
             return task
         } catch (e: PackageManager.NameNotFoundException) {
             Log.d(TAG, "provideSysApps() e:$e")
@@ -193,7 +195,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         }
 //        val taskInfo = TaskInfo(packageName, packageName)
         taskInfo?.id = runningTaskInfo.taskId
-        Log.d(TAG, "topTask: $taskInfo")
+        Log.d(TAG, "topTask: ${taskInfo?.packageName}")
         taskInfo?.setBaseActivityComponentName(runningTaskInfo.baseActivity)
         taskInfo?.setRealActivityComponentName(runningTaskInfo.topActivity)
         val userHandles = userManager.userProfiles
@@ -274,6 +276,27 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         return activeDockApps.size
     }
 
+    fun pin(taskInfo: TaskInfo) {
+        Log.d(TAG, "pin() called with: taskInfo = ${taskInfo.packageName}")
+        taskInfo.dockType = DOCK_TYPE_PERSISIT
+        activeDockApps.removeIf {
+                info-> TextUtils.equals(info.packageName, taskInfo.packageName)
+        }
+        persistDockApps.add(taskInfo)
+        SPUtils.updatePersistDockApp(persistDockApps)
+    }
+
+    fun unpin(taskInfo: TaskInfo) {
+        Log.d(TAG, "unpin() called with: taskInfo = ${taskInfo.packageName}")
+        taskInfo.dockType = DOCK_TYPE_NORMAL
+        activeDockApps.add(taskInfo)
+        persistDockApps.removeIf {
+                info-> TextUtils.equals(info.packageName, taskInfo.packageName)
+        }
+        persistDockApps.forEach {
+                info -> Log.d(TAG, "unpin: info:${info.packageName}") }
+        SPUtils.updatePersistDockApp(persistDockApps)
+    }
 
 
     inner class AppStateListener(private val updater: DockTaskViewUpdater) : TaskStackChangeListener {
@@ -294,7 +317,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
         override fun onTaskMovedToFront(taskInfo: RunningTaskInfo) {
             super.onTaskMovedToFront(taskInfo)
-            Log.d(TAG, "onTaskMovedToFront $taskInfo")
+            Log.d(TAG, "onTaskMovedToFront ${taskInfo.taskId}")
             topTask(taskInfo)
 //            onTaskStackChanged()
         }

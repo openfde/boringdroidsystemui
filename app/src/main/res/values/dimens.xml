@@ -110,4 +110,7 @@
 
     <dimen name="top_bar_single_notification_width">374dp</dimen>
     <dimen name="top_bar_single_notification_height">106dp</dimen>
+
+    <dimen name="dock_context_width">152dp</dimen>
+    <dimen name="dock_context_height">114dp</dimen>
 </resources>

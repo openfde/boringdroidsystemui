@@ -101,4 +101,8 @@
     <string name="sleep_string">Sleep</string>
     <string name="message_count">%d Messages</string>
     <string name="app_list">app list</string>
+
+    <string name="unpin">Unpin</string>
+    <string name="exit">Exit</string>
+    <string name="show">Show</string>
 </resources>

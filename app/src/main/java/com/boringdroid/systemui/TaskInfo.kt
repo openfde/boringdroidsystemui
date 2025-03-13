@@ -117,18 +117,8 @@ class TaskInfo(val packageName: String,
 
     override fun toString(): String {
         return """
-            |id=$id
-            |baseActivityComponentName=$baseActivityComponentName
-            |realActivityComponentName=$realActivityComponentName
-            |packageName=$packageName
-            |icon=${if(icon != null)"Drawable@${Integer.toHexString(icon.hashCode())}" else "null"}
-            |label=$label
-            |state=${stateToString(state)}
-            |action=$action
-            |componentName=$componentName
-            |program=$program
-            |dockType=${dockTypeToString(dockType)}
-            |platformType=${platformTypeToString(platformType)}
+            id=$id packageName=$packageName baseActivityComponentName=$baseActivityComponentName  realActivityComponentName=$realActivityComponentName icon=${if(icon != null)"Drawable@${Integer.toHexString(icon.hashCode())}" else "null"}
+            label=$label  state=${stateToString(state)}  action=$action  componentName=$componentName  program=$program  dockType=${dockTypeToString(dockType)} platformType=${platformTypeToString(platformType)}
         """.trimMargin()
     }
 
@@ -139,6 +129,14 @@ class TaskInfo(val packageName: String,
     fun finshTask() {
         setState(STATE_NORMAL)
         id = ID_UNDEFINED
+    }
+
+    fun isRunning(): Boolean {
+        return state >= STATE_RUNNING
+    }
+
+    fun isTop(): Boolean {
+        return state == STATE_TOP
     }
 
 }
