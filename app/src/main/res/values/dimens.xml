@@ -113,4 +113,7 @@
 
     <dimen name="dock_context_width">152dp</dimen>
     <dimen name="dock_context_height">114dp</dimen>
+
+    <dimen name="overview_app_icon_size">98dp</dimen>
+
 </resources>

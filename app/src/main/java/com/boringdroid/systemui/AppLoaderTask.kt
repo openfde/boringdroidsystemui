@@ -5,6 +5,7 @@ import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Message
 import android.os.UserManager
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
@@ -53,13 +54,15 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
                 appDataTwo.name!!,
             )
         }
+        val msg = Message.obtain()
+        msg.what = HandlerConstant.H_LOAD_SUCCEED
+        msg.obj = allApps
         val target = target
-//        Log.d(TAG, "run() called")
-        target?.sendEmptyMessage(HandlerConstant.H_LOAD_SUCCEED)
+        target?.sendMessage(msg)
     }
 
     @Synchronized
-    fun start(s: String) {
+    fun postSart() {
         stopped = false
         handler.post(this)
     }

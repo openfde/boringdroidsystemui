@@ -7,7 +7,13 @@ import android.content.pm.LauncherApps
 import android.os.UserManager
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.shared.system.ActivityManagerWrapper
@@ -15,7 +21,14 @@ import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.DockAppAdapter
+import com.boringdroid.systemui.adapter.DockAppAdapter.Companion.CONTEXT_WINDOW_PADDING_Y
+import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
+import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
+import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 
 class DockAppsLayout
 @JvmOverloads
@@ -26,22 +39,26 @@ constructor(
 ) : RecyclerView(context, attrs, defStyleAttr),
     DockAppsProvider.DockTaskViewUpdater,
     DockAppItemDecoration.AppClassify,
-    DockAppAdapter.DockItemClickListener {
+    DockAppAdapter.DockItemClickListener,
+    AllAppsProvider.OverviewAppsUpdater
+{
 
     private val activityManager: ActivityManager
     private val launchApps: LauncherApps
     private val userManager: UserManager
     private val windowManager:WindowManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
+    private val apps: MutableList<AppData> = ArrayList()
     private val dockAppAdapter: DockAppAdapter?
     private val dockProvider: DockAppsProvider
+    private val overviewProvider: AllAppsProvider
+    var status: View?= null
+
     private var itemDecoration: DockAppItemDecoration? = null
+    private var appOverviewWindow: AppOverviewWindow ?= null
 
     companion object {
         private const val TAG = "DockAppsLayout"
-        val AM_WRAPPER = ActivityManagerWrapper.getInstance()
-        val TC_WRAPPER = TaskStackChangeListeners.getInstance()
-        private const val MAX_RUNNING_TASKS = 50
     }
 
     init {
@@ -54,6 +71,9 @@ constructor(
         adapter = dockAppAdapter
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         dockProvider = DockAppsProvider(context, this)
+        overviewProvider = AllAppsProvider(context, this)
+        val provideApps = overviewProvider.provideAppsWithFilterSync(TYPE_ALL, null)
+        apps.addAll(provideApps)
     }
 
     override fun onAttachedToWindow() {
@@ -132,14 +152,16 @@ constructor(
                 activityManager.moveTaskToBack(false, taskInfo.id)
             }
             resources.getString(R.string.open) ->{
-                if(!TextUtils.isEmpty(taskInfo.packageName)){
-                    val launchIntent = taskInfo.packageName?.let { it1 ->
-                        context.packageManager.getLaunchIntentForPackage(
-                            it1
-                        )
+                if(!TextUtils.isEmpty(taskInfo.packageName) && taskInfo.launchIntent != null){
+                    if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
+                        appOverviewWindow?.dismiss()
                     }
+                    val launchIntent = taskInfo.launchIntent
                     launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(launchIntent)
+                } else if(ACTION_DOCK_OVERVIEW.equals(taskInfo.action)) {
+//                    context.sendBroadcast(Intent(action))
+                    showAppsOverview()
                 }
             }
             resources.getString(R.string.show) ->{
@@ -155,6 +177,44 @@ constructor(
                 dockProvider.unpin(taskInfo)
             }
         }
+    }
+
+    private fun showAppsOverview() {
+        makeOverviewWinow()
+        if(appOverviewWindow?.isShowing() != true){
+            appOverviewWindow?.showPopupWindow()
+            status?.visibility = View.GONE
+            val contentView = appOverviewWindow?.getContentView()
+            Utils.setBackgroundBlurRadius(contentView, 10)
+        } else{
+            appOverviewWindow?.dismiss()
+        }
+    }
+
+    fun makeOverviewWinow() {
+        if(appOverviewWindow == null){
+            appOverviewWindow = AbsTopPopWindow.Builder(context, MATCH_PARENT, MATCH_PARENT,
+                R.layout.layout_all_app_overview)
+                .gravity(Gravity.START or Gravity.TOP)
+                .locate(WINDOW_PADDING, WINDOW_PADDING)
+                .elevation(0)
+                .provider(null)
+                .paramType(TYPE_SEARCH_BAR)
+                .build(AbsTopPopWindow.WindowType.Overview) as AppOverviewWindow
+            appOverviewWindow?.updateAppList(apps)
+            appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
+                override fun onWindowDismiss() {
+                    Log.d(TAG, "onWindowDismiss  $status")
+                    status?.visibility = View.VISIBLE
+                }
+            })
+        }
+    }
+
+    override fun onAppListUpdated(list: List<AppData>) {
+        apps.clear()
+        apps.addAll(list)
+        appOverviewWindow?.updateAppList(apps)
     }
 
 }

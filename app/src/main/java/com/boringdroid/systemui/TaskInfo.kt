@@ -1,6 +1,7 @@
 package com.boringdroid.systemui
 
 import android.content.ComponentName
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log
@@ -57,6 +58,7 @@ class TaskInfo(val packageName: String,
     var componentName: ComponentName? = null
     var dockType = DOCK_TYPE_UNDEFINED
     var platformType = PLATFORM_TYPE_ANDROID
+    var launchIntent: Intent ?= null
 
     fun getState():Int {
         return state

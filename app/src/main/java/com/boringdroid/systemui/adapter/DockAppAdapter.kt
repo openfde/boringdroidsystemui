@@ -22,6 +22,7 @@ import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_RUNNING
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_TOP
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.view.AbsTopPopWindow
 
@@ -70,14 +71,12 @@ class DockAppAdapter(private val context: Context) :
         }
         holder.appll.setOnClickListener{
             if(app.id == 0){
-                if(!TextUtils.isEmpty(app.packageName)){
-                    val launchIntent = app.packageName?.let { it1 ->
-                        packageManager.getLaunchIntentForPackage(
-                            it1
-                        )
-                    }
+                if(!TextUtils.isEmpty(app.packageName) && app.launchIntent != null){
+                    val launchIntent = app.launchIntent
                     launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(launchIntent)
+                } else if(ACTION_DOCK_OVERVIEW.equals(app.action)){
+                    listener?.onItemClick(context.resources.getString(R.string.open), app)
                 }
             }else if(!isShowing(app.id)){
                 systemUIActivityManager.moveTaskToFront(app.id, ActivityManager.MOVE_TASK_NO_USER_ACTION)

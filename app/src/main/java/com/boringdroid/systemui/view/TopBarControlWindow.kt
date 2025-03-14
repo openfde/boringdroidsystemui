@@ -1,7 +1,6 @@
 package com.boringdroid.systemui.view
 
 import android.content.Context
-import android.graphics.Color
 import android.media.AudioManager
 import android.util.Log
 import android.view.MotionEvent
@@ -9,7 +8,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import androidx.cardview.widget.CardView
 import com.boringdroid.systemui.R
 
 class TopBarControlWindow(
@@ -17,8 +15,10 @@ class TopBarControlWindow(
     width: Int,
     height: Int,
     gravity: Int,
-    layoutResId: Int)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId), View.OnClickListener {
+    layoutResId: Int,
+    typeParam: Int
+)
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
 
     private var screenshotBtn: ImageView?= null

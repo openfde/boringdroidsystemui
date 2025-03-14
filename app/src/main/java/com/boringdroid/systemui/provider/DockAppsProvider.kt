@@ -36,9 +36,9 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
 
     companion object {
-        private const val PACKAGE_X11 = "com.fde.x11"
-        private const val PACKAGE_VNC = "com.iiordanov.bVNC"
-        private const val ACTION_DOCK_OVERVIEW = "com.fde.systemui.SHOW_APP_OVERVIEW"
+        const val PACKAGE_X11 = "com.fde.x11"
+        const val PACKAGE_VNC = "com.iiordanov.bVNC"
+        const val ACTION_DOCK_OVERVIEW = "com.fde.systemui.SHOW_APP_OVERVIEW"
 
         private val AM_WRAPPER = ActivityManagerWrapper.getInstance()
         private val TC_WRAPPER = TaskStackChangeListeners.getInstance()
@@ -87,6 +87,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 val componentName = launchIntent.component
                 task.componentName = componentName
                 task.dockType = type
+                task.launchIntent = launchIntent
             }
             Log.d(TAG, "generateTaskInf: ${task.packageName}")
             return task

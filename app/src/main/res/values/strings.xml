@@ -105,4 +105,5 @@
     <string name="unpin">Unpin</string>
     <string name="exit">Exit</string>
     <string name="show">Show</string>
+    <string name="search_all_app">Search All App</string>
 </resources>

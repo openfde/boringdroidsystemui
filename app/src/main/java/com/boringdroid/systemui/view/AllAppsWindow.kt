@@ -110,7 +110,7 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
-        appLoaderTask.start("")
+        appLoaderTask.postSart()
         shown = true
         Utils.allAppsWindowVisible = true
         listener?.syncVisible(Utils.ALLAPPWINDOW_VISIBLE)
@@ -148,9 +148,9 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         searchEt?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (!TextUtils.isEmpty(s.toString())) {
-                    appLoaderTask.start(s.toString())
+                    appLoaderTask.postSart()
                 } else {
-                    appLoaderTask.start("")
+                    appLoaderTask.postSart()
                 }
                 Log.d(TAG, "afterTextChanged() called with: " + s.toString());
             }
@@ -243,7 +243,7 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
 
     private fun showPowerMenu() {
         searchEt?.setText("")
-        appLoaderTask.start("")
+        appLoaderTask.postSart()
         powerMenuVisible = true
         powerEntry!!.visibility = View.VISIBLE
         powerOffBtn!!.setOnClickListener {

@@ -11,19 +11,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.SystemUIOverlay
-import com.boringdroid.systemui.SystemUIOverlay.Companion
 import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
-import com.boringdroid.systemui.utils.Utils
 
 class TopBarNotificationWindow(
     context: Context,
     width: Int,
     height: Int,
     gravity: Int,
-    layoutResId: Int)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId), View.OnClickListener,
+    layoutResId: Int,
+    typeParam: Int
+)
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener,
     OnNotificationItemClickListener {
 
     companion object {
@@ -78,6 +77,7 @@ class TopBarNotificationWindow(
             }
         }
     }
+
 
     override fun onItemCancelClick(sbn: StatusBarNotification, item: View?) {
         dismiss()

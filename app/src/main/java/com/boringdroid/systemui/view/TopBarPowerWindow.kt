@@ -12,13 +12,15 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 
-class TopBarPowerWindow (
+class TopBarPowerWindow(
     context: Context,
     width: Int,
     height: Int,
     gravity: Int,
-    layoutResId: Int)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId), View.OnClickListener {
+    layoutResId: Int,
+    typeParam: Int
+)
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
     companion object {
         const val WINDOW_PADDING = 8

@@ -9,34 +9,25 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.os.Handler
-import android.os.Looper
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.SystemUIOverlay
-import com.boringdroid.systemui.SystemUIOverlay.Companion
-import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
-import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.utils.AppUtils
-import com.boringdroid.systemui.utils.Utils
 
 class SingleNotificationWindow(
     context: Context,
     width: Int,
     height: Int,
     gravity: Int,
-    layoutResId: Int)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId) {
+    layoutResId: Int,
+    typeParam: Int
+)
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam) {
 
     companion object {
         const val SINGLE_NOTIFICATION_WINDOW_PADDING = 12

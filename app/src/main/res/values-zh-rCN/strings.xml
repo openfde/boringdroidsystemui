@@ -102,4 +102,5 @@
     <string name="pin">固定在任务栏</string>
     <string name="unpin">取消固定</string>
     <string name="exit">退出</string>
+    <string name="search_all_app">搜索全部应用</string>
 </resources>

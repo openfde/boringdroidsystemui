@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:background="#5915191F">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:background="#5915191F">
+            <LinearLayout
+                android:layout_marginTop="40dp"
+                android:layout_width="320dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:background="@drawable/round_rect_6dp_1f"
+                >
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/icon_search_light"
+                    android:layout_marginRight="8dp"
+                    />
+                <EditText
+                    android:id="@+id/search_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:textSize="16sp"
+                    android:gravity="center_vertical"
+                    android:hint="@string/search_all_app"
+                    style="@style/style_55"
+                    android:textColorHint="#59FFFFFF"
+                    android:background="@null"
+                    />
+
+            </LinearLayout>
+
+            <com.boringdroid.systemui.view.LoadedRecycleView
+                android:id="@+id/applist_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="40dp"
+                android:layout_marginHorizontal="254dp"
+                android:layout_marginBottom="152dp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

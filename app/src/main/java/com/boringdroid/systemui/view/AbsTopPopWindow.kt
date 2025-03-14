@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.*
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import android.widget.ImageView
 
 open class AbsTopPopWindow(
@@ -16,7 +17,8 @@ open class AbsTopPopWindow(
     private var width: Int,
     private var height: Int,
     var winGravity: Int,
-    var layoutResId: Int
+    var layoutResId: Int,
+    var typeParam: Int
 ) {
     companion object {
         const val POPUP_WINDOW_RADIUS = 12
@@ -25,6 +27,7 @@ open class AbsTopPopWindow(
     }
 
     sealed class WindowType {
+        object Overview : WindowType()
         object SingleNotification : WindowType()
         object Notification : WindowType()
         object Power : WindowType()
@@ -55,6 +58,9 @@ open class AbsTopPopWindow(
             mContentView?.outlineProvider = provider
             mContentView?.clipToOutline = true
             val params = generateLayoutParams(context, windowManager!!)
+            if(typeParam == TYPE_SEARCH_BAR){
+                params.fitInsetsTypes = 0
+            }
             windowManager?.addView(mContentView, params)
             mContentView?.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_OUTSIDE) {
@@ -91,19 +97,19 @@ open class AbsTopPopWindow(
     }
 
     open fun dismiss() {
-        Log.d(TAG, "dismiss() called")
-        dismissListener?.onWindowDismiss()
         exit?.start()
         handler.removeCallbacksAndMessages(null)
         handler.postDelayed(this::removeViews, FADE_DURATION)
         shown = false
+        dismissListener?.onWindowDismiss()
+
     }
 
     private fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             width,
             height,
-            WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+            typeParam,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
@@ -131,7 +137,6 @@ open class AbsTopPopWindow(
         this.width = width
         this.height = height
         if(windowManager != null && mContentView != null){
-            Log.d(TAG, "updateLayoutParams() called with: width = $width, height = $height")
             val params = generateLayoutParams(context, windowManager!!)
             windowManager?.updateViewLayout(mContentView, params)
         }
@@ -164,6 +169,7 @@ open class AbsTopPopWindow(
     ) {
         private var x = 0
         private var y = 0
+        private var typeParam = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
         private var gravity = Gravity.TOP or Gravity.START
         private var elevation = 0
         private var enter: ObjectAnimator? = null
@@ -190,6 +196,11 @@ open class AbsTopPopWindow(
             return this
         }
 
+        fun paramType(type : Int): Builder {
+            this.typeParam = type
+            return this
+        }
+
         fun provider(provider: ViewOutlineProvider?): Builder {
             this.provider = provider
             return this
@@ -203,11 +214,12 @@ open class AbsTopPopWindow(
 
         fun build(type: WindowType): AbsTopPopWindow {
             val window = when (type) {
-                is WindowType.SingleNotification -> SingleNotificationWindow(context, width, height, gravity, layoutResId)
-                is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId)
-                is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId)
-                is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId)
-                is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId)
+                is WindowType.Overview -> AppOverviewWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.SingleNotification -> SingleNotificationWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam)
             }
 
             return window.apply {
@@ -217,6 +229,8 @@ open class AbsTopPopWindow(
                 this.elevation = this@Builder.elevation
                 this.enter = this@Builder.enter
                 this.exit = this@Builder.exit
+                this.typeParam = this@Builder.typeParam
+
             }
         }
 

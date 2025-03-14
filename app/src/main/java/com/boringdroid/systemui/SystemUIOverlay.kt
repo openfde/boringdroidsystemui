@@ -94,6 +94,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         navi?.removeAllViews()
         navi?.addView(dockAppsGroup, dockParams)
         dockAppsLayout?.initApps()
+        dockAppsLayout?.status = status
         dockAppsGroup?.setOnClickListener{
             Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
             Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
