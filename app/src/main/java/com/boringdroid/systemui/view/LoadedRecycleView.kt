@@ -22,8 +22,9 @@ constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
 ) : RecyclerView(context, attrs, defStyle) {
-    private val appListAdapter: AppListAdapter
+    private var appListAdapter: AppListAdapter
     var overviewWindow: AppOverviewWindow ?= null
+    var list: MutableList<AppData> ?= null
 
     companion object {
         private const val NUMBER_OF_COLUMNS = 7
@@ -37,7 +38,8 @@ constructor(
         adapter = appListAdapter
     }
 
-    fun setData(apps: List<AppData?>?) {
+    fun setData(apps: MutableList<AppData>) {
+        this.list = apps
         appListAdapter.setWindow(overviewWindow)
         appListAdapter.setData(apps)
     }
@@ -65,15 +67,16 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
+            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position = $position")
             val appData = apps[position]
             holder.iconIV?.setImageDrawable(appData!!.icon)
             holder.nameTV?.text = appData?.name
             holder.clickView?.setOnClickListener{
+                window?.dismiss()
                 val intent = Intent()
                 intent.component = appData?.componentName
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
-//                window?.dismiss()
             }
         }
 
@@ -81,7 +84,7 @@ constructor(
             return apps.size
         }
 
-        fun setData(apps: List<AppData?>?) {
+        fun setData(apps: List<AppData>?) {
             this.apps.clear()
             this.apps.addAll(apps!!)
             notifyDataSetChanged()

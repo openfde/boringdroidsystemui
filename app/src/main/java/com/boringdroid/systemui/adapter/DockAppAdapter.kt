@@ -5,6 +5,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
@@ -15,6 +16,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.boringdroid.systemui.R
@@ -59,6 +61,7 @@ class DockAppAdapter(private val context: Context) :
         return apps.size
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
         holder.iconIV?.setImageDrawable(app.icon)
@@ -71,17 +74,11 @@ class DockAppAdapter(private val context: Context) :
         }
         holder.appll.setOnClickListener{
             if(app.id == 0){
-                if(!TextUtils.isEmpty(app.packageName) && app.launchIntent != null){
-                    val launchIntent = app.launchIntent
-                    launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(launchIntent)
-                } else if(ACTION_DOCK_OVERVIEW.equals(app.action)){
-                    listener?.onItemClick(context.resources.getString(R.string.open), app)
-                }
+                listener?.onItemClick(context.resources.getString(R.string.open), app)
             }else if(!isShowing(app.id)){
-                systemUIActivityManager.moveTaskToFront(app.id, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+                listener?.onItemClick(context.resources.getString(R.string.show), app)
             } else {
-                systemUIActivityManager.moveTaskToBack(true, app.id)
+                listener?.onItemClick(context.resources.getString(R.string.minimize), app)
             }
         }
         holder.appll.setOnContextClickListener { v->
@@ -90,6 +87,7 @@ class DockAppAdapter(private val context: Context) :
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun makeAndFillContextWindow(app: TaskInfo, v: View) {
         val width = context.resources.getDimension(R.dimen.dock_context_width).toInt()
         val location = IntArray(2)

@@ -31,4 +31,5 @@ dependencyResolutionManagement {
 
 include ':app'
 include ':restrictionbypass'
+//include ':magicindicator'
 rootProject.name = "BoringdroidSystemUI"

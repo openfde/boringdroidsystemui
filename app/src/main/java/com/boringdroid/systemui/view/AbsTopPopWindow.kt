@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Outline
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -11,6 +12,7 @@ import android.view.*
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 
 open class AbsTopPopWindow(
     private var context: Context,
@@ -49,6 +51,7 @@ open class AbsTopPopWindow(
     val handler = Handler(Looper.getMainLooper())
     private var dismissListener: WindowDismissListener ?= null
 
+    @RequiresApi(Build.VERSION_CODES.R)
     open fun showPopupWindow() {
         shown = true
         if (mContentView == null) {
@@ -62,6 +65,7 @@ open class AbsTopPopWindow(
                 params.fitInsetsTypes = 0
             }
             windowManager?.addView(mContentView, params)
+            Log.d(TAG, "showPopupWindow: windowManager:$windowManager")
             mContentView?.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_OUTSIDE) {
                     dismiss()

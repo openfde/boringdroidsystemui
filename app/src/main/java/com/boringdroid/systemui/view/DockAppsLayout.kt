@@ -26,6 +26,7 @@ import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
@@ -147,21 +148,24 @@ constructor(
     }
 
     override fun onItemClick(action: String, taskInfo: TaskInfo) {
+        if(!ACTION_DOCK_OVERVIEW.equals(taskInfo.action)) {
+            if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
+                appOverviewWindow?.dismiss()
+            }
+        }
         when(action){
             resources.getString(R.string.exit) ->{
                 activityManager.moveTaskToBack(false, taskInfo.id)
             }
             resources.getString(R.string.open) ->{
-                if(!TextUtils.isEmpty(taskInfo.packageName) && taskInfo.launchIntent != null){
-                    if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
-                        appOverviewWindow?.dismiss()
-                    }
+                if(ACTION_DOCK_OVERVIEW.equals(taskInfo.action)) {
+//                    context.sendBroadcast(Intent(action))
+                    showAppsOverview()
+                }else if(!TextUtils.isEmpty(taskInfo.packageName) && taskInfo.launchIntent != null){
+
                     val launchIntent = taskInfo.launchIntent
                     launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(launchIntent)
-                } else if(ACTION_DOCK_OVERVIEW.equals(taskInfo.action)) {
-//                    context.sendBroadcast(Intent(action))
-                    showAppsOverview()
                 }
             }
             resources.getString(R.string.show) ->{
@@ -183,9 +187,15 @@ constructor(
         makeOverviewWinow()
         if(appOverviewWindow?.isShowing() != true){
             appOverviewWindow?.showPopupWindow()
+            val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+            if (runningTasks != null) {
+                for (runningTask in runningTasks){
+                    if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
+                        activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+                    }
+                }
+            }
             status?.visibility = View.GONE
-            val contentView = appOverviewWindow?.getContentView()
-            Utils.setBackgroundBlurRadius(contentView, 10)
         } else{
             appOverviewWindow?.dismiss()
         }
@@ -206,6 +216,14 @@ constructor(
                 override fun onWindowDismiss() {
                     Log.d(TAG, "onWindowDismiss  $status")
                     status?.visibility = View.VISIBLE
+                    val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+                    if (runningTasks != null) {
+                        for (runningTask in runningTasks){
+                            if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
+                                activityManager?.moveTaskToBack(true, runningTask.taskId)
+                            }
+                        }
+                    }
                 }
             })
         }

@@ -74,7 +74,7 @@ object Utils {
         var target = view.parent
         Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
         if (target is ViewRootImpl) {
-            val blurDrawable = target.createBackgroundBlurDrawable()
+            val blurDrawable = target.createBackgroundBlurDrawable(radius)
             val realDrawable = view.background
             val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
             view.background = layerDrawable
