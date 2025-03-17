@@ -93,14 +93,6 @@ constructor(
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChanged()
         dockProvider?.registerTaskStackListener()
-//        val runningTaskInfos = activityManager.getRunningTasks(MAX_RUNNING_TASKS)
-//        for (i in runningTaskInfos.indices.reversed()) {
-//            var runningTaskInfo = runningTaskInfos[i]
-//            if (runningTaskInfo != null && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
-//                continue
-//            }
-//            topTask(runningTaskInfo, true)
-//        }
     }
 
     override fun removeTask(taskId: Int) {
@@ -226,6 +218,7 @@ constructor(
                     }
                 }
             })
+            appOverviewWindow?.appProvider = overviewProvider
         }
     }
 

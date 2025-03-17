@@ -146,6 +146,7 @@ dependencies {
 	implementation 'androidx.preference:preference:1.1.1'
 
 	implementation 'com.github.hackware1993:MagicIndicator:1.7.0' // for androidx
+	implementation 'com.belerweb:pinyin4j:2.5.1'
 
 
 }

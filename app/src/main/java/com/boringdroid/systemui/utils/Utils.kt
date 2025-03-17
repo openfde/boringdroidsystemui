@@ -12,15 +12,15 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewRootImpl
 import android.view.WindowManager
 import com.boringdroid.systemui.R
+import net.sourceforge.pinyin4j.PinyinHelper
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
+
 
 object Utils {
 
@@ -55,6 +55,23 @@ object Utils {
         layoutParams.width = Math.min(displayWidth, width)
         layoutParams.height = Math.min(displayHeight, height)
         return layoutParams
+    }
+
+
+    @JvmStatic fun  getPinyin(chinese : String) : String{
+        val pinyin = java.lang.StringBuilder()
+        // 将汉字转换为拼音
+        for (c in chinese.toCharArray()) {
+            if (c.toString().matches("[\\u4E00-\\u9FA5]+".toRegex())) {
+                val pinyins = PinyinHelper.toHanyuPinyinStringArray(c)
+                if (pinyins != null && pinyins.size > 0) {
+                    pinyin.append(pinyins[0])
+                }
+            } else {
+                pinyin.append(c)
+            }
+        }
+        return pinyin.toString()
     }
 
     @TargetApi(value = 31)

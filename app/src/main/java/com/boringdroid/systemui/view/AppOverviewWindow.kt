@@ -1,7 +1,9 @@
 package com.boringdroid.systemui.view
 
 import android.content.Context
-import android.graphics.Color
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -12,7 +14,10 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.provider.AllAppsProvider
+import com.boringdroid.systemui.provider.AppProvider
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 
 
 class AppOverviewWindow(
@@ -33,6 +38,8 @@ class AppOverviewWindow(
     private var searchEt: EditText ?= null
     private var appsVp: ViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
+    private var runnable: FilterRunnable ?= null
+    var appProvider : AppProvider ?= null
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -59,9 +66,27 @@ class AppOverviewWindow(
         mContentView?.setOnClickListener(this)
         Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
         updateChannel()
+        runnable = appProvider?.let { FilterRunnable(it)
+        }
+        searchEt?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                handler.removeCallbacks(runnable!!)
+                runnable!!.filter = s.toString()
+                handler.postDelayed(runnable!!, 100)
+            }
+        })
     }
 
     private fun updateChannel() {
+        if(appPages.size < 2){
+            return
+        }
         val scaleCircleNavigator = ScaleCircleNavigator(getContext())
         scaleCircleNavigator.setCircleCount(appPages.size)
         scaleCircleNavigator.setCircleClickListener { index -> appsVp?.setCurrentItem(index) }
@@ -93,28 +118,12 @@ class AppOverviewWindow(
 
     fun updateAppList(apps: MutableList<AppData>) {
         this.apps.clear()
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-//        this.apps.addAll(apps)
-
+        this.apps.addAll(apps)
+        apps.forEach { app-> Log.d(TAG, "updateAppList: app:$app") }
+        appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
         appsVp?.adapter = AppsPagerAdapter(appPages)
         appsVp?.adapter?.notifyDataSetChanged()
-        if (appPages != null){
-            updateChannel()
-        }
+        updateChannel()
     }
 }
 
@@ -152,4 +161,12 @@ class AppsPagerAdapter(private val appPages: MutableList<MutableList<AppData>>) 
         return POSITION_NONE
     }
 
+}
+
+class FilterRunnable(private val provider: AppProvider): Runnable {
+    var filter: String? = null
+
+    override fun run() {
+        provider.provideAppsWithFilterAsync(TYPE_ALL, filter)
+    }
 }

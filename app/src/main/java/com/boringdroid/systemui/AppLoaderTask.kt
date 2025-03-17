@@ -46,7 +46,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
             appData.componentName = info.componentName
             appData.packageName = info.applicationInfo.packageName
             appData.icon = info.getIcon(0)
-//            Log.d(TAG, "run() called $appData")
+            Log.d(TAG, "run() called $appData")
             loaderAllApps.add(appData)
         }
         loaderAllApps.sortWith { appDataOne: AppData, appDataTwo: AppData ->
@@ -54,6 +54,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
                 appDataTwo.name!!,
             )
         }
+        android.util.Log.d(TAG, "run() called allApps:$allApps")
         val msg = Message.obtain()
         msg.what = HandlerConstant.H_LOAD_SUCCEED
         msg.obj = allApps

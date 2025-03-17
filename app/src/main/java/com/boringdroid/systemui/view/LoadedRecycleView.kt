@@ -67,7 +67,6 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
-            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position = $position")
             val appData = apps[position]
             holder.iconIV?.setImageDrawable(appData!!.icon)
             holder.nameTV?.text = appData?.name

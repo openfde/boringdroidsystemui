@@ -3,17 +3,20 @@ package com.boringdroid.systemui.provider
 import android.content.Context
 import android.os.Handler
 import android.os.Message
+import android.text.TextUtils
 import android.util.Log
 import com.boringdroid.systemui.AppLoaderTask
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.utils.Utils
 
-class AllAppsProvider (context: Context, updater: OverviewAppsUpdater){
+class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProvider{
 
     private val appLoaderTask: AppLoaderTask
     private val handler = H(updater)
     val apps: MutableList<AppData> = ArrayList()
+    private var filter:String ?= null
 
     companion object {
         const val TAG = "AllAppsProvider"
@@ -24,22 +27,38 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater){
         appLoaderTask.postSart()
     }
 
-    fun provideAppsWithFilterSync(type: Int, name: String?): MutableList<AppData> {
+    override fun provideAppsWithFilterSync(type: Int, name: String?): MutableList<AppData> {
         return apps
+    }
+
+    override fun provideAppsWithFilterAsync(type: Int, name: String?) {
+        handler.fitler = name
+        appLoaderTask.postSart()
     }
 
 
     class H(private val updater: OverviewAppsUpdater) : Handler(){
-
+        var fitler:String ?= null
         val apps: MutableList<AppData> = ArrayList()
 
         override fun handleMessage(msg: Message) {
             when (msg.what){
                 HandlerConstant.H_LOAD_SUCCEED -> {
                     val appData = msg.obj as List<AppData>
+                    Log.d(TAG, "find apps = ${appData.size}  fitler = $fitler")
                     apps.clear()
-                    apps.addAll(appData)
-                    updater.onAppListUpdated(appData)
+                    if(!TextUtils.isEmpty(fitler)){
+                        val filteredAppData: List<AppData> = appData.filter { app ->
+                            fitler?.let { app.name?.contains(it, ignoreCase = true) } == true
+                                    || fitler?.let { app.name?.let { it1 -> Utils.getPinyin(it1)
+                                .contains(it, ignoreCase = true) } } == true
+                        }
+                        Log.d(TAG, "filter AppData = $filteredAppData")
+                        apps.addAll(filteredAppData)
+                    } else {
+                        apps.addAll(appData)
+                    }
+                    updater.onAppListUpdated(apps)
                 }
             }
             Log.d(TAG, "handleMessage() called with: msg = ${msg.what}")
@@ -51,4 +70,9 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater){
     interface OverviewAppsUpdater{
         fun onAppListUpdated(list: List<AppData>)
     }
+}
+
+interface AppProvider {
+    fun provideAppsWithFilterSync(type: Int, name: String?): MutableList<AppData>
+    fun provideAppsWithFilterAsync(type: Int, name: String?)
 }
