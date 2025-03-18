@@ -4,18 +4,20 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.AppProvider
+import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 
@@ -40,6 +42,7 @@ class AppOverviewWindow(
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
     var appProvider : AppProvider ?= null
+    var dockProvider : DockAppsProvider ?= null
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -62,7 +65,8 @@ class AppOverviewWindow(
         appsVp = mContentView?.findViewById(R.id.apps_vp)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
-        appsVp?.adapter = AppsPagerAdapter(appPages)
+        appsVp?.adapter = AppsPagerAdapter(appPages, this)
+        appsVp?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
         Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
         updateChannel()
@@ -113,6 +117,7 @@ class AppOverviewWindow(
 
 
     override fun onClick(v: View?) {
+        Log.d(TAG, "onClick() called with: v = $v")
         dismiss()
     }
 
@@ -121,13 +126,16 @@ class AppOverviewWindow(
         this.apps.addAll(apps)
         apps.forEach { app-> Log.d(TAG, "updateAppList: app:$app") }
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
-        appsVp?.adapter = AppsPagerAdapter(appPages)
+        appsVp?.adapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter?.notifyDataSetChanged()
         updateChannel()
     }
 }
 
-class AppsPagerAdapter(private val appPages: MutableList<MutableList<AppData>>) : PagerAdapter() {
+class AppsPagerAdapter(
+    private val appPages: MutableList<MutableList<AppData>>,
+    private val appOverviewWindow: AppOverviewWindow
+) : PagerAdapter() {
 
     val TAG = "AppsPagerAdapter"
 
@@ -141,8 +149,9 @@ class AppsPagerAdapter(private val appPages: MutableList<MutableList<AppData>>) 
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val recycleView = LoadedRecycleView(container.context)
+        recycleView.overviewWindow = appOverviewWindow
         recycleView.setData(appPages.get(position))
-        val params = LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         container.addView(recycleView, params)
         return recycleView
     }

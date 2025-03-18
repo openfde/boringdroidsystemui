@@ -11,23 +11,18 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.shared.system.ActivityManagerWrapper
-import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.DockAppAdapter
-import com.boringdroid.systemui.adapter.DockAppAdapter.Companion.CONTEXT_WINDOW_PADDING_Y
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
-import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 
@@ -44,6 +39,7 @@ constructor(
     AllAppsProvider.OverviewAppsUpdater
 {
 
+    private var launcherResumeFlag: Boolean ?= false
     private val activityManager: ActivityManager
     private val launchApps: LauncherApps
     private val userManager: UserManager
@@ -96,6 +92,7 @@ constructor(
     }
 
     override fun removeTask(taskId: Int) {
+        Log.d(TAG, "removeTask() called with: taskId = $taskId")
         var taskInfo :TaskInfo ?= null
         tasks.forEach{info ->
             if(info.id == taskId){
@@ -114,6 +111,7 @@ constructor(
     }
 
     override fun setTop(taskInfo: TaskInfo?, needAdd: Boolean) {
+        Log.d(TAG, "setTop() called with: taskInfo = $taskInfo, needAdd = $needAdd")
         if (taskInfo == null){
             dockAppAdapter?.setTopTaskId(null)
         } else {
@@ -125,6 +123,14 @@ constructor(
         }
         dockAppAdapter?.notifyDataSetChanged()
 
+    }
+
+    override fun notifyDockAapp(list: MutableList<TaskInfo>) {
+        tasks.clear()
+        tasks.addAll(list)
+//        tasks.forEach { taskInfo -> Log.d(TAG, "notifyDockAapp each: $taskInfo") }
+        dockAppAdapter?.setData(tasks)
+        dockAppAdapter?.notifyDataSetChanged()
     }
 
     fun reloadActivityManager(systemUIContext: Context?) {
@@ -154,7 +160,6 @@ constructor(
 //                    context.sendBroadcast(Intent(action))
                     showAppsOverview()
                 }else if(!TextUtils.isEmpty(taskInfo.packageName) && taskInfo.launchIntent != null){
-
                     val launchIntent = taskInfo.launchIntent
                     launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(launchIntent)
@@ -173,17 +178,22 @@ constructor(
                 dockProvider.unpin(taskInfo)
             }
         }
+        tasks.forEach { task -> Log.d(TAG, "onItemClick: task:$task") }
     }
 
     private fun showAppsOverview() {
+        overviewProvider.provideAppsWithFilterAsync(TYPE_ALL, null)
         makeOverviewWinow()
         if(appOverviewWindow?.isShowing() != true){
             appOverviewWindow?.showPopupWindow()
-            val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-            if (runningTasks != null) {
-                for (runningTask in runningTasks){
-                    if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
-                        activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+            if (dockAppAdapter?.getTopTaskId() != -1){
+                launcherResumeFlag = true
+                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+                if (runningTasks != null) {
+                    for (runningTask in runningTasks){
+                        if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
+                            activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+                        }
                     }
                 }
             }
@@ -209,16 +219,18 @@ constructor(
                     Log.d(TAG, "onWindowDismiss  $status")
                     status?.visibility = View.VISIBLE
                     val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-                    if (runningTasks != null) {
+                    if (runningTasks != null && launcherResumeFlag == true) {
                         for (runningTask in runningTasks){
                             if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
-                                activityManager?.moveTaskToBack(true, runningTask.taskId)
+                                activityManager.moveTaskToBack(true, runningTask.taskId)
                             }
                         }
                     }
+                    launcherResumeFlag = false
                 }
             })
             appOverviewWindow?.appProvider = overviewProvider
+            appOverviewWindow?.dockProvider = dockProvider
         }
     }
 

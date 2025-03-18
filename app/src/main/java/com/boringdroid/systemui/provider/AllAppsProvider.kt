@@ -45,7 +45,6 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
             when (msg.what){
                 HandlerConstant.H_LOAD_SUCCEED -> {
                     val appData = msg.obj as List<AppData>
-                    Log.d(TAG, "find apps = ${appData.size}  fitler = $fitler")
                     apps.clear()
                     if(!TextUtils.isEmpty(fitler)){
                         val filteredAppData: List<AppData> = appData.filter { app ->
@@ -53,7 +52,6 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
                                     || fitler?.let { app.name?.let { it1 -> Utils.getPinyin(it1)
                                 .contains(it, ignoreCase = true) } } == true
                         }
-                        Log.d(TAG, "filter AppData = $filteredAppData")
                         apps.addAll(filteredAppData)
                     } else {
                         apps.addAll(appData)
@@ -61,7 +59,6 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
                     updater.onAppListUpdated(apps)
                 }
             }
-            Log.d(TAG, "handleMessage() called with: msg = ${msg.what}")
         }
 
     }

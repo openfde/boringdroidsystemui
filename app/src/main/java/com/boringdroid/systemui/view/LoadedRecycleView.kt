@@ -2,11 +2,14 @@ package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
+import android.content.pm.ApplicationInfo
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -14,6 +17,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.provider.DockAppsProvider
+import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 
 class LoadedRecycleView
 @JvmOverloads
@@ -47,9 +53,9 @@ constructor(
 
     private class AppListAdapter(private val context: Context) :
         Adapter<AppListAdapter.ViewHolder>() {
-        private var window: AbsTopPopWindow? = null
+        private var appOverviewWindow: AppOverviewWindow? = null
         private val apps: MutableList<AppData?> = ArrayList()
-
+        private var contextWindow :AbsTopPopWindow ?= null
 
         override fun onCreateViewHolder(
             parent: ViewGroup,
@@ -71,11 +77,101 @@ constructor(
             holder.iconIV?.setImageDrawable(appData!!.icon)
             holder.nameTV?.text = appData?.name
             holder.clickView?.setOnClickListener{
-                window?.dismiss()
-                val intent = Intent()
-                intent.component = appData?.componentName
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
+                if(contextWindow?.isShowing() == true){
+                    contextWindow?.dismiss()
+                } else {
+                    shouldStartApp(appData)
+                }
+            }
+            holder.clickView?.background = null
+            holder.clickView?.setOnContextClickListener { v->
+                if (appData != null) {
+                    makeAndFillContextWindow(appData, v)
+                }
+                true
+            }
+        }
+
+        private fun shouldStartApp(appData: AppData?) {
+            appOverviewWindow?.dismiss()
+            val intent = Intent()
+            intent.component = appData?.componentName
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
+        }
+
+        private fun makeAndFillContextWindow(appData: AppData, v: View) {
+            val width = context.resources.getDimension(R.dimen.overview_context_width).toInt()
+            val height = context.resources.getDimension(R.dimen.overview_context_height).toInt()
+            val location = IntArray(2)
+            v.getLocationOnScreen(location)
+            val x = location[0] + 140
+            val y = location[1] + 80
+            if(contextWindow == null){
+                contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.layout_app_context_overview)
+                    .gravity(Gravity.TOP or Gravity.START)
+                    .locate( x , y)
+                    .build(AbsTopPopWindow.WindowType.Default)
+                contextWindow?.showPopupWindow()
+            } else {
+                if(contextWindow?.isShowing() == true && x == contextWindow?.offsetX
+                    && y == contextWindow?.offsetY){
+                    contextWindow?.dismiss()
+                } else if(contextWindow?.isShowing() != true){
+                    contextWindow?.updateLayoutParams(width, WRAP_CONTENT, x, y,
+                        Gravity.TOP or Gravity.START)
+                    contextWindow?.showPopupWindow()
+                }
+            }
+            val applicationInfo = context.packageManager.getApplicationInfo(appData.packageName!!, 0)
+            val isSystem =
+                applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            val isPersistDockApp =
+                appOverviewWindow?.dockProvider?.isPersistDockApp(appData.packageName!!)
+            val openTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.open_tv)
+            val compatTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+            val ifPinTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.ifpin_tv)
+            ifPinTv?.setText(if(isPersistDockApp == true) R.string.unpin else R.string.pin)
+            val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
+            val uninstallTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.uninstall_tv)
+            val root: LinearLayout? = contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.root)
+            val contexLl: LinearLayout? = contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.contex_ll)
+            contextWindow?.enterView?.background = null
+            contextWindow?.enterView = v
+            contextWindow?.enterView?.setBackgroundResource(R.drawable.round_rect_20dp)
+//            Utils.setBackgroundBlurRadius(root, 40)
+            if(isSystem){
+                divide?.visibility = View.GONE
+                uninstallTv?.visibility = View.GONE
+            } else {
+                divide?.visibility = View.VISIBLE
+                uninstallTv?.visibility = View.VISIBLE
+            }
+            openTv?.setOnClickListener{
+                contextWindow?.dismiss()
+                shouldStartApp(appData)
+            }
+            compatTv?.setOnClickListener{
+                contextWindow?.dismiss()
+                shouldStartCompat(appData)
+            }
+            ifPinTv?.setOnClickListener{
+                contextWindow?.dismiss()
+                if (isPersistDockApp == true) appOverviewWindow?.dockProvider?.unpin(appData.packageName!!)
+                else appOverviewWindow?.dockProvider?.pin(appData.packageName!!)
+            }
+            uninstallTv?.setOnClickListener{
+                contextWindow?.dismiss()
+                appOverviewWindow?.dismiss()
+                AppUtils.uninstallApp(context, appData)
+            }
+        }
+
+        private fun shouldStartCompat(appData: AppData) {
+            val packageNam = appData.componentName?.packageName
+            val appNam = appData.name
+            if (packageNam != null && appNam != null) {
+                AppUtils.toConpatiblePage(context, packageNam,appNam)
             }
         }
 
@@ -90,12 +186,12 @@ constructor(
 
         }
 
-        fun setWindow(window: AbsTopPopWindow?) {
-            this.window = window
+        fun setWindow(window: AppOverviewWindow?) {
+            this.appOverviewWindow = window
         }
 
 
-        private class ViewHolder(val appInfoLayout: ViewGroup) :
+        private class ViewHolder(appInfoLayout: ViewGroup) :
             RecyclerView.ViewHolder(
                 appInfoLayout,
             ) {

@@ -82,12 +82,13 @@ class DockAppAdapter(private val context: Context) :
             }
         }
         holder.appll.setOnContextClickListener { v->
-            makeAndFillContextWindow(app, v)
+            if(!ACTION_DOCK_OVERVIEW.equals(app.action)) {
+                makeAndFillContextWindow(app, v)
+            }
             true
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun makeAndFillContextWindow(app: TaskInfo, v: View) {
         val width = context.resources.getDimension(R.dimen.dock_context_width).toInt()
         val location = IntArray(2)
@@ -133,17 +134,14 @@ class DockAppAdapter(private val context: Context) :
         exitView?.setOnClickListener{
             contextWindow?.dismiss()
             listener?.onItemClick(exitView.text.toString(), app)
-            notifyDataSetChanged()
         }
         pinOperator?.setOnClickListener{
             contextWindow?.dismiss()
             listener?.onItemClick(pinOperator.text.toString(), app)
-            notifyDataSetChanged()
         }
         windowOperator?.setOnClickListener{
             contextWindow?.dismiss()
             listener?.onItemClick(windowOperator.text.toString(), app)
-            notifyDataSetChanged()
         }
     }
 
@@ -169,6 +167,8 @@ class DockAppAdapter(private val context: Context) :
             topTaskId = info.id
             info.setState(STATE_TOP, apps)
             topTaskInfo = info
+//            Log.d(TAG, "setTopTaskId: package:${info?.packageName}")
+//            Log.d(TAG, "setTopTaskId: state:${info?.getState()}")
         }
     }
 
@@ -180,6 +180,10 @@ class DockAppAdapter(private val context: Context) :
     fun reloadActivityManager(context: Context?) {
         systemUIActivityManager =
             context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    }
+
+    fun getTopTaskId(): Int {
+        return topTaskId
     }
 
 

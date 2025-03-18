@@ -38,7 +38,7 @@ open class AbsTopPopWindow(
     }
 
 
-    var enterView: ImageView? = null
+    var enterView: View? = null
     private var shown = false
     var offsetX = 0
     var offsetY = 0
@@ -50,24 +50,25 @@ open class AbsTopPopWindow(
     protected var exit: ObjectAnimator? = null
     val handler = Handler(Looper.getMainLooper())
     private var dismissListener: WindowDismissListener ?= null
-
-    @RequiresApi(Build.VERSION_CODES.R)
+    private var params :WindowManager.LayoutParams?= null
     open fun showPopupWindow() {
         shown = true
-        if (mContentView == null) {
+        Log.d(TAG, "showPopupWindow: ${mContentView?.isAttachedToWindow}")
+        if (mContentView == null || mContentView?.isAttachedToWindow == false) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mContentView = LayoutInflater.from(context).inflate(layoutResId, null)
             mContentView?.elevation = elevation.toFloat()
             mContentView?.outlineProvider = provider
             mContentView?.clipToOutline = true
-            val params = generateLayoutParams(context, windowManager!!)
+            params = generateLayoutParams(context, windowManager!!)
             if(typeParam == TYPE_SEARCH_BAR){
-                params.fitInsetsTypes = 0
+                params!!.fitInsetsTypes = 0
             }
             windowManager?.addView(mContentView, params)
             Log.d(TAG, "showPopupWindow: windowManager:$windowManager")
             mContentView?.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                    Log.d(TAG, "ACTION_OUTSIDE: ")
                     dismiss()
                 }
                 false
@@ -93,7 +94,9 @@ open class AbsTopPopWindow(
 
     fun removeViews() {
         try {
+            Log.d(TAG, "removeViews: ${mContentView?.isAttachedToWindow}")
             windowManager?.removeViewImmediate(mContentView)
+            Log.d(TAG, "removeViews: ${mContentView?.isAttachedToWindow}")
         } catch (e: IllegalArgumentException) {
             Log.e("popwindow", "Catch exception when remove control window：$e")
         }
@@ -102,8 +105,9 @@ open class AbsTopPopWindow(
 
     open fun dismiss() {
         exit?.start()
-        handler.removeCallbacksAndMessages(null)
-        handler.postDelayed(this::removeViews, FADE_DURATION)
+        removeViews()
+//        handler.removeCallbacksAndMessages(null)
+//        handler.postDelayed(this::removeViews, 0)
         shown = false
         dismissListener?.onWindowDismiss()
 
@@ -132,7 +136,7 @@ open class AbsTopPopWindow(
         this.offsetY = y
         this.winGravity = gravity
         if(windowManager != null && mContentView != null){
-            val params = generateLayoutParams(context, windowManager!!)
+            params = generateLayoutParams(context, windowManager!!)
             windowManager?.updateViewLayout(mContentView, params)
         }
     }
@@ -141,7 +145,7 @@ open class AbsTopPopWindow(
         this.width = width
         this.height = height
         if(windowManager != null && mContentView != null){
-            val params = generateLayoutParams(context, windowManager!!)
+            params = generateLayoutParams(context, windowManager!!)
             windowManager?.updateViewLayout(mContentView, params)
         }
     }

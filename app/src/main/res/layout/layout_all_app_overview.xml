@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
         android:background="#5915191F">
-        <LinearLayout
+        <RelativeLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -20,6 +20,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_width="320dp"
                 android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
                 android:gravity="center"
                 android:background="@drawable/round_rect_6dp_1f"
                 >
@@ -47,16 +48,19 @@
             <com.boringdroid.systemui.view.LoadedViewPager
                 android:id="@+id/apps_vp"
                 android:layout_width="match_parent"
-                android:layout_height="784dp"
-                android:layout_marginTop="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="120dp"
+                android:layout_marginBottom="152dp"
                 android:layout_marginHorizontal="254dp"
                 />
 
             <com.boringdroid.systemui.view.LoadedIndicator
                 android:id="@+id/indicator_mi"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
                 android:layout_width="wrap_content"
                 android:layout_height="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginBottom="110dp"
                 />
 
 <!--            <com.boringdroid.systemui.view.LoadedRecycleView-->
@@ -67,6 +71,6 @@
 <!--                android:layout_marginHorizontal="254dp"-->
 <!--                android:layout_marginBottom="152dp"-->
 <!--                />-->
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

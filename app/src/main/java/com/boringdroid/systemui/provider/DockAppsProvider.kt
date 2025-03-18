@@ -58,6 +58,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         val allTask = TaskInfo(persistApps[0], persistApps[0])
         allTask.icon = context.resources.getDrawable(R.drawable.icon_menu)
         allTask.action = ACTION_DOCK_OVERVIEW
+        allTask.dockType = DOCK_TYPE_PERSISIT
         apps.add(allTask)
         for (app in persistApps){
             val info = generateTaskInfo(app, DOCK_TYPE_PERSISIT)
@@ -185,14 +186,17 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
         } else if (isPersistApp(packageName)){
             taskInfo = getTaskInfoFromPersist(packageName)
+            Log.d(TAG, "topTask: getTaskInfoFromPersist $taskInfo")
         } else if (isActiveApp(packageName)){
             taskInfo = getTaskInfoFromActive(packageName)
+            Log.d(TAG, "topTask: getTaskInfoFromActive $taskInfo")
         } else {
             taskInfo = generateTaskInfo(packageName, DOCK_TYPE_NORMAL)
             if (taskInfo != null) {
                 activeDockApps.add(taskInfo)
                 needAdd = true
             }
+            Log.d(TAG, "topTask: generateTaskInfo $taskInfo")
         }
 //        val taskInfo = TaskInfo(packageName, packageName)
         taskInfo?.id = runningTaskInfo.taskId
@@ -277,26 +281,64 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         return activeDockApps.size
     }
 
+    fun pin(packageName: String) {
+        Log.d(TAG, "pin() called with: packageName = $packageName")
+        val taskInfo = TaskInfo(packageName, packageName)
+        pin(taskInfo)
+        providePersistApps()
+        val apps: MutableList<TaskInfo> = ArrayList()
+        apps.addAll(persistDockApps)
+        apps.addAll(activeDockApps)
+        updater.notifyDockAapp(apps)
+    }
+
+    fun unpin(packageName: String) {
+        Log.d(TAG, "unpin() called with: packageName = $packageName")
+        val taskInfo = TaskInfo(packageName, packageName)
+        unpin(taskInfo)
+    }
+
     fun pin(taskInfo: TaskInfo) {
-        Log.d(TAG, "pin() called with: taskInfo = ${taskInfo.packageName}")
+        Log.d(TAG, "pin() called with: taskInfo = $taskInfo")
         taskInfo.dockType = DOCK_TYPE_PERSISIT
         activeDockApps.removeIf {
                 info-> TextUtils.equals(info.packageName, taskInfo.packageName)
         }
         persistDockApps.add(taskInfo)
         SPUtils.updatePersistDockApp(persistDockApps)
+        providePersistApps()
+        val apps: MutableList<TaskInfo> = ArrayList()
+        apps.addAll(persistDockApps)
+        apps.addAll(activeDockApps)
+        updater.notifyDockAapp(apps)
     }
 
     fun unpin(taskInfo: TaskInfo) {
-        Log.d(TAG, "unpin() called with: taskInfo = ${taskInfo.packageName}")
+        Log.d(TAG, "unpin() called with: taskInfo = $taskInfo")
         taskInfo.dockType = DOCK_TYPE_NORMAL
-        activeDockApps.add(taskInfo)
+        if(taskInfo.isRunning()){
+            activeDockApps.add(taskInfo)
+        }
         persistDockApps.removeIf {
                 info-> TextUtils.equals(info.packageName, taskInfo.packageName)
         }
-        persistDockApps.forEach {
-                info -> Log.d(TAG, "unpin: info:${info.packageName}") }
+        val arrayToString = SPUtils.arrayToString(persistDockApps)
+        Log.d(TAG, "unpin after: arrayToString:$arrayToString")
+//        persistDockApps.forEach {
+//                info -> Log.d(TAG, "unpin: info:${info.packageName}") }
         SPUtils.updatePersistDockApp(persistDockApps)
+        providePersistApps()
+        val apps: MutableList<TaskInfo> = ArrayList()
+        apps.addAll(persistDockApps)
+        apps.addAll(activeDockApps)
+        updater.notifyDockAapp(apps)
+    }
+
+    fun isPersistDockApp(packageName: String): Boolean {
+        persistDockApps.forEach {info ->
+//            Log.d(TAG, "isPersistDockApp: ${info.packageName}")
+            if(TextUtils.equals(info.packageName, packageName)){return true}}
+        return false
     }
 
 
@@ -347,6 +389,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     interface DockTaskViewUpdater{
         fun removeTask(taskId: Int)
         fun setTop(info: TaskInfo?, needAdd: Boolean)
+        fun notifyDockAapp(taskInfo: MutableList<TaskInfo>)
     }
 }
 

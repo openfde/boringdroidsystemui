@@ -118,10 +118,11 @@ class TaskInfo(val packageName: String,
     }
 
     override fun toString(): String {
-        return """
-            id=$id packageName=$packageName baseActivityComponentName=$baseActivityComponentName  realActivityComponentName=$realActivityComponentName icon=${if(icon != null)"Drawable@${Integer.toHexString(icon.hashCode())}" else "null"}
-            label=$label  state=${stateToString(state)}  action=$action  componentName=$componentName  program=$program  dockType=${dockTypeToString(dockType)} platformType=${platformTypeToString(platformType)}
-        """.trimMargin()
+        return packageName
+//        return """
+//            id=$id packageName=$packageName baseActivityComponentName=$baseActivityComponentName  realActivityComponentName=$realActivityComponentName icon=${if(icon != null)"Drawable@${Integer.toHexString(icon.hashCode())}" else "null"}
+//            label=$label  state=${stateToString(state)}  action=$action  componentName=$componentName  program=$program  dockType=${dockTypeToString(dockType)} platformType=${platformTypeToString(platformType)}
+//        """.trimMargin()
     }
 
     fun isPersist(): Boolean {

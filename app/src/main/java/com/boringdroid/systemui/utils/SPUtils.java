@@ -22,11 +22,17 @@ public class SPUtils {
         String packages = arrayToString(apps);
         Log.d(TAG, "updatePersistDockApp: " + packages);
         SharedPreferences shared_dock_app = pluginContext.getSharedPreferences(DOCK_APP, pluginContext.MODE_PRIVATE);
+//        shared_dock_app.edit().putString(PERSIST_DOCK_APPS, "com.android.allapp,com.android.settings,com.android.documentsui").commit();
         shared_dock_app.edit().putString(PERSIST_DOCK_APPS, packages).commit();
     }
 
     public static String arrayToString(List<TaskInfo> apps) {
-        String result = apps.stream().map(app -> app.getPackageName()).collect(Collectors.joining(","));
+        List<String> packageNames = apps.stream()
+                .map(TaskInfo::getPackageName)
+                .collect(Collectors.toList());
+        String result = packageNames.stream()
+                .distinct()
+                .collect(Collectors.joining(","));
         return result;
     }
 
