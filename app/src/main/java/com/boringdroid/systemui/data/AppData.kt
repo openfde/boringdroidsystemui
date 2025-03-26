@@ -4,6 +4,8 @@ import android.content.ComponentName
 import android.graphics.drawable.Drawable
 
 class AppData {
+    var fileName: String? = null
+    var linuxInfo: AppListResult.DataBeanX.DataBean ?= null
     var name: String? = null
     var packageName: String? = null
     var componentName: ComponentName? = null

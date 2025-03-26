@@ -6,35 +6,46 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     >
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/app_click_view"
         android:layout_width="188dp"
         android:layout_height="196dp"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        >
 
         <ImageView
             android:id="@+id/app_info_icon"
             android:layout_width="@dimen/overview_app_icon_size"
             android:layout_height="@dimen/overview_app_icon_size"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="25dp"
+            android:scaleType="fitCenter"
             android:src="@mipmap/default_icon_round"
+            />
+        
+        <ImageView
+            android:id="@+id/app_info_badge"
+            android:layout_width="@dimen/overview_badge_icon_size"
+            android:layout_height="@dimen/overview_badge_icon_size"
+            android:src="@drawable/linux_badge"
+            android:layout_marginTop="84dp"
+            android:layout_marginLeft="100dp"
+            android:visibility="gone"
             />
 
         <TextView
             android:id="@+id/app_info_name"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
             android:ellipsize="middle"
             android:textColor="@color/white"
             android:singleLine="true"
             android:gravity="center"
             android:text="Android"
             android:textSize="16sp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="134dp"
             style="@style/style_55"
             />
-    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

@@ -5,6 +5,9 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log
+import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.data.AppListResult
+import com.boringdroid.systemui.data.PersistApp
 
 class TaskInfo(val packageName: String,
                val program: String) {
@@ -59,6 +62,8 @@ class TaskInfo(val packageName: String,
     var dockType = DOCK_TYPE_UNDEFINED
     var platformType = PLATFORM_TYPE_ANDROID
     var launchIntent: Intent ?= null
+    var persistApp: PersistApp? = null
+    var linuxInfo: AppListResult.DataBeanX.DataBean? = null
 
     fun getState():Int {
         return state
@@ -86,7 +91,7 @@ class TaskInfo(val packageName: String,
         Log.d("DockAppAdapter", "setState: $this")
     }
 
-    fun isBatchTaskInfo(info: TaskInfo?):Boolean{
+    private fun isBatchTaskInfo(info: TaskInfo?):Boolean{
         if(info == null){
             return false
         }
@@ -118,7 +123,7 @@ class TaskInfo(val packageName: String,
     }
 
     override fun toString(): String {
-        return packageName
+        return packageName + " state:$state "
 //        return """
 //            id=$id packageName=$packageName baseActivityComponentName=$baseActivityComponentName  realActivityComponentName=$realActivityComponentName icon=${if(icon != null)"Drawable@${Integer.toHexString(icon.hashCode())}" else "null"}
 //            label=$label  state=${stateToString(state)}  action=$action  componentName=$componentName  program=$program  dockType=${dockTypeToString(dockType)} platformType=${platformTypeToString(platformType)}
@@ -140,6 +145,16 @@ class TaskInfo(val packageName: String,
 
     fun isTop(): Boolean {
         return state == STATE_TOP
+    }
+
+    fun makePersistApp(position: Int): PersistApp {
+        if(persistApp != null){
+            persistApp!!.position = position
+        } else{
+            persistApp = PersistApp(packageName, position, platformType,
+                null, program, componentName?.className, null, program, null)
+        }
+        return persistApp as PersistApp
     }
 
 }

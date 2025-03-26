@@ -136,7 +136,6 @@ class TopBarControlWindow(
 
 
     override fun onClick(v: View?) {
-        Log.d(TAG, "onClick() called with: v = $v")
     }
 
 }

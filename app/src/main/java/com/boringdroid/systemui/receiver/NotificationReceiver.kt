@@ -12,7 +12,7 @@ class NotificationReceiver(private val listener: NotificationUpdater)
     : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
+//        Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
         val type = intent?.getIntExtra(NOTIFI_ACTION_TYPE_KEY, 0)
         val notifications: Array<StatusBarNotification>? =
             intent?.getParcelableArrayExtra(NOTIFICATION_LIST_KEY, StatusBarNotification::class.java)

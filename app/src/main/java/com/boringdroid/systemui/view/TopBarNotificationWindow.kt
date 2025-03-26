@@ -93,7 +93,7 @@ class TopBarNotificationWindow(
     }
 
     fun setNotifications(notifications: Array<StatusBarNotification>?) {
-        Log.d(TAG, "setNotifications() called with: notifications = $notifications")
+//        Log.d(TAG, "setNotifications() called with: notifications = $notifications")
         this.notifications = notifications
         notificationAdapter?.notifyData(notifications)
         var notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size

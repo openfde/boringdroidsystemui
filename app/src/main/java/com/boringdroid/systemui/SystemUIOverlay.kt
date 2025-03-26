@@ -10,7 +10,6 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -22,7 +21,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
@@ -30,6 +28,7 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
@@ -38,8 +37,13 @@ import com.boringdroid.systemui.view.DockAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
+import com.xwdz.http.QuietOkHttp
+import com.xwdz.http.log.HttpLog
+import com.xwdz.http.log.HttpLoggingInterceptor
+import okhttp3.OkHttpClient
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
+import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 
@@ -122,6 +126,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     ) {
         systemUIContext = sysUIContext
         pluginContext = pluginContext_1
+        GlobalSystemUIContext.setGlobalSystemuiContext(systemUIContext)
+        ImageUtils.init(sysUIContext)
+        initOKhttp()
         SPUtils.pluginContext = systemUIContext
         navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
@@ -152,6 +159,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         intentFilter.addAction(SERVICE_ACTION)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED);
     }
+
+    private fun initOKhttp() {
+        val logInterceptor = HttpLoggingInterceptor(HttpLog("fde-systemui"))
+        logInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        val sOkHttpClient = OkHttpClient.Builder()
+            .readTimeout(10, TimeUnit.SECONDS)
+            .addInterceptor(logInterceptor)
+            .writeTimeout(10, TimeUnit.SECONDS).build()
+        QuietOkHttp.setOkHttpClient(sOkHttpClient)
+    }
+
 
     private fun grantNmnPermission() {
         val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
@@ -241,7 +259,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     @SuppressLint("PrivateApi")
-    private fun initializeTuningServiceSettingKeys(resolver: ContentResolver?,observer: ContentObserver,) {
+    private fun initializeTuningServiceSettingKeys(
+        resolver: ContentResolver?,
+        observer: ContentObserver
+    ) {
         try {
             val systemPropertiesClass = Class.forName("android.os.SystemProperties")
             val getMethod =
@@ -491,5 +512,18 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     override fun syncVisibleWindow(which: Int) {
 
 
+    }
+}
+
+
+object GlobalSystemUIContext {
+    private var globalSystemuiContext: Context ?= null
+
+    fun getGlobalSystemuiContext(): Context?{
+        return globalSystemuiContext
+    }
+
+    fun setGlobalSystemuiContext(context: Context?){
+        this.globalSystemuiContext = context
     }
 }

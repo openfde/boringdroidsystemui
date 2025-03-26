@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,11 +22,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
+import com.boringdroid.systemui.TaskInfo.Companion.PLATFORM_TYPE_X11
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_RUNNING
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_TOP
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
+import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.view.AbsTopPopWindow
 
 class DockAppAdapter(private val context: Context) :
@@ -64,7 +67,14 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-        holder.iconIV?.setImageDrawable(app.icon)
+        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
+        val info = app.linuxInfo
+        if(info != null){
+            val image = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
+            holder.iconIV.setImageDrawable(image)
+        } else {
+            holder.iconIV.setImageDrawable(app.icon)
+        }
         if(app.getState() == STATE_UNFEFINED){
             holder.viewStatus.background = null
         } else if (app.getState() == STATE_TOP){
@@ -72,6 +82,8 @@ class DockAppAdapter(private val context: Context) :
         } else if (app.getState() == STATE_RUNNING){
             holder.viewStatus.setBackgroundResource(R.drawable.dock_app_unselect)
         }
+        holder.x11Iv.visibility = if(app.platformType == PLATFORM_TYPE_X11) View.VISIBLE else View.GONE
+
         holder.appll.setOnClickListener{
             if(app.id == 0){
                 listener?.onItemClick(context.resources.getString(R.string.open), app)
@@ -157,6 +169,25 @@ class DockAppAdapter(private val context: Context) :
         return runningTask?.isVisible() ?: false
     }
 
+    fun notifyDataSetChangedWapper() {
+//        Log.d(TAG, "notifyDataSetChangedWapper() called")
+//        val runningTasks = systemUIActivityManager.getRunningTasks(MAX_RUNNING_TASKS)
+//        for (task in runningTasks) {
+//            val label = task.taskDescription?.label
+//            val taskPackageName = getRunningTaskInfoPackageName(task)
+//            Log.d(TAG, "notifyDataSetChangedWapper: label:$label taskPackageName:$taskPackageName")
+//        }
+        notifyDataSetChanged()
+    }
+
+    fun getRunningTaskInfoPackageName(runningTaskInfo: RunningTaskInfo): String? {
+        return if (runningTaskInfo.baseActivity == null) {
+            null
+        } else {
+            runningTaskInfo.baseActivity!!.packageName
+        }
+    }
+
 
     fun setTopTaskId(info: TaskInfo?) {
         if(info == null){
@@ -191,7 +222,9 @@ class DockAppAdapter(private val context: Context) :
         RecyclerView.ViewHolder(viewGroup) {
         val iconIV: ImageView = viewGroup.findViewById(R.id.app_icon_iv)!!
         val viewStatus: View = viewGroup.findViewById(R.id.status_v)!!
-        val appll : LinearLayout = viewGroup.findViewById(R.id.app_ll)!!
+        val appll : FrameLayout = viewGroup.findViewById(R.id.app_ll)!!
+        val x11Iv : ImageView = viewGroup.findViewById(R.id.x11_badge)!!
+
     }
 
     interface DockItemClickListener{

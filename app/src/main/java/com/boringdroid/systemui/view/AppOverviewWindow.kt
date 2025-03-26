@@ -117,14 +117,13 @@ class AppOverviewWindow(
 
 
     override fun onClick(v: View?) {
-        Log.d(TAG, "onClick() called with: v = $v")
         dismiss()
     }
 
     fun updateAppList(apps: MutableList<AppData>) {
         this.apps.clear()
         this.apps.addAll(apps)
-        apps.forEach { app-> Log.d(TAG, "updateAppList: app:$app") }
+//        apps.forEach { app-> Log.d(TAG, "updateAppList: app:$app") }
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
         appsVp?.adapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter?.notifyDataSetChanged()

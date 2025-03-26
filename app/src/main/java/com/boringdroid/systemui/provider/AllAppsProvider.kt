@@ -13,6 +13,7 @@ import com.boringdroid.systemui.utils.Utils
 
 class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProvider{
 
+    lateinit var systemUIContext: Context
     private val appLoaderTask: AppLoaderTask
     private val handler = H(updater)
     val apps: MutableList<AppData> = ArrayList()

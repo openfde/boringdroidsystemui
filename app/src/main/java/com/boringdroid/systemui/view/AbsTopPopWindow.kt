@@ -94,9 +94,8 @@ open class AbsTopPopWindow(
 
     fun removeViews() {
         try {
-            Log.d(TAG, "removeViews: ${mContentView?.isAttachedToWindow}")
             windowManager?.removeViewImmediate(mContentView)
-            Log.d(TAG, "removeViews: ${mContentView?.isAttachedToWindow}")
+//            Log.d(TAG, "removeViews: ${mContentView?.isAttachedToWindow}")
         } catch (e: IllegalArgumentException) {
             Log.e("popwindow", "Catch exception when remove control window：$e")
         }

@@ -2,6 +2,7 @@ package com.boringdroid.systemui.utils
 
 import android.annotation.TargetApi
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -10,11 +11,14 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.ViewRootImpl
 import android.view.WindowManager
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_VNC
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import net.sourceforge.pinyin4j.PinyinHelper
 import java.io.BufferedReader
 import java.io.IOException
@@ -56,6 +60,10 @@ object Utils {
         layoutParams.height = Math.min(displayHeight, height)
         return layoutParams
     }
+    @JvmStatic fun isX11App(packageName: String, topActivity: ComponentName?): Boolean {
+        return TextUtils.equals(PACKAGE_X11, packageName)
+                && (topActivity?.className?.contains("MainActivity") ?: false)
+    }
 
 
     @JvmStatic fun  getPinyin(chinese : String) : String{
@@ -79,23 +87,12 @@ object Utils {
         if (view == null) {
             return
         }
-        Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, radius = $radius")
-//        if (view is ViewGroup) {
-//            val viewGroup = view
-//            val lp = WindowManager.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-//            // 这是添加高斯模糊背景，
-//            val blurView = View(viewGroup.context)
-//            viewGroup.background = null
-//            viewGroup.addView(blurView, 0, lp)
-//        }
         var target = view.parent
-        Log.d(TAG, "setBackgroundBlurRadius() called with: view = $view, target = $target")
         if (target is ViewRootImpl) {
             val blurDrawable = target.createBackgroundBlurDrawable(radius)
             val realDrawable = view.background
             val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
             view.background = layerDrawable
-            Log.d(TAG, "setBackgroundBlurRadius: success $radius")
             return
         }
     }

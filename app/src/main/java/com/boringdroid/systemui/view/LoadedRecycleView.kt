@@ -3,6 +3,8 @@ package com.boringdroid.systemui.view
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.net.Uri
+import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
@@ -10,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -75,6 +78,9 @@ constructor(
         ) {
             val appData = apps[position]
             holder.iconIV?.setImageDrawable(appData!!.icon)
+            if(appData?.linuxInfo != null){
+                holder.badgeIv?.visibility = VISIBLE
+            }
             holder.nameTV?.text = appData?.name
             holder.clickView?.setOnClickListener{
                 if(contextWindow?.isShowing() == true){
@@ -94,10 +100,19 @@ constructor(
 
         private fun shouldStartApp(appData: AppData?) {
             appOverviewWindow?.dismiss()
-            val intent = Intent()
-            intent.component = appData?.componentName
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
+            if(appData?.linuxInfo != null){
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
+                val linuxInfo = appData.linuxInfo
+                intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+            } else {
+                val intent = Intent()
+                intent.component = appData?.componentName
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+            }
         }
 
         private fun makeAndFillContextWindow(appData: AppData, v: View) {
@@ -123,11 +138,17 @@ constructor(
                     contextWindow?.showPopupWindow()
                 }
             }
-            val applicationInfo = context.packageManager.getApplicationInfo(appData.packageName!!, 0)
-            val isSystem =
-                applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            Log.d(TAG, "makeAndFillContextWindow() called with: appData = $appData, v = $v")
+            val isLinuxApp = appData.linuxInfo != null
+            var isSystem = false
+            if(!isLinuxApp){
+                val applicationInfo = context.packageManager.getApplicationInfo(appData.packageName!!, 0)
+                isSystem =
+                    applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            }
             val isPersistDockApp =
                 appOverviewWindow?.dockProvider?.isPersistDockApp(appData.packageName!!)
+
             val openTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.open_tv)
             val compatTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
             val ifPinTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.ifpin_tv)
@@ -140,13 +161,15 @@ constructor(
             contextWindow?.enterView = v
             contextWindow?.enterView?.setBackgroundResource(R.drawable.round_rect_20dp)
 //            Utils.setBackgroundBlurRadius(root, 40)
-            if(isSystem){
+            if(isSystem || isLinuxApp){
                 divide?.visibility = View.GONE
                 uninstallTv?.visibility = View.GONE
             } else {
                 divide?.visibility = View.VISIBLE
                 uninstallTv?.visibility = View.VISIBLE
             }
+            compatTv?.visibility = if(isLinuxApp) View.GONE else View.VISIBLE
+
             openTv?.setOnClickListener{
                 contextWindow?.dismiss()
                 shouldStartApp(appData)
@@ -197,7 +220,9 @@ constructor(
             ) {
             val iconIV = appInfoLayout.findViewById<ImageView?>(R.id.app_info_icon)
             val nameTV = appInfoLayout.findViewById<TextView?>(R.id.app_info_name)
-            var clickView = appInfoLayout.findViewById<LinearLayout?>(R.id.app_click_view)
+            var clickView = appInfoLayout.findViewById<FrameLayout?>(R.id.app_click_view)
+            var badgeIv = appInfoLayout.findViewById<ImageView?>(R.id.app_info_badge)
+
         }
 
     }

@@ -45,10 +45,12 @@ constructor(
     private val userManager: UserManager
     private val windowManager:WindowManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
-    private val apps: MutableList<AppData> = ArrayList()
+    private val overviewApps: MutableList<AppData> = ArrayList()
     private val dockAppAdapter: DockAppAdapter?
     private val dockProvider: DockAppsProvider
     private val overviewProvider: AllAppsProvider
+    private var systemUIContext: Context ?= null
+
     var status: View?= null
 
     private var itemDecoration: DockAppItemDecoration? = null
@@ -70,7 +72,7 @@ constructor(
         dockProvider = DockAppsProvider(context, this)
         overviewProvider = AllAppsProvider(context, this)
         val provideApps = overviewProvider.provideAppsWithFilterSync(TYPE_ALL, null)
-        apps.addAll(provideApps)
+        overviewApps.addAll(provideApps)
     }
 
     override fun onAttachedToWindow() {
@@ -87,7 +89,7 @@ constructor(
         addItemDecoration(itemDecoration!!)
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
-        dockAppAdapter?.notifyDataSetChanged()
+        dockAppAdapter?.notifyDataSetChangedWapper()
         dockProvider?.registerTaskStackListener()
     }
 
@@ -106,7 +108,7 @@ constructor(
                 tasks.removeIf { taskInfo: TaskInfo -> taskInfo.id == taskId }
             }
             dockAppAdapter!!.setData(tasks)
-            dockAppAdapter.notifyDataSetChanged()
+            dockAppAdapter.notifyDataSetChangedWapper()
         }
     }
 
@@ -121,7 +123,7 @@ constructor(
             }
             dockAppAdapter!!.setData(tasks)
         }
-        dockAppAdapter?.notifyDataSetChanged()
+        dockAppAdapter?.notifyDataSetChangedWapper()
 
     }
 
@@ -130,10 +132,17 @@ constructor(
         tasks.addAll(list)
 //        tasks.forEach { taskInfo -> Log.d(TAG, "notifyDockAapp each: $taskInfo") }
         dockAppAdapter?.setData(tasks)
-        dockAppAdapter?.notifyDataSetChanged()
+        dockAppAdapter?.notifyDataSetChangedWapper()
+    }
+
+    override fun getOverviewAppData(): MutableList<AppData> {
+        return overviewApps
     }
 
     fun reloadActivityManager(systemUIContext: Context?) {
+        if (systemUIContext != null) {
+            this.systemUIContext = systemUIContext
+        }
         dockAppAdapter?.reloadActivityManager(systemUIContext)
     }
 
@@ -178,11 +187,11 @@ constructor(
                 dockProvider.unpin(taskInfo)
             }
         }
-        tasks.forEach { task -> Log.d(TAG, "onItemClick: task:$task") }
+//        tasks.forEach { task -> Log.d(TAG, "onItemClick: task:$task") }
     }
 
     private fun showAppsOverview() {
-        overviewProvider.provideAppsWithFilterAsync(TYPE_ALL, null)
+//        overviewProvider.provideAppsWithFilterAsync(TYPE_ALL, null)
         makeOverviewWinow()
         if(appOverviewWindow?.isShowing() != true){
             appOverviewWindow?.showPopupWindow()
@@ -213,7 +222,7 @@ constructor(
                 .provider(null)
                 .paramType(TYPE_SEARCH_BAR)
                 .build(AbsTopPopWindow.WindowType.Overview) as AppOverviewWindow
-            appOverviewWindow?.updateAppList(apps)
+            appOverviewWindow?.updateAppList(overviewApps)
             appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
                     Log.d(TAG, "onWindowDismiss  $status")
@@ -235,9 +244,10 @@ constructor(
     }
 
     override fun onAppListUpdated(list: List<AppData>) {
-        apps.clear()
-        apps.addAll(list)
-        appOverviewWindow?.updateAppList(apps)
+        overviewApps.clear()
+        overviewApps.addAll(list)
+        dockProvider.mayFillPersistTaskInfo()
+        appOverviewWindow?.updateAppList(overviewApps)
     }
 
 }
