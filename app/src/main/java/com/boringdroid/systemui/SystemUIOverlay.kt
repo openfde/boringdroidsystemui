@@ -28,6 +28,10 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
+import com.boringdroid.systemui.receiver.UninstallReceiver
+import com.boringdroid.systemui.receiver.XserverHelper
+import com.boringdroid.systemui.receiver.XserverHelper.CLIENT_NUM_UNDEFINED
+import com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
@@ -157,7 +161,41 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         dynamicReceiver = DynamicReceiver(systemStateLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
-        pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED);
+        pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
+        registPackageUpdate()
+        XserverHelper.listenXserverStatus(pluginContext,null)
+        val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
+        val timeTickReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == Intent.ACTION_TIME_TICK) {
+                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
+                    checkXserverStatus()
+                }
+            }
+        }
+        systemUIContext?.registerReceiver(timeTickReceiver, tickFilter)
+    }
+
+    private fun checkXserverStatus() {
+        if (!XserverHelper.isAppInstalled(systemUIContext, XserverHelper.X11_PACKAGE_NAME)) {
+//            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
+        } else if(XserverHelper.isXserviceRunning(systemUIContext)){
+//            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
+        } else {
+//            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
+            XserverHelper.startServer(systemUIContext)
+        }
+    }
+
+
+    private fun registPackageUpdate() {
+        var filter = IntentFilter()
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED)
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
+        filter.addDataScheme("package")
+        val receiver = UninstallReceiver(null)
+        pluginContext?.registerReceiver(receiver, filter)
     }
 
     private fun initOKhttp() {
