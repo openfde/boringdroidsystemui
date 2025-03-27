@@ -2,6 +2,7 @@ package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
@@ -70,8 +71,10 @@ class AppOverviewWindow(
         mContentView?.setOnClickListener(this)
         Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
         updateChannel()
-        runnable = appProvider?.let { FilterRunnable(it)
+        if(runnable == null){
+            runnable = appProvider?.let { FilterRunnable(it)}
         }
+        searchEt?.setText("")
         searchEt?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
@@ -80,11 +83,18 @@ class AppOverviewWindow(
             }
 
             override fun afterTextChanged(s: Editable?) {
-                handler.removeCallbacks(runnable!!)
-                runnable!!.filter = s.toString()
-                handler.postDelayed(runnable!!, 100)
+                Log.d(TAG, "afterTextChanged s = ${s.toString()}")
+
+                filterApps(s.toString(), 100)
             }
         })
+    }
+
+    private fun filterApps(filter: String?, delay: Long) {
+        Log.d(TAG, "filterApps() called with: filter = $filter, delay = $delay")
+        handler.removeCallbacks(runnable!!)
+        runnable!!.filter = filter
+        handler.postDelayed(runnable!!, delay)
     }
 
     private fun updateChannel() {
@@ -113,6 +123,11 @@ class AppOverviewWindow(
                 indicatorMi?.onPageScrollStateChanged(state)
             }
         })
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+        filterApps(null, 0)
     }
 
 

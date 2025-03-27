@@ -3,7 +3,8 @@
     android:orientation="vertical"
     android:layout_width="@dimen/top_bar_power_width"
     android:layout_height="@dimen/top_bar_power_height"
-    android:background="#c7FFFFFF">
+    android:background="@color/topbar_window_bg"
+    >
 
     <TextView
         android:id="@+id/about_tv"

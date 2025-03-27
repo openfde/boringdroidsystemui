@@ -33,6 +33,7 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
     }
 
     override fun provideAppsWithFilterAsync(type: Int, name: String?) {
+        Log.d(TAG, "provideAppsWithFilterAsync() called with: type = $type, name = $name")
         handler.fitler = name
         appLoaderTask.postSart()
     }

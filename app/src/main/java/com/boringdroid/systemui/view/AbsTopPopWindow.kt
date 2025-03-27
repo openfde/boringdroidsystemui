@@ -29,6 +29,7 @@ open class AbsTopPopWindow(
     }
 
     sealed class WindowType {
+        object IME : WindowType()
         object Overview : WindowType()
         object SingleNotification : WindowType()
         object Notification : WindowType()
@@ -221,6 +222,7 @@ open class AbsTopPopWindow(
 
         fun build(type: WindowType): AbsTopPopWindow {
             val window = when (type) {
+                is WindowType.IME -> TopBarImeSwitchWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Overview -> AppOverviewWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.SingleNotification -> SingleNotificationWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId, typeParam)

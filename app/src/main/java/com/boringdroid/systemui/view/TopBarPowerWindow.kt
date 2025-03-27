@@ -105,13 +105,13 @@ class TopBarPowerWindow(
         } else if (v == settingBtn){
             showSetting()
         } else if (v == shutdownBtn){
-            DeviceUtils.gotoNetWork(getContext(),"poweroff")
+            DeviceUtils.poweroff()
         } else if ( v == rebootBtn){
-            DeviceUtils.gotoNetWork(getContext(),"restart")
+            DeviceUtils.restart()
         } else if ( v == logoutBtn){
-            DeviceUtils.gotoNetWork(getContext(),"logout")
+            DeviceUtils.logout()
         } else if ( v == lockBtn){
-            DeviceUtils.gotoNetWork(getContext(),"lock")
+            DeviceUtils.lock()
         }
     }
 

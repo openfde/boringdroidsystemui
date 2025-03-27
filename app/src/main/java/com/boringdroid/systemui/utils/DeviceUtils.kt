@@ -18,9 +18,12 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.Display
 import androidx.core.content.ContextCompat
+import com.boringdroid.systemui.Log
 import com.google.gson.Gson
 import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
+import com.xwdz.http.QuietOkHttp
+import com.xwdz.http.callback.JsonCallBack
 import okhttp3.*
 import java.io.*
 
@@ -278,9 +281,16 @@ object DeviceUtils {
 
 
     fun logout() {
-        val networkUtils = NetworkUtils();
-        val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_LOGOUT, requestBody);
+        QuietOkHttp.post(BASEURL + URL_LOGOUT)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                }
+            })
     }
 
     fun gotoNetWork(context: Context, flag: String) {
@@ -297,23 +307,43 @@ object DeviceUtils {
         context.startActivity(intent)
     }
 
-    @JvmStatic
     fun poweroff() {
-        val networkUtils = NetworkUtils();
-        val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_POWOFF, requestBody);
+        QuietOkHttp.post(BASEURL + URL_POWOFF)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                }
+            })
     }
 
     fun restart() {
-        val networkUtils = NetworkUtils();
-        val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_RESTART, requestBody);
+        QuietOkHttp.post(BASEURL + URL_RESTART)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                }
+            })
     }
 
     fun lock() {
-        val networkUtils = NetworkUtils();
-        val requestBody = FormBody.Builder().build();
-        networkUtils.postRequest(BASEURL + URL_LOCK, requestBody);
+        QuietOkHttp.post(BASEURL + URL_LOCK)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                }
+            })
     }
 
     fun getNavBarHeight(context: Context?): Int {

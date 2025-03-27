@@ -3,6 +3,7 @@ package com.boringdroid.systemui.view
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent.CanceledException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
@@ -12,6 +13,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PorterDuff
 import android.media.AudioManager
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
@@ -20,6 +22,8 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -58,6 +62,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var audioManager: AudioManager? = null
     private var notificationWindow:SingleNotificationWindow ? = null
     private var notificationsWindow:TopBarNotificationWindow? = null
+    private var imeSwitchWindow:TopBarImeSwitchWindow? = null
+    private var imm: InputMethodManager
+    private val inputMethodList: MutableList<InputMethodInfo> = ArrayList()
+
     private var powerWindow:TopBarPowerWindow? = null
     private var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
@@ -71,6 +79,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
     fun initState() {
@@ -86,10 +95,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         searchBtn = findViewById(R.id.search_btn)
         btnList = mutableListOf(imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
         registerNotification()
+        registInputMethodChange()
         makePowerWindow(powerBtn)
         makeControlWindow(controlBtn)
         makeNotificationWindow(notificationBtn)
+        makeImeSwitchWindow(imeBtn)
         makeSingleNotiWinodw()
+//        makeGlobalSearchWindow()
         btnList?.forEach{ imageView ->
             imageView?.setOnTouchListener(touchListener)
             imageView?.setOnHoverListener(hoverListener)
@@ -97,6 +109,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         inited = true
         getContext().sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
+    }
+
+    private fun makeGlobalSearchWindow() {
+
+
     }
 
     private fun registerNotification() {
@@ -124,6 +141,53 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         notificationsWindow?.enterView = imageView
         notificationsWindow?.setNotifications(notifications)
         windowList.add(notificationsWindow!!)
+    }
+
+    private fun makeImeSwitchWindow(imageView: ImageView?) {
+        getInputMethods()
+        val width = context.resources.getDimension(R.dimen.ime_switch_window_width).toInt()
+        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList!!.size) + 20
+        imeSwitchWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_ime)
+            .gravity(Gravity.TOP or Gravity.RIGHT)
+            .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
+            .build(AbsTopPopWindow.WindowType.IME) as TopBarImeSwitchWindow
+        imeSwitchWindow?.setInputMethodList(inputMethodList)
+        imeSwitchWindow?.setDismissListener(object  : WindowDismissListener {
+            override fun onWindowDismiss() {
+                this@TopBarLayout.imeBtn?.background = null
+            }
+        })
+        imeSwitchWindow?.systemUIContext = systemUIContext
+        imeSwitchWindow?.enterView = imageView
+        windowList.add(imeSwitchWindow!!)
+    }
+
+    private fun getInputMethods() {
+        inputMethodList.clear()
+        inputMethodList.addAll(imm.enabledInputMethodList)
+        val currentInputMethod =
+            Settings.Secure.getString(context!!.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD)
+        inputMethodList.forEach {
+            if (currentInputMethod == it.id) {
+                imeBtn?.visibility = View.VISIBLE
+                imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
+            }
+        }
+    }
+
+    private fun registInputMethodChange() {
+        val receiver = InputMethodChangeReceiver()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_INPUT_METHOD_CHANGED)
+        context!!.registerReceiver(receiver, filter)
+    }
+
+    inner class InputMethodChangeReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_INPUT_METHOD_CHANGED) {
+                this@TopBarLayout.getInputMethods()
+            }
+        }
     }
 
     private fun calculateNotificationHeight(): Int {
@@ -212,6 +276,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getContext().sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
     }
 
+
+    private fun imeBtnClick() {
+        getInputMethods()
+        imeSwitchWindow?.showPopupWindow()
+        imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
+    }
+
     override fun onClick(v: View?) {
         windowList.forEach { window ->
             if(window.isShowing()){
@@ -225,6 +296,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             controlBtnClick()
         } else if( v == notificationBtn){
             notificationBtnClick()
+        } else if( v == imeBtn){
+            imeBtnClick()
         }
     }
 
