@@ -6,17 +6,16 @@ import android.os.Message
 import android.text.TextUtils
 import android.util.Log
 import com.boringdroid.systemui.AppLoaderTask
-import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.Utils
 
-class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProvider{
+class AllAppsProvider (context: Context, updater: OverviewAppsUpdater?) : AppProvider{
 
     lateinit var systemUIContext: Context
     private val appLoaderTask: AppLoaderTask
-    private val handler = H(updater)
     val apps: MutableList<AppData> = ArrayList()
+    private val handler = H(updater, apps)
     private var filter:String ?= null
 
     companion object {
@@ -39,7 +38,7 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
     }
 
 
-    class H(private val updater: OverviewAppsUpdater) : Handler(){
+    class H(private val updater: OverviewAppsUpdater?, private val providerResult: MutableList<AppData>) : Handler(){
         var fitler:String ?= null
         val apps: MutableList<AppData> = ArrayList()
 
@@ -47,6 +46,8 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
             when (msg.what){
                 HandlerConstant.H_LOAD_SUCCEED -> {
                     val appData = msg.obj as List<AppData>
+                    providerResult.clear()
+                    providerResult.addAll(appData)
                     apps.clear()
                     if(!TextUtils.isEmpty(fitler)){
                         val filteredAppData: List<AppData> = appData.filter { app ->
@@ -58,7 +59,7 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater) : AppProv
                     } else {
                         apps.addAll(appData)
                     }
-                    updater.onAppListUpdated(apps)
+                    updater?.onAppListUpdated(apps)
                 }
             }
         }

@@ -103,4 +103,7 @@
     <string name="unpin">取消固定</string>
     <string name="exit">退出</string>
     <string name="search_all_app">搜索全部应用</string>
+    <string name="global_search">全局搜索</string>
+    <string name="no_matching_item">暂无匹配项</string>
+    <string name="application">应用</string>
 </resources>

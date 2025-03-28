@@ -26,6 +26,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
@@ -74,6 +75,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var status: ViewGroup ?= null
     private var navi: ViewGroup ?= null
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
+    private var overviewProvider: AllAppsProvider ?= null
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
@@ -141,13 +143,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
+        overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
+        dockAppsLayout?.overviewProvider = overviewProvider
         appStateLayout?.listener = this
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
         appStateLayout!!.reloadActivityManager(systemUIContext)
         dockAppsLayout!!.reloadActivityManager(systemUIContext)
-
+        topBarLayout?.overviewProvider = overviewProvider
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
         btAllApps!!.setOnClickListener(allAppsWindow)

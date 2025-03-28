@@ -106,4 +106,7 @@
     <string name="exit">Exit</string>
     <string name="show">Show</string>
     <string name="search_all_app">Search All App</string>
+    <string name="global_search">Global Search</string>
+    <string name="no_matching_item">No matching items available</string>
+    <string name="application">Application</string>
 </resources>

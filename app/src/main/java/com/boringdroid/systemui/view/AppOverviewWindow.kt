@@ -83,8 +83,6 @@ class AppOverviewWindow(
             }
 
             override fun afterTextChanged(s: Editable?) {
-                Log.d(TAG, "afterTextChanged s = ${s.toString()}")
-
                 filterApps(s.toString(), 100)
             }
         })

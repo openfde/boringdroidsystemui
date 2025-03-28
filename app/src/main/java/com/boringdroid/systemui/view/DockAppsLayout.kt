@@ -48,7 +48,7 @@ constructor(
     private val overviewApps: MutableList<AppData> = ArrayList()
     private val dockAppAdapter: DockAppAdapter?
     private val dockProvider: DockAppsProvider
-    private val overviewProvider: AllAppsProvider
+    var overviewProvider: AllAppsProvider ?= null
     private var systemUIContext: Context ?= null
 
     var status: View?= null
@@ -70,9 +70,7 @@ constructor(
         adapter = dockAppAdapter
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         dockProvider = DockAppsProvider(context, this)
-        overviewProvider = AllAppsProvider(context, this)
-        val provideApps = overviewProvider.provideAppsWithFilterSync(TYPE_ALL, null)
-        overviewApps.addAll(provideApps)
+//        overviewProvider = AllAppsProvider(context, this)
     }
 
     override fun onAttachedToWindow() {
@@ -84,6 +82,10 @@ constructor(
         dockProvider?.unregisterTaskStackListener()
     }
     fun initApps() {
+        val provideApps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
+        if (provideApps != null) {
+            overviewApps.addAll(provideApps)
+        }
         tasks.addAll(dockProvider.providePersistApps())
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)

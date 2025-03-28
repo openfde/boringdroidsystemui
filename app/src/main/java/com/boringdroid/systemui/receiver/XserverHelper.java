@@ -97,7 +97,7 @@ public class XserverHelper {
     public static void listenXserverStatus(Context context, XserverStateListener listener) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_X_MAIN_WINDOW_SIZE);
-        context.registerReceiver(new XserverReceiver(listener), intentFilter);
+        context.registerReceiver(new XserverReceiver(listener), intentFilter, Context.RECEIVER_NOT_EXPORTED);
     }
 
     public interface XserverStateListener{

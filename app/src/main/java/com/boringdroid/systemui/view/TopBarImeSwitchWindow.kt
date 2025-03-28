@@ -63,17 +63,18 @@ class TopBarImeSwitchWindow(
 
     private fun updateInputMethodEnable(inputMethodInfo: InputMethodInfo, isChecked: Boolean) {
         val id = inputMethodInfo.id
-        val enabledIMEsAndSubtypesMap: HashMap<String, HashSet<String>> = getEnabledInputMethodsAndSubtypeList(getContext()!!.getContentResolver())
+        val enabledIMEsAndSubtypesMap: HashMap<String, HashSet<String>> = getEnabledInputMethodsAndSubtypeList(
+            getContext().contentResolver)
         val strings = enabledIMEsAndSubtypesMap.get(id)
         if (strings != null) {
             enabledIMEsAndSubtypesMap.clear()
             enabledIMEsAndSubtypesMap[id] = strings
             val textImiString: String = buildInputMethodsAndSubtypesString(enabledIMEsAndSubtypesMap)
-            Settings.Secure.putString(getContext().getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD,textImiString)
+            Settings.Secure.putString(getContext().contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD,textImiString)
         }
     }
 
-    fun buildInputMethodsAndSubtypesString( imeToSubtypesMap: HashMap<String, HashSet<String>>): String {
+    private fun buildInputMethodsAndSubtypesString(imeToSubtypesMap: HashMap<String, HashSet<String>>): String {
         val builder = StringBuilder()
         for (imi in imeToSubtypesMap.keys) {
             if (builder.length > 0) {
@@ -94,7 +95,7 @@ class TopBarImeSwitchWindow(
         return parseInputMethodsAndSubtypesString(enabledInputMethodsStr)
     }
 
-    fun parseInputMethodsAndSubtypesString(inputMethodsAndSubtypesString: String? ): java.util.HashMap<String, java.util.HashSet<String>> {
+    private fun parseInputMethodsAndSubtypesString(inputMethodsAndSubtypesString: String? ): java.util.HashMap<String, java.util.HashSet<String>> {
         val subtypesMap = java.util.HashMap<String, java.util.HashSet<String>>()
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
             return subtypesMap

@@ -1,44 +1,38 @@
 package com.boringdroid.systemui.view
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent.CanceledException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.Point
-import android.graphics.PorterDuff
 import android.media.AudioManager
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnHoverListener
+import android.view.View.OnTouchListener
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextClock
-import android.widget.TextView
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
-import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
-import com.boringdroid.systemui.view.TopBarNotificationWindow.Companion
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.WINDOW_PADDING
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
@@ -63,8 +57,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var notificationWindow:SingleNotificationWindow ? = null
     private var notificationsWindow:TopBarNotificationWindow? = null
     private var imeSwitchWindow:TopBarImeSwitchWindow? = null
+    private var globalSearchWindow: TopBarGlobalSearchWindow? = null
     private var imm: InputMethodManager
     private val inputMethodList: MutableList<InputMethodInfo> = ArrayList()
+    var overviewProvider: AllAppsProvider?= null
 
     private var powerWindow:TopBarPowerWindow? = null
     private var controlWindow:TopBarControlWindow? = null
@@ -101,7 +97,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         makeNotificationWindow(notificationBtn)
         makeImeSwitchWindow(imeBtn)
         makeSingleNotiWinodw()
-//        makeGlobalSearchWindow()
+        makeGlobalSearchWindow(searchBtn)
         btnList?.forEach{ imageView ->
             imageView?.setOnTouchListener(touchListener)
             imageView?.setOnHoverListener(hoverListener)
@@ -111,9 +107,22 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getContext().sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
     }
 
-    private fun makeGlobalSearchWindow() {
-
-
+    private fun makeGlobalSearchWindow(imageView: ImageView?) {
+        getInputMethods()
+        val width = resources.getDimension(R.dimen.top_bar_search_width).toInt()
+//        val height = resources.getDimension(R.dimen.top_bar_search_height).toInt()
+        globalSearchWindow = AbsTopPopWindow.Builder(context, width, LayoutParams.WRAP_CONTENT, R.layout.window_topbar_search)
+            .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
+            .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
+            .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
+        globalSearchWindow?.setDismissListener(object  : WindowDismissListener {
+            override fun onWindowDismiss() {
+                this@TopBarLayout.searchBtn?.background = null
+            }
+        })
+        globalSearchWindow?.overviewProvider = overviewProvider
+        globalSearchWindow?.enterView = imageView
+        windowList.add(globalSearchWindow!!)
     }
 
     private fun registerNotification() {
@@ -146,7 +155,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeImeSwitchWindow(imageView: ImageView?) {
         getInputMethods()
         val width = context.resources.getDimension(R.dimen.ime_switch_window_width).toInt()
-        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList!!.size) + 20
+        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 20
         imeSwitchWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_ime)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
@@ -166,7 +175,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         inputMethodList.clear()
         inputMethodList.addAll(imm.enabledInputMethodList)
         val currentInputMethod =
-            Settings.Secure.getString(context!!.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD)
+            Settings.Secure.getString(context!!.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
         inputMethodList.forEach {
             if (currentInputMethod == it.id) {
                 imeBtn?.visibility = View.VISIBLE
@@ -273,7 +282,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun notificationBtnClick() {
         notificationBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
         notificationsWindow?.showPopupWindow()
-        getContext().sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
+        context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
     }
 
 
@@ -281,6 +290,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getInputMethods()
         imeSwitchWindow?.showPopupWindow()
         imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
+    }
+
+    private fun searchBtnClick() {
+        searchBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        globalSearchWindow?.showPopupWindow()
     }
 
     override fun onClick(v: View?) {
@@ -298,6 +312,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             notificationBtnClick()
         } else if( v == imeBtn){
             imeBtnClick()
+        } else if( v == searchBtn){
+            searchBtnClick()
         }
     }
 
