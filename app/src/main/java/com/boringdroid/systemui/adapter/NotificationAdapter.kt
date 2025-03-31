@@ -74,7 +74,7 @@ class NotificationAdapter(
         val extras = notification.extras
         viewHolder.notifActionsLayout.removeAllViews()
         val contentView = notification.contentView
-        Log.w("fde", "NotificationAdapter onBindViewHolder contentView: $contentView")
+//        Log.w("fde", "NotificationAdapter onBindViewHolder contentView: $contentView")
         if(contentView != null){
             try {
                 val apply = contentView.apply(context, viewHolder.notifActionsLayout) as View

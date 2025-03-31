@@ -67,7 +67,7 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
+//        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
         val info = app.linuxInfo
         if(info != null){
             val image = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)

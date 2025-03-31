@@ -15,8 +15,8 @@
         >
         <ImageView
             android:id="@+id/app_icon_iv"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:scaleType="fitXY"
             android:layout_gravity="center"
             android:src="@drawable/icon_menu"

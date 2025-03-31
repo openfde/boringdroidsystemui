@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.view
 
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
@@ -11,6 +12,7 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -26,12 +28,14 @@ import android.widget.RelativeLayout
 import android.widget.TextClock
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.provider.AllAppsProvider
+import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
+import com.boringdroid.systemui.view.DockAppsLayout.Companion
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.WINDOW_PADDING
 
@@ -53,6 +57,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var notificationBtn: ImageView? = null
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
+    private var activityManager: ActivityManager? = null
     private var audioManager: AudioManager? = null
     private var notificationWindow:SingleNotificationWindow ? = null
     private var notificationsWindow:TopBarNotificationWindow? = null
@@ -66,6 +71,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<StatusBarNotification>? = null
+    private var launcherResumeFlag: Boolean ?= false
 
     val windowList: MutableList<AbsTopPopWindow> by lazy {
         mutableListOf()
@@ -74,6 +80,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
@@ -118,6 +125,15 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         globalSearchWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.searchBtn?.background = null
+                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+                if (runningTasks != null && launcherResumeFlag == true) {
+                    for (runningTask in runningTasks){
+                        if(Utils.isLauncher(context, runningTask.topActivity)){
+                            activityManager?.moveTaskToBack(true, runningTask.taskId)
+                        }
+                    }
+                }
+                launcherResumeFlag = false
             }
         })
         globalSearchWindow?.overviewProvider = overviewProvider
@@ -295,6 +311,15 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun searchBtnClick() {
         searchBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
         globalSearchWindow?.showPopupWindow()
+        launcherResumeFlag = true
+        val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+        if (runningTasks != null) {
+            for (runningTask in runningTasks){
+                if(Utils.isLauncher(context, runningTask.topActivity)){
+                    activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+                }
+            }
+        }
     }
 
     override fun onClick(v: View?) {

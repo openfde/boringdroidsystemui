@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.app.Instrumentation
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -16,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewRootImpl
 import android.view.WindowManager
+import androidx.annotation.VisibleForTesting
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_VNC
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
@@ -63,6 +65,27 @@ object Utils {
     @JvmStatic fun isX11App(packageName: String, topActivity: ComponentName?): Boolean {
         return TextUtils.equals(PACKAGE_X11, packageName)
                 && (topActivity?.className?.contains("MainActivity") ?: false)
+    }
+
+    @JvmStatic fun isLauncher(context: Context,componentName: ComponentName?,): Boolean {
+        if (componentName == null) {
+            return false
+        }
+        val packageName = componentName.packageName
+        val className = componentName.className
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        val resolveInfos = context.packageManager.queryIntentActivities(intent, 0)
+        for (resolveInfo in resolveInfos) {
+            if (resolveInfo?.activityInfo == null) {
+                continue
+            }
+            val activityInfo = resolveInfo.activityInfo
+            if (packageName == activityInfo.packageName && className == activityInfo.name) {
+                return true
+            }
+        }
+        return false
     }
 
 
