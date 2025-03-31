@@ -258,7 +258,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 this@TopBarLayout.controlBtn?.background = null
             }
         })
-        powerWindow?.enterView = imageView
+        controlWindow?.enterView = imageView
         windowList.add(controlWindow!!)
     }
 

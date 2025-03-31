@@ -15,6 +15,7 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
+import android.view.ViewParent
 import android.view.ViewRootImpl
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -110,7 +111,14 @@ object Utils {
         if (view == null) {
             return
         }
-        var target = view.parent
+        var target : ViewParent ?= view.parent
+        while (target != null){
+            if(target is ViewRootImpl){
+                break
+            }
+            target = target.parent
+        }
+
         if (target is ViewRootImpl) {
             val blurDrawable = target.createBackgroundBlurDrawable(radius)
             val realDrawable = view.background
