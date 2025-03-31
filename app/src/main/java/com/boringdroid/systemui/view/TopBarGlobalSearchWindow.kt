@@ -88,7 +88,11 @@ class TopBarGlobalSearchWindow(
 
     }
 
-    private fun updateWindow(filterApps: MutableList<AppData>?, filterFiles: MutableList<MediaFile>?) {
+    private fun updateWindow(
+        filterApps: MutableList<AppData>?,
+        filterFiles: MutableList<MediaFile>?,
+        filter: String?
+    ) {
         if(CollectionUtils.isEmpty(filterApps) && CollectionUtils.isEmpty(filterFiles)){
             updateLayoutParams(LayoutParams.WRAP_CONTENT, 64 + 160)
             searchViewGroup?.visibility = View.GONE
@@ -106,7 +110,8 @@ class TopBarGlobalSearchWindow(
             searchAppRecycleView,
             expandAppIv,
             filterApps,
-            TYPE_APP
+            TYPE_APP,
+            filter
         )
 
         fileSearchResult(
@@ -114,7 +119,8 @@ class TopBarGlobalSearchWindow(
             searchFileRecycleView,
             expandFileIv,
             filterFiles,
-            TYPE_FILE
+            TYPE_FILE,
+            filter
         )
 
     }
@@ -124,12 +130,14 @@ class TopBarGlobalSearchWindow(
         recycleView: LoadedSearchRecycleView?,
         imageView: ImageView?,
         list: MutableList<*>?,
-        type: Int
+        type: Int,
+        filter: String?
     ) {
         Log.d(
             TAG,
             "fileSearchResult() called with: layout = $layout, recycleView = $recycleView, imageView = $imageView, list = $list, type = $type"
         )
+        recycleView?.filter = filter
         if(!CollectionUtils.isEmpty(list)) {
             layout?.visibility = View.VISIBLE
             if( type == TYPE_APP){
@@ -214,7 +222,7 @@ class TopBarGlobalSearchWindow(
         override fun run() {
             val filterApps = getFilterApps(provider, filter)
             val filterFiles = getFilterFiles(mediaProvider, filter)
-            window.updateWindow(filterApps, filterFiles)
+            window.updateWindow(filterApps, filterFiles, filter)
         }
 
         private fun getFilterFiles(mediaProvider: SearchMediaProvider, filter: String?) : MutableList<MediaFile>?{

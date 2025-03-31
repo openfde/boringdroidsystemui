@@ -3,14 +3,16 @@ package com.boringdroid.systemui.view
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.graphics.Typeface
 import android.net.Uri
+import android.text.Spannable
+import android.text.SpannableString
 import android.text.TextUtils
+import android.text.style.StyleSpan
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -29,6 +31,7 @@ constructor(
     defStyle: Int = 0,
 ) : RecyclerView(context, attrs, defStyle) {
 
+    var filter: String? = null
     var type: Int ?= TYPE_APP
     private var searchListAdapter : SearchListAdapter
     var apps: MutableList<AppData> ?= null
@@ -54,12 +57,14 @@ constructor(
         this.apps = apps
         searchListAdapter.setAppData(apps)
         searchListAdapter.rootWindow = rootWindow
+        searchListAdapter.filter = filter
     }
 
     fun setFileData(apps: MutableList<MediaFile>) {
         this.files = apps
         searchListAdapter.setFileData(apps)
         searchListAdapter.rootWindow = rootWindow
+        searchListAdapter.filter = filter
     }
 
 
@@ -72,6 +77,7 @@ constructor(
 
     private class SearchListAdapter(private val context: Context) :
         Adapter<SearchListAdapter.ViewHolder>() {
+        var filter: String?= null
         private val apps: MutableList<AppData?> = ArrayList()
         private val files: MutableList<MediaFile?> = ArrayList()
         var limited: Boolean = true
@@ -112,7 +118,14 @@ constructor(
                     val appData = apps[position]
 //                    Log.d(TAG, "onBindViewHolder() called with: appData = $appData, position = $position")
                     holder.iconIV?.setImageDrawable(appData!!.icon)
-                    holder.nameTV?.text = appData?.name
+
+
+                    val originString = appData?.name!!
+                    val spannableString = SpannableString(originString)
+                    val targetText = filter!!
+                    setTextBold(originString, spannableString, holder.nameTV, targetText)
+
+//                    holder.nameTV?.text = appData?.name
                     holder.itemLl?.setOnHoverListener(hoverListener)
                     holder.itemLl?.setOnClickListener{
                         rootWindow?.dismiss()
@@ -167,8 +180,11 @@ constructor(
                     } else{
                         resId =  R.drawable.ic_unkown;
                     }
+                    val originString = file.name
+                    val spannableString = SpannableString(originString)
+                    val targetText = filter!!
+                    setTextBold(originString, spannableString, holder.nameTV, targetText)
                     holder.iconIV?.setImageResource(resId)
-                    holder.nameTV?.text = file.name
                     holder.itemLl?.setOnHoverListener(hoverListener)
                     holder.itemLl?.setOnClickListener{
                         rootWindow?.dismiss()
@@ -186,6 +202,29 @@ constructor(
                     }
                 }
             }
+        }
+
+        private fun setTextBold(
+            fullText: String,
+            spannableString: SpannableString,
+            nameTV: TextView?,
+            boldText: String
+        ) {
+
+            val start = fullText.indexOf(boldText)
+
+            if (start >= 0 && boldText.isNotEmpty()) {
+                val end = start + boldText.length
+                if (end <= fullText.length) {
+                    spannableString.setSpan(
+                        StyleSpan(Typeface.BOLD),
+                        start,
+                        end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+            }
+            nameTV?.text = spannableString
         }
 
         val hoverListener = OnHoverListener { v, event ->
