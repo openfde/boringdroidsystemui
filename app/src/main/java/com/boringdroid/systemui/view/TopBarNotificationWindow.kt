@@ -51,7 +51,7 @@ class TopBarNotificationWindow(
     }
 
 
-    fun initViews() {
+    private fun initViews() {
         mRecyclerView = mContentView?.findViewById(R.id.notification_rv)
         countTv = mContentView?.findViewById(R.id.count_tv)
         clearTv = mContentView?.findViewById(R.id.clear_tv)

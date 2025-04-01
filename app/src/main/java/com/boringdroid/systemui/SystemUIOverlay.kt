@@ -143,6 +143,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
+        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
         overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
         dockAppsLayout?.overviewProvider = overviewProvider
         appStateLayout?.listener = this

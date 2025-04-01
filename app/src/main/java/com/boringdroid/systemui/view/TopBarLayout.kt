@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Outline
 import android.graphics.Point
 import android.media.AudioManager
 import android.provider.Settings
@@ -18,6 +19,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnHoverListener
 import android.view.View.OnTouchListener
+import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
@@ -34,10 +36,12 @@ import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_A
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.view.AbsTopPopWindow.Companion.POPUP_WINDOW_RADIUS
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
-import com.boringdroid.systemui.view.DockAppsLayout.Companion
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
-import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.WINDOW_PADDING
+import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_PADDING
+import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_RADIUS
+import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_SHADOW
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater {
@@ -111,7 +115,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             imageView?.setOnClickListener(this)
         }
         inited = true
-        getContext().sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
+        context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
     }
 
     private fun makeGlobalSearchWindow(imageView: ImageView?) {
@@ -231,11 +235,16 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun makePowerWindow(imageView: ImageView?) {
-        val width = context.resources.getDimension(R.dimen.top_bar_power_width).toInt()
-        val height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt()
+        val width = context.resources.getDimension(R.dimen.top_bar_power_width).toInt() + 32
+        val height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt() + 32
         powerWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_power)
             .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(WINDOW_PADDING , WINDOW_PADDING)
+            .provider(object : ViewOutlineProvider() {
+                override fun getOutline(view: View, outline: Outline) {
+                    outline.setRoundRect(0, 0, view.width, view.height, POWER_OUTLINE_RADIUS)
+                }
+            })
+            .locate(0 , 0)
             .build(AbsTopPopWindow.WindowType.Power) as TopBarPowerWindow
         powerWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
@@ -251,7 +260,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         val height = context.resources.getDimension(R.dimen.top_bar_control_height).toInt()
         controlWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_control)
             .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(WINDOW_PADDING , WINDOW_PADDING)
+            .locate(CONTROL_WINDOW_PADDING , CONTROL_WINDOW_PADDING)
             .build(AbsTopPopWindow.WindowType.Control) as TopBarControlWindow
         controlWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
@@ -262,7 +271,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         windowList.add(controlWindow!!)
     }
 
-    val touchListener = OnTouchListener { v, event ->
+    private val touchListener = OnTouchListener { v, event ->
         if (event?.getAction() == MotionEvent.ACTION_DOWN) {
             v?.setBackgroundResource(R.drawable.top_oval_click);
         } else if (event?.getAction() == MotionEvent.ACTION_UP || event?.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -286,12 +295,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun powerBtnClick() {
         powerWindow?.showPopupWindow()
+        Utils.setBackgroundBlurRadius(powerWindow?.getContentView()?.findViewById(R.id.root), POWER_OUTLINE_SHADOW, POWER_OUTLINE_RADIUS)
         powerBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
     private fun controlBtnClick() {
         controlWindow?.showPopupWindow()
-        Utils.setBackgroundBlurRadius(controlWindow?.getContentView(), 100)
+        Utils.setBackgroundBlurRadius(controlWindow?.getContentView(), 100, POPUP_WINDOW_RADIUS)
         controlBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 

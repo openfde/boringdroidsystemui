@@ -96,6 +96,9 @@
     <color name="control_panel_bg">#60FFFFFF</color>
     <color name="white_50p">#80ffffff</color>
     <color name="white_59h">#59ffffff</color>
-    <color name="topbar_window_bg">#c7FFFFFF</color>
+
+
+    <color name="topbar_window_bg">#d1F5F7FA</color>
+
 
 </resources>

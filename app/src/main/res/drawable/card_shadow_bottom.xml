@@ -1,0 +1,16 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 底部阴影 -->
+    <item android:top="2dp" android:bottom="0dp">
+        <shape android:shape="oval">
+            <solid android:color="#40000000"/> <!-- 阴影颜色 -->
+            <corners android:radius="16dp"/>    <!-- 圆角 -->
+        </shape>
+    </item>
+    <!-- 卡片内容背景 -->
+    <item android:top="0dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF"/>   <!-- 卡片颜色 -->
+            <corners android:radius="16dp"/>
+        </shape>
+    </item>
+</layer-list>

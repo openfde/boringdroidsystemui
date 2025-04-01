@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import androidx.cardview.widget.CardView
 import com.boringdroid.systemui.R
 
 class TopBarControlWindow(
@@ -30,34 +31,33 @@ class TopBarControlWindow(
 
 
     companion object {
-        const val WINDOW_PADDING = 8
+        const val CONTROL_WINDOW_PADDING = 8
         const val TAG:String = "TopBarControlWindow"
     }
 
-    val touchListener = object :View.OnTouchListener {
+    private val touchListener = object :View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            if (event?.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event?.action == MotionEvent.ACTION_DOWN) {
                 v?.setBackgroundResource(R.drawable.control_oval_click_26);
-            } else if (event?.getAction() == MotionEvent.ACTION_UP || event?.getAction() == MotionEvent.ACTION_CANCEL) {
+            } else if (event?.action == MotionEvent.ACTION_UP || event?.action == MotionEvent.ACTION_CANCEL) {
                 v?.setBackgroundResource(R.drawable.control_oval_normal_26);
             }
             return false
         }
     }
 
-    val hoverListener = object :View.OnHoverListener {
-        override fun onHover(v: View?, event: MotionEvent?): Boolean {
-            val what = event?.action
-            when (what) {
-                MotionEvent.ACTION_HOVER_ENTER -> {
-                    v?.setBackgroundResource(R.drawable.control_oval_hover_26)
-                }
-                MotionEvent.ACTION_HOVER_EXIT -> {
-                    v?.setBackgroundResource(R.drawable.control_oval_normal_26)
-                }
+    private val hoverListener = View.OnHoverListener { v, event ->
+        val what = event?.action
+        when (what) {
+            MotionEvent.ACTION_HOVER_ENTER -> {
+                v?.setBackgroundResource(R.drawable.control_oval_hover_26)
             }
-            return false
+
+            MotionEvent.ACTION_HOVER_EXIT -> {
+                v?.setBackgroundResource(R.drawable.control_oval_normal_26)
+            }
         }
+        false
     }
 
     override fun showPopupWindow() {
@@ -67,7 +67,7 @@ class TopBarControlWindow(
     }
 
     private fun initVolumeSeekbar() {
-        var audioManager:AudioManager = getContext()!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager:AudioManager = getContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)

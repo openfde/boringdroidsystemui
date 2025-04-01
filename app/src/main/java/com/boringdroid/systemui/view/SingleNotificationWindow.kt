@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.Utils
 
 class SingleNotificationWindow(
     context: Context,
@@ -30,7 +31,7 @@ class SingleNotificationWindow(
     : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam) {
 
     companion object {
-        const val SINGLE_NOTIFICATION_WINDOW_PADDING = 12
+        const val SINGLE_NOTIFICATION_WINDOW_PADDING = 0
         const val TAG:String = "SingleNotificationWindow"
         const val FADE_AUTO_DELAY = 8000
     }
@@ -60,6 +61,8 @@ class SingleNotificationWindow(
         titleTv = mContentView?.findViewById(R.id.tv_title)
         contentTv = mContentView?.findViewById(R.id.tv_content)
         closeIv = mContentView?.findViewById(R.id.iv_close)
+        Utils.setBackgroundBlurRadius(mContentView?.findViewById(R.id.root_blur), 80, 10f)
+
     }
 
     fun postNotificaton(sbn: StatusBarNotification?) {

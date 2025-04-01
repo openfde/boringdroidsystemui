@@ -25,22 +25,28 @@
             android:text="共5条消息"
             style="@style/style_55"
             />
-        <TextView
-            android:id="@+id/clear_tv"
+
+        <com.boringdroid.systemui.view.LoadedCardView
             android:layout_width="64dp"
             android:layout_height="28dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:textColor="#ff292929"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:text="清空"
-            android:background="@drawable/notification_ellipse"
-            android:shadowColor="#1a000000"
-            android:shadowDx="0"
-            android:shadowDy="3"
-            style="@style/style_55"
-            />
+            android:elevation="6dp"
+            app:cardBackgroundColor="#99FFFFFF"
+            app:cardCornerRadius="16dp"
+            >
+            <TextView
+                android:id="@+id/clear_tv"
+                android:layout_width="64dp"
+                android:layout_height="28dp"
+                android:textColor="#ff292929"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:text="@string/clear_text"
+                android:background="@drawable/notification_ellipse"
+                style="@style/style_55"
+                />
+        </com.boringdroid.systemui.view.LoadedCardView>
     </RelativeLayout>
 
 
@@ -49,8 +55,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/all_apps_margin_horizontal"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="6dp"
         android:layout_marginBottom="13dp"
         android:requiresFadingEdge="vertical"
         android:fadingEdgeLength="@dimen/top_bar_notification_fade_length"

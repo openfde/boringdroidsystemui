@@ -23,7 +23,7 @@ open class AbsTopPopWindow(
     var typeParam: Int
 ) {
     companion object {
-        const val POPUP_WINDOW_RADIUS = 12
+        const val POPUP_WINDOW_RADIUS = 12f
         const val FADE_DURATION: Long = 120
         const val TAG:String = "AbsTopPopWindow"
     }
@@ -185,7 +185,7 @@ open class AbsTopPopWindow(
         private var exit: ObjectAnimator? = null
         private var provider: ViewOutlineProvider? = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, POPUP_WINDOW_RADIUS.toFloat())
+                outline.setRoundRect(0, 0, view.width, view.height, POPUP_WINDOW_RADIUS)
             }
         }
 

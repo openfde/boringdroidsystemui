@@ -121,6 +121,30 @@ object Utils {
 
         if (target is ViewRootImpl) {
             val blurDrawable = target.createBackgroundBlurDrawable(radius)
+            blurDrawable.setCornerRadius(10f)
+            val realDrawable = view.background
+            val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
+            view.background = layerDrawable
+            return
+        }
+    }
+
+    @TargetApi(value = 31)
+    @JvmStatic fun setBackgroundBlurRadius(view: View?, radius: Int, cornerRadius: Float) {
+        if (view == null) {
+            return
+        }
+        var target : ViewParent ?= view.parent
+        while (target != null){
+            if(target is ViewRootImpl){
+                break
+            }
+            target = target.parent
+        }
+
+        if (target is ViewRootImpl) {
+            val blurDrawable = target.createBackgroundBlurDrawable(radius)
+            blurDrawable.setCornerRadius(cornerRadius)
             val realDrawable = view.background
             val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
             view.background = layerDrawable

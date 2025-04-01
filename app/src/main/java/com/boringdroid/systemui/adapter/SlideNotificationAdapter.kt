@@ -10,6 +10,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -110,6 +111,11 @@ class SlideNotificationAdapter(
 
     }
 
+    override fun onViewAttachedToWindow(holder: ViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        Utils.setBackgroundBlurRadius(holder.rootBlur, 70, 10f)
+    }
+
     private fun isTouchInsideView(event: MotionEvent, view: View): Boolean {
         val x = event.x
         val y = event.y
@@ -170,6 +176,8 @@ class SlideNotificationAdapter(
         val contentTv: TextView = appInfoLayout.findViewById(R.id.tv_content)!!
         val closeIv: ImageView = appInfoLayout.findViewById(R.id.iv_close)!!
         val root: RelativeLayout = appInfoLayout.findViewById(R.id.root)!!
+        val rootBlur: ViewGroup = appInfoLayout.findViewById(R.id.root_blur)!!
+
 
         fun bind(notification: StatusBarNotification,
                  listener: NotificationService) {

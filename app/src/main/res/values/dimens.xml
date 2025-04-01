@@ -93,8 +93,8 @@
     <dimen name="top_bar_power_height">254dp</dimen>
     <dimen name="top_text_margin">4dp</dimen>
     <dimen name="top_text_padding">20dp</dimen>
-    <dimen name="top_bar_about_width">380dp</dimen>
-    <dimen name="top_bar_about_height">466dp</dimen>
+    <dimen name="top_bar_about_width">430dp</dimen>
+    <dimen name="top_bar_about_height">516dp</dimen>
     <dimen name="top_bar_control_width">376dp</dimen>
     <dimen name="top_bar_control_height">434dp</dimen>
     <dimen name="elevation_control_panel">3dp</dimen>
@@ -108,8 +108,8 @@
     <dimen name="top_bar_notification_fade_length">40dp</dimen>
 
 
-    <dimen name="top_bar_single_notification_width">374dp</dimen>
-    <dimen name="top_bar_single_notification_height">106dp</dimen>
+    <dimen name="top_bar_single_notification_width">398dp</dimen>
+    <dimen name="top_bar_single_notification_height">130dp</dimen>
 
     <dimen name="top_bar_search_width">680dp</dimen>
     <dimen name="top_bar_search_height">56dp</dimen>
