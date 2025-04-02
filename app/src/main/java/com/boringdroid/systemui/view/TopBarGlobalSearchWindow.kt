@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -35,6 +36,8 @@ class TopBarGlobalSearchWindow(
     companion object {
         const val WINDOW_PADDING_TOP = 180
         const val WINDOW_PADDING_LEFT = 0
+        const val SEARCH_WINDOW_SHADOW = 50
+        const val SEARCH_WINDOW_RADIUS = 12f
         const val TAG:String = "TopBarGlobalSearchWindow"
         const val SEARCH_LIMIT = 5
     }
@@ -42,7 +45,9 @@ class TopBarGlobalSearchWindow(
 
     private var glbalSearchEt: EditText ?= null
     private var emptyView: TextView ?= null
-    private var searchViewGroup: ScrollView ?= null
+    private var emptyRoot: ViewGroup ?= null
+
+    private var searchViewGroup: ViewGroup ?= null
     private var searchAppLayout: LinearLayout ?= null
     private var searchAppRecycleView: LoadedSearchRecycleView ?= null
     private var expandAppIv: ImageView ?= null
@@ -65,6 +70,7 @@ class TopBarGlobalSearchWindow(
 
     private fun initViews() {
         emptyView = mContentView?.findViewById(R.id.empty_tv)
+        emptyRoot = mContentView?.findViewById(R.id.empty_root)
 
         searchViewGroup = mContentView?.findViewById(R.id.search_result_sv)
         searchViewGroup?.visibility = View.GONE
@@ -85,6 +91,7 @@ class TopBarGlobalSearchWindow(
         glbalSearchEt?.setText("")
         glbalSearchEt?.removeTextChangedListener(textChangedListener)
         glbalSearchEt?.addTextChangedListener(textChangedListener)
+        Utils.setBackgroundBlurRadius(mContentView?.findViewById(R.id.root_blur), SEARCH_WINDOW_SHADOW, SEARCH_WINDOW_RADIUS)
 
     }
 
@@ -93,15 +100,24 @@ class TopBarGlobalSearchWindow(
         filterFiles: MutableList<MediaFile>?,
         filter: String?
     ) {
+        val width = getContext().resources.getDimension(R.dimen.top_bar_search_width_expand).toInt()
         if(CollectionUtils.isEmpty(filterApps) && CollectionUtils.isEmpty(filterFiles)){
-            updateLayoutParams(LayoutParams.WRAP_CONTENT, 64 + 160)
+
+            updateLayoutParams(width, 64 + 160 + 20)
             searchViewGroup?.visibility = View.GONE
-            emptyView?.visibility = View.VISIBLE
+//            emptyView?.visibility = View.VISIBLE
+            emptyRoot?.visibility = View.VISIBLE
+//            Utils.setBackgroundBlurRadius(emptyRoot, 60, 8f)
+
             searchAppLayout?.visibility = View.GONE
         } else {
-            updateLayoutParams(LayoutParams.WRAP_CONTENT, 64 + 532)
+            updateLayoutParams(width, 64 + 532)
             searchViewGroup?.visibility = View.VISIBLE
-            emptyView?.visibility = View.GONE
+            Utils.setBackgroundBlurRadius(mContentView?.findViewById(R.id.root_blur), 60, 12f)
+            Utils.setBackgroundBlurRadius(searchViewGroup, 60, 8f)
+//            emptyView?.visibility = View.GONE
+            emptyRoot?.visibility = View.GONE
+
         }
 
 
@@ -192,7 +208,8 @@ class TopBarGlobalSearchWindow(
                     if (!TextUtils.isEmpty(s.toString())) {
                         filterApps(s.toString(), 100)
                     } else {
-                        emptyView?.visibility = View.GONE
+                        emptyRoot?.visibility = View.GONE
+//                        emptyView?.visibility = View.GONE
                         searchViewGroup?.visibility = View.GONE
                     }
                 }

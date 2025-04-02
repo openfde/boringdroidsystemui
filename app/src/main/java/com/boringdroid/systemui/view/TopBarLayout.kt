@@ -40,6 +40,8 @@ import com.boringdroid.systemui.view.AbsTopPopWindow.Companion.POPUP_WINDOW_RADI
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_PADDING
+import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_RADIUS
+import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_SHADOW
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_RADIUS
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_SHADOW
 
@@ -120,7 +122,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun makeGlobalSearchWindow(imageView: ImageView?) {
         getInputMethods()
-        val width = resources.getDimension(R.dimen.top_bar_search_width).toInt()
+        val width = resources.getDimension(R.dimen.top_bar_search_width_expand).toInt()
 //        val height = resources.getDimension(R.dimen.top_bar_search_height).toInt()
         globalSearchWindow = AbsTopPopWindow.Builder(context, width, LayoutParams.WRAP_CONTENT, R.layout.window_topbar_search)
             .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
@@ -256,11 +258,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun makeControlWindow(imageView: ImageView?) {
-        val width = context.resources.getDimension(R.dimen.top_bar_control_width).toInt()
-        val height = context.resources.getDimension(R.dimen.top_bar_control_height).toInt()
+        val width = context.resources.getDimension(R.dimen.top_bar_control_width_expand).toInt()
+        val height = context.resources.getDimension(R.dimen.top_bar_control_height_expand).toInt()
         controlWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_control)
             .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(CONTROL_WINDOW_PADDING , CONTROL_WINDOW_PADDING)
+            .locate(0 , 0)
             .build(AbsTopPopWindow.WindowType.Control) as TopBarControlWindow
         controlWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
@@ -295,13 +297,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun powerBtnClick() {
         powerWindow?.showPopupWindow()
-        Utils.setBackgroundBlurRadius(powerWindow?.getContentView()?.findViewById(R.id.root), POWER_OUTLINE_SHADOW, POWER_OUTLINE_RADIUS)
+        Utils.setBackgroundBlurRadius(powerWindow?.getContentView()?.findViewById(R.id.root_blur), POWER_OUTLINE_SHADOW, POWER_OUTLINE_RADIUS)
         powerBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
     private fun controlBtnClick() {
         controlWindow?.showPopupWindow()
-        Utils.setBackgroundBlurRadius(controlWindow?.getContentView(), 100, POPUP_WINDOW_RADIUS)
+        Utils.setBackgroundBlurRadius(controlWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
         controlBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 

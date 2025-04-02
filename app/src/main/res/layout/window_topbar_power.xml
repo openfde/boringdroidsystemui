@@ -8,7 +8,7 @@
     >
 
     <com.boringdroid.systemui.view.LoadedCardView
-        android:id="@+id/root"
+        android:id="@+id/root_blur"
         android:layout_width="@dimen/top_bar_power_width"
         android:layout_height="@dimen/top_bar_power_height"
         android:orientation="vertical"

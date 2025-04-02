@@ -17,7 +17,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/topbar_window_bg"
+            android:background="@drawable/round_rect_12dp_about"
             android:layout_gravity="center"
             >
             <ImageView

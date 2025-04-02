@@ -31,6 +31,8 @@ class TopBarControlWindow(
 
 
     companion object {
+        const val CONTROL_WINDOW_RADIUS = 12f
+        const val CONTROL_WINDOW_SHADOW = 80
         const val CONTROL_WINDOW_PADDING = 8
         const val TAG:String = "TopBarControlWindow"
     }
