@@ -80,7 +80,7 @@ constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        dockProvider?.unregisterTaskStackListener()
+        dockProvider.unregisterTaskStackListener()
     }
     fun initApps() {
         val provideApps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
@@ -93,7 +93,7 @@ constructor(
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChangedWapper()
-        dockProvider?.registerTaskStackListener()
+        dockProvider.registerTaskStackListener()
     }
 
     override fun removeTask(taskId: Int) {

@@ -121,7 +121,8 @@
     <dimen name="top_bar_search_height">56dp</dimen>
     <dimen name="top_bar_search_height_expand">76dp</dimen>
 
-    <dimen name="dock_context_width">152dp</dimen>
+    <dimen name="dock_context_width_expand">192dp</dimen>
+    <dimen name="dock_context_width">176dp</dimen>
     <dimen name="dock_context_height">114dp</dimen>
 
     <dimen name="overview_app_icon_size">98dp</dimen>

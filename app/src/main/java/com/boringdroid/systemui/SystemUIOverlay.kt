@@ -90,11 +90,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             updateNaviDock()
         }
         status?.visibility = View.VISIBLE
-//        traverseAndPrint(status, 0)
         status?.removeAllViews()
         generateTopBar()
     }
-    fun updateNaviDock() {
+    private fun updateNaviDock() {
         val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
         layoutParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
@@ -111,6 +110,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
+        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
     }
 
     fun generateTopBar() {
@@ -194,7 +194,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
 
     private fun registPackageUpdate() {
-        var filter = IntentFilter()
+        val filter = IntentFilter()
         filter.addAction(Intent.ACTION_PACKAGE_ADDED)
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
@@ -380,16 +380,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             ?: LayoutInflater.from(context).inflate(R.layout.layout_topbar, null)
                     as TopBarLayout
     }
-
-    private fun initDockAppsLayout(
-        context: Context?,
-        dockAppsLayout: DockAppsLayout?
-    ): DockAppsLayout? {
-        return dockAppsLayout
-            ?: LayoutInflater.from(context).inflate(R.layout.dock_apps_layout, null)
-                    as DockAppsLayout
-    }
-
 
     @SuppressLint("InflateParams")
     private fun initializeAppStateLayout(

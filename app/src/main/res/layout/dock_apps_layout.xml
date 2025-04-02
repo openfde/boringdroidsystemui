@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_ll"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <FrameLayout
-        android:id="@+id/paren_fl"
+    android:layout_height="68dp"
+    android:layout_centerVertical="true"
+    android:orientation="vertical"
+    >
+
+    <com.boringdroid.systemui.view.LoadedCardView
+        android:id="@+id/root_blur"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/round_rect_16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
         >
-        <com.boringdroid.systemui.view.DockAppsLayout
-            android:id="@+id/apps_rv"
-            android:layout_marginHorizontal="4dp"
-            android:layout_marginTop="4dp"
-            android:orientation="horizontal"
+        <FrameLayout
+            android:id="@+id/paren_fl"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"/>
-    </FrameLayout>
+            android:layout_height="60dp"
+            android:paddingHorizontal="8dp"
+            android:background="@drawable/round_rect_16dp"
+            >
+            <com.boringdroid.systemui.view.DockAppsLayout
+                android:id="@+id/apps_rv"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"/>
+        </FrameLayout>
+    </com.boringdroid.systemui.view.LoadedCardView>
 </LinearLayout>

@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="right|top"
     >
 
     <com.boringdroid.systemui.view.LoadedCardView
@@ -14,6 +14,8 @@
         android:orientation="vertical"
         app:cardCornerRadius="8dp"
         app:cardElevation="12dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
         >
 <!--        <ImageView-->
 <!--            android:layout_width="match_parent"-->

@@ -29,6 +29,7 @@ import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.utils.ImageUtils
+import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
 
 class DockAppAdapter(private val context: Context) :
@@ -45,7 +46,7 @@ class DockAppAdapter(private val context: Context) :
     companion object {
         private const val TAG = "DockAppAdapter"
         const val CONTEXT_WINDOW_PADDING_X = 0
-        const val CONTEXT_WINDOW_PADDING_Y = 4
+        const val CONTEXT_WINDOW_PADDING_Y = 0
     }
 
     init {
@@ -70,7 +71,7 @@ class DockAppAdapter(private val context: Context) :
 //        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
         val info = app.linuxInfo
         if(info != null){
-            val image = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
+            val image = ImageUtils.getImage(info.Icon, info.iconType, info.getName(), context)
             holder.iconIV.setImageDrawable(image)
         } else {
             holder.iconIV.setImageDrawable(app.icon)
@@ -102,11 +103,11 @@ class DockAppAdapter(private val context: Context) :
     }
 
     private fun makeAndFillContextWindow(app: TaskInfo, v: View) {
-        val width = context.resources.getDimension(R.dimen.dock_context_width).toInt()
+        val width = context.resources.getDimension(R.dimen.dock_context_width_expand).toInt()
         val location = IntArray(2)
         v.getLocationOnScreen(location)
         val x = location[0]
-        val paddingX = x + 3- width/2 + v.width/2
+        val paddingX = x + 3 - width/2 + v.width/2
         val showing = isShowing(app.id)
         val persist = app.isPersist()
         val running = app.isRunning()
@@ -114,18 +115,21 @@ class DockAppAdapter(private val context: Context) :
         if (contextWindow == null){
             contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.dock_app_context)
                 .gravity(Gravity.BOTTOM or Gravity.LEFT)
-                .locate( paddingX , CONTEXT_WINDOW_PADDING_Y)
+                .locate( paddingX - 16 , CONTEXT_WINDOW_PADDING_Y)
                 .build(AbsTopPopWindow.WindowType.Default)
             contextWindow?.showPopupWindow()
+            Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
         } else {
             if(contextWindow?.isShowing() == true && paddingX == contextWindow?.offsetX){
                 contextWindow?.dismiss()
             }else if (contextWindow?.isShowing() != true){
-                contextWindow?.updateLayoutParams(width, WRAP_CONTENT, paddingX, CONTEXT_WINDOW_PADDING_Y,
+                contextWindow?.updateLayoutParams(width, WRAP_CONTENT, paddingX - 16, CONTEXT_WINDOW_PADDING_Y,
                     Gravity.BOTTOM or Gravity.LEFT)
                 contextWindow?.showPopupWindow()
+                Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
             }
         }
+
         val windowOperator: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.window_tv)
         val pinOperator: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.dock_tv)
         val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
