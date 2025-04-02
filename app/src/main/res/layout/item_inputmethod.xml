@@ -1,29 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="230dp"
     android:layout_height="@dimen/item_ime_height"
-    android:id="@+id/item_view">
+    android:id="@+id/item_view"
+    android:paddingHorizontal="8dp"
+    >
 
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_centerVertical="true"
+        android:src="@drawable/icon_down"
         />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="6dp"
         android:layout_toRightOf="@id/icon"
-        android:textColor="@color/black"
+        android:textColor="#e6000000"
         android:singleLine="true"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:text="12121"
+        android:layout_marginRight="25dp"
+        style="@style/style_55"
+        />
 
+    <ImageView
+        android:id="@+id/select"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="12dp"
+        android:src="@drawable/icon_select"
+        />
 
 </RelativeLayout>

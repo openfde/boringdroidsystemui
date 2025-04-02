@@ -2,15 +2,19 @@ package com.boringdroid.systemui.view
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.InputMethodInfo
+import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.ImeAdapter
 import com.boringdroid.systemui.adapter.OnItemClickListener
+
 
 class TopBarImeSwitchWindow(
     context: Context,
@@ -24,9 +28,10 @@ class TopBarImeSwitchWindow(
     var systemUIContext: Context? = null
     private var inputMethodList: MutableList<InputMethodInfo>? = ArrayList()
     private var recyclerView:RecyclerView ?= null
+    private var settingTv:TextView ?= null
 
     companion object {
-        const val WINDOW_PADDING_TOP = 8
+        const val WINDOW_PADDING_TOP = 0
         const val WINDOW_PADDING_RIGHT = 150
         const val TAG:String = "TopBarImeSwitchWindow"
         private const val FADE_DURATION :Long = 80
@@ -45,6 +50,7 @@ class TopBarImeSwitchWindow(
     }
 
     private fun initViews() {
+        settingTv = mContentView?.findViewById(R.id.setting_tv)
         recyclerView = mContentView?.findViewById(R.id.ime_Rv)
         recyclerView?.layoutManager = LinearLayoutManager(getContext())
         recyclerView?.adapter = ImeAdapter(getContext(), inputMethodList, object : OnItemClickListener {
@@ -59,6 +65,12 @@ class TopBarImeSwitchWindow(
             override fun onItemClick(position: Int, type: String, view: View) {
             }
         })
+        settingTv?.setOnClickListener{
+            dismiss()
+            val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            getContext().startActivity(intent)
+        }
     }
 
     private fun updateInputMethodEnable(inputMethodInfo: InputMethodInfo, isChecked: Boolean) {
@@ -129,5 +141,13 @@ class TopBarImeSwitchWindow(
             this.inputMethodList?.clear()
             this.inputMethodList?.addAll(inputMethodList)
         }
+    }
+
+    fun setSelect(currentInputMethod: String?) {
+        if(recyclerView?.adapter == null){
+            return
+        }
+        val imeAdapter = recyclerView?.adapter as ImeAdapter
+        imeAdapter?.setSelect(currentInputMethod)
     }
 }

@@ -1,14 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@color/topbar_window_bg"
-    android:paddingVertical="10dp"
-    android:paddingHorizontal="@dimen/ime_window_padding"
     >
-    <com.boringdroid.systemui.view.LoadedImeRecycleView
-        android:id="@+id/ime_Rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+
+    <com.boringdroid.systemui.view.LoadedCardView
+        android:id="@+id/root_blur"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="8dp"
+        android:layout_marginHorizontal="15dp"
+        android:elevation="12dp"
+        app:cardCornerRadius="8dp"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/round_rect_8dp_search"
+            >
+            <com.boringdroid.systemui.view.LoadedImeRecycleView
+                android:id="@+id/ime_Rv"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1a000000"
+                />
+            <TextView
+                android:id="@+id/setting_tv"
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                android:text="@string/ime_setting"
+                android:layout_marginVertical="9dp"
+                android:textColor="#e6000000"
+                android:textSize="14sp"
+                android:layout_marginLeft="14dp"
+                />
+            
+        </LinearLayout>
+    </com.boringdroid.systemui.view.LoadedCardView>
 </LinearLayout>

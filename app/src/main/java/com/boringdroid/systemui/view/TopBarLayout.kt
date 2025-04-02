@@ -19,6 +19,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnHoverListener
 import android.view.View.OnTouchListener
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodInfo
@@ -78,7 +79,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<StatusBarNotification>? = null
     private var launcherResumeFlag: Boolean ?= false
-
+    private var currentInputMethod :String ?= null
     val windowList: MutableList<AbsTopPopWindow> by lazy {
         mutableListOf()
     }
@@ -176,10 +177,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun makeImeSwitchWindow(imageView: ImageView?) {
         getInputMethods()
-        val width = context.resources.getDimension(R.dimen.ime_switch_window_width).toInt()
-        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 20
-        imeSwitchWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_ime)
+        val width = context.resources.getDimension(R.dimen.ime_switch_window_width_expand).toInt()
+        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 65
+        imeSwitchWindow = AbsTopPopWindow.Builder(context, WRAP_CONTENT, height, R.layout.window_topbar_ime)
             .gravity(Gravity.TOP or Gravity.RIGHT)
+            .provider(null)
             .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.IME) as TopBarImeSwitchWindow
         imeSwitchWindow?.setInputMethodList(inputMethodList)
@@ -196,7 +198,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun getInputMethods() {
         inputMethodList.clear()
         inputMethodList.addAll(imm.enabledInputMethodList)
-        val currentInputMethod =
+        currentInputMethod =
             Settings.Secure.getString(context!!.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
         inputMethodList.forEach {
             if (currentInputMethod == it.id) {
@@ -204,6 +206,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
             }
         }
+        imeSwitchWindow?.setSelect(currentInputMethod)
     }
 
     private fun registInputMethodChange() {
@@ -317,7 +320,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun imeBtnClick() {
         getInputMethods()
         imeSwitchWindow?.showPopupWindow()
+        imeSwitchWindow?.setSelect(currentInputMethod)
         imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        Utils.setBackgroundBlurRadius(imeSwitchWindow?.getContentView()?.findViewById(R.id.root_blur), 30, 8f)
     }
 
     private fun searchBtnClick() {

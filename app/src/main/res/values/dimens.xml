@@ -80,9 +80,10 @@
     <dimen name="volume_loading_height">300dp</dimen>
 
     <dimen name="ime_switch_window_width">180dp</dimen>
+    <dimen name="ime_switch_window_width_expand">210dp</dimen>
     <dimen name="ime_switch_window_height">110dp</dimen>
     <dimen name="ime_switch_window_margin">240dp</dimen>
-    <dimen name="item_ime_height">40dp</dimen>
+    <dimen name="item_ime_height">34dp</dimen>
     <dimen name="ime_window_padding">15dp</dimen>
 
     <dimen name="top_bar_layout_width">1920dp</dimen>

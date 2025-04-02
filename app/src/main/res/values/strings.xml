@@ -110,4 +110,5 @@
     <string name="no_matching_item">No matching items available</string>
     <string name="application">Application</string>
     <string name="clear_text">Clear</string>
+    <string name="ime_setting">IME Setting</string>
 </resources>
