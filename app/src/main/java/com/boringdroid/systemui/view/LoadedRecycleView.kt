@@ -22,6 +22,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 
 class LoadedRecycleView
@@ -120,14 +121,15 @@ constructor(
             val height = context.resources.getDimension(R.dimen.overview_context_height).toInt()
             val location = IntArray(2)
             v.getLocationOnScreen(location)
-            val x = location[0] + 140
-            val y = location[1] + 80
+            val x = location[0] + 132
+            val y = location[1] + 32
             if(contextWindow == null){
                 contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.layout_app_context_overview)
                     .gravity(Gravity.TOP or Gravity.START)
                     .locate( x , y)
                     .build(AbsTopPopWindow.WindowType.Default)
                 contextWindow?.showPopupWindow()
+                Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
             } else {
                 if(contextWindow?.isShowing() == true && x == contextWindow?.offsetX
                     && y == contextWindow?.offsetY){
@@ -136,6 +138,7 @@ constructor(
                     contextWindow?.updateLayoutParams(width, WRAP_CONTENT, x, y,
                         Gravity.TOP or Gravity.START)
                     contextWindow?.showPopupWindow()
+                    Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
                 }
             }
             Log.d(TAG, "makeAndFillContextWindow() called with: appData = $appData, v = $v")

@@ -162,7 +162,7 @@ class AppsPagerAdapter(
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val recycleView = LoadedRecycleView(container.context)
         recycleView.overviewWindow = appOverviewWindow
-        recycleView.setData(appPages.get(position))
+        recycleView.setData(appPages[position])
         val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         container.addView(recycleView, params)
         return recycleView
