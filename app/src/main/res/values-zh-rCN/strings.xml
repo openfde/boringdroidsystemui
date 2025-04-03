@@ -109,4 +109,8 @@
     <string name="files">文件</string>
     <string name="clear_text">清空</string>
     <string name="ime_setting">输入法设置</string>
+    <string name="sound">声音</string>
+    <string name="set_output">输出设备</string>
+    <string name="set_input">输入设备</string>
+    <string name="sound_more_set">更多声音设置</string>
 </resources>

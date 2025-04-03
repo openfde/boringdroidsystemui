@@ -11,17 +11,24 @@ import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.media.AudioSystem
 import android.os.Build
+import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewParent
 import android.view.ViewRootImpl
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_VNC
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
+import com.boringdroid.systemui.view.TopBarControlWindow
+import com.boringdroid.systemui.view.TopBarVolumeWindow
+import com.boringdroid.systemui.view.TopBarVolumeWindow.Companion
 import net.sourceforge.pinyin4j.PinyinHelper
 import java.io.BufferedReader
 import java.io.IOException
@@ -187,6 +194,55 @@ object Utils {
                 }
             }
         }.start()
+    }
+
+    @JvmStatic fun parseAudioDevice(result:String, typeInput:Boolean): ArrayList<AudioDevice>{
+        val devicesResult = AudioSystem.getDevs(typeInput)
+        val audioDeviceList = ArrayList<AudioDevice>()
+
+        // When there is no device, the result is empty,
+        // then you should return the audioDevices in advance.
+        if (devicesResult == null || devicesResult.isEmpty()) return audioDeviceList
+        Log.d(TopBarVolumeWindow.TAG, "getDevices: $devicesResult")
+        val deviceResult = devicesResult.split(';')
+        deviceResult.forEachIndexed { index, device ->
+            val audioDevice = parseDevice(device, typeInput, index == 0)
+            if (audioDevice != null) audioDeviceList.add(audioDevice)
+        }
+        return audioDeviceList
+    }
+
+    @JvmStatic fun parseDevice(result: String, type: Boolean, isSelected: Boolean): AudioDevice? {
+        try {
+            val deviceInfo = result.split('=')
+            val audioDevice = AudioDevice(deviceInfo[0], deviceInfo[1], type, isSelected)
+            // If the size of the returned data is 4, it means that volume and isMuted exist.
+            if (deviceInfo.size == 4) {
+                audioDevice.needInfo = false
+                audioDevice.volume = deviceInfo[2].toFloat()
+                audioDevice.isMuted = ("1" == deviceInfo[3])
+            }
+            return audioDevice
+        } catch (e: Exception) {
+            com.boringdroid.systemui.Log.e(TopBarControlWindow.TAG, "parseDevs exception: ${e.message}")
+            return null
+        }
+    }
+
+    private fun sendKeyEvent(keyCode: Int, action: Int) {
+        val downTime = SystemClock.uptimeMillis()
+        val eventTime = SystemClock.uptimeMillis()
+
+        val keyEvent = KeyEvent(
+            downTime,
+            eventTime,
+            action,
+            keyCode,
+            0 // repeat count
+        )
+
+        // 使用 Instrumentation 发送按键事件（需要 INJECT_EVENTS 权限）
+        Instrumentation().sendKeySync(keyEvent)
     }
 
     fun drawableToBitmap(drawable: Drawable): Bitmap? {

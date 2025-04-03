@@ -111,4 +111,9 @@
     <string name="application">Application</string>
     <string name="clear_text">Clear</string>
     <string name="ime_setting">IME Setting</string>
+    <string name="sound">Sound</string>
+    <string name="set_output">Output</string>
+    <string name="set_input">Input</string>
+    <string name="sound_more_set">More</string>
+
 </resources>

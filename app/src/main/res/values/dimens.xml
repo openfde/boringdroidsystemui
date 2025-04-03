@@ -86,6 +86,12 @@
     <dimen name="item_ime_height">34dp</dimen>
     <dimen name="ime_window_padding">15dp</dimen>
 
+    <dimen name="volume_window_width_expand">394dp</dimen>
+    <dimen name="volume_window_height_expand">476dp</dimen>
+
+    <dimen name="volume_window_width">376dp</dimen>
+    <dimen name="volume_window_height">460dp</dimen>
+
     <dimen name="top_bar_layout_width">1920dp</dimen>
     <dimen name="top_bar_layout_height">24dp</dimen>
     <dimen name="topbar_icon_size">30dp</dimen>

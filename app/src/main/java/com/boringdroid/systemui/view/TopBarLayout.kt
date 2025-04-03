@@ -47,7 +47,8 @@ import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_R
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_SHADOW
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
-    RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater {
+    RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
+    TopBarControlWindow.TopbarLayoutController {
 
     var inited: Boolean = false
     private val TAG: String = "TopBarLayout"
@@ -83,7 +84,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     val windowList: MutableList<AbsTopPopWindow> by lazy {
         mutableListOf()
     }
-    var btnList: MutableList<ImageView?> ?= null
+    private var volumeWindow:TopBarVolumeWindow? = null
+
+
+    private var btnList: MutableList<ImageView?> ?= null
 
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -112,6 +116,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         makeImeSwitchWindow(imeBtn)
         makeSingleNotiWinodw()
         makeGlobalSearchWindow(searchBtn)
+        makeVolumeWindow(volumeBtn)
         btnList?.forEach{ imageView ->
             imageView?.setOnTouchListener(touchListener)
             imageView?.setOnHoverListener(hoverListener)
@@ -119,6 +124,24 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         inited = true
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
+    }
+
+    private fun makeVolumeWindow(imageView: ImageView?) {
+        getInputMethods()
+        val width = resources.getDimension(R.dimen.volume_window_width_expand).toInt()
+        val height = resources.getDimension(R.dimen.volume_window_height_expand).toInt()
+        volumeWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_volume)
+            .gravity(Gravity.TOP or Gravity.RIGHT)
+            .locate(0 , 0)
+            .build(AbsTopPopWindow.WindowType.Volume) as TopBarVolumeWindow
+        volumeWindow?.setDismissListener(object  : WindowDismissListener {
+            override fun onWindowDismiss() {
+                this@TopBarLayout.volumeBtn?.background = null
+            }
+        })
+        volumeWindow?.enterView = imageView
+        windowList.add(volumeWindow!!)
+
     }
 
     private fun makeGlobalSearchWindow(imageView: ImageView?) {
@@ -273,6 +296,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             }
         })
         controlWindow?.enterView = imageView
+        controlWindow?.topbarController = this
         windowList.add(controlWindow!!)
     }
 
@@ -339,6 +363,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
+    private fun volumeBtnClick() {
+        volumeWindow?.showPopupWindow()
+//        Utils.setBackgroundBlurRadius(volumeWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
+        volumeBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+    }
+
     override fun onClick(v: View?) {
         windowList.forEach { window ->
             if(window.isShowing()){
@@ -356,6 +386,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             imeBtnClick()
         } else if( v == searchBtn){
             searchBtnClick()
+        } else if( v == volumeBtn){
+            volumeBtnClick()
         }
     }
 
@@ -403,6 +435,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 SINGLE_NOTIFICATION_WINDOW_PADDING,
                 SINGLE_NOTIFICATION_WINDOW_PADDING
             ).build(AbsTopPopWindow.WindowType.SingleNotification) as SingleNotificationWindow
+    }
+
+    override fun showVolumeWindow() {
+        volumeBtnClick()
     }
 
 }

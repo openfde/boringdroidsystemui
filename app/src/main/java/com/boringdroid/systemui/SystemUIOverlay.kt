@@ -113,7 +113,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
     }
 
-    fun generateTopBar() {
+    private fun generateTopBar() {
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
         status?.addView(topBarLayout)
         Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
@@ -124,6 +124,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             }
             topBarLayout?.systemUIContext = systemUIContext
         }
+        Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
     }
 
     override fun onCreate(
