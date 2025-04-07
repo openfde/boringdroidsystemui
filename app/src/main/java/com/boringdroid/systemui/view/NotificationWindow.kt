@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.NotificationService
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
+import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
@@ -35,7 +36,7 @@ class NotificationWindow(
     private val mContext: Context?,
     private val listener: NotificationService
 ) {
-    var notifications: Array<StatusBarNotification>? = null
+    var notifications: Array<DesktopNotification>? = null
     private var shown = false
     private var windowWidth:Int
     private var windowHeight:Int
@@ -49,7 +50,7 @@ class NotificationWindow(
     private var notificationAdapter: SlideNotificationAdapter? = null
     private val mSpaceDecoration :RecyclerView.ItemDecoration
 
-    private fun showNotificationView(notificationArray: Array<StatusBarNotification>) {
+    private fun showNotificationView(notificationArray: Array<DesktopNotification>) {
         val height = mContext!!.resources.getDimension(R.dimen.notification_window_height).toInt()
         val layoutParams = generateLayoutParams(mContext, windowManager, height)
         windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_notification_window, null)
@@ -140,7 +141,7 @@ class NotificationWindow(
 
     fun ifShowNotificationWindow(
         context: Context?,
-        activeNotifications: Array<StatusBarNotification>
+        activeNotifications: Array<DesktopNotification>
     ) {
         if (shown) {
             dismiss(context)

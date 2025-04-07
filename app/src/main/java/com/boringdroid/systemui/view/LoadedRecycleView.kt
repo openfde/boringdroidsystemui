@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.view
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -101,18 +102,22 @@ constructor(
 
         private fun shouldStartApp(appData: AppData?) {
             appOverviewWindow?.dismiss()
-            if(appData?.linuxInfo != null){
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
-                val linuxInfo = appData.linuxInfo
-                intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
-            } else {
-                val intent = Intent()
-                intent.component = appData?.componentName
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
+            try {
+                if(appData?.linuxInfo != null){
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
+                    val linuxInfo = appData.linuxInfo
+                    intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                } else {
+                    val intent = Intent()
+                    intent.component = appData?.componentName
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                }
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, "shouldStartApp: ${e.message}", )
             }
         }
 
@@ -194,10 +199,14 @@ constructor(
         }
 
         private fun shouldStartCompat(appData: AppData) {
-            val packageNam = appData.componentName?.packageName
-            val appNam = appData.name
-            if (packageNam != null && appNam != null) {
-                AppUtils.toConpatiblePage(context, packageNam,appNam)
+            try {
+                val packageNam = appData.componentName?.packageName
+                val appNam = appData.name
+                if (packageNam != null && appNam != null) {
+                    AppUtils.toConpatiblePage(context, packageNam,appNam)
+                }
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, "shouldStartCompat: ${e.message}", )
             }
         }
 

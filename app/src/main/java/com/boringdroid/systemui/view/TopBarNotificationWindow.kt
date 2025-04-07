@@ -3,6 +3,7 @@ package com.boringdroid.systemui.view
 import android.app.NotificationManager
 import android.app.PendingIntent.CanceledException
 import android.content.Context
+import android.content.Intent
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.View
@@ -13,6 +14,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
+import com.boringdroid.systemui.data.DesktopNotification
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_ID
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ALL_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CLICK_ACTION
 
 class TopBarNotificationWindow(
     context: Context,
@@ -37,7 +43,7 @@ class TopBarNotificationWindow(
     private var clearTv: TextView? = null
     private var notificationAdapter: SlideNotificationAdapter? = null
     var systemUIContext: Context? = null
-    private var notifications: Array<StatusBarNotification> ? = null
+    private var notifications: Array<DesktopNotification> ? = null
     private var rootRl:RelativeLayout ? = null
     private var nm: NotificationManager ? = null
 
@@ -63,23 +69,20 @@ class TopBarNotificationWindow(
         mRecyclerView?.layoutManager = LinearLayoutManager(getContext())
     }
 
-    override fun onItemClick(sbn: StatusBarNotification, item: View?) {
-        val notification = sbn.notification
-        if (notification.contentIntent != null) {
+    override fun onItemClick(sbn: DesktopNotification, item: View?) {
+        if (sbn.contentIntent != null) {
             dismiss()
-            try {
-                notification.contentIntent.send()
-                if (sbn.isClearable) {
-                    nm?.cancel(sbn.id)
-                }
-            } catch (e: CanceledException) {
-                Log.d(TAG, "cancel notification: e:$e")
+            val intent = Intent(NOTIFI_CLICK_ACTION)
+            intent.putExtra(NOTIFICATION_ID, sbn.id)
+            getContext().sendBroadcast(intent)
+            if (sbn.isClearable) {
+                nm?.cancel(sbn.id)
             }
         }
     }
 
 
-    override fun onItemCancelClick(sbn: StatusBarNotification, item: View?) {
+    override fun onItemCancelClick(sbn: DesktopNotification, item: View?) {
         dismiss()
         nm?.cancel(sbn.id)
     }
@@ -88,12 +91,13 @@ class TopBarNotificationWindow(
     override fun onClick(v: View?) {
         if(clearTv == v){
             dismiss()
-            nm?.cancelAll()
+//            nm?.cancelAll()
+            val intent = Intent(NOTIFI_CANCEL_ALL_ACTION)
+            getContext().sendBroadcast(intent)
         }
     }
 
-    fun setNotifications(notifications: Array<StatusBarNotification>?) {
-//        Log.d(TAG, "setNotifications() called with: notifications = $notifications")
+    fun setNotifications(notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
         notificationAdapter?.notifyData(notifications)
         var notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size

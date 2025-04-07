@@ -66,6 +66,8 @@
     <dimen name="notification_window_height">406dp</dimen>
     <dimen name="notification_info_width">374dp</dimen>
     <dimen name="notification_info_height">106dp</dimen>
+    <dimen name="notification_info_height_expand">114dp</dimen>
+
     <dimen name="notification_decoration">80dp</dimen>
 
 

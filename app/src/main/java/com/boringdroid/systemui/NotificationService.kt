@@ -3,41 +3,23 @@
  */
 package com.boringdroid.systemui
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.Notification
 import android.app.PendingIntent.CanceledException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.Outline
-import android.graphics.PorterDuff
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.view.WindowManager
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.TextView
-import android.widget.ImageView
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.adapter.NotificationAdapter
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
+import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_PROCESSING_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_RECORDING_ID
@@ -45,6 +27,7 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_SCREEN_NOTIFY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_ID
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_KEY
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_LIST_KEY
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
@@ -55,12 +38,11 @@ import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_A
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_TYPE_KEY
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_UPDATE_COUNT
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
-import com.boringdroid.systemui.utils.Utils
-import com.boringdroid.systemui.utils.IconParserUtilities
-import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ALL_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CLICK_ACTION
 import com.boringdroid.systemui.utils.AppUtils
-import com.boringdroid.systemui.view.NotificationWindow
-import com.boringdroid.systemui.view.TopBarNotificationWindow
+import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.Utils
 
 class NotificationService : NotificationListenerService(),
     NotificationAdapter.OnNotificationClickListener,
@@ -68,117 +50,79 @@ class NotificationService : NotificationListenerService(),
 {
     private var wm: WindowManager? = null
     private var notificationLayout: ViewGroup? = null
-
-    private var iconIv: ImageView ?= null
-    private var nameTv: TextView ?= null
-    private var elapsedTv: TextView ?= null
-    private var titleTv: TextView ?= null
-    private var contentTv: TextView ?= null
-    private var closeIv: ImageView ?= null
-
     private var handler: Handler? = null
-    private var sp: SharedPreferences? = null
-    private var notificationPanel: View? = null
-    private var notificationsLv: RecyclerView? = null
-    private var cancelAllBtn: ImageButton? = null
     private var context: Context? = null
     private var preferLastDisplay = false
-    private var iconParserUtilities: IconParserUtilities? = null
-    private var notificationWindow: NotificationWindow? = null
-    private var topBarNotificationWindow: TopBarNotificationWindow? = null
-
-
     private var y = 0
     private var x = 0
     private val TAG: String = "NotificationService"
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
 
-    private var windowContentView: View? = null
-
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "onCreate() called")
-        sp = PreferenceManager.getDefaultSharedPreferences(this)
-        preferLastDisplay = sp!!.getBoolean("prefer_last_display", false)
         context = DeviceUtils.getDisplayContext(this, preferLastDisplay)
         wm = context!!.getSystemService(WINDOW_SERVICE) as WindowManager
-        iconParserUtilities = IconParserUtilities(context)
-        val lp = Utils.makeWindowParams(
-            context!!.resources.getDimension(R.dimen.notification_info_width).toInt(),
-            context!!.resources.getDimension(R.dimen.notification_info_height).toInt(),
-            context!!,
-            preferLastDisplay
-        )
-
-        lp?.x = Utils.dpToPx(context!!, 8)
-        lp?.gravity = Gravity.BOTTOM or Gravity.END
-        lp?.y = Utils.dpToPx(context!!, 8)
-        notificationLayout = LayoutInflater.from(this).inflate(
-            R.layout.layout_notification_info,
-            null
-        ) as ViewGroup
-        notificationLayout!!.visibility = View.GONE
-//        notifTitle = notificationLayout!!.findViewById(R.id.notif_title_tv)
-//        notifText = notificationLayout!!.findViewById(R.id.notif_text_tv)
-//        notifIcon = notificationLayout!!.findViewById(R.id.notif_icon_iv)
-//        notifCancelBtn = notificationLayout!!.findViewById(R.id.notif_close_btn)
-//        notifActionsLayout = notificationLayout!!.findViewById(R.id.notif_actions_container2)
-        iconIv = notificationLayout!!.findViewById(R.id.image_icon)
-        nameTv = notificationLayout!!.findViewById(R.id.tv_name)
-        elapsedTv = notificationLayout!!.findViewById(R.id.tv_elapsed)
-        titleTv = notificationLayout!!.findViewById(R.id.tv_title)
-        contentTv = notificationLayout!!.findViewById(R.id.tv_content)
-        closeIv = notificationLayout!!.findViewById(R.id.iv_close)
-
-//        wm!!.addView(notificationLayout, lp)
         handler = Handler(Looper.getMainLooper())
-
-        notificationLayout!!.alpha = 0f
-        notificationLayout!!.setOnHoverListener { p1: View?, p2: MotionEvent ->
-            if (p2.action == MotionEvent.ACTION_HOVER_ENTER) {
-//                iconIv!!.setVisibility(View.VISIBLE)
-                handler!!.removeCallbacksAndMessages(null)
-            } else if (p2.action == MotionEvent.ACTION_HOVER_EXIT) {
-//                Handler(Looper.getMainLooper()).postDelayed(
-//                    { iconIv!!.setVisibility(View.INVISIBLE) },
-//                    200
-//                )
-//                hideNotification()
-            }
-            false
-        }
-        val cornerRadius = context?.resources?.getDimension(R.dimen.control_center_window_radius)
-        val elevation = context?.resources?.getInteger(R.integer.control_center_elevation)?.toFloat()
-        notificationLayout?.elevation = elevation!!
-        notificationLayout?.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, cornerRadius!!)
-            }
-        }
         val dockReceiver = DockServiceReceiver()
         val filter = IntentFilter()
         filter.addAction("com.fde.action.NOTIFICATION_PANEL_CHANG")
         filter.addAction("com.fde.action.NETWORK_PANEL_CHANG")
         filter.addAction(NOTIFI_AQUIRE_ACTION)
+        filter.addAction(NOTIFI_CLICK_ACTION)
+        filter.addAction(NOTIFI_CANCEL_ALL_ACTION)
         registerReceiver(dockReceiver, filter, RECEIVER_EXPORTED)
         Log.d(TAG, "activeNotifications:" + activeNotifications.size)
-        notificationWindow = NotificationWindow(context, this)
         broadcastNotifications(NOTIFI_ACTION_CREATE)
     }
 
+    private fun getNotifications(): Array<DesktopNotification>? {
+        val notifications = activeNotifications ?: return null
+        if (notifications.isEmpty()) return null
+
+        return notifications.mapNotNull { sbn ->
+            try {
+                createDesktopNotification(sbn)
+            } catch (e: Exception) {
+                Log.e("Notification", "Failed to convert notification ${sbn.id}", e)
+                null
+            }
+        }.toTypedArray()
+    }
+
+    private fun createDesktopNotification(sbn: StatusBarNotification): DesktopNotification? {
+        val notification = sbn.notification ?: return null
+        val extras = notification.extras ?: return null
+        if(notification.contentView != null){
+            return null
+        }
+        return DesktopNotification().apply {
+            id = sbn.id
+            packageName = sbn.packageName
+            name = AppUtils.getPackageLabel(context, packageName) ?: "default"
+            title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+            content = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+            val posttime = sbn.postTime
+            val currentTime = System.currentTimeMillis()
+            computeElapsedTime = context?.let {
+                Utils.computeElapsedTime(posttime, currentTime, it)
+            }.orEmpty()
+            notificationText = if (content.isNotEmpty()) content
+            else AppUtils.getPackageLabel(context, packageName).orEmpty()
+            contentIntent = notification.contentIntent
+            isClearable = sbn.isClearable
+            postTime = posttime
+        }
+    }
+
     private fun broadcastNotifications(type: Int) {
-        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type)
-            .putExtra(NOTIFICATION_LIST_KEY, activeNotifications)
-        )
+        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type).putExtra(NOTIFICATION_LIST_KEY, getNotifications())   )
     }
 
     private fun broadcastNotification(type: Int, sbn: StatusBarNotification) {
-        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type)
-            .putExtra(NOTIFICATION_KEY, sbn)
-        )
+        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type).putExtra(NOTIFICATION_KEY, createDesktopNotification(sbn)))
     }
-
 
     override fun onListenerConnected() {
         super.onListenerConnected()
@@ -192,7 +136,6 @@ class NotificationService : NotificationListenerService(),
         Log.d(TAG, "onNotificationRemoved() called with: sbn = $sbn")
         broadcastNotification(NOTIFI_ACTION_REMOVE, sbn)
         updateNotificationCount()
-        if (Utils.notificationPanelVisible) updateNotificationPanel()
     }
 
 
@@ -200,39 +143,11 @@ class NotificationService : NotificationListenerService(),
         Log.d(TAG, "onNotificationPosted() called with: sbn = $sbn")
         super.onNotificationPosted(sbn)
         updateNotificationCount()
-//        val toString = sbn.notification.actions.toString()
-//        Log.d(TAG, "onNotificationPosted() called with: sbn action = $toString")
-
         if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
-            sendBroadcast(
-                Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY)
-                    .putExtra("id", sbn.id)
-            )
-        } else if (Utils.notificationPanelVisible) {
-            updateNotificationPanel()
-        } else {
+            sendBroadcast( Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY).putExtra("id", sbn.id))
+        }  else {
             broadcastNotification(NOTIFI_ACTION_POST,sbn)
         }
-    }
-
-    fun hideNotification() {
-        handler!!.removeCallbacksAndMessages(null)
-        handler!!.postDelayed({
-            notificationLayout!!.animate().alpha(0f).setDuration(300)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        notificationLayout!!.visibility = View.GONE
-                    }
-                })
-        }, sp!!.getString("notification_timeout", "5000")!!.toInt().toLong())
-    }
-
-    fun isBlackListed(packageName: String?): Boolean {
-        if(true)return false
-        val ignoredPackages = sp!!.getString("blocked_notifications", "android")
-        Log.w(TAG,"ignoredPackages: $ignoredPackages")
-        return ignoredPackages!!.contains(packageName!!)
     }
 
     private fun updateNotificationCount() {
@@ -243,8 +158,6 @@ class NotificationService : NotificationListenerService(),
             count++
             if (notification.isClearable) cancelableCount++
         }
-        notificationWindow?.notifications = activeNotifications
-        notificationWindow?.updateIfNotify(true)
         Log.w(TAG,"updateNotificationCount count: $count")
         sendBroadcast(
             Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY)
@@ -254,7 +167,6 @@ class NotificationService : NotificationListenerService(),
     }
 
     fun showNotificationPanel() {
-        notificationWindow?.ifShowNotificationWindow(context, activeNotifications)
         Log.d(TAG, "showNotificationPanel() called activeNotifications{$activeNotifications[0]}")
         Utils.notificationPanelVisible = true
         if(notificationLayout?.visibility == View.VISIBLE){
@@ -266,66 +178,20 @@ class NotificationService : NotificationListenerService(),
         )
     }
 
-    fun launchApp(mode: String?, app: String?) {
-        sendBroadcast(
-            Intent("$packageName.HOME").putExtra("action", "launch").putExtra("mode", mode)
-                .putExtra("app", app)
-        )
-    }
-
-    fun hideNotificationPanel() {
-        if(notificationLayout?.visibility == View.VISIBLE){
-            notificationLayout?.visibility = View.GONE
-        }
-
-        if(!Utils.notificationPanelVisible)return
-        notificationWindow?.ifShowNotificationWindow(context, activeNotifications)
-        Utils.notificationPanelVisible = false
-        notificationsLv = null
-        notificationPanel = null
-        cancelAllBtn = null
-    }
-
-    fun updateNotificationPanel() {
-        notificationWindow?.notifications = activeNotifications
-        notificationWindow?.updateIfNotify(true)
-
-//        val adapter = NotificationAdapter(
-//            context, iconParserUtilities, activeNotifications,
-//            this
-//        )
-//        notificationsLv!!.adapter = adapter
-//        val lp = notificationsLv!!.layoutParams
-//        val count = adapter.itemCount
-//        if (count > 3) {
-//            lp.height = Utils.dpToPx(context!!, 232)
-//        } else lp.height = -2
-//        notificationArea!!.visibility = if (count == 0) View.GONE else View.VISIBLE
-//        notificationsLv!!.layoutParams = lp
-    }
-
     internal inner class DockServiceReceiver : BroadcastReceiver() {
-        override fun onReceive(p1: Context, p2: Intent) {
-            val action = p2.getStringExtra("action")
-            android.util.Log.i("sanycrm","onReceive  "+action)
-            Log.w("DockServiceReceiver","onReceive action: $action")
-            if (action.equals("SHOW_NOTIF_PANEL"))
-                showNotificationPanel()
-            else if(action.equals("com.fde.action.NETWORK_PANEL_CHANG")){
-                val status = p2.getIntExtra("status",-1)
-                var tipText = "";
-                if(status == 1){
-                    tipText = "wifi"+getString(R.string.fde_has_connected)
-                }else if(status == 0){
-                    tipText = "wifi"+getString(R.string.fde_unconnect)
-                }else{
-//                    tipText = getString(R.string.fde_no_wifi_module);
-                }
-//                Toast.makeText(context,tipText,Toast.LENGTH_SHORT).show();
-            }else if(p2.action.equals(NOTIFI_AQUIRE_ACTION)){
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d(TAG, "onReceive() action = ${intent.action}")
+            if(intent.action.equals(NOTIFI_AQUIRE_ACTION)){
                 broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
-            } else {
-                hideNotificationPanel()
+            } else if(intent.action.equals(NOTIFI_CLICK_ACTION)){
+                val id = intent.getIntExtra(NOTIFICATION_ID, -1)
+                if(id !=-1){
+                    val foundNotification = activeNotifications.find { it.id == id }
+                    foundNotification?.notification?.contentIntent?.send()
+                    if (foundNotification!!.isClearable) cancelNotification(foundNotification.key)
+                }
+            } else if(intent.action.equals(NOTIFI_CANCEL_ALL_ACTION)){
+                cancelAllNotifications()
             }
         }
     }
@@ -333,7 +199,6 @@ class NotificationService : NotificationListenerService(),
     override fun onNotificationClicked(sbn: StatusBarNotification, item: View?) {
         val notification = sbn.notification
         if (notification.contentIntent != null) {
-            hideNotificationPanel()
             try {
                 notification.contentIntent.send()
                 if (sbn.isClearable) cancelNotification(sbn.key)
@@ -342,7 +207,8 @@ class NotificationService : NotificationListenerService(),
         }
     }
 
-    override fun onNotificationLongClicked(notification: StatusBarNotification?, item: View?) {}
+    override fun onNotificationLongClicked(notification: StatusBarNotification?, item: View?) {
+    }
     override fun onNotificationCancelClicked(notification: StatusBarNotification, item: View?) {
         cancelNotification(notification.key)
     }

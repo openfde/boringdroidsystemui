@@ -30,6 +30,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextClock
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.receiver.NotificationReceiver
@@ -78,7 +79,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var powerWindow:TopBarPowerWindow? = null
     private var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
-    private var notifications: Array<StatusBarNotification>? = null
+    private var notifications: Array<DesktopNotification>? = null
     private var launcherResumeFlag: Boolean ?= false
     private var currentInputMethod :String ?= null
     val windowList: MutableList<AbsTopPopWindow> by lazy {
@@ -258,7 +259,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         val notificationSize =  if (notifications.isNullOrEmpty()) 1 else notifications!!.size
         var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
         // 128 means navi + statusbr + space
-        height = if (height > size.y - 128) (size.y - 128) else height
+        height = if (height >( size.y - 128)) (size.y - 128) else height
+        Log.d(TAG, "calculateNotificationHeight() returned: $height size:$notificationSize")
         return height
     }
 
@@ -335,6 +337,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun notificationBtnClick() {
+        if(notifications?.size == 0){
+            return
+        }
         notificationBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
         notificationsWindow?.showPopupWindow()
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
@@ -391,8 +396,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    override fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?) {
+    override fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
+        Log.d(TAG, "updateState: ${notifications?.size}")
         val width = notificationsWindow?.getWidth()
         if (width != null) {
             notificationsWindow?.updateLayoutParams(width,  calculateNotificationHeight())
@@ -401,8 +407,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     }
 
-    override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<StatusBarNotification>?) {
+    override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
+        this.notifications = notifications
         val count =  if (notifications.isNullOrEmpty()) 0 else notifications!!.size
+        Log.d(TAG, "updateCount: $count")
         if(count > 0){
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
         } else {
@@ -415,14 +423,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         notificationsWindow?.setNotifications(notifications)
     }
 
-    override fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: StatusBarNotification?) {
+    override fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: DesktopNotification?) {
     }
 
-    override fun postNotification(sbn: StatusBarNotification?) {
-        val notification = sbn?.notification
-        if (notification?.contentView == null) {
-            notificationWindow?.postNotificaton(sbn)
-        }
+    override fun postNotification(sbn: DesktopNotification?) {
+//        if (sbn?.contentView == null) {
+        notificationWindow?.postNotificaton(sbn)
+//        }
     }
 
 
