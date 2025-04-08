@@ -19,12 +19,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
+import com.bumptech.glide.Glide
 
 class LoadedRecycleView
 @JvmOverloads
@@ -78,10 +80,17 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
+
             val appData = apps[position]
-            holder.iconIV?.setImageDrawable(appData!!.icon)
             if(appData?.linuxInfo != null){
+                Glide .with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                    .load("${Utils.linuxRootPath}${appData?.iconPath}")
+                    .centerCrop()
+                    .placeholder(context.getDrawable(R.drawable.linux_x11))
+                    .into(holder.iconIV!!)
                 holder.badgeIv?.visibility = VISIBLE
+            } else {
+                holder.iconIV?.setImageDrawable(appData!!.icon)
             }
             holder.nameTV?.text = appData?.name
             holder.clickView?.setOnClickListener{

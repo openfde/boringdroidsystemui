@@ -29,8 +29,11 @@ import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import com.boringdroid.systemui.view.TopBarControlWindow
 import com.boringdroid.systemui.view.TopBarVolumeWindow
 import com.boringdroid.systemui.view.TopBarVolumeWindow.Companion
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import net.sourceforge.pinyin4j.PinyinHelper
 import java.io.BufferedReader
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
@@ -45,6 +48,8 @@ object Utils {
     @JvmField var shouldPlayChargeComplete = false
     @JvmField var volumeCenterWindowVisible = false
     @JvmField var imeSwitchWindoVisible = false
+    @JvmField
+    var linuxRootPath:String ?= null
 
     const val ALL_INVISIBLE:Int = 0x1111
     const val NOTIFICATION_VISIBLE:Int = 1
@@ -95,6 +100,31 @@ object Utils {
         }
         return false
     }
+
+    @JvmStatic fun getLinuxRootFileName(context: Context) {
+        try {
+            val file = File("/volumes/.fde_path_key")
+            if (!file.exists()) {
+                null
+            } else {
+                val jsonString = file.readText()
+                val volumes = Gson().fromJson(jsonString, Array<VolumeInfo>::class.java)
+                val uuid = volumes.firstOrNull { it.path == "/" }?.uuid
+                linuxRootPath = "/volumes/$uuid"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+        null
+    }
+
+    data class VolumeInfo(
+        @SerializedName("UUID")
+        val uuid: String,
+        @SerializedName("Path")
+        val path: String
+    )
 
 
     @JvmStatic fun  getPinyin(chinese : String) : String{

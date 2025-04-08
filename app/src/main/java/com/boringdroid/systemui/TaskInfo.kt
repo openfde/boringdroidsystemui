@@ -55,6 +55,7 @@ class TaskInfo(val packageName: String,
     //    var packageName: String? = null
 //    var name: String? = null
     var icon: Drawable? = null
+    var iconPath: String? = null
     var label:String ? = null
     private var state:Int  = STATE_UNFEFINED
     var action:String ? = null

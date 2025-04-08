@@ -92,6 +92,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         task.componentName = intent.component
         task.dockType = type
         task.icon = appData?.icon
+        task.iconPath = appData?.iconPath
         task.platformType = PLATFORM_TYPE_X11
         Log.d(TAG, "generateX11TaskInfo() returned: $task")
         return task

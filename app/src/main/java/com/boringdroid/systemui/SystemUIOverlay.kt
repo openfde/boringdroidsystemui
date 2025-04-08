@@ -145,6 +145,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
         Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
+        Utils.getLinuxRootFileName(systemUIContext!!)
+        Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
         overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
         dockAppsLayout?.overviewProvider = overviewProvider
         appStateLayout?.listener = this

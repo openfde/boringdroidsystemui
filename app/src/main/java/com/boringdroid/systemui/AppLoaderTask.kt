@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import android.os.UserManager
+import android.util.Log
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.AppListResult
@@ -102,14 +103,16 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     }
 
     private fun convertAppData(info: AppListResult.DataBeanX.DataBean): AppData{
+        Log.d(TAG, "convertAppData() called with: info = ${info.iconPath}")
         val appData = AppData()
         appData.name = info.name as String
         val component = ComponentName("com.fde.x11", "com.fde.x11.XWindowService")
         appData.componentName = component
         appData.packageName = "$PACKAGE_X11#${info.getWmName()}"
         appData.linuxInfo = info
+        appData.iconPath = info.iconPath
         appData.fileName = info.fileName
-        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
+//        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
         return appData
     }
 

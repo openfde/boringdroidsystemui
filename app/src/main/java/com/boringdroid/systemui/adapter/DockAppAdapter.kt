@@ -20,6 +20,7 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
+import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.TaskInfo.Companion.PLATFORM_TYPE_X11
@@ -31,6 +32,7 @@ import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
+import com.bumptech.glide.Glide
 
 class DockAppAdapter(private val context: Context) :
     Adapter<DockAppAdapter.ViewHolder>() {
@@ -71,8 +73,14 @@ class DockAppAdapter(private val context: Context) :
 //        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
         val info = app.linuxInfo
         if(info != null){
-            val image = ImageUtils.getImage(info.Icon, info.iconType, info.getName(), context)
-            holder.iconIV.setImageDrawable(image)
+            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+//            Glide.with(context)
+                .load("$Utils.linuxRootPath$info.iconPath")
+                .centerCrop()
+                .placeholder(context.getDrawable(R.drawable.linux_x11))
+                .into(holder.iconIV);
+//            val image = ImageUtils.getImage(info.Icon, info.iconType, info.getName(), context)
+//            holder.iconIV.setImageDrawable(image)
         } else {
             holder.iconIV.setImageDrawable(app.icon)
         }

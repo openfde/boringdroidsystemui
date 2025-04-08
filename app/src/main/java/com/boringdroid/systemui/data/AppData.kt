@@ -10,6 +10,8 @@ class AppData {
     var packageName: String? = null
     var componentName: ComponentName? = null
     var icon: Drawable? = null
+    var iconPath: String? = null
+
     override fun toString(): String {
         return "AppData(name=$name, packageName=$packageName, componentName=$componentName, icon=$icon)"
     }
