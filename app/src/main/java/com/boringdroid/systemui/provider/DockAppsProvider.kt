@@ -1,5 +1,7 @@
 package com.boringdroid.systemui.provider
 
+import android.app.Activity
+import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.ComponentName
 import android.content.Context
@@ -21,20 +23,19 @@ import com.boringdroid.systemui.TaskInfo.Companion.DOCK_TYPE_NORMAL
 import com.boringdroid.systemui.TaskInfo.Companion.DOCK_TYPE_PERSISIT
 import com.boringdroid.systemui.TaskInfo.Companion.PLATFORM_TYPE_ANDROID
 import com.boringdroid.systemui.TaskInfo.Companion.PLATFORM_TYPE_X11
+import com.boringdroid.systemui.TaskInfo.Companion.STATE_RUNNING
+import com.boringdroid.systemui.TaskInfo.Companion.STATE_TOP
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.PersistApp
-import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 class DockAppsProvider(private val context: Context, private val updater: DockTaskViewUpdater){
 
     private val TAG: String = "DockAppsProvider"
     val packageManager: PackageManager
+    val activityManager: ActivityManager
     private val appstateListener: AppStateListener
     private val launchApps: LauncherApps
     private val userManager: UserManager
@@ -54,9 +55,10 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     init {
         packageManager = context.packageManager
-        appstateListener = AppStateListener(updater)
-        launchApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+        activityManager = context.getSystemService(Activity.ACTIVITY_SERVICE) as ActivityManager
         userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
+        launchApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+        appstateListener = AppStateListener(updater)
     }
 
     fun providePersistApps() : MutableList<TaskInfo>{
@@ -199,7 +201,8 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
 
 
-    private fun topTask(runningTaskInfo: RunningTaskInfo, skipIgnoreCheck: Boolean = false) {
+    private fun topTask(runningTaskInfo: RunningTaskInfo, isTop: Boolean = true) {
+        Log.d(TAG, "topTask() called with: runningTaskInfo = ${runningTaskInfo.baseActivity?.packageName}, isTop = $isTop")
         if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
             return
         }
@@ -208,11 +211,12 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             return
         }
         if(isLauncher(context, runningTaskInfo.topActivity)){
-            updater.setTop(null, false)
+//            updater.setTop(null, false, isTop)
             return
         }
 
-        if (!skipIgnoreCheck && shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
+        if (shouldIgnoreTopTask(runningTaskInfo.topActivity)) {
+            Log.d(TAG, "topTask shouldIgnoreTopTask ")
 //            updater.setTop(null, false)
             return
         }
@@ -221,25 +225,30 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         if(Utils.isX11App(packageName, runningTaskInfo.topActivity)){
             val label = runningTaskInfo.taskDescription?.label ?: return
             packageName = "$packageName#$label"
-            Log.d(TAG, "topTask: isX11Platform packageName$packageName")
+            Log.d(TAG, "isX11Platform packageName$packageName")
         }
 
         if (isPersistApp(packageName)){
             taskInfo = getTaskInfoFromPersist(packageName)
-            Log.d(TAG, "topTask: getTaskInfoFromPersist $taskInfo")
+            Log.d(TAG, "getTaskInfoFromPersist $taskInfo")
         } else if (isActiveApp(packageName)){
             taskInfo = getTaskInfoFromActive(packageName)
-            Log.d(TAG, "topTask: getTaskInfoFromActive $taskInfo")
+            Log.d(TAG, "getTaskInfoFromActive $taskInfo")
         } else {
             taskInfo = generateTaskInfo(packageName, DOCK_TYPE_NORMAL)
             if (taskInfo != null) {
                 activeDockApps.add(taskInfo)
                 needAdd = true
             }
-            Log.d(TAG, "topTask: generateTaskInfoFromTopTask $taskInfo")
+            Log.d(TAG, "generateTaskInfoFromTopTask $taskInfo")
         }
 //        val taskInfo = TaskInfo(packageName, packageName)
         taskInfo?.id = runningTaskInfo.taskId
+        if(isTop){
+            taskInfo?.setState(STATE_TOP)
+        }else {
+            taskInfo?.setState(STATE_RUNNING)
+        }
         Log.d(TAG, "topTask: ${taskInfo}")
         taskInfo?.setBaseActivityComponentName(runningTaskInfo.baseActivity)
         taskInfo?.setRealActivityComponentName(runningTaskInfo.topActivity)
@@ -252,18 +261,16 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                         || runningTaskInfo.taskDescription!!.label.contains("FDE"))
             ){
                 taskInfo?.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
-                Log.d(TAG, "set icon: 1 ")
             } else if (taskInfo?.icon == null && infoList.size > 0 && infoList[0] != null) {
                 taskInfo?.icon = infoList[0]!!.getIcon(0)
-                Log.d(TAG, "set icon: 2 ")
                 break
             }
         }
         var icon = taskInfo?.icon
         icon = if (icon == null && context != null)  context.getDrawable(R.mipmap.default_icon_round) else icon
         taskInfo?.icon = icon
-        Log.d(TAG, "icon: ${taskInfo?.icon}")
-        updater.setTop(taskInfo, needAdd)
+//        Log.d(TAG, "icon: ${taskInfo?.icon}")
+        updater.setTop(taskInfo, needAdd, isTop)
     }
 
     private fun isActiveApp(packageName: String): Boolean {
@@ -320,6 +327,10 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     private fun isPersistApp(packageName: String): Boolean {
+        Log.d(TAG, "isPersistApp: $packageName $persistDockApps ")
+        if(persistDockApps.isEmpty()){
+            providePersistApps()
+        }
         persistDockApps.forEach{ app->
             if(TextUtils.equals(app.packageName, packageName)){
                 return true
@@ -331,6 +342,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     fun registerTaskStackListener(){
         TC_WRAPPER.registerTaskStackListener(appstateListener)
+        appstateListener.updateDockAppLocked(false)
     }
 
     fun unregisterTaskStackListener(){
@@ -356,13 +368,11 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     fun unpin(packageName: String) {
-        Log.d(TAG, "unpin() called with: packageName = $packageName")
         val taskInfo = TaskInfo(packageName, packageName)
         unpin(taskInfo)
     }
 
     fun pin(taskInfo: TaskInfo) {
-        Log.d(TAG, "pin() called with: taskInfo = $taskInfo")
         taskInfo.dockType = DOCK_TYPE_PERSISIT
         activeDockApps.removeIf { info->
             if(TextUtils.equals(info.packageName, taskInfo.packageName)){
@@ -373,7 +383,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             }
         }
         mayFillTaskInfo(taskInfo)
-        Log.d(TAG, "pin() called with: taskInfo = $taskInfo")
         persistDockApps.add(taskInfo)
         SPUtils.updatePersistDockApp(persistDockApps)
         val apps: MutableList<TaskInfo> = ArrayList()
@@ -383,7 +392,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     fun unpin(taskInfo: TaskInfo) {
-        Log.d(TAG, "unpin() called with: taskInfo = $taskInfo")
         taskInfo.dockType = DOCK_TYPE_NORMAL
         if(taskInfo.isRunning()){
             activeDockApps.add(taskInfo)
@@ -392,7 +400,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 info-> TextUtils.equals(info.packageName, taskInfo.packageName)
         }
         val arrayToString = SPUtils.arrayToString(persistDockApps)
-        Log.d(TAG, "unpin after: arrayToString:$arrayToString")
 //        persistDockApps.forEach {
 //                info -> Log.d(TAG, "unpin: info:${info.packageName}") }
         SPUtils.updatePersistDockApp(persistDockApps)
@@ -417,58 +424,88 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         apps.addAll(persistDockApps)
         apps.addAll(activeDockApps)
         updater.notifyDockAapp(apps)
-        Log.d(TAG, "mayFillPersistTaskInfo() called")
     }
 
 
     inner class AppStateListener(private val updater: DockTaskViewUpdater) : TaskStackChangeListener {
+
+        private val TAG: String = "AppStateListener"
+
+        init {
+            updateDockAppLocked(false)
+        }
+
         override fun onTaskCreated(
             taskId: Int,
             componentName: ComponentName?,
         ) {
             super.onTaskCreated(taskId, componentName)
-//            Log.d(TAG, "onTaskCreated $taskId, cm $componentName")
-            onTaskStackChanged()
+            logByTaskid("onTaskCreated", taskId)
+            updateDockAppLocked(false)
         }
 
         override fun onTaskMovedToFront(taskId: Int) {
             super.onTaskMovedToFront(taskId)
-//            Log.d(TAG, "onTaskMoveToFront taskId $taskId")
-            onTaskStackChanged()
+            logByTaskid("onTaskMovedToFront", taskId)
+            updateDockAppLocked(true)
         }
 
         override fun onTaskMovedToFront(taskInfo: RunningTaskInfo) {
             super.onTaskMovedToFront(taskInfo)
-            Log.d(TAG, "onTaskMovedToFront ${taskInfo}")
+            logByTaskid("onTaskMovedToFront", taskInfo.taskId)
             topTask(taskInfo)
-//            onTaskStackChanged()
+            updateDockAppLocked(true)
         }
 
         override fun onTaskStackChanged() {
             super.onTaskStackChanged()
-            CoroutineScope(Dispatchers.Main).launch {
-//                delay(300L)
-//                val info = AM_WRAPPER.getRunningTask(false)
-//                info?.let { topTask(it) }
-            }
+//            val info = AM_WRAPPER.getRunningTask(false)
+//            info?.let { topTask(it) }
+            updateDockAppLocked(false)
+        }
 
-            val info = AM_WRAPPER.getRunningTask(false)
-//            Log.d(TAG, "onTaskStackChanged ${info.taskId} ${info.topActivity}")
-            info?.let { topTask(it) }
+        fun updateDockAppLocked(toFront: Boolean) {
+            var launcherFlag = false
+            var isTop = true
+            activityManager.getRunningTasks(MAX_RUNNING_TASKS)?.forEach {
+                val packageName = getRunningTaskInfoPackageName(it)
+                if (packageName != null) {
+                    if(isLauncher(context, it.topActivity)){
+                        launcherFlag = true
+                    }
+                    val realTop = (!launcherFlag || toFront) && isTop
+                    if(realTop){
+                        isTop = false
+                    }
+                    topTask(it, realTop)
+                }
+            }
         }
 
         override fun onTaskRemoved(taskId: Int) {
             super.onTaskRemoved(taskId)
+            logByTaskid("onTaskRemoved", taskId)
             activeDockApps.removeIf {taskInfo: TaskInfo -> taskInfo.id == taskId}
-//            Log.d(TAG, "onTaskRemoved $taskId")
             updater.removeTask(taskId)
+            onTaskStackChanged()
+        }
+
+        fun logByTaskid(event: String, taskid: Int) {
+//            Log.d(TAG, "event = $event, taskid = $taskid")
+//            activityManager?.getRunningTasks(MAX_RUNNING_TASKS)?.forEach {
+//                Log.d(
+//                    TAG, "foreach: runningtask taskId:${it.taskId} " +
+//                            "topActivity:${it.topActivity}"
+//                )
+//            }
         }
     }
 
     interface DockTaskViewUpdater{
         fun removeTask(taskId: Int)
-        fun setTop(info: TaskInfo?, needAdd: Boolean)
+        fun setTop(info: TaskInfo?, needAdd: Boolean, isTop: Boolean)
         fun notifyDockAapp(taskInfo: MutableList<TaskInfo>)
+        fun getDockAapp():MutableList<TaskInfo>
         fun getOverviewAppData():MutableList<AppData>
     }
 }

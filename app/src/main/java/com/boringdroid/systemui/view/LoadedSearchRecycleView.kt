@@ -18,10 +18,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.GlobalSystemUIContext
+import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.MediaFile
+import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.TopBarGlobalSearchWindow.Companion.SEARCH_LIMIT
+import com.bumptech.glide.Glide
 
 class LoadedSearchRecycleView
 @JvmOverloads
@@ -116,16 +120,22 @@ constructor(
             when (type){
                 TYPE_APP->{
                     val appData = apps[position]
-//                    Log.d(TAG, "onBindViewHolder() called with: appData = $appData, position = $position")
                     holder.iconIV?.setImageDrawable(appData!!.icon)
-
+                    val info = appData?.linuxInfo
+                    if(info != null){
+                        Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                            .load("${Utils.linuxRootPath}${info.iconPath}")
+                            .centerCrop()
+                            .placeholder(context.getDrawable(R.drawable.linux_x11))
+                            .into(holder.iconIV!!)
+                    } else {
+                        holder.iconIV?.setImageDrawable(appData!!.icon)
+                    }
 
                     val originString = appData?.name!!
                     val spannableString = SpannableString(originString)
                     val targetText = filter!!
                     setTextBold(originString, spannableString, holder.nameTV, targetText)
-
-//                    holder.nameTV?.text = appData?.name
                     holder.itemLl?.setOnHoverListener(hoverListener)
                     holder.itemLl?.setOnClickListener{
                         rootWindow?.dismiss()
@@ -135,12 +145,20 @@ constructor(
                             val linuxInfo = appData.linuxInfo
                             intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            context.startActivity(intent)
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: Exception){
+                                Log.e(TAG, e.message.toString())
+                            }
                         } else {
                             val intent = Intent()
                             intent.component = appData?.componentName
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            context.startActivity(intent)
+                            try {
+                                context.startActivity(intent)
+                            }  catch (e: Exception){
+                                Log.e(TAG, e.message.toString())
+                            }
                         }
                     }
                 }

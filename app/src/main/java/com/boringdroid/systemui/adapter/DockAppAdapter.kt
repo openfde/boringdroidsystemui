@@ -70,17 +70,13 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-//        Log.d(TAG, "onBindViewHolder() called with: app = $app, position = $position")
         val info = app.linuxInfo
         if(info != null){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
-//            Glide.with(context)
-                .load("$Utils.linuxRootPath$info.iconPath")
+                .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.linux_x11))
                 .into(holder.iconIV);
-//            val image = ImageUtils.getImage(info.Icon, info.iconType, info.getName(), context)
-//            holder.iconIV.setImageDrawable(image)
         } else {
             holder.iconIV.setImageDrawable(app.icon)
         }
@@ -204,7 +200,7 @@ class DockAppAdapter(private val context: Context) :
     fun setTopTaskId(info: TaskInfo?) {
         if(info == null){
             topTaskId = -1
-            topTaskInfo?.unTopState()
+//            topTaskInfo?.unTopState()
             topTaskInfo = null
         } else{
             topTaskId = info.id
@@ -216,6 +212,7 @@ class DockAppAdapter(private val context: Context) :
     }
 
     fun setData(tasks: MutableList<TaskInfo>) {
+//        Log.d(TAG, "setData() called with: tasks = $tasks")
         this.apps.clear()
         this.apps.addAll(tasks)
     }

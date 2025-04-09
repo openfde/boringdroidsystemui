@@ -176,7 +176,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         val timeTickReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == Intent.ACTION_TIME_TICK) {
-                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
+//                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
                     checkXserverStatus()
                 }
             }

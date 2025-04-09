@@ -23,7 +23,6 @@ import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
-import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 
@@ -90,6 +89,7 @@ constructor(
         tasks.addAll(dockProvider.providePersistApps())
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
+        Log.d(TAG, "initApps: ")
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChangedWapper()
@@ -115,17 +115,19 @@ constructor(
         }
     }
 
-    override fun setTop(taskInfo: TaskInfo?, needAdd: Boolean) {
-        Log.d(TAG, "setTop() called with: taskInfo = $taskInfo, needAdd = $needAdd")
+    override fun setTop(taskInfo: TaskInfo?, needAdd: Boolean, isTop: Boolean) {
         if (taskInfo == null){
             dockAppAdapter?.setTopTaskId(null)
         } else {
-            dockAppAdapter?.setTopTaskId(taskInfo)
+            if(isTop){
+                dockAppAdapter?.setTopTaskId(taskInfo)
+            }
             if(needAdd){
                 tasks.add(taskInfo)
             }
             dockAppAdapter!!.setData(tasks)
         }
+//        Log.d(TAG, "setTop() called with: taskInfo = $taskInfo, needAdd = $needAdd, isTop = $isTop")
         dockAppAdapter?.notifyDataSetChangedWapper()
 
     }
@@ -133,9 +135,14 @@ constructor(
     override fun notifyDockAapp(list: MutableList<TaskInfo>) {
         tasks.clear()
         tasks.addAll(list)
+        Log.d(TAG, "notifyDockAapp: ")
 //        tasks.forEach { taskInfo -> Log.d(TAG, "notifyDockAapp each: $taskInfo") }
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.notifyDataSetChangedWapper()
+    }
+
+    override fun getDockAapp(): MutableList<TaskInfo> {
+        return tasks
     }
 
     override fun getOverviewAppData(): MutableList<AppData> {
@@ -228,7 +235,6 @@ constructor(
             appOverviewWindow?.updateAppList(overviewApps)
             appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
-                    Log.d(TAG, "onWindowDismiss  $status")
                     status?.visibility = View.VISIBLE
                     val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
                     if (runningTasks != null && launcherResumeFlag == true) {

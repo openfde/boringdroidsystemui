@@ -89,7 +89,7 @@ class TaskInfo(val packageName: String,
             }
         }
         setState(state)
-        Log.d("DockAppAdapter", "setState: $this")
+//        Log.d("DockAppAdapter", "setState: $this")
     }
 
     private fun isBatchTaskInfo(info: TaskInfo?):Boolean{
