@@ -296,8 +296,6 @@ object Utils {
         val hours: Long = TimeUnit.MILLISECONDS.toHours(diffInMillis) % 24
         val minutes: Long = TimeUnit.MILLISECONDS.toMinutes(diffInMillis) % 60
         val seconds: Long = TimeUnit.MILLISECONDS.toSeconds(diffInMillis) % 60
-        Log.d("MainActivity", "距今时间：" + days + "天 " + hours + "小时 " + minutes + "分钟 " + seconds + "秒");
-
         if(days != 0L){
             return "${days}" + context.getString(R.string.days)
         }

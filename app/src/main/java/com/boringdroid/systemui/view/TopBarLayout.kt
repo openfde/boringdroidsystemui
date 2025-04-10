@@ -225,11 +225,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         currentInputMethod =
             Settings.Secure.getString(context!!.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
         inputMethodList.forEach {
+//            Log.d(TAG, "getInputMethods: ${it.packageName}")
             if (currentInputMethod == it.id) {
                 imeBtn?.visibility = View.VISIBLE
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
             }
         }
+        imeSwitchWindow?.setInputMethodList(inputMethodList)
         imeSwitchWindow?.setSelect(currentInputMethod)
     }
 
@@ -260,7 +262,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
         // 128 means navi + statusbr + space
         height = if (height >( size.y - 128)) (size.y - 128) else height
-        Log.d(TAG, "calculateNotificationHeight() returned: $height size:$notificationSize")
+//        Log.d(TAG, "calculateNotificationHeight() returned: $height size:$notificationSize")
         return height
     }
 
@@ -348,6 +350,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun imeBtnClick() {
         getInputMethods()
+        val height =
+            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 65
+        imeSwitchWindow?.updateLayoutParams(WRAP_CONTENT, height)
         imeSwitchWindow?.showPopupWindow()
         imeSwitchWindow?.setSelect(currentInputMethod)
         imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
@@ -410,7 +415,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
         val count =  if (notifications.isNullOrEmpty()) 0 else notifications!!.size
-        Log.d(TAG, "updateCount: $count")
+//        Log.d(TAG, "updateCount: $count")
         if(count > 0){
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
         } else {

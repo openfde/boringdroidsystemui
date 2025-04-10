@@ -144,7 +144,7 @@ public class AppListResult implements Serializable {
             public int id;
             public String Type;
             public String Path;
-            public String Icon;
+//            public String Icon;
             public String IconPath;
             public String IconType;
             public String Name;
@@ -187,13 +187,13 @@ public class AppListResult implements Serializable {
                 this.Path = Path;
             }
 
-            public String getIcon() {
-                return Icon;
-            }
+//            public String getIcon() {
+//                return Icon;
+//            }
 
-            public void setIcon(String Icon) {
-                this.Icon = Icon;
-            }
+//            public void setIcon(String Icon) {
+//                this.Icon = Icon;
+//            }
 
             public String getIconPath() {
                 return IconPath;

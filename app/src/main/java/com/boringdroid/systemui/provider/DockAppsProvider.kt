@@ -294,6 +294,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     private fun mayFillTaskInfo(app: TaskInfo) {
         val packageName = app.packageName
+        Log.d(TAG, "mayFillTaskInfo() called with: app = $packageName")
         if(packageName.contains("#")){
             val names = packageName.split("#")
             val overviewAppData = updater.getOverviewAppData()
@@ -313,6 +314,27 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             app.icon = appData.icon
             app.platformType = PLATFORM_TYPE_X11
             Log.d(TAG, "mayFillTaskInfo : $app")
+        } else {
+            try {
+                val packageInfo =
+                    packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+                val appIcon = packageManager.getApplicationIcon(packageName)
+                val appName = packageInfo.applicationInfo?.let {
+                    packageManager.getApplicationLabel(it).toString()
+                } ?: "Unknown App"
+                app.icon = appIcon
+                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                if (launchIntent != null) {
+                    val action = launchIntent.action
+                    app.action = action
+                    val componentName = launchIntent.component
+                    app.componentName = componentName
+                    app.launchIntent = launchIntent
+                    app.platformType = PLATFORM_TYPE_ANDROID
+                }
+            } catch (e: PackageManager.NameNotFoundException){
+                Log.e(TAG, "mayFillTaskInfo: ${e.message}", )
+            }
         }
     }
 
@@ -358,8 +380,8 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     fun pin(packageName: String) {
-        Log.d(TAG, "pin() called with: packageName = $packageName")
         val taskInfo = TaskInfo(packageName, packageName)
+        Log.d(TAG, "pin() called with: taskInfo = $taskInfo")
         pin(taskInfo)
         val apps: MutableList<TaskInfo> = ArrayList()
         apps.addAll(persistDockApps)
