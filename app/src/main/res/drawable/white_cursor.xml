@@ -1,0 +1,4 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <size android:width="2dp" />
+    <solid android:color="#ffffff" /> <!-- 设置光标颜色 -->
+</shape>

@@ -24,4 +24,10 @@
     <style name="style_105">
         <item name="fontFamily">@font/alibaba_puhui_105_heavy_105_heavy</item>
     </style>
+
+
+    <style name="textInputEditTextStyle" parent="style_55">
+        <item name="android:textCursorDrawable">@drawable/white_cursor</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
 </resources>

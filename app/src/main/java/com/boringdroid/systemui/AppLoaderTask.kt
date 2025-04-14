@@ -15,17 +15,9 @@ import com.boringdroid.systemui.data.AppListResult
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
 import com.boringdroid.systemui.utils.DeviceUtils.URL_GETALLAPP
-import com.boringdroid.systemui.utils.ImageUtils
-import com.google.gson.Gson
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
-import java.lang.Exception
 import java.lang.ref.WeakReference
 
 
@@ -98,12 +90,14 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         appData.name = info.label as String
         appData.componentName = info.componentName
         appData.packageName = info.applicationInfo.packageName
-        appData.icon = info.getIcon(0)
+        val density: Int = context?.resources?.displayMetrics?.densityDpi ?: 0
+        Log.d(TAG, "convertAppData density = $density")
+        appData.icon = info.getIcon(480)
         return appData
     }
 
     private fun convertAppData(info: AppListResult.DataBeanX.DataBean): AppData{
-        Log.d(TAG, "convertAppData() called with: info = ${info.iconPath}")
+        Log.d(TAG, "convertAppData info = ${info.iconPath}")
         val appData = AppData()
         appData.name = info.name as String
         val component = ComponentName("com.fde.x11", "com.fde.x11.XWindowService")

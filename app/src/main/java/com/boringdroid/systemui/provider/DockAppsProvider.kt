@@ -448,6 +448,14 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         updater.notifyDockAapp(apps)
     }
 
+    fun updateUninstall(packageName: String) {
+        persistDockApps.removeIf { info-> TextUtils.equals(info.packageName, packageName) }
+        val apps: MutableList<TaskInfo> = ArrayList()
+        apps.addAll(persistDockApps)
+        apps.addAll(activeDockApps)
+        updater.notifyDockAapp(apps)
+    }
+
 
     inner class AppStateListener(private val updater: DockTaskViewUpdater) : TaskStackChangeListener {
 

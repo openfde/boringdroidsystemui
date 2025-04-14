@@ -23,6 +23,7 @@ import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
+import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 
@@ -36,7 +37,8 @@ constructor(
     DockAppsProvider.DockTaskViewUpdater,
     DockAppItemDecoration.AppClassify,
     DockAppAdapter.DockItemClickListener,
-    AllAppsProvider.OverviewAppsUpdater
+    AllAppsProvider.OverviewAppsUpdater,
+    UninstallReceiver.AppUninstallListener
 {
 
     private var launcherResumeFlag: Boolean ?= false
@@ -207,14 +209,14 @@ constructor(
             appOverviewWindow?.showPopupWindow()
             if (dockAppAdapter?.getTopTaskId() != -1){
                 launcherResumeFlag = true
-                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-                if (runningTasks != null) {
-                    for (runningTask in runningTasks){
-                        if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
-                            activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
-                        }
-                    }
-                }
+//                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+//                if (runningTasks != null) {
+//                    for (runningTask in runningTasks){
+//                        if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
+//                            activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+//                        }
+//                    }
+//                }
             }
             status?.visibility = View.GONE
         } else{
@@ -236,14 +238,14 @@ constructor(
             appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
                     status?.visibility = View.VISIBLE
-                    val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-                    if (runningTasks != null && launcherResumeFlag == true) {
-                        for (runningTask in runningTasks){
-                            if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
-                                activityManager.moveTaskToBack(true, runningTask.taskId)
-                            }
-                        }
-                    }
+//                    val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+//                    if (runningTasks != null && launcherResumeFlag == true) {
+//                        for (runningTask in runningTasks){
+//                            if(dockProvider?.isLauncher(context, runningTask.topActivity) == true){
+//                                activityManager.moveTaskToBack(true, runningTask.taskId)
+//                            }
+//                        }
+//                    }
                     launcherResumeFlag = false
                 }
             })
@@ -257,6 +259,11 @@ constructor(
         overviewApps.addAll(list)
         dockProvider.mayFillPersistTaskInfo()
         appOverviewWindow?.updateAppList(overviewApps)
+    }
+
+    override fun onUninstall(packageName: String) {
+        dockProvider.unpin(packageName)
+//        dockProvider.updateUninstall(packageName)
     }
 
 }

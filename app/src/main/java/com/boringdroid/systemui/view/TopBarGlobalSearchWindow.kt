@@ -18,6 +18,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.MediaFile
 import com.boringdroid.systemui.provider.AppProvider
+import com.boringdroid.systemui.provider.SearchIndexProvider
 import com.boringdroid.systemui.provider.SearchMediaProvider
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
@@ -60,6 +61,8 @@ class TopBarGlobalSearchWindow(
     private var runnable: FilterRunnable ?= null
     var overviewProvider: AppProvider ?= null
     var mediaProvider: SearchMediaProvider ?= null
+    var searchIndexProvider: SearchIndexProvider?= null
+
     var apps: MutableList<AppData> = ArrayList()
 
     override fun showPopupWindow() {
@@ -181,7 +184,7 @@ class TopBarGlobalSearchWindow(
 
     private fun initFilterAction() {
         mediaProvider = SearchMediaProvider(getContext(), handler)
-
+        searchIndexProvider = SearchIndexProvider(getContext(), handler)
         val apps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
         if (apps != null) {
             this.apps.clear()

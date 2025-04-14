@@ -53,7 +53,8 @@ import java.util.stream.Collectors
 
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener{
+class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
+    UninstallReceiver.AppUninstallListener {
     private var pluginContext: Context? = null
     private var systemUIContext: Context? = null
     private var navBarButtonGroup: View? = null
@@ -202,8 +203,12 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
         filter.addDataScheme("package")
-        val receiver = UninstallReceiver(null)
+        val receiver = UninstallReceiver(this)
         pluginContext?.registerReceiver(receiver, filter)
+    }
+
+    override fun onUninstall(packageName: String) {
+        dockAppsLayout?.onUninstall(packageName)
     }
 
     private fun initOKhttp() {

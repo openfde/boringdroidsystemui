@@ -23,6 +23,7 @@ import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.MediaFile
+import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.TopBarGlobalSearchWindow.Companion.SEARCH_LIMIT
 import com.bumptech.glide.Glide
@@ -120,14 +121,16 @@ constructor(
             when (type){
                 TYPE_APP->{
                     val appData = apps[position]
-                    holder.iconIV?.setImageDrawable(appData!!.icon)
-                    val info = appData?.linuxInfo
-                    if(info != null){
-                        Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
-                            .load("${Utils.linuxRootPath}${info.iconPath}")
-                            .centerCrop()
-                            .placeholder(context.getDrawable(R.drawable.linux_x11))
-                            .into(holder.iconIV!!)
+                    if(appData?.linuxInfo != null){
+                        if(appData.linuxInfo?.type == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.type == ImageUtils.SURFFIX_SVGZ){
+                            holder.iconIV?.setImageDrawable(context.getDrawable(R.drawable.linux_x11))
+                        } else {
+                            Glide .with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                                .load("${Utils.linuxRootPath}${appData?.iconPath}")
+                                .centerCrop()
+                                .placeholder(context.getDrawable(R.drawable.linux_x11))
+                                .into(holder.iconIV!!)
+                        }
                     } else {
                         holder.iconIV?.setImageDrawable(appData!!.icon)
                     }

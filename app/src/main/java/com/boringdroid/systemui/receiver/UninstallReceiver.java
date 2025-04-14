@@ -14,10 +14,15 @@ import com.boringdroid.systemui.utils.LogTools;
 
 public class UninstallReceiver extends BroadcastReceiver {
     private static final String TAG = "UninstallReceiver";
-    XserverHelper.XserverStateListener listener ;
+    XserverHelper.XserverStateListener listener;
+    AppUninstallListener uninstallListener;
 
-    public UninstallReceiver(XserverHelper.XserverStateListener listener){
-        this.listener = listener;
+//    public UninstallReceiver(XserverHelper.XserverStateListener listener){
+//        this.listener = listener;
+//    }
+
+    public UninstallReceiver(AppUninstallListener uninstallListener){
+        this.uninstallListener = uninstallListener;
     }
 
     @Override
@@ -28,6 +33,9 @@ public class UninstallReceiver extends BroadcastReceiver {
             LogTools.Companion.i("packageName "+packageName + " ,getPackageName "+context.getPackageName());
             if (packageName.equals(context.getPackageName())) {
 //                CollectUtils.deleteCollectData(context,packageName);
+            }
+            if(uninstallListener != null){
+                uninstallListener.onUninstall(packageName);
             }
         }
         //check for x11 service start
@@ -46,5 +54,10 @@ public class UninstallReceiver extends BroadcastReceiver {
 //            listener.updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED);
         }
         //check for x11 service end
+    }
+
+
+    public interface AppUninstallListener{
+        void onUninstall(String packageName);
     }
 }

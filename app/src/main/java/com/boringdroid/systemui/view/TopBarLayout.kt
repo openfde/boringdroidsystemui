@@ -156,14 +156,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         globalSearchWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.searchBtn?.background = null
-                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-                if (runningTasks != null && launcherResumeFlag == true) {
-                    for (runningTask in runningTasks){
-                        if(Utils.isLauncher(context, runningTask.topActivity)){
-                            activityManager?.moveTaskToBack(true, runningTask.taskId)
-                        }
-                    }
-                }
+//                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+//                if (runningTasks != null && launcherResumeFlag == true) {
+//                    for (runningTask in runningTasks){
+//                        if(Utils.isLauncher(context, runningTask.topActivity)){
+//                            activityManager?.moveTaskToBack(true, runningTask.taskId)
+//                        }
+//                    }
+//                }
                 launcherResumeFlag = false
             }
         })
@@ -363,14 +363,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         searchBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
         globalSearchWindow?.showPopupWindow()
         launcherResumeFlag = true
-        val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-        if (runningTasks != null) {
-            for (runningTask in runningTasks){
-                if(Utils.isLauncher(context, runningTask.topActivity)){
-                    activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
-                }
-            }
-        }
+//        val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+//        if (runningTasks != null) {
+//            for (runningTask in runningTasks){
+//                if(Utils.isLauncher(context, runningTask.topActivity)){
+//                    activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
+//                }
+//            }
+//        }
     }
 
     private fun volumeBtnClick() {

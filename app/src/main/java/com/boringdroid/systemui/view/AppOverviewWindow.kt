@@ -2,16 +2,16 @@ package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
-import android.view.MotionEvent
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
@@ -39,6 +39,7 @@ class AppOverviewWindow(
 
     //    private var recycleView: LoadedRecycleView?= null
     private var searchEt: EditText ?= null
+    private var searchLl: LinearLayout ?= null
     private var appsVp: ViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
@@ -63,6 +64,7 @@ class AppOverviewWindow(
 
     private fun initViews() {
         searchEt = mContentView?.findViewById(R.id.search_et)
+        searchLl = mContentView?.findViewById(R.id.search_ll)
         appsVp = mContentView?.findViewById(R.id.apps_vp)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
@@ -86,6 +88,23 @@ class AppOverviewWindow(
                 filterApps(s.toString(), 100)
             }
         })
+
+
+        searchEt?.setOnFocusChangeListener { v, hasFocus ->
+            if(hasFocus){
+                val layoutParams1 =
+                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
+                layoutParams1.leftMargin = 10
+                getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
+                getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
+            } else {
+                val layoutParams1 =
+                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
+                layoutParams1.leftMargin = 100
+                getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
+                getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
+            }
+        }
     }
 
     private fun filterApps(filter: String?, delay: Long) {
@@ -130,7 +149,13 @@ class AppOverviewWindow(
 
 
     override fun onClick(v: View?) {
-        dismiss()
+        if(v == getContentView()){
+            dismiss()
+        } else if( v == searchLl){
+
+        } else if( v == appsVp){
+            dismiss()
+        }
     }
 
     fun updateAppList(apps: MutableList<AppData>) {
@@ -160,7 +185,7 @@ class AppsPagerAdapter(
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val recycleView = LoadedRecycleView(container.context)
+        val recycleView = LoadedOverviewRecycleView(container.context)
         recycleView.overviewWindow = appOverviewWindow
         recycleView.setData(appPages[position])
         val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -173,7 +198,7 @@ class AppsPagerAdapter(
     }
 
     override fun getItemPosition(`object`: Any): Int {
-        val recycleView = `object` as LoadedRecycleView
+        val recycleView = `object` as LoadedOverviewRecycleView
         val list : MutableList<AppData>? = recycleView.list
         val index = appPages.indexOf(list)
         if(index >= 0){

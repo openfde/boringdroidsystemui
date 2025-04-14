@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
-import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
@@ -21,14 +20,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
-import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.bumptech.glide.Glide
 
-class LoadedRecycleView
+class LoadedOverviewRecycleView
 @JvmOverloads
 constructor(
     context: Context,
@@ -80,14 +79,17 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
-
             val appData = apps[position]
             if(appData?.linuxInfo != null){
-                Glide .with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
-                    .load("${Utils.linuxRootPath}${appData?.iconPath}")
-                    .centerCrop()
-                    .placeholder(context.getDrawable(R.drawable.linux_x11))
-                    .into(holder.iconIV!!)
+                if(appData.linuxInfo?.type == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.type == ImageUtils.SURFFIX_SVGZ){
+                    holder.iconIV?.setImageDrawable(context.getDrawable(R.drawable.linux_x11))
+                } else {
+                    Glide .with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                        .load("${Utils.linuxRootPath}${appData?.iconPath}")
+                        .centerCrop()
+                        .placeholder(context.getDrawable(R.drawable.linux_x11))
+                        .into(holder.iconIV!!)
+                }
                 holder.badgeIv?.visibility = VISIBLE
             } else {
                 holder.iconIV?.setImageDrawable(appData!!.icon)
