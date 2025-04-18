@@ -122,10 +122,14 @@ constructor(
                 TYPE_APP->{
                     val appData = apps[position]
                     if(appData?.linuxInfo != null){
-                        if(appData.linuxInfo?.type == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.type == ImageUtils.SURFFIX_SVGZ){
-                            holder.iconIV?.setImageDrawable(context.getDrawable(R.drawable.linux_x11))
+                        if(appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVGZ){
+                            val svgDrawable = ImageUtils.getSVGDrawable(
+                                "${Utils.linuxRootPath}${appData?.iconPath}",
+                                context
+                            )
+                            holder.iconIV?.setImageDrawable(svgDrawable)
                         } else {
-                            Glide .with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                                 .load("${Utils.linuxRootPath}${appData?.iconPath}")
                                 .centerCrop()
                                 .placeholder(context.getDrawable(R.drawable.linux_x11))

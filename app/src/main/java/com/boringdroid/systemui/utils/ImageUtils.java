@@ -147,6 +147,29 @@ public class ImageUtils {
         return null;
     }
 
+    public static Drawable getSVGDrawable(String path, Context context) {
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(path);
+            SVG svg = SVG.getFromInputStream(inputStream);
+            if(svg == null){
+                Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.linux_x11);
+                return new BitmapDrawable(bitmap);
+            }
+            Drawable drawable = new PictureDrawable(svg.renderToPicture());
+            return drawable;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SVGParseException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.linux_x11);
+            return new BitmapDrawable(bitmap);
+        }
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.linux_x11);
+        return new BitmapDrawable(bitmap);
+    }
+
 
     public static Drawable getImage(String imageStr, String iconType, String name, Context context) {
         if (SURFFIX_SVG.equals(iconType) || SURFFIX_SVGZ.equals(iconType)) {

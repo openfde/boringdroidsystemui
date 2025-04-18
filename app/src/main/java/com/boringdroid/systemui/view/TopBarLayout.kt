@@ -15,6 +15,7 @@ import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnHoverListener
@@ -37,6 +38,7 @@ import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
+import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.Companion.POPUP_WINDOW_RADIUS
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
@@ -63,6 +65,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var searchBtn: ImageView? = null
     private var homeBtn: LinearLayout? = null
     private var powerBtn: ImageView? = null
+    private var desktopBtn: LinearLayout? = null
     private var notificationBtn: ImageView? = null
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
@@ -107,6 +110,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         powerBtn = findViewById(R.id.about_btn)
+        desktopBtn = findViewById(R.id.desktop_btn)
+        desktopBtn?.setOnClickListener(this)
         searchBtn = findViewById(R.id.search_btn)
         btnList = mutableListOf(imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
         registerNotification()
@@ -398,6 +403,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             searchBtnClick()
         } else if( v == volumeBtn){
             volumeBtnClick()
+        } else if( v == desktopBtn){
+            DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
         }
     }
 

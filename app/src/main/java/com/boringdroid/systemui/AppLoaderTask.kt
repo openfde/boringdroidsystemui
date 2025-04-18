@@ -93,6 +93,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         val density: Int = context?.resources?.displayMetrics?.densityDpi ?: 0
         Log.d(TAG, "convertAppData density = $density")
         appData.icon = info.getIcon(480)
+        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 
@@ -107,6 +108,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         appData.iconPath = info.iconPath
         appData.fileName = info.fileName
 //        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
+        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 
