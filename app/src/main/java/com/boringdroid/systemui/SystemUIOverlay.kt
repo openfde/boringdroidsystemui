@@ -10,6 +10,7 @@ import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -23,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
@@ -111,7 +113,16 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
-        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
+        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
+            Log.d(TAG, "updateNaviDock() called blur")
+            Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
+        } else {
+            Log.d(TAG, "updateNaviDock() called not blur")
+            val bgViewGroup = dockAppsGroup?.findViewById<ViewGroup>(R.id.paren_fl)
+            bgViewGroup?.setBackgroundResource(R.drawable.round_rect_16dp_no_blur)
+            val cardView = dockAppsGroup?.findViewById<CardView>(R.id.root_blur)
+            cardView?.setCardBackgroundColor(Color.parseColor("#aaF2F6FA"))
+        }
     }
 
     private fun generateTopBar() {

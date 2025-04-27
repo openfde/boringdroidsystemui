@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    >
+
+
+<!--    width = 1920 x 1.1-->
+<!--    height = 1080 x 1.1-->
+    <ImageView
+        android:id="@+id/bg_iv"
+        android:layout_width="2112dp"
+        android:layout_height="1188dp"
+        android:layout_marginTop="-54dp"
+        android:layout_marginLeft="-96dp"
+        android:scaleType="centerCrop"
+        />
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -80,4 +91,4 @@
 <!--                />-->
         </RelativeLayout>
     </LinearLayout>
-</LinearLayout>
+</FrameLayout>

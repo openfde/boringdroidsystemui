@@ -1,16 +1,22 @@
 package com.boringdroid.systemui.view
 
+import android.app.WallpaperManager
 import android.content.Context
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
@@ -71,7 +77,7 @@ class AppOverviewWindow(
         appsVp?.adapter = AppsPagerAdapter(appPages, this)
         appsVp?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
-        Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
+        blurWallPaper()
         updateChannel()
         if(runnable == null){
             runnable = appProvider?.let { FilterRunnable(it)}
@@ -103,6 +109,27 @@ class AppOverviewWindow(
                 layoutParams1.leftMargin = 100
                 getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
+            }
+        }
+    }
+
+    private fun blurWallPaper() {
+        val wallpaperView = getContentView()?.findViewById<ImageView>(R.id.bg_iv)
+        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
+            Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
+            wallpaperView?.visibility = View.GONE
+        } else {
+            val wallpaperManager = WallpaperManager.getInstance(getContext())
+            wallpaperManager.desiredMinimumHeight
+            val wallpaperDrawable = wallpaperManager.drawable as Drawable
+            val wallpaperBitmap =
+                (wallpaperDrawable as BitmapDrawable?)!!.bitmap
+
+            wallpaperView?.setImageBitmap(wallpaperBitmap)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val blurEffect = RenderEffect.createBlurEffect(120f, 120f, Shader.TileMode.CLAMP)
+                wallpaperView?.setRenderEffect(blurEffect)
             }
         }
     }

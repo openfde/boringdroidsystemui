@@ -21,14 +21,11 @@ import android.view.View
 import android.view.ViewParent
 import android.view.ViewRootImpl
 import android.view.WindowManager
-import androidx.annotation.VisibleForTesting
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
-import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_VNC
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import com.boringdroid.systemui.view.TopBarControlWindow
 import com.boringdroid.systemui.view.TopBarVolumeWindow
-import com.boringdroid.systemui.view.TopBarVolumeWindow.Companion
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import net.sourceforge.pinyin4j.PinyinHelper
@@ -59,6 +56,7 @@ object Utils {
     const val VOLUMECENTERWINDOW_VISIBLE : Int = 16
     const val IMESWITCHWINDOW_VISIBLE : Int = 32
     const val TAG = "Utils"
+    const val CLASS_NAME: String = "android.os.SystemProperties"
 
     @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
@@ -80,7 +78,7 @@ object Utils {
                 && (topActivity?.className?.contains("MainActivity") ?: false)
     }
 
-    @JvmStatic fun isLauncher(context: Context,componentName: ComponentName?,): Boolean {
+    @JvmStatic fun isLauncher(context: Context, componentName: ComponentName?): Boolean {
         if (componentName == null) {
             return false
         }
@@ -125,6 +123,34 @@ object Utils {
         @SerializedName("Path")
         val path: String
     )
+
+    fun getProperty(key: String?, defaultValue: String?): String? {
+        var value = defaultValue
+
+        try {
+            val c = Class.forName(CLASS_NAME)
+            val get = c.getMethod("get", String::class.java, String::class.java)
+            value = get.invoke(c, key, defaultValue) as String
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        } finally {
+            return value
+        }
+    }
+
+    fun getProperty(key: String?, defaultValue: Int?): Int? {
+        var value = defaultValue
+
+        try {
+            val c = Class.forName(CLASS_NAME)
+            val get = c.getMethod("getInt", String::class.java, Int::class.java)
+            value = get.invoke(c, key, defaultValue) as Int
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        } finally {
+            return value
+        }
+    }
 
 
     @JvmStatic fun  getPinyin(chinese : String) : String{
