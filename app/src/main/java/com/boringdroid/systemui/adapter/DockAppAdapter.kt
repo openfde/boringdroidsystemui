@@ -89,6 +89,7 @@ class DockAppAdapter(private val context: Context) :
         }
         holder.x11Iv.visibility = if(app.platformType == PLATFORM_TYPE_X11) View.VISIBLE else View.GONE
 
+        holder.appll.tooltipText = app.program
         holder.appll.setOnClickListener{
             if(app.id == 0){
                 listener?.onItemClick(context.resources.getString(R.string.open), app)

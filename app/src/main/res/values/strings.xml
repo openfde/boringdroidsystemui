@@ -116,4 +116,14 @@
     <string name="set_input">Input</string>
     <string name="sound_more_set">More</string>
 
+    <string name="top_power">Power</string>
+    <string name="top_message">Message</string>
+    <string name="top_control">Control</string>
+    <string name="top_search">Search</string>
+    <string name="top_battery">Battery</string>
+    <string name="top_volume">Volume</string>
+    <string name="top_wifi">Wifi</string>
+    <string name="top_ime">IME</string>
+    <string name="top_home">Desktop</string>
+
 </resources>

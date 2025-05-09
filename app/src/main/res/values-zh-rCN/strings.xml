@@ -113,4 +113,14 @@
     <string name="set_output">输出设备</string>
     <string name="set_input">输入设备</string>
     <string name="sound_more_set">更多声音设置</string>
+
+    <string name="top_power">电源</string>
+    <string name="top_message">通知</string>
+    <string name="top_control">控制</string>
+    <string name="top_search">查找</string>
+    <string name="top_battery">电池</string>
+    <string name="top_volume">音量</string>
+    <string name="top_wifi">网络</string>
+    <string name="top_ime">输入法</string>
+    <string name="top_home">搜索</string>
 </resources>

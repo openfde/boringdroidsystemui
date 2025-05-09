@@ -19,6 +19,7 @@ import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call
 import java.lang.ref.WeakReference
+import java.util.concurrent.CopyOnWriteArrayList
 
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
@@ -38,7 +39,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     private val loaderLinuxApps: MutableList<AppData> = ArrayList()
     private var stopped = false
     private val pageSize = 100
-    val allApps: MutableList<AppData> = ArrayList()
+    val allApps: MutableList<AppData> = CopyOnWriteArrayList()
 
     override fun run() {
         if (stopped) {

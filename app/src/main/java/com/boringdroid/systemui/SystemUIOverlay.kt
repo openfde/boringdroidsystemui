@@ -79,7 +79,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var navi: ViewGroup ?= null
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private var overviewProvider: AllAppsProvider ?= null
-
+    private var timeTickReceiver :BroadcastReceiver ?= null
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
         statusBar: View,
@@ -185,7 +185,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         registPackageUpdate()
         XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
-        val timeTickReceiver = object : BroadcastReceiver() {
+        timeTickReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == Intent.ACTION_TIME_TICK) {
 //                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
@@ -193,7 +193,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 }
             }
         }
-        systemUIContext?.registerReceiver(timeTickReceiver, tickFilter)
+        systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
     }
 
     private fun checkXserverStatus() {
@@ -301,8 +301,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         if (systemUIContext != null) {
             try {
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
+                systemUIContext!!.unregisterReceiver(timeTickReceiver)
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Try to unregister close system dialogs receiver without registering")
+                Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
+            }
+        }
+
+        if (pluginContext != null) {
+            try {
+                pluginContext!!.unregisterReceiver(dynamicReceiver)
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "pluginContext unregisterReceiver: " + e.message )
             }
         }
         if (resolver != null) {
