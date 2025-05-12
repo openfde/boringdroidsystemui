@@ -92,14 +92,14 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         appData.componentName = info.componentName
         appData.packageName = info.applicationInfo.packageName
         val density: Int = context?.resources?.displayMetrics?.densityDpi ?: 0
-        Log.d(TAG, "convertAppData density = $density")
+//        Log.d(TAG, "convertAppData density = $density")
         appData.icon = info.getIcon(480)
-        Log.d(TAG, "convertAppData() returned: $appData")
+//        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 
     private fun convertAppData(info: AppListResult.DataBeanX.DataBean): AppData{
-        Log.d(TAG, "convertAppData info = ${info.iconPath}")
+//        Log.d(TAG, "convertAppData info = ${info.iconPath}")
         val appData = AppData()
         appData.name = info.name as String
         val component = ComponentName("com.fde.x11", "com.fde.x11.XWindowService")
@@ -109,7 +109,7 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         appData.iconPath = info.iconPath
         appData.fileName = info.fileName
 //        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
-        Log.d(TAG, "convertAppData() returned: $appData")
+//        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 

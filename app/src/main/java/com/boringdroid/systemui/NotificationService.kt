@@ -4,6 +4,11 @@
 package com.boringdroid.systemui
 
 import android.app.Notification
+import android.app.Notification.EXTRA_BIG_TEXT
+import android.app.Notification.EXTRA_INFO_TEXT
+import android.app.Notification.EXTRA_SUB_TEXT
+import android.app.Notification.EXTRA_SUMMARY_TEXT
+import android.app.Notification.EXTRA_TITLE_BIG
 import android.app.PendingIntent.CanceledException
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -103,6 +108,7 @@ class NotificationService : NotificationListenerService(),
             name = AppUtils.getPackageLabel(context, packageName) ?: "default"
             title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
             content = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+            actions = sbn.notification?.actions
             val posttime = sbn.postTime
             val currentTime = System.currentTimeMillis()
             computeElapsedTime = context?.let {

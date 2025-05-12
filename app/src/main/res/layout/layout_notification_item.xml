@@ -97,6 +97,18 @@
                 android:layout_marginTop="6dp"
                 android:visibility="gone"
                 />
+
+            <LinearLayout
+                android:id="@+id/notification_actions_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/tv_content"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:layout_below="@id/tv_title"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
         </RelativeLayout>
 
     </com.boringdroid.systemui.view.LoadedCardView>

@@ -67,7 +67,7 @@ class NotificationAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        Log.w("NotificationAdapter", "onBindViewHolder")
+//        Log.w("NotificationAdapter", "onBindViewHolder")
         val sbn = notifications[position]
         val notification = sbn.notification
         val actions = notification.actions

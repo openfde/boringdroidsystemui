@@ -64,7 +64,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     fun providePersistApps() : MutableList<TaskInfo>{
         val apps: MutableList<TaskInfo> = ArrayList()
         val persistApps = SPUtils.getPersistDockApp()
-        val allTask = TaskInfo(persistApps[0], persistApps[0])
+        val allTask = TaskInfo(persistApps[0], "Apps")
         allTask.icon = context.resources.getDrawable(R.drawable.icon_menu)
         allTask.action = ACTION_DOCK_OVERVIEW
         allTask.dockType = DOCK_TYPE_PERSISIT
@@ -128,7 +128,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 task.launchIntent = launchIntent
                 task.platformType = PLATFORM_TYPE_ANDROID
             }
-            Log.d(TAG, "generatAndroidTaskInfo: ${task}")
+//            Log.d(TAG, "generatAndroidTaskInfo: ${task}")
             return task
         } catch (e: PackageManager.NameNotFoundException) {
             Log.d(TAG, "provideSysApps() e:$e")
@@ -294,7 +294,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     private fun mayFillTaskInfo(app: TaskInfo) {
         val packageName = app.packageName
-        Log.d(TAG, "mayFillTaskInfo() called with: app = $packageName")
+//        Log.d(TAG, "mayFillTaskInfo() called with: app = $packageName")
         if(packageName.contains("#")){
             val names = packageName.split("#")
             val overviewAppData = updater.getOverviewAppData()
@@ -313,7 +313,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             app.linuxInfo = linuxInfo
             app.icon = appData.icon
             app.platformType = PLATFORM_TYPE_X11
-            Log.d(TAG, "mayFillTaskInfo : $app")
+//            Log.d(TAG, "mayFillTaskInfo : $app")
         } else {
             try {
                 val packageInfo =

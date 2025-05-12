@@ -97,7 +97,7 @@
     <color name="white_50p">#80ffffff</color>
     <color name="white_59h">#59ffffff</color>
 
-
+    <color name="notification_text_color">#E6000000</color>
     <color name="topbar_window_bg">#d1F5F7FA</color>
 
 

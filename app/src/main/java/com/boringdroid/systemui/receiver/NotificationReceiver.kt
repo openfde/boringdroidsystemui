@@ -15,8 +15,12 @@ class NotificationReceiver(private val listener: NotificationUpdater)
     override fun onReceive(context: Context?, intent: Intent?) {
 //        Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
         val type = intent?.getIntExtra(NOTIFI_ACTION_TYPE_KEY, 0)
-        val notifications: Array<DesktopNotification>? =
-            intent?.getParcelableArrayExtra(NOTIFICATION_LIST_KEY, DesktopNotification::class.java)
+        var notifications: Array<DesktopNotification>? = null
+            try {
+                notifications =   intent?.getParcelableArrayExtra(NOTIFICATION_LIST_KEY, DesktopNotification::class.java)
+            } catch (e: Exception){
+                Log.e(TAG, "onReceive: $e")
+            }
         val notification: DesktopNotification? = intent?.getParcelableExtra(NOTIFICATION_KEY, DesktopNotification::class.java)
 
         when(type){

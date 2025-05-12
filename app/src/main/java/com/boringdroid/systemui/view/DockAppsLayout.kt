@@ -86,8 +86,10 @@ constructor(
     fun initApps() {
         val provideApps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
         if (provideApps != null) {
+            overviewApps.clear()
             overviewApps.addAll(provideApps)
         }
+        tasks.clear()
         tasks.addAll(dockProvider.providePersistApps())
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
@@ -263,6 +265,7 @@ constructor(
 
     override fun onUninstall(packageName: String) {
         dockProvider.unpin(packageName)
+        overviewProvider?.provideAppsWithFilterAsync(TYPE_ALL, null);
 //        dockProvider.updateUninstall(packageName)
     }
 

@@ -108,16 +108,16 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         dockAppsLayout?.initApps()
         dockAppsLayout?.status = status
         dockAppsGroup?.setOnClickListener{
-            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
-            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
+//            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
+//            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
             traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
-            Log.d(TAG, "updateNaviDock() called blur")
+//            Log.d(TAG, "updateNaviDock() called blur")
             Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
         } else {
-            Log.d(TAG, "updateNaviDock() called not blur")
+//            Log.d(TAG, "updateNaviDock() called not blur")
             val bgViewGroup = dockAppsGroup?.findViewById<ViewGroup>(R.id.paren_fl)
             bgViewGroup?.setBackgroundResource(R.drawable.round_rect_16dp_no_blur)
             val cardView = dockAppsGroup?.findViewById<CardView>(R.id.root_blur)
@@ -128,7 +128,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private fun generateTopBar() {
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
         status?.addView(topBarLayout)
-        Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
+//        Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
         if(topBarLayout?.inited != true){
             topBarLayout?.initState()
             topBarLayout?.notificationListener = this

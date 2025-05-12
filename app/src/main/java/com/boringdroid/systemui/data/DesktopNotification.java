@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.data;
 
+import android.app.Notification;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.app.PendingIntent;
@@ -9,12 +10,14 @@ public class DesktopNotification implements Parcelable {
     public String name;
     public String title;
     public String content;
+    public String mediaStyle;
     public String packageName;
     public String computeElapsedTime;
     public String notificationText;
     public PendingIntent contentIntent;
     public boolean isClearable;
     public long postTime;
+    public Notification.Action[] actions;
 
     public DesktopNotification() {
     }
@@ -30,6 +33,7 @@ public class DesktopNotification implements Parcelable {
         contentIntent = in.readParcelable(PendingIntent.class.getClassLoader());
         isClearable = in.readBoolean();
         postTime = in.readLong();
+        actions = in.createTypedArray(Notification.Action.CREATOR);
     }
 
     @Override
@@ -44,6 +48,7 @@ public class DesktopNotification implements Parcelable {
         dest.writeParcelable(contentIntent, flags);
         dest.writeBoolean(isClearable);
         dest.writeLong(postTime);
+        dest.writeTypedArray(actions, 0);
     }
 
     @Override

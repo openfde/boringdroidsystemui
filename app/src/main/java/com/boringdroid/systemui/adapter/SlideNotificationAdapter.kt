@@ -1,7 +1,10 @@
 package com.boringdroid.systemui.adapter
 
 import android.app.Notification
+import android.app.PendingIntent.CanceledException
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -29,6 +32,7 @@ class SlideNotificationAdapter(
 ) : RecyclerView.Adapter<SlideNotificationAdapter.ViewHolder>(){
     var notificationList: ArrayList<DesktopNotification> ? = null
     var itemClickListener: OnNotificationItemClickListener ? = null
+    private val actionsHeight = Utils.dpToPx(context, 20)
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -46,7 +50,7 @@ class SlideNotificationAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val sbn = notificationList?.get(position)
-        Log.d(TAG, "onBindViewHolder() called with: sbn = $sbn, position = $position")
+//        Log.d(TAG, "onBindViewHolder() called with: sbn = $sbn, position = $position")
         holder.iconIv.setImageDrawable(
             IconParserUtilities(context)!!.getPackageThemedIcon(
                 sbn?.packageName
@@ -87,7 +91,58 @@ class SlideNotificationAdapter(
             false
         }
 
+        val actions = sbn?.actions
+        holder.actions.removeAllViews()
+
+        if (actions != null) {
+            val actionLayoutParams = LinearLayout.LayoutParams(
+                0,
+                actionsHeight
+            )
+            actionLayoutParams.marginStart = Utils.dpToPx(context, 20)
+            actionLayoutParams.weight = 1f
+//            if (isMediaNotification(sbn)) {
+//                for (action in actions) {
+//                    val actionIv = ImageView(context)
+//                    val resources = context.packageManager
+//                        .getResourcesForApplication(sbn.packageName)
+//                    val drawable = resources.getDrawable(
+//                        resources.getIdentifier(
+//                            action.icon.toString() + "",
+//                            "drawable",
+//                            sbn.packageName
+//                        )
+//                    )
+//                    drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+//                    actionIv.setImageDrawable(drawable)
+//                    actionIv.setOnClickListener {
+//                        try {
+//                            action.actionIntent.send()
+//                            itemClickListener?.onItemClick(sbn, holder.root)
+//                        } catch (_: CanceledException) {
+//                        }
+//                    }
+//                    holder.actions.addView(actionIv, actionLayoutParams)
+//                }
+//            } else {
+            for (action in actions) {
+                val actionTv = TextView(context)
+                actionTv.setTextColor(context.getColor(R.color.notification_text_color))
+                actionTv.isSingleLine = true
+                actionTv.text = action.title
+                actionTv.setOnClickListener {
+                    try {
+                        action.actionIntent.send()
+                        itemClickListener?.onItemClick(sbn, holder.root)
+                    } catch (_: CanceledException) {
+                    }
+                }
+                holder.actions.addView(actionTv, actionLayoutParams)
+            }
+//            }
+        }
     }
+
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
@@ -155,6 +210,7 @@ class SlideNotificationAdapter(
         val closeIv: ImageView = appInfoLayout.findViewById(R.id.iv_close)!!
         val root: RelativeLayout = appInfoLayout.findViewById(R.id.root)!!
         val rootBlur: ViewGroup = appInfoLayout.findViewById(R.id.root_blur)!!
+        val actions: ViewGroup = appInfoLayout.findViewById(R.id.notification_actions_layout)!!
 
 
         fun bind(notification: StatusBarNotification,
