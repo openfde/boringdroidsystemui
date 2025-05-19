@@ -242,6 +242,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             }
             Log.d(TAG, "generateTaskInfoFromTopTask $taskInfo")
         }
+        taskInfo?.runningTaskInfo = runningTaskInfo
 //        val taskInfo = TaskInfo(packageName, packageName)
         taskInfo?.id = runningTaskInfo.taskId
         if(isTop){

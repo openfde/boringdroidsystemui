@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioSystem
 import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
+import android.widget.Toast
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.utils.Utils
@@ -156,6 +158,11 @@ class TopBarVolumeWindow(
             } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
                 volumeImage?.setImageResource(R.drawable.icon_volume_max)
+            }
+
+            if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){
+                Toast.makeText(context, context.getString(R.string.no_device), Toast.LENGTH_SHORT)
+                return
             }
 
             Log.d(TAG, "onProgressChanged: isInput:$isInput name:${audioDevice?.physicalName}" +

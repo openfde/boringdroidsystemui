@@ -125,5 +125,6 @@
     <string name="top_wifi">Wifi</string>
     <string name="top_ime">IME</string>
     <string name="top_home">Desktop</string>
+    <string name="no_device">No device</string>
 
 </resources>

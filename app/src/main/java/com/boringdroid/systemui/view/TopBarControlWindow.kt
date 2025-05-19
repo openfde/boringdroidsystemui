@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.media.AudioSystem
+import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -13,6 +14,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
@@ -130,6 +132,11 @@ class TopBarControlWindow(
             } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
                 volumeImage?.setImageResource(R.drawable.icon_volume_max)
+            }
+
+            if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){
+                Toast.makeText(context, context.getString(R.string.no_device), Toast.LENGTH_SHORT)
+                return;
             }
 
             val devVolume = AudioSystem.setDevVolume(

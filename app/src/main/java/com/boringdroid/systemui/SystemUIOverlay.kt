@@ -136,7 +136,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             }
             topBarLayout?.systemUIContext = systemUIContext
         }
-        Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
+        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
+            Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
+        }
     }
 
     override fun onCreate(
@@ -156,7 +158,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
-        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
+//        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
         Utils.getLinuxRootFileName(systemUIContext!!)
         Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
         overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)

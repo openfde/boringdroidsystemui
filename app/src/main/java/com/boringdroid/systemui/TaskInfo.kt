@@ -1,5 +1,6 @@
 package com.boringdroid.systemui
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -49,6 +50,7 @@ class TaskInfo(val packageName: String,
         }
     }
 
+    var runningTaskInfo: ActivityManager.RunningTaskInfo ?= null
     var id = ID_UNDEFINED
     private var baseActivityComponentName: ComponentName? = null
     private var realActivityComponentName: ComponentName? = null
