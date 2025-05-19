@@ -115,7 +115,7 @@ class TopBarControlWindow(
 
     private val volumeChangeListener = object : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            if(formUser){
+            if(!fromUser){
                 return
             }
             Log.w(TAG, "progress: $progress ")

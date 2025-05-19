@@ -75,8 +75,9 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 apps.add(info)
             }
         }
+        val list = apps.toMutableSet().toList()
         persistDockApps.clear()
-        persistDockApps.addAll(apps)
+        persistDockApps.addAll(list)
         return persistDockApps
     }
 
@@ -128,7 +129,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                 task.launchIntent = launchIntent
                 task.platformType = PLATFORM_TYPE_ANDROID
             }
-//            Log.d(TAG, "generatAndroidTaskInfo: ${task}")
+            Log.d(TAG, "generatAndroidTaskInfo: ${task}")
             return task
         } catch (e: PackageManager.NameNotFoundException) {
             Log.d(TAG, "provideSysApps() e:$e")
