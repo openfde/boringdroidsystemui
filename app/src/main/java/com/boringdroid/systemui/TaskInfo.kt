@@ -150,6 +150,9 @@ class TaskInfo(val packageName: String,
         return state == STATE_TOP
     }
 
+    fun isLinux(): Boolean {
+        return platformType == PLATFORM_TYPE_X11
+    }
     fun makePersistApp(position: Int): PersistApp {
         if(persistApp != null){
             persistApp!!.position = position

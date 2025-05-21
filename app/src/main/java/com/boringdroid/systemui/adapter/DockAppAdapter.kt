@@ -70,6 +70,7 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
+//        Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
         val info = app.linuxInfo
         if(info != null){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
@@ -77,8 +78,13 @@ class DockAppAdapter(private val context: Context) :
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.linux_x11))
                 .into(holder.iconIV);
-        } else {
-            holder.iconIV.setImageDrawable(app.icon)
+        } else if(!app.isLinux()){
+            if(app.program.equals("Apps")){
+                context.resources.getDrawable(R.drawable.icon_menu)
+            } else {
+                val appIcon = packageManager.getApplicationIcon(app.packageName)
+                holder.iconIV.setImageDrawable(appIcon)
+            }
         }
         if(app.getState() == STATE_UNFEFINED){
             holder.viewStatus.background = null

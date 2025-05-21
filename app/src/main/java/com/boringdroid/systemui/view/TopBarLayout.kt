@@ -1,6 +1,9 @@
 package com.boringdroid.systemui.view
 
+import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS
 import android.app.ActivityManager
+import android.app.PendingIntent
+import android.app.RemoteAction
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
@@ -8,6 +11,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Outline
 import android.graphics.Point
+import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
@@ -23,6 +27,7 @@ import android.view.View.OnTouchListener
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
@@ -30,6 +35,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextClock
+import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.provider.AllAppsProvider
@@ -55,8 +61,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     var inited: Boolean = false
     private val TAG: String = "TopBarLayout"
+    val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
     var systemUIContext: Context ? = null
     var notificationListener : TopBarNotificationWindow.WindowListener? = null
+    var accessibilityManager: AccessibilityManager? = null
     private var imeBtn: ImageView? = null
     private var wifiBtn: ImageView? = null
     private var volumeBtn: ImageView? = null
@@ -139,6 +147,38 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         inited = true
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
+        val globalSearchRecevier = GlobalSearchRecevier()
+        val filter = IntentFilter()
+        filter.addAction(SYSTEM_ALL_APP_ACTION)
+        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
+        val broadcast = PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(SYSTEM_ALL_APP_ACTION),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
+            accessibilityManager!!.registerSystemAction(
+                RemoteAction(
+                    Icon.createWithResource(context, R.drawable.icon_menu),
+                    context.getString(R.string.search),
+                    context.getString(R.string.search),
+                    broadcast
+                ),
+                GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+    }
+
+    internal inner class GlobalSearchRecevier : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(SYSTEM_ALL_APP_ACTION != intent?.action){
+                return
+            }
+            if(globalSearchWindow?.isShowing() == true){
+                globalSearchWindow?.dismiss()
+            } else {
+                globalSearchWindow?.showPopupWindow()
+            }
+        }
     }
 
     private fun makeVolumeWindow(imageView: ImageView?) {

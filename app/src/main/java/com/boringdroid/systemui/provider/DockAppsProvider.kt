@@ -296,7 +296,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     private fun mayFillTaskInfo(app: TaskInfo) {
         val packageName = app.packageName
-//        Log.d(TAG, "mayFillTaskInfo() called with: app = $packageName")
         if(packageName.contains("#")){
             val names = packageName.split("#")
             val overviewAppData = updater.getOverviewAppData()
@@ -335,9 +334,9 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
                     app.platformType = PLATFORM_TYPE_ANDROID
                 }
             } catch (e: PackageManager.NameNotFoundException){
-                Log.e(TAG, "mayFillTaskInfo: ${e.message}", )
             }
         }
+//        Log.d(TAG, "mayFillTaskInfo finish: $app")
     }
 
     private fun getTaskInfoFromActive(packageName: String):TaskInfo? {

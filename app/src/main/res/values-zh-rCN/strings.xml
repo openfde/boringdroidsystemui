@@ -122,6 +122,6 @@
     <string name="top_volume">音量</string>
     <string name="top_wifi">网络</string>
     <string name="top_ime">输入法</string>
-    <string name="top_home">搜索</string>
+    <string name="top_home">桌面</string>
     <string name="no_device">没有找到设备</string>
 </resources>
