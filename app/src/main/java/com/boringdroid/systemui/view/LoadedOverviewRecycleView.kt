@@ -215,6 +215,7 @@ constructor(
 
         private fun shouldStartCompat(appData: AppData) {
             try {
+                appOverviewWindow?.dismiss()
                 val packageNam = appData.componentName?.packageName
                 val appNam = appData.name
                 if (packageNam != null && appNam != null) {

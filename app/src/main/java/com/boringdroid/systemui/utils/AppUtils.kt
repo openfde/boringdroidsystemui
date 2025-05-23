@@ -368,31 +368,11 @@ object AppUtils {
     }
 
     public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {
-//        var inte = Intent(mContext, CompatibleListActivity::class.java)
-//        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        inte.putExtra("packageName", packageName)
-//        inte.putExtra("appName", appName)
-//        mContext.startActivity(inte);
-
-//        CompatibleConfig.call(mContext)
-
-//        LogTools.i("toConpatiblePage")
-//        val result = CompatibleConfig.queryValueData(
-//            mContext, "com.android.gallery3d",
-//           "isAllowScreenshotAndRecord"
-//        )
-//        LogTools.i("toConpatiblePage result "+result)
-
-
-//        ParseUtils.parseListXML(mContext);
-//        ParseUtils.parseGpsData(mContext);
-
         val intent = Intent()
-        val cn: ComponentName? =
-            ComponentName.unflattenFromString("com.android.settings/.Settings\$SetCompatibleActivity")
+        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$PrivacyDashboardActivity")
         intent.component = cn;
         intent.putExtra("appName", appName)
-        intent.putExtra("packageName", packageName)
+        intent.putExtra("packageName",packageName)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         mContext.startActivity(intent)
     }
