@@ -27,7 +27,7 @@
             android:layout_width="@dimen/overview_badge_icon_size"
             android:layout_height="@dimen/overview_badge_icon_size"
             android:src="@drawable/linux_badge"
-            android:layout_marginTop="84dp"
+            android:layout_marginTop="80dp"
             android:layout_marginLeft="100dp"
             android:visibility="gone"
             />
@@ -42,8 +42,8 @@
             android:singleLine="true"
             android:gravity="center"
             android:text="Android"
-            android:textSize="16sp"
-            android:layout_marginTop="134dp"
+            android:textSize="14sp"
+            android:layout_marginTop="120dp"
             style="@style/style_55"
             />
     </FrameLayout>

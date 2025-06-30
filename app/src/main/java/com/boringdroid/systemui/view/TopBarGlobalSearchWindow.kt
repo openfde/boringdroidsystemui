@@ -43,6 +43,10 @@ class TopBarGlobalSearchWindow(
         const val SEARCH_LIMIT = 5
     }
 
+    init {
+        Log.d(TAG, "$this init")
+    }
+
 
     private var glbalSearchEt: EditText ?= null
     private var emptyView: TextView ?= null
@@ -66,6 +70,7 @@ class TopBarGlobalSearchWindow(
     var apps: MutableList<AppData> = ArrayList()
 
     override fun showPopupWindow() {
+        Log.d(TAG, "showPopupWindow() called")
         super.showPopupWindow()
         initFilterAction()
         initViews()

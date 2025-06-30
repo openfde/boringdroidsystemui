@@ -59,7 +59,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
     TopBarControlWindow.TopbarLayoutController {
 
-    var inited: Boolean = false
+        companion object {
+            var inited: Boolean = false
+        }
+
     private val TAG: String = "TopBarLayout"
     val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
     var systemUIContext: Context ? = null
@@ -170,9 +173,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     internal inner class GlobalSearchRecevier : BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive() called with: context = ${context?.packageName}, intent = $intent")
+
             if(SYSTEM_ALL_APP_ACTION != intent?.action){
                 return
             }
+            Log.d(TAG, "onReceive isShowing: $globalSearchWindow ${globalSearchWindow?.isShowing()}")
             if(globalSearchWindow?.isShowing() == true){
                 globalSearchWindow?.dismiss()
             } else {
@@ -207,6 +213,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
             .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
+        Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow = $globalSearchWindow")
         globalSearchWindow?.setDismissListener(object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.searchBtn?.background = null

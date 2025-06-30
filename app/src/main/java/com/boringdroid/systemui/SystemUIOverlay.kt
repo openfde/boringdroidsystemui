@@ -128,8 +128,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private fun generateTopBar() {
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
         status?.addView(topBarLayout)
-//        Log.d(TAG, "generateTopBar() ${topBarLayout?.inited}")
-        if(topBarLayout?.inited != true){
+        status?.setBackgroundColor(Color.TRANSPARENT)
+        Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
+        if(TopBarLayout?.inited != true){
             topBarLayout?.initState()
             topBarLayout?.notificationListener = this
             topBarLayout?.setOnClickListener{

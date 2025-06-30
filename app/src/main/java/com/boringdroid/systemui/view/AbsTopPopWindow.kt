@@ -56,7 +56,7 @@ open class AbsTopPopWindow(
     private var params :WindowManager.LayoutParams?= null
     open fun showPopupWindow() {
         shown = true
-        Log.d(TAG, "showPopupWindow: ${mContentView?.isAttachedToWindow}")
+        Log.d(TAG, "showPopupWindow: ${mContentView?.isAttachedToWindow} $this isshowing: ${isShowing()}")
         if (mContentView == null || mContentView?.isAttachedToWindow == false) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mContentView = LayoutInflater.from(context).inflate(layoutResId, null)
