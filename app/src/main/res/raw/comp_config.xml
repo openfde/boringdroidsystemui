@@ -61,7 +61,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible date="2024-04-23" isdel="0">
+    <compatible date="2025-06-24" isdel="0">
         <keycode>size</keycode>
         <keydesc>
             {
@@ -87,6 +87,15 @@
             }, {
             "width": "800",
             "height": "600"
+            }, {
+            "width": "540",
+            "height": "960"
+            }, {
+            "width": "1080",
+            "height": "1920"
+            }, {
+            "width": "412",
+            "height": "713"
             }
             ]</optionjson>
     </compatible>
@@ -204,7 +213,8 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible date="2025-02-25" isdel="0">
+    <compatible date="2025-06-24" isdel="0">
+
         <keycode>doNotAllowRunningInTheBackground</keycode>
         <keydesc>
             {
@@ -245,9 +255,36 @@
             },{
             "width": "1080",
             "height": "1920"
+            }, {
+            "width": "540",
+            "height": "960"
+            }, {
+            "width": "1080",
+            "height": "1920"
+            }, {
+            "width": "412",
+            "height": "713"
             }
             ]</optionjson>
     </compatible>
 
+    <compatible date="2025-06-30" isdel="0">
+        <keycode>forcedPortraitMode</keycode>
+        <keydesc>
+            {
+            "en":"Forced portrait mode",
+            "ch":"强制竖屏模式"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>switch</inputtype>
+        <notes>
+            {
+            "en":"Enable vertical mode, disable max, full screen mode, and zoom functions",
+            "ch":"启用竖屏模式，禁用最大化、全屏模式、缩放功能"
+            }
+        </notes>
+        <optionjson>[]</optionjson>
+    </compatible>
 
 </library>
