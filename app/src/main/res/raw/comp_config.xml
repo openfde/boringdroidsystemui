@@ -272,8 +272,8 @@
         <keycode>forcedPortraitMode</keycode>
         <keydesc>
             {
-            "en":"Forced portrait mode",
-            "ch":"强制竖屏模式"
+            "en":"Disable window scaling",
+            "ch":"禁用窗口缩放"
             }
         </keydesc>
         <defaultvalue>0</defaultvalue>
