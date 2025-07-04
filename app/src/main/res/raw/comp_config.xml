@@ -287,4 +287,39 @@
         <optionjson>[]</optionjson>
     </compatible>
 
+    <compatible date="2025-07-05" isdel="0">
+        <keycode>activityLunchSize</keycode>
+        <keydesc>
+            {
+            "en":"Fix activity size",
+            "ch":"固定应用启动大小"
+            }
+        </keydesc>
+        <defaultvalue>0</defaultvalue>
+        <inputtype>select</inputtype>
+        <notes>
+            {
+            "en":"Fix app lunch size",
+            "ch":"固定应用启动大小"
+            }
+        </notes>
+        <optionjson>[{
+            "width": "650",
+            "height": "850"
+            },{
+            "width": "1080",
+            "height": "1920"
+            }, {
+            "width": "540",
+            "height": "960"
+            }, {
+            "width": "1080",
+            "height": "1920"
+            }, {
+            "width": "412",
+            "height": "713"
+            }
+            ]</optionjson>
+    </compatible>
+
 </library>
