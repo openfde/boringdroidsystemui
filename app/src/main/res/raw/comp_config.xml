@@ -61,7 +61,7 @@
         <optionjson>[]</optionjson>
     </compatible>
 
-    <compatible date="2025-06-24" isdel="0">
+    <compatible date="2025-07-09" isdel="0">
         <keycode>size</keycode>
         <keydesc>
             {
@@ -79,23 +79,29 @@
         </notes>
         <optionjson>[{
             "width": "1920",
-            "height": "1080"
+            "height": "1080",
+            "type":"relative"
             },
             {
             "width": "1600",
-            "height": "900"
+            "height": "900",
+            "type":"relative"
             }, {
             "width": "800",
-            "height": "600"
+            "height": "600",
+            "type":"fixed"
             }, {
             "width": "540",
-            "height": "960"
+            "height": "960",
+            "type":"relative"
             }, {
             "width": "1080",
-            "height": "1920"
+            "height": "1920",
+            "type":"relative"
             }, {
             "width": "412",
-            "height": "713"
+            "height": "713",
+            "type":"relative"
             }
             ]</optionjson>
     </compatible>
