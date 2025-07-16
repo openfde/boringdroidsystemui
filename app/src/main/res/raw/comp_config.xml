@@ -310,20 +310,21 @@
             }
         </notes>
         <optionjson>[{
+            {
+            "width": "1920",
+            "height": "1080"
+            }, {
+            "width": "412",
+            "height": "713"
+            },
             "width": "650",
             "height": "850"
-            },{
-            "width": "1080",
-            "height": "1920"
             }, {
             "width": "540",
             "height": "960"
             }, {
             "width": "1080",
             "height": "1920"
-            }, {
-            "width": "412",
-            "height": "713"
             }
             ]</optionjson>
     </compatible>
