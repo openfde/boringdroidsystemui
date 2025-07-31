@@ -27,6 +27,7 @@ import com.boringdroid.systemui.TaskInfo.Companion.PLATFORM_TYPE_X11
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_RUNNING
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_TOP
 import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
+import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.utils.ImageUtils
@@ -70,14 +71,18 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-//        Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
+        Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
         val info = app.linuxInfo
-        if(info != null){
+        if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG) ){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.linux_x11))
                 .into(holder.iconIV);
+            Log.d(TAG, "onBindViewHolder: png")
+        } else if(app.icon != null){
+            holder.iconIV.setImageDrawable(app.icon)
+            Log.d(TAG, "onBindViewHolder: icon")
         } else if(!app.isLinux()){
             if(app.program.equals("Apps")){
                 context.resources.getDrawable(R.drawable.icon_menu)
@@ -85,6 +90,7 @@ class DockAppAdapter(private val context: Context) :
                 val appIcon = packageManager.getApplicationIcon(app.packageName)
                 holder.iconIV.setImageDrawable(appIcon)
             }
+            Log.d(TAG, "onBindViewHolder: !islinux")
         }
         if(app.getState() == STATE_UNFEFINED){
             holder.viewStatus.background = null

@@ -260,7 +260,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             if(runningTaskInfo.taskDescription != null
                 && runningTaskInfo.taskDescription!!.label != null
                 && (runningTaskInfo.taskDescription!!.label.contains("Fusion")
-                        || runningTaskInfo.taskDescription!!.label.contains("FDE"))
+                        || runningTaskInfo.taskDescription!!.label.contains("FDE")||taskInfo!!.isLinux())
             ){
                 taskInfo?.icon = BitmapDrawable(runningTaskInfo!!.taskDescription!!.icon)
             } else if (taskInfo?.icon == null && infoList.size > 0 && infoList[0] != null) {
