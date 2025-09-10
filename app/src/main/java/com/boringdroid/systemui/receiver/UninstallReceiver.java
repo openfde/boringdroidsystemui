@@ -41,6 +41,9 @@ public class UninstallReceiver extends BroadcastReceiver {
         //check for x11 service start
         if(intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) || intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)){
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
+            if(uninstallListener != null){
+                uninstallListener.onInstall(packageName);
+            }
             if (!packageName.equals(X11_PACKAGE_NAME)) {
                 return;
             }
@@ -59,5 +62,6 @@ public class UninstallReceiver extends BroadcastReceiver {
 
     public interface AppUninstallListener{
         void onUninstall(String packageName);
+        void onInstall(String packageName);
     }
 }

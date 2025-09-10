@@ -25,6 +25,8 @@ import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_
 import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
+import com.fde.x11.ICmdEntryInterface;
+
 
 class DockAppsLayout
 @JvmOverloads
@@ -40,6 +42,7 @@ constructor(
     UninstallReceiver.AppUninstallListener
 {
 
+    var xserver: ICmdEntryInterface? = null
     private var launcherResumeFlag: Boolean ?= false
     private val activityManager: ActivityManager
     private val launchApps: LauncherApps
@@ -208,6 +211,11 @@ constructor(
         makeOverviewWinow()
         if(appOverviewWindow?.isShowing() != true){
             appOverviewWindow?.showPopupWindow()
+            try {
+                xserver?.updateSystemViewVisible(false)
+            } catch (e: Exception){
+                Log.e(TAG, "showAppsOverview: $e")
+            }
             if (dockAppAdapter?.getTopTaskId() != -1){
                 launcherResumeFlag = true
 //                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
@@ -239,6 +247,11 @@ constructor(
             appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
                     status?.visibility = View.VISIBLE
+                    try {
+                        xserver?.updateSystemViewVisible(true)
+                    } catch (e: Exception){
+                        Log.e(TAG, "showAppsOverview: $e")
+                    }
 //                    val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
 //                    if (runningTasks != null && launcherResumeFlag == true) {
 //                        for (runningTask in runningTasks){
@@ -266,6 +279,10 @@ constructor(
         dockProvider.unpin(packageName)
         overviewProvider?.provideAppsWithFilterAsync(TYPE_ALL, null);
 //        dockProvider.updateUninstall(packageName)
+    }
+
+    override fun onInstall(packageName: String?) {
+
     }
 
     fun dimissWindow() {

@@ -32,13 +32,22 @@
                 android:textSize="16sp"
                 style="@style/style_35"
                 />
-
             <LinearLayout
+                android:id="@+id/system_tray"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical"
+                android:layout_toLeftOf="@+id/control_lv"
+                />
+            <LinearLayout
+                android:id="@+id/control_lv"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:gravity="center_vertical"
                 >
+
                 <ImageView
                     android:id="@+id/imeswitch_btn"
                     android:layout_width="@dimen/topbar_icon_size"

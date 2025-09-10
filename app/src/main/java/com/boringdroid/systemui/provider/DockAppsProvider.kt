@@ -203,7 +203,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
 
     private fun topTask(runningTaskInfo: RunningTaskInfo, isTop: Boolean = true) {
-        Log.d(TAG, "topTask() called with: runningTaskInfo = ${runningTaskInfo.baseActivity?.packageName}, isTop = $isTop")
+//        Log.d(TAG, "topTask() called with: runningTaskInfo = ${runningTaskInfo.baseActivity?.packageName}, isTop = $isTop")
         if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
             return
         }
@@ -251,7 +251,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         }else {
             taskInfo?.setState(STATE_RUNNING)
         }
-        Log.d(TAG, "topTask: ${taskInfo}")
+//        Log.d(TAG, "topTask: ${taskInfo}")
         taskInfo?.setBaseActivityComponentName(runningTaskInfo.baseActivity)
         taskInfo?.setRealActivityComponentName(runningTaskInfo.topActivity)
         val userHandles = userManager.userProfiles

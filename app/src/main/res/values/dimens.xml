@@ -98,6 +98,7 @@
     <dimen name="top_bar_layout_height">24dp</dimen>
     <dimen name="topbar_icon_size">30dp</dimen>
     <dimen name="topbar_icon_padding">7dp</dimen>
+    <dimen name="topbar_icon_tray_padding">3dp</dimen>
     <dimen name="top_bar_power_width">150dp</dimen>
     <dimen name="top_bar_power_height">254dp</dimen>
     <dimen name="top_text_margin">4dp</dimen>

@@ -7,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.audio.common.Int;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Surface;
 
 import java.util.Date;
 import java.util.List;
@@ -42,6 +44,25 @@ public class XserverHelper {
     public static final String COMPOENT_EXPORT_1_2_3 = "FakeAppListActivity";
     public static final String BGSERVICE_EXPORT_FROM_VERSION = "1.3.0";
     public static final String COMPOENT_EXPORT_1_3_0 = X11_SERVICE_NAME;
+
+    public static final String ACTION_X_UPDATE_SYSTEMTRAY_ICON = "com.fde.x11.update_systemtray_icon";
+    public static final String START_SYSTRAY_FROM_X = "com.fde.x11.Xserver.start_systray_from_x";
+    public static final String X_WINDOW_RECT = "x_window_rect";
+    public static final String X_WINDOW_INDEX = "x_window_index";
+    public static final String X_WINDOW_PWIN = "x_window_pwin";
+    public static final String X_WINDOW_WINDOW = "x_window_window";
+    public static final String STOP_SYSTRAY_FROM_X = "com.fde.x11.Xserver.stop_systray_from_x";
+    public static final String KEY_ICON = "icon";
+    public static final String KEY_WINDOW = "window";
+    public static final String KEY_ACTION = "action";
+    public static final String KEY_TITLE = "title";
+    public static final long SYSTEM_TRAY_REQUEST_DOCK = 0;
+    public static final long SYSTEM_TRAY_BEGIN_MESSAGE = 1;
+    public static final long SYSTEM_TRAY_CANCEL_MESSAGE = 2;
+    public static final long SYSTEM_TRAY_UNDOCK = 3;
+    public static final long SYSTEM_TRAY_UNDOCK_ALL = 4;
+
+    public static final long SYSTEM_TRAY_CLICK = 4;
 
     public static void startServer(Context context) {
         if(!XserverHelper.isAppInstalled(context, X11_PACKAGE_NAME)){
@@ -126,6 +147,15 @@ public class XserverHelper {
                 }
             }
         }
+    }
+
+//    public void windowChanged(android.view.Surface surface, float offsetX, float offsetY, float width, float height, int index, long windPtr, long window) throws android.os.RemoteException;
+    public interface XserverWindowInjector {
+        void windowChanged(Surface sfc, float x, float y, float w, float h, int index, long p, long window);
+    }
+
+    public interface XserverEventInputer{
+        void mouseEvent(int x, int y, int detail, boolean down);
     }
 
     public static class TimeTickReceiver extends BroadcastReceiver {

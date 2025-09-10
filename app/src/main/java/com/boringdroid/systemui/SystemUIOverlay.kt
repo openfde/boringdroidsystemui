@@ -9,11 +9,15 @@ import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.database.ContentObserver
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
 import android.util.AttributeSet
@@ -28,18 +32,31 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE_STATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
+import com.boringdroid.systemui.receiver.XserverHelper.KEY_ACTION
+import com.boringdroid.systemui.receiver.XserverHelper.KEY_ICON
+import com.boringdroid.systemui.receiver.XserverHelper.KEY_TITLE
+import com.boringdroid.systemui.receiver.XserverHelper.KEY_WINDOW
+import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK_ALL
+import com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME
+import com.boringdroid.systemui.receiver.XserverHelper.X11_SERVICE_ACTION
+import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_INDEX
+import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_PWIN
+import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_RECT
+import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_WINDOW
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.DockAppsLayout
+import com.boringdroid.systemui.view.NotificationWindow
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
@@ -51,6 +68,12 @@ import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
+import com.fde.x11.ICmdEntryInterface;
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
@@ -80,7 +103,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var overviewProvider: AllAppsProvider ?= null
     private var timeTickReceiver :BroadcastReceiver ?= null
     private var recordHandler: Handler ?= null
-
+    private var mService: ICmdEntryInterface? = null
+    private var mIsServiceBound = false
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
@@ -196,12 +220,30 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         registPackageUpdate()
         XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
+        tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
+        tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
         timeTickReceiver = object : BroadcastReceiver() {
+            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
             override fun onReceive(context: Context, intent: Intent) {
+                Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
                 if (intent.action == Intent.ACTION_TIME_TICK) {
 //                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
                     checkXserverStatus()
                 }
+//                else if (intent.action == XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON){
+//                    val icon: Bitmap? = intent.getParcelableExtra(KEY_ICON)
+//                    val window = intent.getLongExtra(KEY_WINDOW, -1)
+//                    val action = intent.getLongExtra(KEY_ACTION, -1)
+//                    val title = intent.getStringExtra(KEY_TITLE)
+//                    topBarLayout?.updateSystemTrayIcon(icon, window, action, title)
+//                } else if(intent.action == XserverHelper.START_SYSTRAY_FROM_X){
+//                    val rect: Rect? = intent.getParcelableExtra(X_WINDOW_RECT, Rect::class.java)
+//                    val index = intent.getIntExtra(X_WINDOW_INDEX, -1)
+//                    val pwin = intent.getLongExtra(X_WINDOW_PWIN, -1)
+//                    val window = intent.getLongExtra(X_WINDOW_WINDOW, -1)
+//                    val windowAttr = WindowAttr(rect, index, pwin, window)
+//                    topBarLayout?.startSystray(windowAttr)
+//                }
             }
         }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
@@ -215,6 +257,48 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         } else {
 //            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
             XserverHelper.startServer(systemUIContext)
+        }
+        Log.d(TAG, "checkXserverStatus() called {$mIsServiceBound}")
+        if(!mIsServiceBound){
+            val intent = Intent()
+            intent.setPackage(X11_PACKAGE_NAME)
+            intent.setAction(X11_SERVICE_ACTION)
+            systemUIContext?.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    private val mServiceConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            mService = ICmdEntryInterface.Stub.asInterface(service)
+            mIsServiceBound = true
+            dockAppsLayout?.xserver = mService
+//            topBarLayout?.xserverEventInputer =
+//                XserverHelper.XserverEventInputer { x, y, detail, down ->
+//                    Log.d(
+//                        TAG,
+//                        "sendMouseEvent  x = $x, y = $y, detail = $detail, down = $down"
+//                    )
+//                    mService?.sendMouseEvent(x.toFloat(), y.toFloat(), detail, down , detail > 0, detail)
+//                }
+//
+//            topBarLayout?.xserverWindowInjector =
+//                XserverHelper.XserverWindowInjector { sfc, x, y, w, h, index, p, window ->
+//                    Log.d(
+//                        TAG,
+//                        "surfaceChanged $mService: sfc = $sfc, x = $x, y = $y, w = $w, h = $h, index = $index, p = $p, window = $window"
+//                    )
+//                    mService?.windowChanged(sfc, x, y, w, h, index, p, window)
+//                }
+//            topBarLayout?.startSystray()
+            Log.d(TAG, "Service connected successfully $topBarLayout")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            mService = null
+            mIsServiceBound = false
+            dockAppsLayout?.xserver = mService
+//            topBarLayout?.updateSystemTrayIcon(null, -1, SYSTEM_TRAY_UNDOCK_ALL, null)
+//            Log.d(TAG, "Service disconnected")
         }
     }
 
@@ -231,6 +315,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     override fun onUninstall(packageName: String) {
         dockAppsLayout?.onUninstall(packageName)
+    }
+
+    override fun onInstall(packageName: String?) {
+        Log.d(TAG, "onInstall() called with: packageName = $packageName")
+        GlobalScope.launch {
+            delay(500)
+            checkXserverStatus()
+        }
+
     }
 
     private fun initOKhttp() {

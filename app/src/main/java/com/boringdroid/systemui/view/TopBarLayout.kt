@@ -9,28 +9,30 @@ import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.graphics.Outline
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.provider.Settings
-import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.MotionEvent.BUTTON_PRIMARY
+import android.view.MotionEvent.BUTTON_SECONDARY
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
-import android.view.View.OnHoverListener
-import android.view.View.OnTouchListener
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -38,20 +40,22 @@ import android.widget.TextClock
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.DesktopNotification
+import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
-import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
 import com.boringdroid.systemui.receiver.DynamicReceiver.NotificationListener
 import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
+import com.boringdroid.systemui.receiver.XserverHelper
+import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_REQUEST_DOCK
+import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK
+import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK_ALL
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
-import com.boringdroid.systemui.view.AbsTopPopWindow.Companion.POPUP_WINDOW_RADIUS
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
-import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_PADDING
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_RADIUS
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_SHADOW
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_RADIUS
@@ -65,6 +69,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             var inited: Boolean = false
         }
 
+    private var windowAttr: WindowAttr? = null
     private val TAG: String = "TopBarLayout"
     val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
     var systemUIContext: Context ? = null
@@ -79,6 +84,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var homeBtn: LinearLayout? = null
     private var powerBtn: ImageView? = null
     private var desktopBtn: LinearLayout? = null
+    private var systemTray: LinearLayout?= null
     private var notificationBtn: ImageView? = null
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
@@ -91,6 +97,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var imm: InputMethodManager
     private val inputMethodList: MutableList<InputMethodInfo> = ArrayList()
     var overviewProvider: AllAppsProvider?= null
+    var  xserverEventInputer: XserverHelper.XserverEventInputer ?= null
+    var  xserverWindowInjector: XserverHelper.XserverWindowInjector ?= null
 
     private var powerWindow:TopBarPowerWindow? = null
     var controlWindow:TopBarControlWindow? = null
@@ -102,6 +110,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         mutableListOf()
     }
     private var volumeWindow:TopBarVolumeWindow? = null
+    private val x11TrayImageViesList: MutableList<ImageView> = ArrayList()
 
 
     private var btnList: MutableList<ImageView?> ?= null
@@ -135,6 +144,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         desktopBtn?.setOnClickListener(this)
         searchBtn = findViewById(R.id.search_btn)
         searchBtn?.tooltipText = context.resources.getString(R.string.top_search)
+        systemTray = findViewById(R.id.system_tray)
         btnList = mutableListOf(imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
         registerNotification()
         registInputMethodChange()
@@ -545,5 +555,140 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         AbsTopPopWindow.dissmissWindow(powerWindow)
         AbsTopPopWindow.dissmissWindow(controlWindow)
         AbsTopPopWindow.dissmissWindow(volumeWindow)
+    }
+
+    fun updateSystemTrayIcon(icon: Bitmap?, window: Long, action: Long, title: String?) {
+
+        if(action == SYSTEM_TRAY_UNDOCK_ALL){
+            x11TrayImageViesList.clear()
+            systemTray?.removeAllViews()
+            return
+        }
+
+        if(window.toInt() == -1){
+            return
+        }
+
+        val imageView = x11TrayImageViesList.firstOrNull {
+            it.tag == window
+        }
+
+        x11TrayImageViesList.forEach {
+            Log.d(TAG, "updateSystemTrayIcon() tag: ${it.tag}")
+        }
+
+        Log.d(
+            TAG,
+            "updateSystemTrayIcon() called with: icon = $icon, window = $window, action = $action, title = $title, imageView = $imageView"
+        )
+
+        if(action == SYSTEM_TRAY_REQUEST_DOCK && imageView == null){
+            val imageView = ImageView(context)
+            imageView.setImageBitmap(icon)
+            val sizeInPx = (30 * resources.displayMetrics.density).toInt()
+            val params = LinearLayout.LayoutParams(sizeInPx, sizeInPx)
+//            val paddingInPx = (7 * resources.displayMetrics.density).toInt()
+//            imageView.setPadding(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
+//            params.setMargins(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
+            imageView.layoutParams = params
+            imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+            systemTray?.addView(imageView, 0)
+            imageView.tag = window
+            x11TrayImageViesList.add(imageView)
+            imageView.setOnTouchListener { v, event ->
+                Log.d(TAG, "setOnTouchListener  event:${event}")
+                var detail = BUTTON_PRIMARY
+                var down = event.action == MotionEvent.ACTION_DOWN
+                if(event.action == MotionEvent.ACTION_DOWN){
+                    if(event.buttonState == BUTTON_SECONDARY){
+                        detail = 3
+                    }
+                } else if(event.action == MotionEvent.ACTION_UP){
+                    detail = BUTTON_PRIMARY
+                    down = false
+                } else if(event.action == MotionEvent.ACTION_CANCEL){
+                    detail = 3
+                    down = false
+                }
+//                xserverEventInputer?.mouseEvent(0,
+//                    0, detail, down)
+                false
+            }
+            imageView.setOnHoverListener(hoverListener)
+            imageView.setOnGenericMotionListener { v, event ->
+                Log.d(TAG, "setOnGenericMotionListener, event = $event")
+                if(event.action == MotionEvent.ACTION_HOVER_MOVE){
+                    xserverEventInputer?.mouseEvent(event.rawX.toInt(), event.rawY.toInt(), 0, false)
+                } else if(event.action == MotionEvent.ACTION_BUTTON_PRESS){
+                    var detail = BUTTON_PRIMARY
+                    if(event.actionButton == BUTTON_SECONDARY){
+                        detail = 3
+                    }
+                    xserverEventInputer?.mouseEvent(0, 0, detail, true)
+                } else if(event.action == MotionEvent.ACTION_BUTTON_RELEASE){
+                    var detail = BUTTON_PRIMARY
+                    if(event.actionButton == BUTTON_SECONDARY){
+                        detail = 3
+                    }
+                    xserverEventInputer?.mouseEvent(0, 0, detail, false)
+                }
+                true
+            }
+            imageView.tooltipText = title
+
+        } else if(action == SYSTEM_TRAY_UNDOCK){
+            systemTray?.removeView(imageView)
+            x11TrayImageViesList.remove(imageView)
+        }
+
+    }
+
+    fun startSystray(){
+        startSystray(windowAttr)
+    }
+
+    fun startSystray(attr: WindowAttr?){
+        if(attr == null){
+            return
+        }
+        this.windowAttr = attr
+        if(xserverWindowInjector == null){
+            return
+        }
+        val rect  = attr.rect
+        val window = attr.window
+        val pwin = attr.pwin
+        val index =  attr.index
+        rect?.let { absoluteRect ->
+            val surfaceView = SurfaceView(context).apply {
+                id = View.generateViewId()
+                layoutParams = LinearLayout.LayoutParams(
+                    absoluteRect.width() ,
+                    absoluteRect.height()
+                )
+            }
+            systemTray?.addView(surfaceView)
+            setupSurfaceView(surfaceView, window, pwin, index, rect)
+        }
+    }
+
+
+    private fun setupSurfaceView(surfaceView: SurfaceView, window: Long, pwin: Long, index: Int, rect: Rect) {
+        surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                Log.d(TAG, "Surface created for index: $index, window: $window")
+            }
+
+            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                Log.d(TAG, "surfaceChanged for index: $index - $width x $height $xserverWindowInjector")
+                xserverWindowInjector?.windowChanged(holder.surface, rect.left.toFloat(),
+                    rect.top.toFloat(), (rect.right - rect.left).toFloat(), (rect.bottom - rect.top).toFloat(),
+                    index, pwin, window)
+            }
+
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+                Log.d(TAG, "Surface destroyed for index: $index")
+            }
+        })
     }
 }
