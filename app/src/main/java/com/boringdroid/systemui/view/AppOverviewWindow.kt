@@ -98,12 +98,19 @@ class AppOverviewWindow(
 
         searchEt?.setOnFocusChangeListener { v, hasFocus ->
             if(hasFocus){
+                if(getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null){
+                    return@setOnFocusChangeListener
+                }
+
                 val layoutParams1 =
                     getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
                 layoutParams1.leftMargin = 10
                 getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
             } else {
+                if(getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null){
+                    return@setOnFocusChangeListener
+                }
                 val layoutParams1 =
                     getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
                 layoutParams1.leftMargin = 100

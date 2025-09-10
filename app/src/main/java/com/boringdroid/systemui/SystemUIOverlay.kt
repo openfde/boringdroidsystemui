@@ -30,11 +30,10 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.DynamicReceiver
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE_STATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
-import com.boringdroid.systemui.receiver.XserverHelper.CLIENT_NUM_UNDEFINED
-import com.boringdroid.systemui.receiver.XserverHelper.LOADING_UNDEFINED
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
@@ -80,12 +79,19 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private var overviewProvider: AllAppsProvider ?= null
     private var timeTickReceiver :BroadcastReceiver ?= null
+    private var recordHandler: Handler ?= null
+
+
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
         statusBar: View,
         navBar: View?,
     ) {
-        Log.d(TAG, "setup this = $this,  statusBar = ${statusBar}, navBar = ${navBar}")
+        Log.d(TAG, "setup this = $this,  statusBar tag = ${statusBar.getTag()}, navBar = ${navBar}")
+        if(statusBar.getTag() != null && statusBar.getTag() is Handler){
+            recordHandler = statusBar.getTag() as Handler
+        }
+
         status = statusBar as ViewGroup
         navi = navBar as ViewGroup
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
@@ -140,6 +146,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
             Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
         }
+        topBarLayout?.controlWindow?.recordHandler = recordHandler
     }
 
     override fun onCreate(
@@ -181,9 +188,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
-        dynamicReceiver = DynamicReceiver(systemStateLayout, topBarLayout)
+        dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
+        intentFilter.addAction(INTENT_UPDATE_STATE)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
         registPackageUpdate()
         XserverHelper.listenXserverStatus(pluginContext,null)

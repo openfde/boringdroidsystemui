@@ -216,6 +216,7 @@
                         android:background="@drawable/control_oval_bg_26"
                         />
                     <TextView
+                        android:id="@+id/record_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"

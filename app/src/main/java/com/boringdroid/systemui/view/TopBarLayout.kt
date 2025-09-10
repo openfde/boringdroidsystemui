@@ -40,6 +40,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
+import com.boringdroid.systemui.receiver.DynamicReceiver.NotificationListener
 import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
@@ -57,7 +58,7 @@ import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_S
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
-    TopBarControlWindow.TopbarLayoutController {
+    TopBarControlWindow.TopbarLayoutController, NotificationListener {
 
         companion object {
             var inited: Boolean = false
@@ -91,7 +92,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     var overviewProvider: AllAppsProvider?= null
 
     private var powerWindow:TopBarPowerWindow? = null
-    private var controlWindow:TopBarControlWindow? = null
+    var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<DesktopNotification>? = null
     private var launcherResumeFlag: Boolean ?= false
@@ -514,6 +515,23 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     override fun showVolumeWindow() {
         volumeBtnClick()
+    }
+
+    override fun onNotifyCount(count: Int) {
+        if(count > 0){
+            notificationBtn?.setImageResource(R.drawable.icon_notification_red)
+        } else {
+            notificationBtn?.setImageResource(R.drawable.icon_notification)
+        }
+    }
+
+
+    override fun onNotificationPanelVisibleChanged(boolean: Boolean) {
+
+    }
+
+    override fun onScreenRecordStateChange(state: Int) {
+        controlWindow?.onScreenRecordStateChange(state)
     }
 
 }

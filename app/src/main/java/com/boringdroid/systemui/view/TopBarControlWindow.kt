@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.media.AudioSystem
+import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
@@ -14,11 +15,15 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_PROCESSING_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_RECORDING_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_VIEW_ID
 import com.boringdroid.systemui.utils.Utils
 import java.lang.Thread.sleep
 
@@ -33,6 +38,7 @@ class TopBarControlWindow(
     : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
 
+    private var isRecording: Boolean = false
     private var screenshotBtn: ImageView?= null
     private var regionshotBtn: ImageView?= null
     private var recordBtn: ImageView?= null
@@ -41,8 +47,11 @@ class TopBarControlWindow(
     private var volumeCenterIv: ImageView?= null
     private var volumeSeekBar: SeekBar?= null
     private var audioDevice: AudioDevice? = null
+    private var recordTextView: TextView?= null
+
     var topbarController: TopbarLayoutController ?=null
     var formUser: Boolean = false
+    var recordHandler: Handler ?= null
 
 
     companion object {
@@ -198,6 +207,7 @@ class TopBarControlWindow(
     private fun initViews() {
         screenshotBtn = mContentView?.findViewById(R.id.screenshot_iv)
         regionshotBtn = mContentView?.findViewById(R.id.regionshot_iv)
+        recordTextView = mContentView?.findViewById(R.id.record_tv)
         recordBtn = mContentView?.findViewById(R.id.record_iv)
         settingBtn = mContentView?.findViewById(R.id.setting_iv)
         volumeSeekBar = mContentView?.findViewById(R.id.volume_seekbar)
@@ -220,7 +230,12 @@ class TopBarControlWindow(
         settingBtn?.setOnTouchListener(touchListener)
         settingBtn?.setOnHoverListener(hoverListener)
         settingBtn?.setOnClickListener(this)
-
+//        Log.d(TAG, "initViews() called isRecording: ${isRecording} ${this}")
+        if(isRecording){
+            recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
+        } else {
+            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+        }
     }
 
 
@@ -237,7 +252,8 @@ class TopBarControlWindow(
                 )
             }, 300)
         } else if(v == recordBtn){
-            Utils.sendKeyCode(KeyEvent.KEYCODE_MEDIA_RECORD)
+            recordHandler?.obtainMessage(2, 0, 0, null)?.sendToTarget()
+//            Utils.sendKeyCode(KeyEvent.KEYCODE_MEDIA_RECORD)
 //            val inst = Instrumentation()
 //            inst.sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_RECORD)
 //            val launcherComponent: ComponentName = ComponentName(
@@ -253,6 +269,18 @@ class TopBarControlWindow(
             topbarController?.showVolumeWindow()
         }
 
+    }
+
+    fun onScreenRecordStateChange(state: Int) {
+//        Log.d(TAG, "onScreenRecordStateChange() called with: state = $state recordTextView = $recordTextView")
+        if(state == NOTIFICATION_RECORDING_ID || state == NOTIFICATION_PROCESSING_ID || state == NOTIFICATION_VIEW_ID){
+            isRecording = true
+            recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
+        } else {
+            isRecording = false
+            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+            Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()
+        }
     }
 
     interface TopbarLayoutController {

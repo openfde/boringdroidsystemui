@@ -81,6 +81,8 @@
     <string name="printscreen_string">PrintScreen</string>
     <string name="printscreen_region_string">PrintScreenRegion</string>
     <string name="recordscreen_string">ScreenRecord</string>
+    <string name="success_recordscreen_string">Saved successfully in gallery</string>
+    <string name="finish_recordscreen_string">Finish Record</string>
     <string name="savepower_string">PowerSave</string>
     <string name="setting_string">Setting</string>
 

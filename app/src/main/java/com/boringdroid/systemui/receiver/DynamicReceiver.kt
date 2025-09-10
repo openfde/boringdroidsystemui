@@ -9,30 +9,42 @@ import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 
 
-class DynamicReceiver (private val systemStateLayout: SystemStateLayout?, topBarLayout: TopBarLayout?) : BroadcastReceiver(){
+class DynamicReceiver (private val notificationListener: NotificationListener?, topBarLayout: TopBarLayout?) : BroadcastReceiver(){
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        val type = intent.getIntExtra("type",-1)
-//        Log.d(TAG, "onReceive() called with: type = $type")
-        when(type){
-            TYEP_COUNT_NOTIFY ->{
-                systemStateLayout?.onNotifyCount(intent.getIntExtra("count",0))
-            }
+        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
+        if(intent.action.equals(SERVICE_ACTION)){
+            val type = intent.getIntExtra("type",-1)
+        Log.d(TAG, "onReceive() called with: type = $type")
+            when(type){
+                TYEP_COUNT_NOTIFY ->{
+                    notificationListener?.onNotifyCount(intent.getIntExtra("count",0))
+                }
 
-            TYEP_PANEL_CHANGE_NOTIFY ->{
-                systemStateLayout?.onNotificationPanelVisibleChanged(intent.getBooleanExtra("panel_visible",false))
-            }
+                TYEP_PANEL_CHANGE_NOTIFY ->{
+                    notificationListener?.onNotificationPanelVisibleChanged(intent.getBooleanExtra("panel_visible",false))
+                }
 
-            TYEP_SCREEN_NOTIFY ->{
-                systemStateLayout?.onScreenRecordStateChange(intent.getIntExtra("id",0))
-            }
+                TYEP_SCREEN_NOTIFY ->{
+                    notificationListener?.onScreenRecordStateChange(intent.getIntExtra("id",0))
+                }
 
+            }
+        } else if (intent.action.equals(INTENT_UPDATE_STATE)){
         }
 
     }
 
+    interface NotificationListener {
+        fun onNotifyCount(count: Int)
+        fun onNotificationPanelVisibleChanged(boolean: Boolean)
+        fun onScreenRecordStateChange(state: Int)
+    }
+
     companion object {
+        val INTENT_UPDATE_STATE: String = "com.android.systemui.screenrecord.UPDATE_STATE"
+        val EXTRA_STATE: String = "extra_state"
         private const val TAG = "DynamicReceiver"
         val SERVICE_ACTION = "notify_action"
         val TYEP_COUNT_NOTIFY = 1

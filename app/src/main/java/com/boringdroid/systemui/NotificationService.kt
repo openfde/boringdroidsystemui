@@ -18,6 +18,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -149,7 +150,8 @@ class NotificationService : NotificationListenerService(),
         Log.d(TAG, "onNotificationPosted() called with: sbn = $sbn")
         super.onNotificationPosted(sbn)
         updateNotificationCount()
-        if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
+        if(TextUtils.equals("screen_record", sbn.notification.channelId)){
+//        if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
             sendBroadcast( Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY).putExtra("id", sbn.id))
         }  else {
             broadcastNotification(NOTIFI_ACTION_POST,sbn)
