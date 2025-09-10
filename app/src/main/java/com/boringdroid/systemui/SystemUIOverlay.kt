@@ -535,6 +535,12 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS != intent.action) {
                     return
                 }
+                if(dockAppsLayout != null){
+                    dockAppsLayout?.dimissWindow()
+                }
+                if(topBarLayout != null){
+                    topBarLayout?.dimissWindow()
+                }
                 allAppsWindow!!.dismiss()
             }
         }

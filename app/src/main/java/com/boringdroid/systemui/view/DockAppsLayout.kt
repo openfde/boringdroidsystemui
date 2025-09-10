@@ -268,4 +268,8 @@ constructor(
 //        dockProvider.updateUninstall(packageName)
     }
 
+    fun dimissWindow() {
+        AbsTopPopWindow.dissmissWindow(appOverviewWindow)
+    }
+
 }

@@ -537,4 +537,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         controlWindow?.onScreenRecordStateChange(state)
     }
 
+    fun dimissWindow() {
+        AbsTopPopWindow.dissmissWindow(notificationWindow)
+        AbsTopPopWindow.dissmissWindow(notificationsWindow)
+        AbsTopPopWindow.dissmissWindow(imeSwitchWindow)
+        AbsTopPopWindow.dissmissWindow(globalSearchWindow)
+        AbsTopPopWindow.dissmissWindow(powerWindow)
+        AbsTopPopWindow.dissmissWindow(controlWindow)
+        AbsTopPopWindow.dissmissWindow(volumeWindow)
+    }
 }

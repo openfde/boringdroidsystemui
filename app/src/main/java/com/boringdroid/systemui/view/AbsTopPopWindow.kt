@@ -23,6 +23,11 @@ open class AbsTopPopWindow(
     var typeParam: Int
 ) {
     companion object {
+        fun dissmissWindow(window: AbsTopPopWindow?) {
+            if(window != null && window!!.isShowing()){
+                window?.dismiss()
+            }
+        }
         const val POPUP_WINDOW_RADIUS = 12f
         const val FADE_DURATION: Long = 120
         const val TAG:String = "AbsTopPopWindow"
