@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextClock
 import androidx.core.view.get
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 
 class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
@@ -286,6 +287,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
      * network wifi click
      */
     private fun wifiClick() {
+        AppUtils.toWifiPage(context)
 //        showTips("",0.05f)
 //
 //        val intent = Intent()

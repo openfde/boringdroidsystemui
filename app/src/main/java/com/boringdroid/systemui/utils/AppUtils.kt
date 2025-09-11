@@ -378,4 +378,12 @@ object AppUtils {
     }
 
 
+    public fun toWifiPage(mContext: Context) {
+        val intent = Intent()
+        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$NetworkDashboardActivity")
+        intent.component = cn;
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        mContext.startActivity(intent)
+    }
+
 }
