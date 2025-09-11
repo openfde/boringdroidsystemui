@@ -44,6 +44,7 @@ import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.Companion.POPUP_WINDOW_RADIUS
@@ -461,6 +462,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             volumeBtnClick()
         } else if( v == desktopBtn){
             DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
+        }else if(v == wifiBtn){
+            AppUtils.toWifiPage(context)
         }
     }
 

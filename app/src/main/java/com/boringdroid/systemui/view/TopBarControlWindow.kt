@@ -12,6 +12,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.cardview.widget.CardView
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 import java.lang.Thread.sleep
 
@@ -39,6 +41,7 @@ class TopBarControlWindow(
     private var settingBtn: ImageView?= null
     private var volumeImage: ImageView?= null
     private var volumeCenterIv: ImageView?= null
+    private var wifiCv: LinearLayout?= null
     private var volumeSeekBar: SeekBar?= null
     private var audioDevice: AudioDevice? = null
     var topbarController: TopbarLayoutController ?=null
@@ -204,6 +207,8 @@ class TopBarControlWindow(
         volumeImage = mContentView?.findViewById(R.id.volume_iv)
         volumeCenterIv = mContentView?.findViewById(R.id.volume_go_iv)
         volumeCenterIv?.setOnClickListener(this)
+        wifiCv = mContentView?.findViewById(R.id.wifi_cv)
+        wifiCv?.setOnClickListener(this)
 
         screenshotBtn?.setOnTouchListener(touchListener)
         screenshotBtn?.setOnHoverListener(hoverListener)
@@ -251,6 +256,9 @@ class TopBarControlWindow(
         } else if(v == volumeCenterIv){
             dismiss()
             topbarController?.showVolumeWindow()
+        }else if(v ==wifiCv){
+            dismiss()
+            AppUtils.toWifiPage(getContext() )
         }
 
     }
