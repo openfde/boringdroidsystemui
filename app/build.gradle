@@ -45,8 +45,25 @@ android {
 		main.resources.srcDirs += "src/main/SystemUISharedRes"
 	}
 
+	// must before buildTypes
+	signingConfigs {
+		release {
+			keyAlias 'androiddebugkey'
+			keyPassword 'android'
+			storeFile file('plugin.keystore')
+			storePassword 'android'
+		}
+		debug {
+			keyAlias 'androiddebugkey'
+			keyPassword 'android'
+			storeFile file('plugin.keystore')
+			storePassword 'android'
+		}
+	}
+
 	buildTypes {
 		release {
+			signingConfig signingConfigs.release  // for signingconfig
 			minifyEnabled false
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
@@ -60,20 +77,6 @@ android {
 		jvmTarget = "1.8"
 	}
 
-	signingConfigs {
-		debug {
-			keyAlias 'androiddebugkey'
-			keyPassword 'android'
-			storeFile file('plugin.keystore')
-			storePassword 'android'
-		}
-		release {
-			keyAlias 'androiddebugkey'
-			keyPassword 'android'
-			storeFile file('plugin.keystore')
-			storePassword 'android'
-		}
-	}
 
 
 	testOptions {
