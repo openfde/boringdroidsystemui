@@ -278,7 +278,7 @@ class AppStateLayout @JvmOverloads constructor(
         override fun onTaskRemoved(taskId: Int) {
             super.onTaskRemoved(taskId)
             Log.d(TAG, "onTaskRemoved $taskId")
-            CompatibleConfig.setSystemProperty("$taskId", "false")
+            CompatibleConfig.setSystemProperty("fde_running_task_$taskId", "false")
             removeTask(taskId)
         }
     }
