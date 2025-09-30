@@ -43,6 +43,7 @@ import com.boringdroid.systemui.SystemUIOverlay
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.AppStateActionsAdapter
 import com.boringdroid.systemui.data.Action
+import com.boringdroid.systemui.utils.CompatibleConfig
 import com.boringdroid.systemui.utils.SystemuiColorUtils
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -277,6 +278,7 @@ class AppStateLayout @JvmOverloads constructor(
         override fun onTaskRemoved(taskId: Int) {
             super.onTaskRemoved(taskId)
             Log.d(TAG, "onTaskRemoved $taskId")
+            CompatibleConfig.setSystemProperty("$taskId", "false")
             removeTask(taskId)
         }
     }
