@@ -18,12 +18,13 @@ constructor(
     attrs: AttributeSet? = null,
 ) : ViewPager(context, attrs) {
 
+    var overviewWindow: AppOverviewWindow ?= null
     private val DEFAULT_TRIGGER_DISTANCE: Int = 20 // 触发翻页的默认距离（像素）
     private val mTriggerDistance = DEFAULT_TRIGGER_DISTANCE
     private var mStartX = 0f
     private var mStartY = 0f
     private var mIsHorizontalScroll = false
-    val LOG_TAG = "ViewPager"
+    val TAG = "ViewPager"
 
     init {
         setOnTouchListener { v, event -> handleTouchEvent(event) }
@@ -42,6 +43,11 @@ constructor(
                 val dy = Math.abs(ev!!.y - mStartY)
                 if (dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop) {
                     return true // 拦截横向滑动
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if(mStartX == ev.x && mStartY == ev.y && ev.source == 0x1002){
+                    postDelayed({ overviewWindow?.dismiss() }, 50)
                 }
             }
         }
@@ -74,7 +80,7 @@ constructor(
 //                if (mIsHorizontalScroll) {
             {
                 val dx = event.x - mStartX
-                Log.d(LOG_TAG, "handleTouchEvent() called with: dx = $dx")
+                Log.d(TAG, "handleTouchEvent() called with: dx = $dx")
                 if (abs(dx.toDouble()) > mTriggerDistance) {
                     val current = currentItem
                     val next = if (dx > 0) current - 1 else current + 1

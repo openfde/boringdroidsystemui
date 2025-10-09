@@ -63,6 +63,12 @@
 
             </LinearLayout>
 
+            <View
+                android:id="@+id/bg_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
             <com.boringdroid.systemui.view.LoadedViewPager
                 android:id="@+id/apps_vp"
                 android:layout_width="match_parent"

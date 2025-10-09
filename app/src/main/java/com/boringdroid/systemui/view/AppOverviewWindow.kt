@@ -49,7 +49,8 @@ class AppOverviewWindow(
     //    private var recycleView: LoadedRecycleView?= null
      var searchEt: EditText ?= null
      var searchLl: LinearLayout ?= null
-    private var appsVp: ViewPager ?= null
+     var bgView : View ?= null
+    private var appsVp: LoadedViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
     var appProvider : AppProvider ?= null
@@ -76,11 +77,14 @@ class AppOverviewWindow(
         searchEt = mContentView?.findViewById(R.id.search_et)
         searchLl = mContentView?.findViewById(R.id.search_ll)
         appsVp = mContentView?.findViewById(R.id.apps_vp)
+        appsVp?.overviewWindow = this
+        bgView = mContentView?.findViewById(R.id.bg_view)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
         appsVp?.setOnClickListener(this)
+        bgView?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
         blurWallPaper()
         updateChannel()
@@ -206,6 +210,8 @@ class AppOverviewWindow(
         } else if( v == searchLl){
 
         } else if( v == appsVp){
+            dismiss()
+        } else if( v == bgView){
             dismiss()
         }
     }
