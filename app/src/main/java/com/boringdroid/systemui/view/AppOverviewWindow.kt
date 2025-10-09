@@ -11,6 +11,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_TAB
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -41,17 +42,19 @@ class AppOverviewWindow(
     : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener{
 
 
+    var focusView: View ?= null
     private val apps: MutableList<AppData> = ArrayList()
     private var appPages: MutableList<MutableList<AppData>> = ArrayList()
 
     //    private var recycleView: LoadedRecycleView?= null
-    private var searchEt: EditText ?= null
-    private var searchLl: LinearLayout ?= null
+     var searchEt: EditText ?= null
+     var searchLl: LinearLayout ?= null
     private var appsVp: ViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
     var appProvider : AppProvider ?= null
     var dockProvider : DockAppsProvider ?= null
+    var appsPagerAdapter : AppsPagerAdapter ?= null
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -75,7 +78,8 @@ class AppOverviewWindow(
         appsVp = mContentView?.findViewById(R.id.apps_vp)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
         appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
-        appsVp?.adapter = AppsPagerAdapter(appPages, this)
+        appsPagerAdapter = AppsPagerAdapter(appPages, this)
+        appsVp?.adapter = appsPagerAdapter
         appsVp?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
         blurWallPaper()
@@ -119,6 +123,18 @@ class AppOverviewWindow(
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
             }
         }
+        searchEt?.requestFocus()
+        searchEt?.setOnKeyListener { v, keyCode, event ->
+            if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN){
+                return@setOnKeyListener true
+            } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
+                focusView?.requestFocus()
+                return@setOnKeyListener true
+            } else {
+                return@setOnKeyListener false
+            }
+        }
+
     }
 
     private fun blurWallPaper() {
@@ -180,6 +196,7 @@ class AppOverviewWindow(
     override fun dismiss() {
         super.dismiss()
         filterApps(null, 0)
+        focusView = null
     }
 
 

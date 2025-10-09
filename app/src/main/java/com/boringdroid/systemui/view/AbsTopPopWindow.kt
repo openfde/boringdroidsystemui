@@ -65,6 +65,9 @@ open class AbsTopPopWindow(
         if (mContentView == null || mContentView?.isAttachedToWindow == false) {
             windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             mContentView = LayoutInflater.from(context).inflate(layoutResId, null)
+            mContentView?.isFocusable = true
+            mContentView?.isFocusableInTouchMode = true
+            mContentView?.isClickable = true
             mContentView?.elevation = elevation.toFloat()
             mContentView?.outlineProvider = provider
             mContentView?.clipToOutline = true

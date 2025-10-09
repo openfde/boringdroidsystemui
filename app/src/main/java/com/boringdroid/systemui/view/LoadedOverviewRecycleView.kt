@@ -8,6 +8,8 @@ import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
+import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -112,6 +114,28 @@ constructor(
                     makeAndFillContextWindow(appData, v)
                 }
                 true
+            }
+            holder.itemView.isFocusable = true
+            holder.itemView.isClickable = true
+            holder.itemView.isFocusableInTouchMode = true
+            if(appOverviewWindow?.focusView == null){
+                appOverviewWindow?.focusView = holder.itemView
+            }
+            holder.itemView.setOnKeyListener { v, keyCode, event ->
+                if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN){
+                    return@setOnKeyListener true
+                } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
+                    appOverviewWindow?.searchEt?.requestFocus()
+                    return@setOnKeyListener true
+                } else {
+                    return@setOnKeyListener false
+                }
+            }
+            holder.itemView.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+                if( hasFocus){
+                    appOverviewWindow?.focusView = v
+                }
+                Log.d(TAG, "initViews() called with: v = $v, hasFocus = $hasFocus")
             }
         }
 
