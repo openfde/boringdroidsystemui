@@ -85,12 +85,15 @@ class DockAppAdapter(private val context: Context) :
             Log.d(TAG, "onBindViewHolder: icon")
         } else if(!app.isLinux()){
             if(app.program.equals("Apps")){
-                context.resources.getDrawable(R.drawable.icon_menu)
+                holder.iconIV.setImageResource(R.drawable.icon_menu)
             } else {
                 val appIcon = packageManager.getApplicationIcon(app.packageName)
                 holder.iconIV.setImageDrawable(appIcon)
             }
             Log.d(TAG, "onBindViewHolder: !islinux")
+        }
+        if(app.program.equals("Apps")){
+            holder.iconIV.setImageResource(R.drawable.icon_menu)
         }
         if(app.getState() == STATE_UNFEFINED){
             holder.viewStatus.background = null
