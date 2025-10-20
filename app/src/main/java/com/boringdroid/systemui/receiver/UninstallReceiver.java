@@ -27,8 +27,8 @@ public class UninstallReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-//        Log.d(TAG, "onReceive: action:" + intent.getAction());
-        if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)) {
+//        Log.d(TAG, "onReceive: action:" + intent.getAction() + " package:" + intent.getData().getEncodedSchemeSpecificPart());
+        if (intent.getAction().equals(Intent.ACTION_PACKAGE_FULLY_REMOVED)) {
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             LogTools.Companion.i("packageName "+packageName + " ,getPackageName "+context.getPackageName());
             if (packageName.equals(context.getPackageName())) {

@@ -284,7 +284,8 @@ class TopBarControlWindow(
         if(state == NOTIFICATION_RECORDING_ID || state == NOTIFICATION_PROCESSING_ID || state == NOTIFICATION_VIEW_ID){
             isRecording = true
             recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
-        } else {
+        } else if(isRecording && recordTextView != null){
+//            Log.d(TAG, "onScreenRecordStateChange: show finish toast")
             isRecording = false
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
             Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()

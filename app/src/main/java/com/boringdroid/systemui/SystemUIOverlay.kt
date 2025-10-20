@@ -307,6 +307,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_PACKAGE_ADDED)
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
         filter.addDataScheme("package")
         val receiver = UninstallReceiver(this)
