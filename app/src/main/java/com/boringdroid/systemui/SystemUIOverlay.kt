@@ -34,6 +34,7 @@ import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
 import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
+import com.boringdroid.systemui.receiver.BatteryReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE_STATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
@@ -50,6 +51,7 @@ import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_INDEX
 import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_PWIN
 import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_RECT
 import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_WINDOW
+import com.boringdroid.systemui.utils.BatteryUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
@@ -102,6 +104,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private var overviewProvider: AllAppsProvider ?= null
     private var timeTickReceiver :BroadcastReceiver ?= null
+    private var batteryReceiver : BroadcastReceiver ?= null
     private var recordHandler: Handler ?= null
     private var mService: ICmdEntryInterface? = null
     private var mIsServiceBound = false
@@ -247,6 +250,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             }
         }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
+        initBattery()
+    }
+
+    private fun initBattery() {
+        val batteryLevel = BatteryUtils.getBatteryPercentage(systemUIContext)
+        Log.d(TAG, "initBattery batteryLevel : $batteryLevel")
+        batteryReceiver = BatteryReceiver(topBarLayout);
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        systemUIContext?.registerReceiver(batteryReceiver, filter);
     }
 
     private fun checkXserverStatus() {

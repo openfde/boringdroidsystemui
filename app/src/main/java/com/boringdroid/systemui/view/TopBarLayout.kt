@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.RemoteAction
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.media.AudioManager
+import android.os.BatteryManager
 import android.provider.Settings
 import android.util.AttributeSet
 import android.util.DisplayMetrics
@@ -42,6 +44,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
+import com.boringdroid.systemui.receiver.BatteryReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.NotificationListener
 import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
@@ -63,11 +66,11 @@ import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_S
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
-    TopBarControlWindow.TopbarLayoutController, NotificationListener {
+    TopBarControlWindow.TopbarLayoutController, NotificationListener, BatteryReceiver.BatteryListener {
 
-        companion object {
-            var inited: Boolean = false
-        }
+    companion object {
+        var inited: Boolean = false
+    }
 
     private var windowAttr: WindowAttr? = null
     private val TAG: String = "TopBarLayout"
@@ -173,14 +176,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
-            accessibilityManager!!.registerSystemAction(
-                RemoteAction(
-                    Icon.createWithResource(context, R.drawable.icon_menu),
-                    context.getString(R.string.search),
-                    context.getString(R.string.search),
-                    broadcast
-                ),
-                GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+        accessibilityManager!!.registerSystemAction(
+            RemoteAction(
+                Icon.createWithResource(context, R.drawable.icon_menu),
+                context.getString(R.string.search),
+                context.getString(R.string.search),
+                broadcast
+            ),
+            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
     }
 
     internal inner class GlobalSearchRecevier : BroadcastReceiver(){
@@ -221,7 +224,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getInputMethods()
         val width = resources.getDimension(R.dimen.top_bar_search_width_expand).toInt()
 //        val height = resources.getDimension(R.dimen.top_bar_search_height).toInt()
-        globalSearchWindow = AbsTopPopWindow.Builder(context, width, LayoutParams.WRAP_CONTENT, R.layout.window_topbar_search)
+        globalSearchWindow = AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.window_topbar_search)
             .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
             .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
@@ -300,7 +303,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         inputMethodList.forEach {
 //            Log.d(TAG, "getInputMethods: ${it.packageName}")
             if (currentInputMethod == it.id) {
-                imeBtn?.visibility = View.VISIBLE
+                imeBtn?.visibility = VISIBLE
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
             }
         }
@@ -475,6 +478,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
         }else if(v == wifiBtn){
             AppUtils.toWifiPage(context)
+        } else if(v == batteryBtn){
+            val intent = Intent()
+            val cn: ComponentName? =
+                ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+            intent.component = cn;
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
         }
     }
 
@@ -661,7 +671,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         val index =  attr.index
         rect?.let { absoluteRect ->
             val surfaceView = SurfaceView(context).apply {
-                id = View.generateViewId()
+                id = generateViewId()
                 layoutParams = LinearLayout.LayoutParams(
                     absoluteRect.width() ,
                     absoluteRect.height()
@@ -690,5 +700,92 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 Log.d(TAG, "Surface destroyed for index: $index")
             }
         })
+    }
+
+    override fun onBatteryChanged(
+        percentage: Float,
+        status: Int,
+        plugged: Int
+    ) {
+        var statusText = ""
+        var pluggedText = ""
+
+        // 电池状态
+        when (status) {
+            BatteryManager.BATTERY_STATUS_CHARGING -> statusText = "充电中"
+            BatteryManager.BATTERY_STATUS_DISCHARGING -> statusText = "放电中"
+            BatteryManager.BATTERY_STATUS_NOT_CHARGING -> statusText = "未充电"
+            BatteryManager.BATTERY_STATUS_FULL -> statusText = "已充满"
+            BatteryManager.BATTERY_STATUS_UNKNOWN -> statusText = "未知状态"
+            else -> statusText = "未知状态"
+        }
+
+        // 充电方式
+        when (plugged) {
+            BatteryManager.BATTERY_PLUGGED_AC -> pluggedText = "AC充电"
+            BatteryManager.BATTERY_PLUGGED_USB -> pluggedText = "USB充电"
+            BatteryManager.BATTERY_PLUGGED_WIRELESS -> pluggedText = "无线充电"
+            0 -> pluggedText = "未充电"
+            else -> pluggedText = "未充电"
+        }
+
+//        Log.d("BatteryAnalysis",
+//            "电量: " + percentage + "%\n" +
+//                    "状态: " + statusText + " (代码:" + status + ")\n" +
+//                    "充电方式: " + pluggedText + " (代码:" + plugged + ")")
+
+        // 更准确的充电状态判断
+        val charging = when (status) {
+            BatteryManager.BATTERY_STATUS_CHARGING -> true
+            BatteryManager.BATTERY_STATUS_FULL -> true  // 已充满也算充电状态
+            else -> false
+        }
+
+        // 如果是未知状态，可以根据 plugged 来判断是否在充电
+        val isActuallyCharging = if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+            // 未知状态时，通过 plugged 判断
+            val isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC ||
+                    plugged == BatteryManager.BATTERY_PLUGGED_USB ||
+                    plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+//            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
+            isPlugged
+        } else {
+            charging
+        }
+
+        val iconRes = when {
+            isActuallyCharging -> {
+                when {
+                    percentage == 0.0f -> R.drawable.icon_battery_chargeing_0
+                    percentage <= 10.0f -> R.drawable.icon_battery_chargeing_10
+                    percentage <= 20.0f -> R.drawable.icon_battery_chargeing_20
+                    percentage <= 30.0f -> R.drawable.icon_battery_chargeing_30
+                    percentage <= 40.0f -> R.drawable.icon_battery_chargeing_40
+                    percentage <= 50.0f -> R.drawable.icon_battery_chargeing_50
+                    percentage <= 60.0f -> R.drawable.icon_battery_chargeing_60
+                    percentage <= 70.0f -> R.drawable.icon_battery_chargeing_70
+                    percentage <= 80.0f -> R.drawable.icon_battery_chargeing_80
+                    percentage <= 90.0f -> R.drawable.icon_battery_chargeing_90
+                    else -> R.drawable.icon_battery_chargeing_100
+                }
+            }
+            else -> {
+                when {
+                    percentage == 0.0f -> R.drawable.icon_battery_0
+                    percentage <= 10.0f -> R.drawable.icon_battery_10
+                    percentage <= 20.0f -> R.drawable.icon_battery_20
+                    percentage <= 30.0f -> R.drawable.icon_battery_30
+                    percentage <= 40.0f -> R.drawable.icon_battery_40
+                    percentage <= 50.0f -> R.drawable.icon_battery_50
+                    percentage <= 60.0f -> R.drawable.icon_battery_60
+                    percentage <= 70.0f -> R.drawable.icon_battery_70
+                    percentage <= 80.0f -> R.drawable.icon_battery_80
+                    percentage <= 90.0f -> R.drawable.icon_battery_90
+                    else -> R.drawable.icon_battery_100
+                }
+            }
+        }
+
+        batteryBtn?.setImageResource(iconRes)
     }
 }
