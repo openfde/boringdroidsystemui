@@ -72,6 +72,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         var inited: Boolean = false
     }
 
+    private var needUpdateBattery: Boolean = false
+    private var plugged: Int = 0
+    private var status: Int = 0
+    private var percentage: Float = 0f
     private var windowAttr: WindowAttr? = null
     private val TAG: String = "TopBarLayout"
     val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
@@ -136,7 +140,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         volumeBtn = findViewById(R.id.volume_btn)
         volumeBtn?.tooltipText = context.resources.getString(R.string.top_volume)
         batteryBtn = findViewById(R.id.battery_btn)
-        batteryBtn?.tooltipText = context.resources.getString(R.string.top_battery)
         controlBtn = findViewById(R.id.control_btn)
         controlBtn?.tooltipText = context.resources.getString(R.string.top_control)
         notificationBtn = findViewById(R.id.notifications_btn)
@@ -184,6 +187,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 broadcast
             ),
             GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+
+        if(needUpdateBattery){
+            onBatteryChanged(percentage, status, plugged)
+        }
     }
 
     internal inner class GlobalSearchRecevier : BroadcastReceiver(){
@@ -479,12 +486,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }else if(v == wifiBtn){
             AppUtils.toWifiPage(context)
         } else if(v == batteryBtn){
-            val intent = Intent()
-            val cn: ComponentName? =
-                ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
-            intent.component = cn;
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
+//            val intent = Intent()
+//            val cn: ComponentName? =
+//                ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+//            intent.component = cn;
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            context.startActivity(intent)
         }
     }
 
@@ -707,6 +714,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         status: Int,
         plugged: Int
     ) {
+        this.percentage = percentage
+        this.status = status
+        this.plugged = plugged
+
+        if(batteryBtn == null){
+            needUpdateBattery = true
+            return
+        }
         var statusText = ""
         var pluggedText = ""
 
@@ -729,10 +744,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             else -> pluggedText = "未充电"
         }
 
-//        Log.d("BatteryAnalysis",
-//            "电量: " + percentage + "%\n" +
-//                    "状态: " + statusText + " (代码:" + status + ")\n" +
-//                    "充电方式: " + pluggedText + " (代码:" + plugged + ")")
+        Log.d("BatteryAnalysis",
+            "电量: " + percentage + "%\n" + batteryBtn + " $batteryBtn " +
+                    "状态: " + statusText + " (代码:" + status + ")\n" +
+                    "充电方式: " + pluggedText + " (代码:" + plugged + ")")
 
         // 更准确的充电状态判断
         val charging = when (status) {
@@ -747,7 +762,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             val isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC ||
                     plugged == BatteryManager.BATTERY_PLUGGED_USB ||
                     plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
-//            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
+            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
             isPlugged
         } else {
             charging
@@ -785,7 +800,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 }
             }
         }
-
         batteryBtn?.setImageResource(iconRes)
+//        var p = 80.0f
+        var tips: CharSequence = "%.0f%%".format(percentage)
+                if(plugged == 0 && status == BatteryManager.BATTERY_STATUS_UNKNOWN){
+            tips = "DC"
+            batteryBtn?.setImageResource(R.drawable.icon_battery_chargeing_100)
+        }
+        batteryBtn?.tooltipText = tips
     }
 }
