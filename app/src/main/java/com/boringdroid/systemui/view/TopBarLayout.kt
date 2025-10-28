@@ -804,7 +804,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 //        var p = 80.0f
         var tips: CharSequence = "%.0f%%".format(percentage)
                 if(plugged == 0 && status == BatteryManager.BATTERY_STATUS_UNKNOWN){
-            tips = "DC"
+            tips = "AC"
             batteryBtn?.setImageResource(R.drawable.icon_battery_chargeing_100)
         }
         batteryBtn?.tooltipText = tips
