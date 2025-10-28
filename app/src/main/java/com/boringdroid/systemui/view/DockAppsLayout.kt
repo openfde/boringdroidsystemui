@@ -56,6 +56,7 @@ constructor(
     private var systemUIContext: Context ?= null
 
     var status: View?= null
+    var navi: View?= null
 
     private var itemDecoration: DockAppItemDecoration? = null
     private var appOverviewWindow: AppOverviewWindow ?= null
@@ -99,6 +100,7 @@ constructor(
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChangedWapper()
+        updateNaviWidth(tasks.size)
         dockProvider.registerTaskStackListener()
     }
 
@@ -135,7 +137,7 @@ constructor(
         }
 //        Log.d(TAG, "setTop() called with: taskInfo = $taskInfo, needAdd = $needAdd, isTop = $isTop")
         dockAppAdapter?.notifyDataSetChangedWapper()
-
+        updateNaviWidth(tasks.size)
     }
 
     override fun notifyDockAapp(list: MutableList<TaskInfo>) {
@@ -145,7 +147,31 @@ constructor(
 //        tasks.forEach { taskInfo -> Log.d(TAG, "notifyDockAapp each: $taskInfo") }
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.notifyDataSetChangedWapper()
+        updateNaviWidth(tasks.size)
     }
+
+
+    fun updateNaviWidth(count :Int){
+        val parentView = navi?.parent as? View
+        parentView?.let { view ->
+            val windowManager = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val params = view.layoutParams as? WindowManager.LayoutParams
+            if (params != null) {
+                params.height =
+                    context?.resources?.getDimension(R.dimen.dock_app_layout_height)?.toInt()!!
+                val itemWidth =
+                    context?.resources?.getDimension(R.dimen.dock_icon_width)?.toInt()!!
+                val itemMargin =
+                    context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 2
+                val groupMargin =
+                    context?.resources?.getDimension(R.dimen.dock_group_margin)?.toInt()!! * 2
+                params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                params.width = count * (itemWidth + itemMargin ) + groupMargin + 20
+                windowManager.updateViewLayout(view, params)
+            }
+        }
+    }
+
 
     override fun getDockAapp(): MutableList<TaskInfo> {
         return tasks

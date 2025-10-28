@@ -11,9 +11,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.database.ContentObserver
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -21,18 +19,19 @@ import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
-import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.BatteryReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -40,17 +39,9 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
-import com.boringdroid.systemui.receiver.XserverHelper.KEY_ACTION
-import com.boringdroid.systemui.receiver.XserverHelper.KEY_ICON
-import com.boringdroid.systemui.receiver.XserverHelper.KEY_TITLE
-import com.boringdroid.systemui.receiver.XserverHelper.KEY_WINDOW
-import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK_ALL
 import com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME
 import com.boringdroid.systemui.receiver.XserverHelper.X11_SERVICE_ACTION
-import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_INDEX
-import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_PWIN
-import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_RECT
-import com.boringdroid.systemui.receiver.XserverHelper.X_WINDOW_WINDOW
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.BatteryUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
@@ -58,24 +49,21 @@ import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.DockAppsLayout
-import com.boringdroid.systemui.view.NotificationWindow
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
+import com.fde.x11.ICmdEntryInterface
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.log.HttpLog
 import com.xwdz.http.log.HttpLoggingInterceptor
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
-import com.fde.x11.ICmdEntryInterface;
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
@@ -140,6 +128,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         navi?.addView(dockAppsGroup, dockParams)
         dockAppsLayout?.initApps()
         dockAppsLayout?.status = status
+        dockAppsLayout?.navi = navi
         dockAppsGroup?.setOnClickListener{
 //            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
 //            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")

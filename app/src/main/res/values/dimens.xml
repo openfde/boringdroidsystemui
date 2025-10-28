@@ -138,5 +138,9 @@
     <dimen name="overview_context_width">176dp</dimen>
     <dimen name="overview_context_height">147dp</dimen>
     <dimen name="overview_badge_icon_size">40dp</dimen>
+    <dimen name="dock_app_layout_height">68dp</dimen>
+    <dimen name="dock_icon_width">42dp</dimen>
+    <dimen name="dock_icon_margin">5dp</dimen>
+    <dimen name="dock_group_margin">8dp</dimen>
 
 </resources>
