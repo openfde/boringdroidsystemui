@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.View
@@ -127,6 +128,13 @@ constructor(
                 } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
                     appOverviewWindow?.searchEt?.requestFocus()
                     return@setOnKeyListener true
+                } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                    if(holder.itemView == appOverviewWindow?.focusView){
+                        holder.clickView?.performClick()
+                        return@setOnKeyListener true
+                    } else {
+                        return@setOnKeyListener false
+                    }
                 } else {
                     return@setOnKeyListener false
                 }
