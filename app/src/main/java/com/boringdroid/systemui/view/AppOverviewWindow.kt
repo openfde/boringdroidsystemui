@@ -85,6 +85,7 @@ class AppOverviewWindow(
         appsVp?.adapter = appsPagerAdapter
         appsVp?.setOnClickListener(this)
         bgView?.setOnClickListener(this)
+        searchLl?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
         blurWallPaper()
         updateChannel()
@@ -213,6 +214,8 @@ class AppOverviewWindow(
             dismiss()
         } else if( v == bgView){
             dismiss()
+        } else if( v == searchEt){
+
         }
     }
 

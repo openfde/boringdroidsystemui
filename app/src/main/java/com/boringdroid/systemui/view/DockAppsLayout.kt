@@ -23,6 +23,7 @@ import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.receiver.UninstallReceiver
+import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 import com.fde.x11.ICmdEntryInterface;
@@ -166,7 +167,10 @@ constructor(
                 val groupMargin =
                     context?.resources?.getDimension(R.dimen.dock_group_margin)?.toInt()!! * 2
                 params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                params.width = count * (itemWidth + itemMargin ) + groupMargin + 20
+                val width = count * (itemWidth + itemMargin ) + groupMargin + 20
+                val px = Utils.dpToPx(context, width)
+//                Log.d(TAG, "updateNaviWidth: px:$px width:$width")
+                params.width = px
                 windowManager.updateViewLayout(view, params)
             }
         }
