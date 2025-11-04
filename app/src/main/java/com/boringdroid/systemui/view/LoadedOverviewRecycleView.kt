@@ -271,6 +271,7 @@ constructor(
 
         fun setWindow(window: AppOverviewWindow?) {
             this.appOverviewWindow = window
+            this.appOverviewWindow?.focusView = null
         }
 
 
