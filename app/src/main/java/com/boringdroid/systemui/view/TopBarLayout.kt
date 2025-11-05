@@ -41,6 +41,8 @@ import android.widget.RelativeLayout
 import android.widget.TextClock
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.SystemUIOverlay
+import com.boringdroid.systemui.SystemUIOverlay.Companion
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
@@ -207,6 +209,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 globalSearchWindow?.showPopupWindow()
             }
         }
+    }
+
+    fun wifiStatusListen(){
+        controlWindow?.wifiStatusListen()
     }
 
     private fun makeVolumeWindow(imageView: ImageView?) {

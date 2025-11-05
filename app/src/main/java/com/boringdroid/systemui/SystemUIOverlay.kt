@@ -12,20 +12,20 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.database.ContentObserver
 import android.graphics.Color
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.Message
 import android.provider.Settings
 import android.util.AttributeSet
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
@@ -38,10 +38,10 @@ import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE_STATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
+import com.boringdroid.systemui.receiver.WifiBroadcastReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
 import com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME
 import com.boringdroid.systemui.receiver.XserverHelper.X11_SERVICE_ACTION
-import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.BatteryUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
@@ -85,6 +85,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val classLoader = SystemUIOverlay::class.java.classLoader
     private var mNm: NotificationManager? = null
     private var dynamicReceiver: DynamicReceiver? = null
+    private var wifiBroadcastReceiver: WifiBroadcastReceiver? = null
+    private var networkChangeReceiver: NetWorkBroadcastReceiver? =null
+
     private var dockAppsGroup: ViewGroup? = null
     private var dockAppsLayout: DockAppsLayout? = null
     private var status: ViewGroup ?= null
@@ -96,6 +99,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var recordHandler: Handler ?= null
     private var mService: ICmdEntryInterface? = null
     private var mIsServiceBound = false
+
+
+    val CONNECTIVITY_ACTION =  "com.android.systemui.CONNECTIVITY_CHANGE"
+
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
@@ -205,10 +212,19 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
         dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
+        wifiBroadcastReceiver = WifiBroadcastReceiver(handlerWifi)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         intentFilter.addAction(INTENT_UPDATE_STATE)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
+
+        val intentFilterWifi  = IntentFilter()
+        intentFilterWifi.addAction("com.android.systemui.CONNECTIVITY_CHANGE")
+        pluginContext!!.registerReceiver(wifiBroadcastReceiver, intentFilterWifi, RECEIVER_EXPORTED)
+
+        networkChangeReceiver = topBarLayout?.let { NetWorkBroadcastReceiver(it) }
+
+        systemUIContext!!.registerReceiver(networkChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         registPackageUpdate()
         XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
@@ -240,6 +256,12 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
         initBattery()
+    }
+
+    val handlerWifi = object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            topBarLayout?.wifiStatusListen()
+        }
     }
 
     private fun initBattery() {
@@ -408,6 +430,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             try {
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
                 systemUIContext!!.unregisterReceiver(timeTickReceiver)
+                systemUIContext!!.unregisterReceiver(networkChangeReceiver)
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
             }
@@ -685,6 +708,28 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     override fun syncVisibleWindow(which: Int) {
 
 
+    }
+
+    class NetWorkBroadcastReceiver(val topBarLayout: TopBarLayout) : BroadcastReceiver() {
+          val SETTINGS_PACKAGE =  "com.android.settings"
+          val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
+          var lastClickTime = 0L
+
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastClickTime >= 2000) {
+                lastClickTime = currentTime
+            } else {
+                Log.w(TAG, "NetWorkBroadcastReceiver-bsystemui lost info")
+                return ;
+            }
+
+            val inte = Intent(Wifi_ACTION)
+            inte.putExtra("wifiStatus", -1)
+            inte.setPackage(SETTINGS_PACKAGE)
+            context.sendBroadcast(inte)
+        }
     }
 }
 
