@@ -23,6 +23,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -182,6 +183,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
+        dockAppsGroup?.defaultFocusHighlightEnabled = false
 //        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
         Utils.getLinuxRootFileName(systemUIContext!!)
         Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
@@ -191,6 +193,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
+        topBarLayout?.defaultFocusHighlightEnabled = false
         appStateLayout!!.reloadActivityManager(systemUIContext)
         dockAppsLayout!!.reloadActivityManager(systemUIContext)
         topBarLayout?.overviewProvider = overviewProvider
