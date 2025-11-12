@@ -42,9 +42,20 @@ public class SPUtils {
 
     public static String[] getPersistDockApp(){
         SharedPreferences shared_dock_app = pluginContext.getSharedPreferences(DOCK_APP, pluginContext.MODE_PRIVATE);
-        String apps = shared_dock_app.getString(PERSIST_DOCK_APPS, "com.android.allapp,com.android.settings,com.android.documentsui,com.fde.taskmanager");
+        String defaultApps = "com.android.allapp,com.android.settings," +
+                "com.android.documentsui," +
+                "com.fde.download," +
+                "org.lineageos.etar," +
+                "com.android.gallery3d," +
+                "com.fde.taskmanager";
+        String apps = shared_dock_app.getString(PERSIST_DOCK_APPS, "com.android.allapp,com.android.settings," +
+                "com.android.documentsui," +
+                "com.fde.download," +
+                "org.lineageos.etar," +
+                "com.android.gallery3d," +
+                "com.fde.taskmanager");
         Log.d(TAG, "getPersistDockApp() returned: " + apps);
-        return stringToArray(apps);
+        return stringToArray(apps + defaultApps);
     }
 
     public static String getUserInfo(Context context, String key) {
