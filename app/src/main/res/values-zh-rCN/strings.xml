@@ -21,6 +21,7 @@
     <string name="open">打开</string>
     <string name="todesk">快捷方式</string>
     <string name="close">关闭窗口</string>
+    <string name="close_wifi">关闭</string>
     <string name="uninstall">卸载</string>
     <string name="compatible_config">兼容配置</string>
     <string name="notifications">通知</string>

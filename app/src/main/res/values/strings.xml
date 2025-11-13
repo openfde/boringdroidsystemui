@@ -23,6 +23,7 @@
     <string name="compatible_config">compatible config</string>
     <string name="uninstall">Uninstall</string>
     <string name="close">Close</string>
+    <string name="close_wifi">Close</string>
     <string name="hide">Minimize</string>
     <string name="minimize">Minimize</string>
 

@@ -1,12 +1,11 @@
 package com.boringdroid.systemui.view
 
-import android.app.Instrumentation
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.media.AudioSystem
 import android.os.Handler
+import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
@@ -18,7 +17,6 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
-import androidx.cardview.widget.CardView
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
@@ -27,7 +25,6 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_VIEW_ID
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
-import java.lang.Thread.sleep
 
 class TopBarControlWindow(
     context: Context,
@@ -37,7 +34,7 @@ class TopBarControlWindow(
     layoutResId: Int,
     typeParam: Int
 )
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener,View.OnLongClickListener {
 
 
     private var isRecording: Boolean = false
@@ -46,15 +43,22 @@ class TopBarControlWindow(
     private var recordBtn: ImageView?= null
     private var settingBtn: ImageView?= null
     private var volumeImage: ImageView?= null
+    private var wifiImage: ImageView?= null
+    private var tvWifiName: TextView?= null
     private var volumeCenterIv: ImageView?= null
     private var wifiCv: LinearLayout?= null
     private var volumeSeekBar: SeekBar?= null
     private var audioDevice: AudioDevice? = null
     private var recordTextView: TextView?= null
+    private  val SETTINGS_PACKAGE =  "com.android.settings"
+    private  val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
+
 
     var topbarController: TopbarLayoutController ?=null
     var formUser: Boolean = false
     var recordHandler: Handler ?= null
+
+    var wifiStatus :Int ? = 0 ;
 
 
     companion object {
@@ -64,6 +68,7 @@ class TopBarControlWindow(
         const val TAG:String = "TopBarControlWindow"
         const val SYSUI_PACKAGE = "com.android.systemui"
         const val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
+
     }
 
     private val touchListener = View.OnTouchListener { v, event ->
@@ -215,10 +220,13 @@ class TopBarControlWindow(
         settingBtn = mContentView?.findViewById(R.id.setting_iv)
         volumeSeekBar = mContentView?.findViewById(R.id.volume_seekbar)
         volumeImage = mContentView?.findViewById(R.id.volume_iv)
+        wifiImage = mContentView?.findViewById(R.id.wifi_img)
+        tvWifiName = mContentView?.findViewById(R.id.tv_wifi_name)
         volumeCenterIv = mContentView?.findViewById(R.id.volume_go_iv)
         volumeCenterIv?.setOnClickListener(this)
         wifiCv = mContentView?.findViewById(R.id.wifi_cv)
         wifiCv?.setOnClickListener(this)
+        wifiCv?.setOnLongClickListener (this)
 
         screenshotBtn?.setOnTouchListener(touchListener)
         screenshotBtn?.setOnHoverListener(hoverListener)
@@ -241,14 +249,35 @@ class TopBarControlWindow(
         } else {
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
         }
+
+        wifiStatusListen()
+
     }
 
+    fun wifiStatusListen(){
+        try {
+            wifiStatus = Settings.Global.getInt(getContext().contentResolver, "wifi_status")
+            wifiImage?.apply {
+                setBackgroundResource(if (wifiStatus == 1) R.drawable.control_oval_blue else R.drawable.control_oval_grep)
+                setImageResource(if (wifiStatus == 1) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
+            }
+            val wifiName = Settings.Global.getString(getContext().contentResolver, "wifi_name")
+            tvWifiName?.apply {
+                setText(if (wifiStatus == 1) wifiName else context.getString(R.string.close_wifi))
+            }
+            Log.w(TAG, "bsystemui-wifiStatus $wifiStatus  -wifiName: $wifiName")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     override fun onClick(v: View?) {
-        dismiss()
+
         if( v == screenshotBtn){
+            dismiss()
             Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
         }else if(v == regionshotBtn){
+            dismiss()
             handler.postDelayed({
                 val screenshotHelper = ScreenshotHelper(getContext())
                 screenshotHelper.takeScreenshot(
@@ -257,6 +286,7 @@ class TopBarControlWindow(
                 )
             }, 300)
         } else if(v == recordBtn){
+            dismiss()
             recordHandler?.obtainMessage(2, 0, 0, null)?.sendToTarget()
 //            Utils.sendKeyCode(KeyEvent.KEYCODE_MEDIA_RECORD)
 //            val inst = Instrumentation()
@@ -273,11 +303,22 @@ class TopBarControlWindow(
             dismiss()
             topbarController?.showVolumeWindow()
         }else if(v ==wifiCv){
-            dismiss()
-            AppUtils.toWifiPage(getContext() )
+//            dismiss()
+//            AppUtils.toWifiPage(getContext() )
+            val intent = Intent(Wifi_ACTION)
+            intent.putExtra("wifiStatus", 1 - wifiStatus!!)
+            intent.setPackage(SETTINGS_PACKAGE)
+            getContext().sendBroadcast(intent)
+
+            wifiImage?.apply {
+                setBackgroundResource(if (wifiStatus == 0) R.drawable.control_oval_blue else R.drawable.control_oval_grep)
+                setImageResource(if (wifiStatus == 0) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
+            }
         }
 
     }
+
+
 
     fun onScreenRecordStateChange(state: Int) {
 //        Log.d(TAG, "onScreenRecordStateChange() called with: state = $state recordTextView = $recordTextView")
@@ -294,5 +335,13 @@ class TopBarControlWindow(
 
     interface TopbarLayoutController {
         fun showVolumeWindow();
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        if(v ==wifiCv){
+            dismiss()
+            AppUtils.toWifiPage(getContext() )
+        }
+        return  false;
     }
 }
