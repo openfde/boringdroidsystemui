@@ -2,6 +2,7 @@ package com.boringdroid.systemui.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.boringdroid.systemui.TaskInfo;
@@ -55,7 +56,7 @@ public class SPUtils {
                 "com.android.gallery3d," +
                 "com.fde.taskmanager");
         Log.d(TAG, "getPersistDockApp() returned: " + apps);
-        return stringToArray(apps + defaultApps);
+        return stringToArray(apps + "," + defaultApps);
     }
 
     public static String getUserInfo(Context context, String key) {
