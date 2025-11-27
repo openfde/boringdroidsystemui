@@ -173,7 +173,7 @@ class DockAppAdapter(private val context: Context) :
         pinOperator?.setText(if (persist) R.string.unpin else R.string.pin)
 
         exitView?.setOnClickListener{
-//            contextWindow?.dismiss()
+            contextWindow?.dismiss()
             listener?.onItemClick(exitView.text.toString(), app)
         }
         comptView?.setOnClickListener{
@@ -187,7 +187,6 @@ class DockAppAdapter(private val context: Context) :
                         ),
                     )
                 AppUtils.toConpatiblePage(context, app.packageName, label.toString())
-                Log.w("bellaSystem","packageName: "+app.packageName + ",platformType: "  + app.platformType +",label: "+label)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
