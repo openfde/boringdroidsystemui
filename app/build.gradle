@@ -35,8 +35,8 @@ android {
 		applicationId "com.boringdroid.systemui"
 		minSdkVersion 30
 		targetSdkVersion 34
-		versionCode 150
-		versionName "150"
+		versionCode 151
+		versionName "151"
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 	}

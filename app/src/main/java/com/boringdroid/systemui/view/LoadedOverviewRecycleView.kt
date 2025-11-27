@@ -1,9 +1,13 @@
 package com.boringdroid.systemui.view
 
+import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
@@ -206,6 +210,7 @@ constructor(
 
             val openTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.open_tv)
             val compatTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+            val shortTv: TextView ?= contextWindow?.getContentView()?.findViewById<TextView>(R.id.short_tv)
             val ifPinTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.ifpin_tv)
             ifPinTv?.setText(if(isPersistDockApp == true) R.string.unpin else R.string.pin)
             val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
@@ -242,6 +247,11 @@ constructor(
                 contextWindow?.dismiss()
                 appOverviewWindow?.dismiss()
                 AppUtils.uninstallApp(context, appData)
+            }
+            shortTv?.setOnClickListener {
+                contextWindow?.dismiss()
+                appOverviewWindow?.dismiss()
+                createShortcut( appData)
             }
         }
 
@@ -284,6 +294,31 @@ constructor(
             var clickView = appInfoLayout.findViewById<FrameLayout?>(R.id.app_click_view)
             var badgeIv = appInfoLayout.findViewById<ImageView?>(R.id.app_info_badge)
 
+        }
+
+        fun createShortcut(app: AppData) {
+            com.boringdroid.systemui.Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
+            val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+            val shortcutManager: ShortcutManager? =
+                context?.getSystemService(ShortcutManager::class.java)
+            if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+                val launchIntentForPackage: Intent = context?.getPackageManager()
+                    ?.getLaunchIntentForPackage(app.packageName!!) as Intent
+                launchIntentForPackage.action = Intent.ACTION_MAIN
+                val pinShortcutInfo = ShortcutInfo.Builder(context, app.name)
+                    .setLongLabel(app.name!!)
+                    .setShortLabel(app.name!!)
+                    .setIcon(icon)
+                    .setIntent(launchIntentForPackage)
+                    .build()
+                val pinnedShortcutCallbackIntent =
+                    shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+                val successCallback = PendingIntent.getBroadcast(
+                    context, 0,
+                    pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+                )
+                shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
+            }
         }
 
     }

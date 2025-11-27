@@ -73,30 +73,55 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-//        Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
+        if(position == 1){
+            Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
+        }
         val info = app.linuxInfo
-        if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG) ){
+//        if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG) ){
+//            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+//                .load("${Utils.linuxRootPath}${info.iconPath}")
+//                .centerCrop()
+//                .placeholder(context.getDrawable(R.drawable.icon_menu))
+//                .into(holder.iconIV);
+//            if(position == 1){
+//                Log.d(TAG, "onBindViewHolder: png")
+//            }
+//        } else if(!app.isLinux()){
+//            if(app.program.equals("Apps")){
+//                holder.iconIV.setImageResource(R.drawable.icon_menu)
+//                if(position == 1){
+//                    Log.d(TAG, "onBindViewHolder: icon_menu")
+//                }
+//            } else {
+//                val appIcon = packageManager.getApplicationIcon(app.packageName)
+//                holder.iconIV.setImageDrawable(appIcon)
+//                if(position == 1){
+//                    Log.d(TAG, "onBindViewHolder: appIcon")
+//                }
+//            }
+//        } else if(app.icon != null){
+//            holder.iconIV.setImageDrawable(app.icon)
+//            if(position == 1){
+//                Log.d(TAG, "onBindViewHolder: icon")
+//            }
+//        }
+
+        Log.d(TAG, "onBindViewHolder: ${app.program}  ${!app.isLinux()} ${app.icon} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
+        if(app.program.equals("Apps")){
+            holder.iconIV.setImageResource(R.drawable.icon_menu)
+        } else if( !app.isLinux()){
+            val appIcon = packageManager.getApplicationIcon(app.packageName)
+            holder.iconIV.setImageDrawable(appIcon)
+        } else if(app.icon != null){
+//            holder.iconIV.setImageDrawable(app.icon)
+        } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
-                .placeholder(context.getDrawable(R.drawable.linux_x11))
+                .placeholder(context.getDrawable(R.drawable.icon_menu))
                 .into(holder.iconIV);
-//            Log.d(TAG, "onBindViewHolder: png")
-        } else if(app.icon != null){
-            holder.iconIV.setImageDrawable(app.icon)
-//            Log.d(TAG, "onBindViewHolder: icon")
-        } else if(!app.isLinux()){
-            if(app.program.equals("Apps")){
-                holder.iconIV.setImageResource(R.drawable.icon_menu)
-            } else {
-                val appIcon = packageManager.getApplicationIcon(app.packageName)
-                holder.iconIV.setImageDrawable(appIcon)
-            }
-            Log.d(TAG, "onBindViewHolder: !islinux")
         }
-        if(app.program.equals("Apps")){
-            holder.iconIV.setImageResource(R.drawable.icon_menu)
-        }
+
         if(app.getState() == STATE_UNFEFINED){
             holder.viewStatus.background = null
         } else if (app.getState() == STATE_TOP){
