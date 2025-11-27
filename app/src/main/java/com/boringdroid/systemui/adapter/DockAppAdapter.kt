@@ -31,6 +31,7 @@ import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
@@ -155,6 +156,9 @@ class DockAppAdapter(private val context: Context) :
         val pinOperator: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.dock_tv)
         val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
         val exitView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.exit_tv)
+        val comptView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+        comptView?.visibility = if(app.platformType == TaskInfo.PLATFORM_TYPE_ANDROID) View.VISIBLE else View.GONE
+
 
         exitView?.visibility = if (running) View.VISIBLE else View.GONE
         divide?.visibility = if (running) View.VISIBLE else View.GONE
@@ -169,8 +173,24 @@ class DockAppAdapter(private val context: Context) :
         pinOperator?.setText(if (persist) R.string.unpin else R.string.pin)
 
         exitView?.setOnClickListener{
-            contextWindow?.dismiss()
+//            contextWindow?.dismiss()
             listener?.onItemClick(exitView.text.toString(), app)
+        }
+        comptView?.setOnClickListener{
+            contextWindow?.dismiss()
+            try {
+                val label =
+                    packageManager.getApplicationLabel(
+                        packageManager.getApplicationInfo(
+                            app.packageName!!,
+                            PackageManager.GET_META_DATA
+                        ),
+                    )
+                AppUtils.toConpatiblePage(context, app.packageName, label.toString())
+                Log.w("bellaSystem","packageName: "+app.packageName + ",platformType: "  + app.platformType +",label: "+label)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         pinOperator?.setOnClickListener{
             contextWindow?.dismiss()
