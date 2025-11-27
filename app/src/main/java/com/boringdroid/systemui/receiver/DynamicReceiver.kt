@@ -13,10 +13,10 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
+//        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
         if(intent.action.equals(SERVICE_ACTION)){
             val type = intent.getIntExtra("type",-1)
-        Log.d(TAG, "onReceive() called with: type = $type")
+//        Log.d(TAG, "onReceive() called with: type = $type")
             when(type){
                 TYEP_COUNT_NOTIFY ->{
                     notificationListener?.onNotifyCount(intent.getIntExtra("count",0))

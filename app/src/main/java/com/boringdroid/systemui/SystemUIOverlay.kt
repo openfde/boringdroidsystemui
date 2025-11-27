@@ -236,7 +236,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         timeTickReceiver = object : BroadcastReceiver() {
             @RequiresApi(Build.VERSION_CODES.TIRAMISU)
             override fun onReceive(context: Context, intent: Intent) {
-                Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
+//                Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
                 if (intent.action == Intent.ACTION_TIME_TICK) {
 //                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
                     checkXserverStatus()
@@ -284,7 +284,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
             XserverHelper.startServer(systemUIContext)
         }
-        Log.d(TAG, "checkXserverStatus() called {$mIsServiceBound}")
+//        Log.d(TAG, "checkXserverStatus() called {$mIsServiceBound}")
         if(!mIsServiceBound){
             val intent = Intent()
             intent.setPackage(X11_PACKAGE_NAME)
