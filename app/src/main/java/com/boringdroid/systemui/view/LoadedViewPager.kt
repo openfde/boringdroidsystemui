@@ -80,13 +80,14 @@ constructor(
 //                if (mIsHorizontalScroll) {
             {
                 val dx = event.x - mStartX
-                Log.d(TAG, "handleTouchEvent() called with: dx = $dx")
                 if (abs(dx.toDouble()) > mTriggerDistance) {
                     val current = currentItem
                     val next = if (dx > 0) current - 1 else current + 1
+
+                    val toIndex = max(0.0, min(next.toDouble(), (adapter!!.count - 1).toDouble()))
+                        .toInt()
                     setCurrentItem(
-                        max(0.0, min(next.toDouble(), (adapter!!.count - 1).toDouble()))
-                            .toInt(), true
+                        toIndex, true
                     )
                     return true // 已处理滑动
                 }

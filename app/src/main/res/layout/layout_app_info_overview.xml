@@ -8,16 +8,15 @@
     >
     <FrameLayout
         android:id="@+id/app_click_view"
-        android:layout_width="188dp"
-        android:layout_height="196dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="25dp"
         >
-
         <ImageView
             android:id="@+id/app_info_icon"
             android:layout_width="@dimen/overview_app_icon_size"
             android:layout_height="@dimen/overview_app_icon_size"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="25dp"
             android:scaleType="fitCenter"
             android:src="@mipmap/default_icon_round"
             />
@@ -27,8 +26,8 @@
             android:layout_width="@dimen/overview_badge_icon_size"
             android:layout_height="@dimen/overview_badge_icon_size"
             android:src="@drawable/linux_badge"
-            android:layout_marginTop="80dp"
-            android:layout_marginLeft="100dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="75dp"
             android:visibility="gone"
             />
 
@@ -43,7 +42,7 @@
             android:gravity="center"
             android:text="Android"
             android:textSize="14sp"
-            android:layout_marginTop="120dp"
+            android:layout_marginTop="95dp"
             style="@style/style_55"
             />
     </FrameLayout>

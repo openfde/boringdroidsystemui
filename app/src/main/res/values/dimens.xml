@@ -95,8 +95,8 @@
     <dimen name="volume_window_height">460dp</dimen>
 
     <dimen name="top_bar_layout_width">1920dp</dimen>
-    <dimen name="top_bar_layout_height">24dp</dimen>
-    <dimen name="topbar_icon_size">30dp</dimen>
+    <dimen name="top_bar_layout_height">32dp</dimen>
+    <dimen name="topbar_icon_size">32dp</dimen>
     <dimen name="topbar_icon_padding">7dp</dimen>
     <dimen name="topbar_icon_tray_padding">3dp</dimen>
     <dimen name="top_bar_power_width">150dp</dimen>
@@ -108,7 +108,7 @@
     <dimen name="top_bar_control_width">376dp</dimen>
     <dimen name="top_bar_control_height">434dp</dimen>
     <dimen name="top_bar_control_width_expand">392dp</dimen>
-    <dimen name="top_bar_control_height_expand">460dp</dimen>
+    <dimen name="top_bar_control_height_expand">520dp</dimen>
     <dimen name="elevation_control_panel">3dp</dimen>
     <dimen name="radius_control_panel">12dp</dimen>
     <dimen name="card_elevation_control_panel">10dp</dimen>
@@ -142,5 +142,6 @@
     <dimen name="dock_icon_width">42dp</dimen>
     <dimen name="dock_icon_margin">5dp</dimen>
     <dimen name="dock_group_margin">8dp</dimen>
+    <dimen name="control_item_width">64dp</dimen>
 
 </resources>

@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/top_bar_control_width_expand"
-    android:layout_height="@dimen/top_bar_control_height_expand"
+    android:layout_height="wrap_content"
+    android:paddingBottom="12dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="right">
 
     <com.boringdroid.systemui.view.LoadedCardView
         android:id="@+id/root_blur"
         android:layout_width="@dimen/top_bar_control_width"
-        android:layout_height="@dimen/top_bar_control_height"
+        android:layout_height="wrap_content"
         app:cardCornerRadius="16dp"
         app:cardElevation="12dp"
         android:layout_margin="8dp"
         >
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"
             android:background="@drawable/round_rect_16dp_control"
             >
             <TextView
@@ -33,13 +35,15 @@
                 android:text="快捷控制" />
 
             <LinearLayout
+                android:layout_below="@id/shortcut_tv"
                 android:id="@+id/wifi_cv"
                 android:layout_width="166dp"
-                android:layout_height="72dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
-                android:layout_marginTop="56dp"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
+                android:paddingBottom="15dp"
                 >
                 <ImageView
                     android:id="@+id/wifi_img"
@@ -47,6 +51,7 @@
                     android:layout_height="44dp"
                     android:layout_gravity="center_vertical"
                     android:padding="10dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginLeft="10dp"
                     android:src="@drawable/icon_wifi_select_full"
                     android:background="@drawable/control_oval_blue"
@@ -71,10 +76,9 @@
 
                     <TextView
                         android:id="@+id/tv_wifi_name"
-                        android:layout_width="36dp"
-                        android:layout_height="17dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
                         android:textColor="#59000000"
                         android:textSize="12sp"
                         android:layout_marginTop="3dp"
@@ -86,13 +90,15 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_below="@id/shortcut_tv"
                 android:layout_width="166dp"
-                android:layout_height="72dp"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="16dp"
-                android:layout_marginTop="56dp"
+                android:layout_marginTop="15dp"
                 android:layout_alignParentRight="true"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
+                android:paddingBottom="15dp"
                 >
                 <ImageView
                     android:layout_width="44dp"
@@ -101,6 +107,7 @@
                     android:layout_marginLeft="10dp"
                     android:src="@drawable/icon_light_unselect"
                     android:padding="10dp"
+                    android:layout_marginTop="8dp"
                     android:background="@drawable/control_oval_gray"
                     />
                 <LinearLayout
@@ -122,8 +129,8 @@
                         />
 
                     <TextView
-                        android:layout_width="36dp"
-                        android:layout_height="17dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
                         android:textColor="#59000000"
@@ -137,83 +144,91 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_marginTop="140dp"
+                android:id="@+id/control_ll"
+                android:layout_below="@+id/wifi_cv"
+                android:layout_marginTop="12dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_width="match_parent"
-                android:layout_height="122dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
+                android:paddingBottom="15dp"
                 >
-                <LinearLayout
-                    android:layout_width="52dp"
+                <FrameLayout
+                    android:layout_width="@dimen/control_item_width"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="26dp"
+                    android:layout_marginLeft="18dp"
                     >
                     <ImageView
                         android:id="@+id/screenshot_iv"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:padding="14dp"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/icon_fullscreen_shot_unselect"
                         android:background="@drawable/control_oval_bg_26"
                         />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="64dp"
                         android:gravity="center"
                         android:textColor="#ff292929"
+                        android:layout_gravity="center_horizontal"
                         android:textSize="13sp"
                         android:alpha="1"
                         android:text="@string/printscreen_string"
                         style="@style/style_55"
                         />
 
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="52dp"
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="@dimen/control_item_width"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="28dp"
+                    android:layout_marginLeft="16dp"
                     >
                     <ImageView
                         android:id="@+id/regionshot_iv"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
+                        android:layout_gravity="center_horizontal"
                         android:padding="14dp"
                         android:src="@drawable/icon_regionshot_unselect"
                         android:background="@drawable/control_oval_bg_26"
                         />
+
                     <TextView
+                        style="@style/style_55"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center"
-                        android:textColor="#ff292929"
-                        android:textSize="13sp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="64dp"
                         android:alpha="1"
+                        android:gravity="center"
                         android:text="@string/printscreen_region_string"
-                        style="@style/style_55"
-                        />
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="52dp"
+                        android:textColor="#ff292929"
+                        android:textSize="13sp" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="@dimen/control_item_width"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="28dp"
+                    android:layout_marginLeft="16dp"
                     >
                     <ImageView
                         android:id="@+id/record_iv"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:padding="14dp"
+                        android:layout_gravity="center_horizontal"
                         android:src="@drawable/icon_record_unselect"
                         android:background="@drawable/control_oval_bg_26"
                         />
@@ -221,7 +236,8 @@
                         android:id="@+id/record_tv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="64dp"
+                        android:layout_gravity="center_horizontal"
                         android:gravity="center"
                         android:textColor="#ff292929"
                         android:textSize="13sp"
@@ -229,19 +245,20 @@
                         android:text="@string/recordscreen_string"
                         style="@style/style_55"
                         />
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="52dp"
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="@dimen/control_item_width"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="28dp"
+                    android:layout_marginLeft="16dp"
                     >
                     <ImageView
                         android:id="@+id/setting_iv"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
+                        android:layout_gravity="center_horizontal"
                         android:padding="14dp"
                         android:src="@drawable/icon_setting_unselect"
                         android:background="@drawable/control_oval_bg_26"
@@ -249,7 +266,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="64dp"
                         android:gravity="center"
                         android:textColor="#ff292929"
                         android:textSize="13sp"
@@ -257,10 +274,12 @@
                         android:text="@string/setting_string"
                         style="@style/style_55"
                         />
-                </LinearLayout>
+                </FrameLayout>
             </LinearLayout>
             <LinearLayout
-                android:layout_marginTop="274dp"
+                android:id="@+id/volume_ll"
+                android:layout_below="@+id/control_ll"
+                android:layout_marginTop="12dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
@@ -298,10 +317,11 @@
             </LinearLayout>
 
             <LinearLayout
+                android:layout_below="@+id/volume_ll"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="350dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
                 android:gravity="center_vertical"

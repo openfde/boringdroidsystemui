@@ -77,35 +77,6 @@ class DockAppAdapter(private val context: Context) :
             Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
         }
         val info = app.linuxInfo
-//        if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG) ){
-//            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
-//                .load("${Utils.linuxRootPath}${info.iconPath}")
-//                .centerCrop()
-//                .placeholder(context.getDrawable(R.drawable.icon_menu))
-//                .into(holder.iconIV);
-//            if(position == 1){
-//                Log.d(TAG, "onBindViewHolder: png")
-//            }
-//        } else if(!app.isLinux()){
-//            if(app.program.equals("Apps")){
-//                holder.iconIV.setImageResource(R.drawable.icon_menu)
-//                if(position == 1){
-//                    Log.d(TAG, "onBindViewHolder: icon_menu")
-//                }
-//            } else {
-//                val appIcon = packageManager.getApplicationIcon(app.packageName)
-//                holder.iconIV.setImageDrawable(appIcon)
-//                if(position == 1){
-//                    Log.d(TAG, "onBindViewHolder: appIcon")
-//                }
-//            }
-//        } else if(app.icon != null){
-//            holder.iconIV.setImageDrawable(app.icon)
-//            if(position == 1){
-//                Log.d(TAG, "onBindViewHolder: icon")
-//            }
-//        }
-
         Log.d(TAG, "onBindViewHolder: ${app.program}  ${!app.isLinux()} ${app.icon} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
         if(app.program.equals("Apps")){
             holder.iconIV.setImageResource(R.drawable.icon_menu)
@@ -113,7 +84,7 @@ class DockAppAdapter(private val context: Context) :
             val appIcon = packageManager.getApplicationIcon(app.packageName)
             holder.iconIV.setImageDrawable(appIcon)
         } else if(app.icon != null){
-//            holder.iconIV.setImageDrawable(app.icon)
+            holder.iconIV.setImageDrawable(app.icon)
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
