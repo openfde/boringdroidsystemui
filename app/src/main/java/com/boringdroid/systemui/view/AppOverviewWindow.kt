@@ -12,6 +12,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_TAB
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -247,12 +248,16 @@ class AppsPagerAdapter(
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val recycleView = LoadedOverviewRecycleView(container.context)
+        val view = LayoutInflater.from(container.context)
+            .inflate(R.layout.layout_overview_item, container, false)
+
+        val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
+//        val recycleView = LoadedOverviewRecycleView(container.context)
         recycleView.overviewWindow = appOverviewWindow
         recycleView.setData(appPages[position])
         val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        container.addView(recycleView, params)
-        return recycleView
+        container.addView(view, params)
+        return view
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
@@ -260,7 +265,9 @@ class AppsPagerAdapter(
     }
 
     override fun getItemPosition(`object`: Any): Int {
-        val recycleView = `object` as LoadedOverviewRecycleView
+//        val recycleView = `object` as LoadedOverviewRecycleView
+        val view = `object` as View
+        val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
         val list : MutableList<AppData>? = recycleView.list
         val index = appPages.indexOf(list)
         if(index >= 0){

@@ -84,7 +84,7 @@ class DockAppAdapter(private val context: Context) :
             val appIcon = packageManager.getApplicationIcon(app.packageName)
             holder.iconIV.setImageDrawable(appIcon)
         } else if(app.icon != null){
-//            holder.iconIV.setImageDrawable(app.icon)
+            holder.iconIV.setImageDrawable(app.icon)
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
