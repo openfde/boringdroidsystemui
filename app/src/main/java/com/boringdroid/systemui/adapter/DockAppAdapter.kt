@@ -31,6 +31,7 @@ import com.boringdroid.systemui.TaskInfo.Companion.STATE_UNFEFINED
 import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.MAX_RUNNING_TASKS
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
@@ -76,35 +77,6 @@ class DockAppAdapter(private val context: Context) :
             Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
         }
         val info = app.linuxInfo
-//        if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG) ){
-//            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
-//                .load("${Utils.linuxRootPath}${info.iconPath}")
-//                .centerCrop()
-//                .placeholder(context.getDrawable(R.drawable.icon_menu))
-//                .into(holder.iconIV);
-//            if(position == 1){
-//                Log.d(TAG, "onBindViewHolder: png")
-//            }
-//        } else if(!app.isLinux()){
-//            if(app.program.equals("Apps")){
-//                holder.iconIV.setImageResource(R.drawable.icon_menu)
-//                if(position == 1){
-//                    Log.d(TAG, "onBindViewHolder: icon_menu")
-//                }
-//            } else {
-//                val appIcon = packageManager.getApplicationIcon(app.packageName)
-//                holder.iconIV.setImageDrawable(appIcon)
-//                if(position == 1){
-//                    Log.d(TAG, "onBindViewHolder: appIcon")
-//                }
-//            }
-//        } else if(app.icon != null){
-//            holder.iconIV.setImageDrawable(app.icon)
-//            if(position == 1){
-//                Log.d(TAG, "onBindViewHolder: icon")
-//            }
-//        }
-
         Log.d(TAG, "onBindViewHolder: ${app.program}  ${!app.isLinux()} ${app.icon} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
         if(app.program.equals("Apps")){
             holder.iconIV.setImageResource(R.drawable.icon_menu)
@@ -112,7 +84,7 @@ class DockAppAdapter(private val context: Context) :
             val appIcon = packageManager.getApplicationIcon(app.packageName)
             holder.iconIV.setImageDrawable(appIcon)
         } else if(app.icon != null){
-//            holder.iconIV.setImageDrawable(app.icon)
+            holder.iconIV.setImageDrawable(app.icon)
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
@@ -180,6 +152,9 @@ class DockAppAdapter(private val context: Context) :
         val pinOperator: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.dock_tv)
         val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
         val exitView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.exit_tv)
+        val comptView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+        comptView?.visibility = if(app.platformType == TaskInfo.PLATFORM_TYPE_ANDROID) View.VISIBLE else View.GONE
+
 
         exitView?.visibility = if (running) View.VISIBLE else View.GONE
         divide?.visibility = if (running) View.VISIBLE else View.GONE
@@ -196,6 +171,21 @@ class DockAppAdapter(private val context: Context) :
         exitView?.setOnClickListener{
             contextWindow?.dismiss()
             listener?.onItemClick(exitView.text.toString(), app)
+        }
+        comptView?.setOnClickListener{
+            contextWindow?.dismiss()
+            try {
+                val label =
+                    packageManager.getApplicationLabel(
+                        packageManager.getApplicationInfo(
+                            app.packageName!!,
+                            PackageManager.GET_META_DATA
+                        ),
+                    )
+                AppUtils.toConpatiblePage(context, app.packageName, label.toString())
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         pinOperator?.setOnClickListener{
             contextWindow?.dismiss()
