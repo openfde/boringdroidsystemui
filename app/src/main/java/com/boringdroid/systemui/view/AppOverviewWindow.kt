@@ -136,6 +136,7 @@ class AppOverviewWindow(
                 focusView?.requestFocus()
                 return@setOnKeyListener true
             } else {
+                Log.d(TAG, "initViews() called with: v = $v, keyCode = $keyCode, event = $event")
                 return@setOnKeyListener false
             }
         }
