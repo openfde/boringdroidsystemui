@@ -18,6 +18,7 @@ import android.graphics.Point
 import android.os.Handler
 import android.os.Message
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -134,7 +135,7 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             screenRecordBtn!!.context.startActivity(intent)
         }
         imgSetting!!.setOnClickListener {
-            val intent = Intent("android.settings.SETTINGS")
+            val intent = Intent(Settings.ACTION_SETTINGS)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             mContext.startActivity(intent)
             listener?.syncVisible(Utils.ALL_INVISIBLE)

@@ -276,6 +276,11 @@ class TopBarControlWindow(
         if( v == screenshotBtn){
             dismiss()
             Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
+        }else if(v == settingBtn){
+            dismiss()
+            val intent = Intent(Settings.ACTION_SETTINGS)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            getContext().startActivity(intent)
         }else if(v == regionshotBtn){
             dismiss()
             handler.postDelayed({

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Outline
 import android.os.Build
+import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -150,7 +151,7 @@ class TopBarPowerWindow(
     }
 
     private fun showSetting() {
-        val intent = Intent("android.settings.SETTINGS")
+        val intent = Intent(Settings.ACTION_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         getContext().startActivity(intent)
     }
