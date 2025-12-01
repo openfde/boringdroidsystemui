@@ -17,6 +17,7 @@ import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
@@ -27,7 +28,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.constant.Constant
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.ImageUtils
@@ -48,6 +48,7 @@ constructor(
     companion object {
         private const val NUMBER_OF_COLUMNS = 7
         private const val TAG = "LoadedRecycleView"
+        private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
     }
 
     init {
@@ -168,7 +169,7 @@ constructor(
                     context.startActivity(intent)
                 }
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "shouldStartApp: ${e.message}", )
+                Log.e(TAG, "shouldStartApp: ${e.message}")
             }
         }
 
@@ -229,6 +230,7 @@ constructor(
                 uninstallTv?.visibility = View.VISIBLE
             }
             compatTv?.visibility = if(isLinuxApp) View.GONE else View.VISIBLE
+            shortTv?.visibility = if(isLinuxApp) View.GONE else View.VISIBLE
 
             openTv?.setOnClickListener{
                 contextWindow?.dismiss()
@@ -264,7 +266,7 @@ constructor(
                     AppUtils.toConpatiblePage(context, packageNam,appNam)
                 }
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "shouldStartCompat: ${e.message}", )
+                Log.e(TAG, "shouldStartCompat: ${e.message}")
             }
         }
 
@@ -298,27 +300,32 @@ constructor(
 
         fun createShortcut(app: AppData) {
             com.boringdroid.systemui.Log.d(TAG, "createShortcut() called with: app = [${app.name}]")
-            val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-            val shortcutManager: ShortcutManager? =
-                context?.getSystemService(ShortcutManager::class.java)
-            if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-                val launchIntentForPackage: Intent = context?.getPackageManager()
-                    ?.getLaunchIntentForPackage(app.packageName!!) as Intent
-                launchIntentForPackage.action = Intent.ACTION_MAIN
-                val pinShortcutInfo = ShortcutInfo.Builder(context, app.name)
-                    .setLongLabel(app.name!!)
-                    .setShortLabel(app.name!!)
-                    .setIcon(icon)
-                    .setIntent(launchIntentForPackage)
-                    .build()
-                val pinnedShortcutCallbackIntent =
-                    shortcutManager.createShortcutResultIntent(pinShortcutInfo)
-                val successCallback = PendingIntent.getBroadcast(
-                    context, 0,
-                    pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
-                )
-                shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
-            }
+            val inte = Intent(ACTION_SHORT_CUT)
+            inte.putExtra("packageName", app.packageName!!)
+            inte.putExtra("appName", app.name!!)
+            inte.setPackage("com.android.launcher3")
+            context.sendBroadcast(inte)
+//            val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+//            val shortcutManager: ShortcutManager? =
+//                context?.getSystemService(ShortcutManager::class.java)
+//            if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+//                val launchIntentForPackage: Intent = context?.getPackageManager()
+//                    ?.getLaunchIntentForPackage(app.packageName!!) as Intent
+//                launchIntentForPackage.action = Intent.ACTION_MAIN
+//                val pinShortcutInfo = ShortcutInfo.Builder(context, app.name)
+//                    .setLongLabel(app.packageName!!)
+//                    .setShortLabel(app.name!!)
+//                    .setIcon(icon)
+//                    .setIntent(launchIntentForPackage)
+//                    .build()
+//                val pinnedShortcutCallbackIntent =
+//                    shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+//                val successCallback = PendingIntent.getBroadcast(
+//                    context, 0,
+//                    pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+//                )
+//                shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
+//            }
         }
 
     }
