@@ -73,8 +73,8 @@
                 android:id="@+id/apps_vp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="120dp"
-                android:layout_marginBottom="152dp"
+                android:layout_marginTop="105dp"
+                android:layout_marginBottom="135dp"
                 />
 
             <com.boringdroid.systemui.view.LoadedIndicator
@@ -83,7 +83,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_width="wrap_content"
                 android:layout_height="16dp"
-                android:layout_marginBottom="110dp"
+                android:layout_marginBottom="100dp"
                 />
 
 <!--            <com.boringdroid.systemui.view.LoadedRecycleView-->
