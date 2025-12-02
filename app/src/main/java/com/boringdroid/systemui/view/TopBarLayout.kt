@@ -291,7 +291,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeImeSwitchWindow(imageView: ImageView?) {
         getInputMethods()
         val width = context.resources.getDimension(R.dimen.ime_switch_window_width_expand).toInt()
-        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 65
+        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + resources.getDimension(R.dimen.ime_margin_vert).toInt()
         imeSwitchWindow = AbsTopPopWindow.Builder(context, WRAP_CONTENT, height, R.layout.window_topbar_ime)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .provider(null)
@@ -440,7 +440,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun imeBtnClick() {
         getInputMethods()
         val height =
-            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + 65
+            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + + resources.getDimension(R.dimen.ime_margin_vert).toInt()
         imeSwitchWindow?.updateLayoutParams(WRAP_CONTENT, height)
         imeSwitchWindow?.showPopupWindow()
         imeSwitchWindow?.setSelect(currentInputMethod)

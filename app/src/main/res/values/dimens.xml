@@ -86,6 +86,7 @@
     <dimen name="ime_switch_window_height">110dp</dimen>
     <dimen name="ime_switch_window_margin">240dp</dimen>
     <dimen name="item_ime_height">34dp</dimen>
+    <dimen name="ime_margin_vert">65dp</dimen>
     <dimen name="ime_window_padding">15dp</dimen>
 
     <dimen name="volume_window_width_expand">394dp</dimen>
@@ -143,5 +144,6 @@
     <dimen name="dock_icon_margin">5dp</dimen>
     <dimen name="dock_group_margin">8dp</dimen>
     <dimen name="control_item_width">64dp</dimen>
+    <dimen name="overview_recycle_padding">180dp</dimen>
 
 </resources>
