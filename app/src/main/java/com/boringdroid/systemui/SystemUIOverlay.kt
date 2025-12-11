@@ -24,7 +24,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -100,7 +99,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var recordHandler: Handler ?= null
     private var mService: ICmdEntryInterface? = null
     private var mIsServiceBound = false
-
+    private var mDockScaleFactor = 1.0f
+    var receiver :BroadcastReceiver?= null
+    private var mHandler : Handler = Handler(Looper.getMainLooper())
 
     val CONNECTIVITY_ACTION =  "com.android.systemui.CONNECTIVITY_CHANGE"
 
@@ -117,6 +118,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
         status = statusBar as ViewGroup
         navi = navBar as ViewGroup
+        if(navi != null && navi!!.getTag() is Float){
+            mDockScaleFactor = navi!!.getTag() as Float
+//            Log.d(TAG, "setup: mDockScaleFactor :${mDockScaleFactor}")
+        }
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
 //            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
             updateNaviDock()
@@ -128,19 +133,19 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private fun updateNaviDock() {
         val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
-        layoutParams.height = FrameLayout.LayoutParams.WRAP_CONTENT
-        layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
         navi?.layoutParams = layoutParams
-        val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+        val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
         navi?.removeAllViews()
         navi?.addView(dockAppsGroup, dockParams)
-        dockAppsLayout?.initApps()
+        dockAppsLayout?.initApps(mDockScaleFactor)
         dockAppsLayout?.status = status
         dockAppsLayout?.navi = navi
         dockAppsGroup?.setOnClickListener{
 //            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
 //            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
-            traverseAndPrint(navi!!, 0)
+//            traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
@@ -259,6 +264,22 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
         initBattery()
+
+        systemUIContext?.contentResolver?.registerContentObserver(
+            Settings.System.getUriFor("dock_scale"),
+            false, mDockContentObserver
+        )
+    }
+
+    private val mDockContentObserver: ContentObserver = object : ContentObserver(mHandler) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            val scaleFactor: Float = Settings.System.getFloat(
+                systemUIContext?.getContentResolver(),
+                "dock_scale", 1.0f)
+            Log.d(TAG, "onChange() called with: selfChange = $selfChange, scaleFactor = $scaleFactor")
+            mDockScaleFactor = scaleFactor
+            updateNaviDock()
+        }
     }
 
     val handlerWifi = object : Handler(Looper.getMainLooper()) {
@@ -336,7 +357,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED)
         filter.addDataScheme("package")
-        val receiver = UninstallReceiver(this)
+        receiver = UninstallReceiver(this)
         pluginContext?.registerReceiver(receiver, filter)
     }
 
@@ -459,6 +480,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         pluginContext = null
         status?.removeAllViews()
+        pluginContext?.unregisterReceiver(receiver)
     }
 
     @SuppressLint("PrivateApi")

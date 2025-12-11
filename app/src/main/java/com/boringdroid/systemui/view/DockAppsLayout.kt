@@ -1,10 +1,12 @@
 package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.os.UserManager
+import android.provider.Settings
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
@@ -43,6 +45,7 @@ constructor(
     UninstallReceiver.AppUninstallListener
 {
 
+    var dockScaleFactor: Float = 1.0f
     var xserver: ICmdEntryInterface? = null
     private var launcherResumeFlag: Boolean ?= false
     private val activityManager: ActivityManager
@@ -87,7 +90,8 @@ constructor(
         super.onDetachedFromWindow()
         dockProvider.unregisterTaskStackListener()
     }
-    fun initApps() {
+    fun initApps(dockScaleFactor: Float) {
+        this.dockScaleFactor = dockScaleFactor
         val provideApps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
         if (provideApps != null) {
             overviewApps.clear()
@@ -98,6 +102,7 @@ constructor(
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
         Log.d(TAG, "initApps: ")
+        dockAppAdapter?.dockScaleFactor = dockScaleFactor
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChangedWapper()
@@ -158,10 +163,14 @@ constructor(
             val windowManager = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val params = view.layoutParams as? WindowManager.LayoutParams
             if (params != null) {
-                params.height =
-                    context?.resources?.getDimension(R.dimen.dock_app_layout_height)?.toInt()!!
-                val itemWidth =
-                    context?.resources?.getDimension(R.dimen.dock_icon_width)?.toInt()!!
+
+                val dock_height = context?.resources?.getDimension(R.dimen.dock_app_layout_height)
+                var dock_height_scaled = dock_height?.times(dockScaleFactor)?.plus(0.5f)
+
+                params.height = dock_height_scaled!!.toInt()
+                val dock_item_width = context?.resources?.getDimension(R.dimen.dock_icon_width)
+                val dock_item_width_scaled = dock_item_width?.times(dockScaleFactor)?.plus(0.5f)
+                val itemWidth = dock_item_width_scaled!!.toInt()
                 val itemMargin =
                     context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 2
                 val groupMargin =
@@ -231,6 +240,14 @@ constructor(
             }
             resources.getString(R.string.unpin) ->{
                 dockProvider.unpin(taskInfo)
+            }
+            resources.getString(R.string.dock_settings) ->{
+                val intent = Intent()
+                val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.TextReadingForSetupWizardActivity")
+                intent.component = cn;
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+
             }
         }
 //        tasks.forEach { task -> Log.d(TAG, "onItemClick: task:$task") }

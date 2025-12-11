@@ -36,7 +36,8 @@
                 android:id="@+id/search_ll"
                 android:layout_marginTop="40dp"
                 android:layout_width="320dp"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/round_rect_6dp_1f"
         >
@@ -53,8 +54,7 @@
                 <EditText
                     android:id="@+id/search_et"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingVertical="10dp"
+                    android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:gravity="center_vertical"
                     android:hint="@string/search_all_app"

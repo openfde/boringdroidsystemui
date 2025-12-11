@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_ll"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/dock_app_layout_height"
+    android:layout_height="match_parent"
     android:layout_centerVertical="true"
     android:orientation="vertical"
     >
@@ -12,7 +12,7 @@
         android:id="@+id/root_blur"
         android:layout_width="wrap_content"
         android:layout_marginTop="1dp"
-        android:layout_height="60dp"
+        android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/dock_group_margin"
         android:layout_marginBottom="8dp"
         app:cardCornerRadius="16dp"
@@ -22,16 +22,18 @@
         <FrameLayout
             android:id="@+id/paren_fl"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="match_parent"
             android:paddingHorizontal="8dp"
             android:background="@drawable/round_rect_16dp"
             >
             <com.boringdroid.systemui.view.DockAppsLayout
                 android:id="@+id/apps_rv"
+                android:layout_marginVertical="2dp"
                 android:layout_marginTop="2dp"
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="56dp"/>
+                android:layout_height="match_parent"
+                />
         </FrameLayout>
     </com.boringdroid.systemui.view.LoadedCardView>
 </LinearLayout>
