@@ -145,5 +145,7 @@
     <dimen name="dock_group_margin">8dp</dimen>
     <dimen name="control_item_width">64dp</dimen>
     <dimen name="overview_recycle_padding">180dp</dimen>
-
+    <dimen name="dock_badge_width">25dp</dimen>
+    <dimen name="dock_status_margin">1dp</dimen>
+    <dimen name="dock_status_width">8dp</dimen>
 </resources>

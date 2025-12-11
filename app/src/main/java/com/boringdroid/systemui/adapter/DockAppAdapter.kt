@@ -36,9 +36,11 @@ import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
 import com.bumptech.glide.Glide
+import android.provider.Settings
 
 class DockAppAdapter(private val context: Context) :
     Adapter<DockAppAdapter.ViewHolder>() {
+    var dockScaleFactor: Float = 1.0f
     private val TAG: String = "DockAppAdapter"
     private val apps: MutableList<TaskInfo> = ArrayList()
     private var systemUIActivityManager: ActivityManager
@@ -118,6 +120,40 @@ class DockAppAdapter(private val context: Context) :
             }
             true
         }
+
+        var marginReverse: Int = 0
+        if(dockScaleFactor < 0.8f){
+            marginReverse = context.resources?.getDimension(R.dimen.dock_status_margin)!!.toInt()
+        }
+        val layoutParams = holder.iconIV.layoutParams as FrameLayout.LayoutParams
+        val dimensionPixelSize = context.resources.getDimensionPixelSize(R.dimen.dock_icon_width)
+        val iconSize = (dimensionPixelSize * dockScaleFactor + 0.5f - marginReverse * 6).toInt()
+        layoutParams.width = iconSize
+        layoutParams.height = iconSize
+        holder.iconIV?.layoutParams = layoutParams
+
+        val layoutParamsBadge = holder.x11Iv.layoutParams as FrameLayout.LayoutParams
+        val dimensionPixelSizeBadge = context.resources.getDimensionPixelSize(R.dimen.dock_badge_width)
+        val badgeSize = (dimensionPixelSizeBadge * dockScaleFactor + 0.5f).toInt()
+        layoutParamsBadge.width = badgeSize
+        layoutParamsBadge.height = badgeSize
+        holder.x11Iv?.layoutParams = layoutParamsBadge
+
+        var factor: Float = 1.0f
+//        if(dockScaleFactor > 0.8f){
+            factor = dockScaleFactor
+//        }
+        val layoutParamsStatus = holder.viewStatus.layoutParams as FrameLayout.LayoutParams
+        val dimensionPixelSizeStatus = context.resources.getDimensionPixelSize(R.dimen.dock_status_margin)
+        val statusSize = (dimensionPixelSizeStatus * factor ).toInt()
+
+        val dimensionPixelSizeStatusWidth = context.resources.getDimensionPixelSize(R.dimen.dock_status_width)
+        val statusSizeWidth = (dimensionPixelSizeStatusWidth * factor ).toInt()
+
+        layoutParamsStatus.bottomMargin = statusSize
+        layoutParamsStatus.width = statusSizeWidth
+        holder.viewStatus?.layoutParams = layoutParamsStatus
+
     }
 
     private fun makeAndFillContextWindow(app: TaskInfo, v: View) {
@@ -153,6 +189,7 @@ class DockAppAdapter(private val context: Context) :
         val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
         val exitView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.exit_tv)
         val comptView: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+        val settingsTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.settings_tv)
         comptView?.visibility = if(app.platformType == TaskInfo.PLATFORM_TYPE_ANDROID) View.VISIBLE else View.GONE
 
 
@@ -194,6 +231,10 @@ class DockAppAdapter(private val context: Context) :
         windowOperator?.setOnClickListener{
             contextWindow?.dismiss()
             listener?.onItemClick(windowOperator.text.toString(), app)
+        }
+        settingsTv?.setOnClickListener {
+            contextWindow?.dismiss()
+            listener?.onItemClick(settingsTv.text.toString(), app)
         }
     }
 

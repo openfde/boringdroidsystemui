@@ -16,7 +16,8 @@
     <!--    &lt;!&ndash;User context menu&ndash;&gt;-->
     <!--    <string name="users">Users</string>-->
     <!--    <string name="files">Files</string>-->
-    <!--    <string name="settings">Settings</string>-->
+        <string name="settings">设置</string>
+    <string name="dock_settings">程序坞设置</string>
     <!--    <string name="dock_settings">Settings</string>-->
     <string name="open">打开</string>
     <string name="todesk">快捷方式</string>
