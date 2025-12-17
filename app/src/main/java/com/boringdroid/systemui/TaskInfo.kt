@@ -12,7 +12,6 @@ import com.boringdroid.systemui.data.PersistApp
 
 class TaskInfo(val packageName: String,
                val program: String) {
-
     companion object {
         const val ID_UNDEFINED = 0
 

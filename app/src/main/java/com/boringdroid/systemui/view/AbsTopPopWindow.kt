@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.*
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
 
@@ -42,6 +43,7 @@ open class AbsTopPopWindow(
         object Notification : WindowType()
         object Power : WindowType()
         object Control : WindowType()
+        object DockContext : WindowType()
         object Default : WindowType()
     }
 
@@ -240,6 +242,7 @@ open class AbsTopPopWindow(
                 is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.DockContext -> DockContextWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam)
             }
 

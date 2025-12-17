@@ -8,7 +8,7 @@
 
     <com.boringdroid.systemui.view.LoadedCardView
         android:id="@+id/root_blur"
-        android:layout_width="@dimen/dock_context_width"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:elevation="14dp"
@@ -16,7 +16,7 @@
         >
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="@dimen/dock_context_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/round_rect_8dp_d1"
             android:paddingVertical="9dp"
@@ -79,6 +79,21 @@
                 android:lineSpacingExtra="5.2sp"
                 android:gravity="left|center_vertical"
                 android:text="@string/dock_settings"
+                style="@style/style_55"
+                />
+            <TextView
+                android:id="@+id/todesk_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginHorizontal="@dimen/top_text_margin"
+                android:paddingHorizontal="@dimen/top_text_padding"
+                android:layout_centerVertical="true"
+                android:textColor="#e6000000"
+                android:textSize="14sp"
+                android:lineSpacingExtra="5.2sp"
+                android:gravity="left|center_vertical"
+                android:text="@string/todesk"
                 style="@style/style_55"
                 />
             <View
