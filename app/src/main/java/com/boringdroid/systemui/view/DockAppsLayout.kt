@@ -1,16 +1,19 @@
 package com.boringdroid.systemui.view
 
 import android.app.ActivityManager
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.UserManager
-import android.provider.Settings
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
@@ -21,13 +24,16 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.DockAppAdapter
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.data.DockContext
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.receiver.UninstallReceiver
+import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
+import com.boringdroid.systemui.view.LoadedDockContextRecycleView.Companion.TYPE_APP
 import com.fde.x11.ICmdEntryInterface;
 
 
@@ -53,7 +59,7 @@ constructor(
     private val userManager: UserManager
     private val windowManager:WindowManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
-    private val overviewApps: MutableList<AppData> = ArrayList()
+    val overviewApps: MutableList<AppData> = ArrayList()
     private val dockAppAdapter: DockAppAdapter?
     private val dockProvider: DockAppsProvider
     var overviewProvider: AllAppsProvider ?= null
@@ -63,10 +69,11 @@ constructor(
     var navi: View?= null
 
     private var itemDecoration: DockAppItemDecoration? = null
-    private var appOverviewWindow: AppOverviewWindow ?= null
+    var appOverviewWindow: AppOverviewWindow ?= null
 
     companion object {
         private const val TAG = "DockAppsLayout"
+        private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
     }
 
     init {
@@ -80,6 +87,18 @@ constructor(
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         dockProvider = DockAppsProvider(context, this)
 //        overviewProvider = AllAppsProvider(context, this)
+    }
+
+    override fun onTouchEvent(e: MotionEvent?): Boolean {
+        Log.d(TAG, "onTouchEvent() called with: e = $e")
+        if(e?.buttonState == MotionEvent.BUTTON_SECONDARY && e.action == MotionEvent.ACTION_DOWN){
+            dockAppAdapter?.makeListContextWindowAt(
+                e.rawX.toInt(),
+                null
+            )
+            return true
+        }
+        return super.onTouchEvent(e)
     }
 
     override fun onAttachedToWindow() {
@@ -106,6 +125,7 @@ constructor(
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
         dockAppAdapter?.notifyDataSetChangedWapper()
+        dockAppAdapter?.dockAppLayout = this
         updateNaviWidth(tasks.size)
         dockProvider.registerTaskStackListener()
     }
@@ -169,18 +189,20 @@ constructor(
 
                 params.height = dock_height_scaled!!.toInt()
                 val dock_item_width = context?.resources?.getDimension(R.dimen.dock_icon_width)
-                val dock_item_width_scaled = dock_item_width?.times(dockScaleFactor)?.plus(0.5f)
+                val dock_item_width_scaled = dock_item_width
                 val itemWidth = dock_item_width_scaled!!.toInt()
                 val itemMargin =
-                    context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 2
+                    context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 4
                 val groupMargin =
                     context?.resources?.getDimension(R.dimen.dock_group_margin)?.toInt()!! * 2
                 params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                val width = count * (itemWidth + itemMargin ) + groupMargin + 20
+                val width = count * (itemWidth + itemMargin ) + groupMargin + context?.resources?.getDimension(R.dimen.dock_width_margin)?.toInt()!!
                 val px = Utils.dpToPx(context, width)
-//                Log.d(TAG, "updateNaviWidth: px:$px width:$width")
-                params.width = px
-                windowManager.updateViewLayout(view, params)
+                Log.d(TAG, "updateNaviWidth: px:$px width:$width")
+                params.width = width
+                if(view.isAttachedToWindow){
+                    windowManager.updateViewLayout(view, params)
+                }
             }
         }
     }
@@ -209,10 +231,54 @@ constructor(
         return dockProvider.getActiveSize()
     }
 
-    override fun onItemClick(action: String, taskInfo: TaskInfo) {
+    override fun onItemClick(dockContext: DockContext) {
+        if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
+            appOverviewWindow?.dismiss()
+            return
+        }
+        if(dockContext.type == TYPE_APP){
+            dockContext.app ?.let { appData ->
+                try {
+                    if(appData?.linuxInfo != null){
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
+                        val linuxInfo = appData.linuxInfo
+                        intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        context.startActivity(intent)
+                    } else {
+                        val intent = Intent()
+                        intent.component = appData?.componentName
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        context.startActivity(intent)
+                    }
+                } catch (e: ActivityNotFoundException) {
+                }
+            }
+        } else if(dockContext.taskInfo == null){
+            when(dockContext.name){
+                resources.getString(R.string.dock_settings) ->{
+                    val intent = Intent()
+                    val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.TextReadingForSetupWizardActivity")
+                    intent.component = cn;
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                }
+                resources.getString(R.string.close_overview) ->{
+                    appOverviewWindow?.dismiss()
+                }
+            }
+        } else {
+            onItemClick(dockContext.name, dockContext.taskInfo!!)
+        }
+
+    }
+
+    override fun onItemClick(action: String?, taskInfo: TaskInfo) {
         if(!ACTION_DOCK_OVERVIEW.equals(taskInfo.action)) {
             if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
                 appOverviewWindow?.dismiss()
+                return
             }
         }
         when(action){
@@ -241,16 +307,36 @@ constructor(
             resources.getString(R.string.unpin) ->{
                 dockProvider.unpin(taskInfo)
             }
+            resources.getString(R.string.compatible_set) ->{
+                val packageManager: PackageManager = context.packageManager
+                try {
+                    val label =
+                        packageManager.getApplicationLabel(
+                            packageManager.getApplicationInfo(
+                                taskInfo.packageName!!,
+                                PackageManager.GET_META_DATA
+                            ),
+                        )
+                    AppUtils.toConpatiblePage(context, taskInfo.packageName, label.toString())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             resources.getString(R.string.dock_settings) ->{
                 val intent = Intent()
                 val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.TextReadingForSetupWizardActivity")
                 intent.component = cn;
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
-
+            }
+            resources.getString(R.string.todesk) ->{
+                val inte = Intent(ACTION_SHORT_CUT)
+                inte.putExtra("packageName", taskInfo.packageName!!)
+                inte.putExtra("appName", taskInfo.program!!)
+                inte.setPackage("com.android.launcher3")
+                context.sendBroadcast(inte)
             }
         }
-//        tasks.forEach { task -> Log.d(TAG, "onItemClick: task:$task") }
     }
 
     private fun showAppsOverview() {

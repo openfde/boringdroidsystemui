@@ -16,6 +16,7 @@ import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
+import com.boringdroid.systemui.data.DockContext
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
@@ -229,8 +231,6 @@ constructor(
                 divide?.visibility = View.VISIBLE
                 uninstallTv?.visibility = View.VISIBLE
             }
-            compatTv?.visibility = if(isLinuxApp) View.GONE else View.VISIBLE
-            shortTv?.visibility = if(isLinuxApp) View.GONE else View.VISIBLE
 
             openTv?.setOnClickListener{
                 contextWindow?.dismiss()
@@ -250,11 +250,44 @@ constructor(
                 appOverviewWindow?.dismiss()
                 AppUtils.uninstallApp(context, appData)
             }
-            shortTv?.setOnClickListener {
-                contextWindow?.dismiss()
-                appOverviewWindow?.dismiss()
-                createShortcut( appData)
+            if(isLinuxApp){
+                shortTv?.setTextColor(context.resources.getColor(R.color.md_theme_dark_outline))
+            } else {
+                shortTv?.setTextColor(context.resources.getColor(R.color.notification_text_color))
+                shortTv?.setOnClickListener {
+                    contextWindow?.dismiss()
+                    appOverviewWindow?.dismiss()
+                    createShortcut( appData)
+                }
             }
+            appOverviewWindow?.contextWindow = contextWindow
+
+
+            var list: MutableList<View?> = ArrayList()
+
+            list.add(openTv)
+            list.add(compatTv)
+            list.add(shortTv)
+            list.add(ifPinTv)
+            list.add(uninstallTv)
+
+            list.forEach {
+                it?.setOnHoverListener(hoverListener)
+            }
+        }
+
+        private val hoverListener = OnHoverListener { v, event ->
+            val what = event?.action
+            when (what) {
+                MotionEvent.ACTION_HOVER_ENTER -> {
+                    v?.setBackgroundResource(R.drawable.round_rect_4dp)
+                }
+
+                MotionEvent.ACTION_HOVER_EXIT -> {
+                    v?.setBackgroundResource(R.drawable.round_rect_4dp_null)
+                }
+            }
+            false
         }
 
         private fun shouldStartCompat(appData: AppData) {

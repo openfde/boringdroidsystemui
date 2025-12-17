@@ -43,6 +43,7 @@ class AppOverviewWindow(
     : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener{
 
 
+    var contextWindow: AbsTopPopWindow ?= null
     var focusView: View ?= null
     private val apps: MutableList<AppData> = ArrayList()
     private var appPages: MutableList<MutableList<AppData>> = ArrayList()
@@ -51,7 +52,7 @@ class AppOverviewWindow(
      var searchEt: EditText ?= null
      var searchLl: LinearLayout ?= null
      var bgView : View ?= null
-    private var appsVp: LoadedViewPager ?= null
+     var appsVp: LoadedViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
     var appProvider : AppProvider ?= null
@@ -186,16 +187,25 @@ class AppOverviewWindow(
                 positionOffset: Float,
                 positionOffsetPixels: Int
             ) {
+                Log.d(
+                    "ViewPager",
+                    "onPageScrolled() called with: position = $position, positionOffset = $positionOffset, positionOffsetPixels = $positionOffsetPixels"
+                )
                 indicatorMi?.onPageScrolled(position, positionOffset, positionOffsetPixels)
             }
 
             override fun onPageSelected(position: Int) {
+                Log.d("ViewPager", "onPageSelected() called with: position = $position")
                 indicatorMi?.onPageSelected(position)
 
             }
 
             override fun onPageScrollStateChanged(state: Int) {
+                Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
                 indicatorMi?.onPageScrollStateChanged(state)
+//                if(state == 0){
+                    appsVp?.blockScroll = false
+//                }
             }
         })
     }
@@ -204,6 +214,8 @@ class AppOverviewWindow(
         super.dismiss()
         filterApps(null, 0)
         focusView = null
+        contextWindow?.dismiss()
+        contextWindow = null
     }
 
 

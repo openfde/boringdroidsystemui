@@ -478,6 +478,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
             }
         }
+        topBarLayout?.unregisterNotification()
         pluginContext = null
         status?.removeAllViews()
         pluginContext?.unregisterReceiver(receiver)

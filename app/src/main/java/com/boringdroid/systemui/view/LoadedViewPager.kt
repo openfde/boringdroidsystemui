@@ -25,20 +25,61 @@ constructor(
     private var mStartY = 0f
     private var mIsHorizontalScroll = false
     val TAG = "ViewPager"
+    var blockScroll : Boolean = false
 
     init {
         setOnTouchListener { v, event -> handleTouchEvent(event) }
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+    private fun goToNextPage() {
+        val currentItem = currentItem
+        val totalItems = adapter?.count ?: 0 // 使用 Elvis 运算符提供默认值
 
+        if (currentItem < totalItems - 1) {
+            setCurrentItem(currentItem + 1, true)
+        }
+    }
+    // 翻到上一页
+    private fun goToPreviousPage() {
+        val currentItem = currentItem
+        if (currentItem > 0) {
+            setCurrentItem(currentItem - 1, true)
+        }
+    }
+
+    private var lastInterceptX : Float = -1f
+    private var lastInterceptY : Float = -1f
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         when (ev!!.action) {
             MotionEvent.ACTION_DOWN -> {
                 mStartX = ev!!.x
                 mStartY = ev!!.y
+                lastInterceptX = -1f
+                lastInterceptY = -1f
             }
 
             MotionEvent.ACTION_MOVE -> {
+                if(blockScroll){
+                    lastInterceptX = -1f
+                    lastInterceptY = -1f
+                    blockScroll = false
+                } else if(lastInterceptX == -1f){
+                    lastInterceptX = ev!!.x
+                    lastInterceptY = ev!!.y
+                } else {
+                    if(lastInterceptX == ev!!.x){
+                        lastInterceptX = -1f
+                        if(lastInterceptY > ev!!.y){
+                            goToNextPage()
+                        } else {
+                            goToPreviousPage()
+                        }
+                        blockScroll = true
+                        lastInterceptY = -1f
+                    }
+                }
+
                 val dx = Math.abs(ev!!.x - mStartX)
                 val dy = Math.abs(ev!!.y - mStartY)
                 if (dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop) {
@@ -49,8 +90,11 @@ constructor(
                 if(mStartX == ev.x && mStartY == ev.y && ev.source == 0x1002){
                     postDelayed({ overviewWindow?.dismiss() }, 50)
                 }
+                lastInterceptX = -1f
+                lastInterceptY = -1f
             }
         }
+
         return super.onInterceptTouchEvent(ev)
     }
 

@@ -131,16 +131,18 @@
     <dimen name="top_bar_search_height">56dp</dimen>
     <dimen name="top_bar_search_height_expand">76dp</dimen>
 
-    <dimen name="dock_context_width_expand">192dp</dimen>
+    <dimen name="dock_context_width_expand">198dp</dimen>
+    <dimen name="dock_context_width_small">150dp</dimen>
     <dimen name="dock_context_width">176dp</dimen>
     <dimen name="dock_context_height">114dp</dimen>
 
     <dimen name="overview_app_icon_size">80dp</dimen>
-    <dimen name="overview_context_width">176dp</dimen>
+    <dimen name="overview_context_width">185dp</dimen>
     <dimen name="overview_context_height">147dp</dimen>
     <dimen name="overview_badge_icon_size">40dp</dimen>
     <dimen name="dock_app_layout_height">68dp</dimen>
     <dimen name="dock_icon_width">42dp</dimen>
+    <dimen name="dock_width_margin">20dp</dimen>
     <dimen name="dock_icon_margin">5dp</dimen>
     <dimen name="dock_group_margin">8dp</dimen>
     <dimen name="control_item_width">64dp</dimen>
@@ -148,4 +150,6 @@
     <dimen name="dock_badge_width">25dp</dimen>
     <dimen name="dock_status_margin">1dp</dimen>
     <dimen name="dock_status_width">8dp</dimen>
+    <dimen name="dock_context_divider_height">6dp</dimen>
+    <dimen name="dock_divide_padding">8dp</dimen>
 </resources>

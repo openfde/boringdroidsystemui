@@ -268,6 +268,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         context.registerReceiver(notificationReceiver, intentFilter, RECEIVER_EXPORTED)
     }
 
+    public fun unregisterNotification() {
+        try {
+            context.unregisterReceiver(notificationReceiver)
+        } catch (e: IllegalArgumentException) {
+        }
+    }
+
 
     private fun makeNotificationWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_notification_width).toInt()
