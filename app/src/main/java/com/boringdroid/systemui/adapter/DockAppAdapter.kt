@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -36,6 +37,7 @@ import com.boringdroid.systemui.view.AbsTopPopWindow
 import com.bumptech.glide.Glide
 import com.boringdroid.systemui.data.DockContext
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TASK_CLICK_ACTION
 import com.boringdroid.systemui.view.DockAppsLayout
 import com.boringdroid.systemui.view.DockContextWindow
 import com.boringdroid.systemui.view.LoadedDockContextRecycleView
@@ -116,6 +118,7 @@ class DockAppAdapter(private val context: Context) :
             if(app.id == 0){
                 listener?.onItemClick(context.resources.getString(R.string.open), app)
             }else if(!isShowing(app.id)){
+                context.sendBroadcast(Intent(TASK_CLICK_ACTION))
                 listener?.onItemClick(context.resources.getString(R.string.show), app)
             } else {
                 listener?.onItemClick(context.resources.getString(R.string.minimize), app)

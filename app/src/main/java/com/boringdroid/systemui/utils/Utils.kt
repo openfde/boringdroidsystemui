@@ -124,6 +124,40 @@ object Utils {
         val path: String
     )
 
+    /**
+     * 获取Android大版本号（数字）
+     * @return 大版本号，如 14、13、12 等
+     */
+    fun getMajorVersion(): Int {
+        // 根据API Level判断大版本
+        val apiLevel = Build.VERSION.SDK_INT
+
+
+        // API Level与大版本对应关系（持续更新）
+        if (apiLevel >= 34) {
+            return 14 // Android 14+
+        } else if (apiLevel >= 33) {
+            return 13 // Android 13
+        } else if (apiLevel >= 32) {
+            return 12 // Android 12L
+        } else if (apiLevel >= 31) {
+            return 12 // Android 12
+        } else if (apiLevel >= 30) {
+            return 11 // Android 11
+        } else if (apiLevel >= 29) {
+            return 10 // Android 10
+        } else if (apiLevel >= 28) {
+            return 9 // Android 9
+        } else if (apiLevel >= 27) {
+            return 8 // Android 8.1
+        } else if (apiLevel >= 26) {
+            return 8 // Android 8.0
+        }
+
+        // 可以继续添加更早的版本
+        return -1 // 未知版本
+    }
+
     fun getProperty(key: String?, defaultValue: String?): String? {
         var value = defaultValue
 

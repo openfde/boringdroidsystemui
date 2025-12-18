@@ -47,6 +47,8 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
         val EXTRA_STATE: String = "extra_state"
         private const val TAG = "DynamicReceiver"
         val SERVICE_ACTION = "notify_action"
+        val TASK_CLICK_ACTION = "task_click_action"
+
         val TYEP_COUNT_NOTIFY = 1
         val TYEP_PANEL_CHANGE_NOTIFY = 2
         val TYEP_ADD_NOTIFY = 21

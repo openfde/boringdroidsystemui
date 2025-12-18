@@ -131,4 +131,8 @@
     <string name="top_home">Desktop</string>
     <string name="no_device">No device</string>
 
+    <string name="openfde_version">OpenFDE version</string>
+    <string name="android_version">Android version</string>
+
+
 </resources>
