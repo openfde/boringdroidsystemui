@@ -129,4 +129,9 @@
     <string name="top_ime">输入法</string>
     <string name="top_home">桌面</string>
     <string name="no_device">没有找到设备</string>
+
+    <string name="openfde_version">OpenFDE 版本</string>
+    <string name="android_version">Android 版本</string>
+
+
 </resources>

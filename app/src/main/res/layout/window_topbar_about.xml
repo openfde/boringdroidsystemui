@@ -61,7 +61,7 @@
                 android:layout_below="@id/device_tv"
                 android:layout_centerHorizontal="true"
                 style="@style/style_55"
-                android:text="OpenFDE OS 版本 2.0.1" />
+                android:text="OpenFDE 2.0.1" />
         </RelativeLayout>
     </com.boringdroid.systemui.view.LoadedCardView>
 </RelativeLayout>

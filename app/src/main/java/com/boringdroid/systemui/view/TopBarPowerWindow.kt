@@ -24,23 +24,22 @@ class TopBarPowerWindow(
     gravity: Int,
     layoutResId: Int,
     typeParam: Int
-)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
+) : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
     companion object {
         const val POWER_WINDOW_PADDING = 8
         const val POWER_OUTLINE_RADIUS = 8f
         const val POWER_OUTLINE_SHADOW = 60
-        const val TAG:String = "TopBarPowerWindow"
+        const val TAG: String = "TopBarPowerWindow"
     }
 
-    private var aboutBtn : TextView ?= null
-    private var settingBtn : TextView ?= null
-    private var sleepBtn : TextView ?= null
-    private var shutdownBtn : TextView ?= null
-    private var rebootBtn : TextView ?= null
-    private var logoutBtn : TextView ?= null
-    private var lockBtn : TextView ?= null
+    private var aboutBtn: TextView? = null
+    private var settingBtn: TextView? = null
+    private var sleepBtn: TextView? = null
+    private var shutdownBtn: TextView? = null
+    private var rebootBtn: TextView? = null
+    private var logoutBtn: TextView? = null
+    private var lockBtn: TextView? = null
 
     private val hoverListener = View.OnHoverListener { v, event ->
         val what = event?.action
@@ -57,12 +56,14 @@ class TopBarPowerWindow(
     }
 
 
-    override fun showPopupWindow(){
+    override fun showPopupWindow() {
         super.showPopupWindow()
-        val enterAnim = ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, - getHeight().toFloat(), 0f)
+        val enterAnim =
+            ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, -getHeight().toFloat(), 0f)
         enterAnim.duration = FADE_DURATION
         enterAnim.interpolator = LinearInterpolator()
-        val exitAnim = ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, 0f, - getHeight().toFloat())
+        val exitAnim =
+            ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, 0f, -getHeight().toFloat())
         exitAnim.duration = FADE_DURATION
         exitAnim.interpolator = LinearInterpolator()
         this.enter = enterAnim
@@ -71,7 +72,7 @@ class TopBarPowerWindow(
         initViews()
     }
 
-    fun initViews(){
+    fun initViews() {
         aboutBtn = mContentView?.findViewById(R.id.about_tv)
         settingBtn = mContentView?.findViewById(R.id.setting_tv)
         sleepBtn = mContentView?.findViewById(R.id.sleep_tv)
@@ -112,23 +113,23 @@ class TopBarPowerWindow(
     }
 
 
-    override fun dismiss(){
+    override fun dismiss() {
         super.dismiss()
     }
 
     override fun onClick(v: View?) {
         dismiss()
-        if(v == aboutBtn){
+        if (v == aboutBtn) {
             showAboutWindow()
-        } else if (v == settingBtn){
+        } else if (v == settingBtn) {
             showSetting()
-        } else if (v == shutdownBtn){
+        } else if (v == shutdownBtn) {
             DeviceUtils.poweroff()
-        } else if ( v == rebootBtn){
+        } else if (v == rebootBtn) {
             DeviceUtils.restart()
-        } else if ( v == logoutBtn){
+        } else if (v == logoutBtn) {
             DeviceUtils.logout()
-        } else if ( v == lockBtn){
+        } else if (v == lockBtn) {
             DeviceUtils.lock()
         }
     }
@@ -136,18 +137,32 @@ class TopBarPowerWindow(
     private fun showAboutWindow() {
         val width = getContext().resources.getDimension(R.dimen.top_bar_about_width).toInt()
         val height = getContext().resources.getDimension(R.dimen.top_bar_about_height).toInt()
-        var powerWindow: AbsTopPopWindow  = Builder(getContext(), width, height, R.layout.window_topbar_about)
-            .gravity(Gravity.CENTER)
-            .build(WindowType.Default)
+        var powerWindow: AbsTopPopWindow =
+            Builder(getContext(), width, height, R.layout.window_topbar_about)
+                .gravity(Gravity.CENTER)
+                .build(WindowType.Default)
         powerWindow.showPopupWindow()
         val contentView = powerWindow.getContentView()
         Utils.setBackgroundBlurRadius(contentView?.findViewById(R.id.root_blur), 100, 12f)
-        if(contentView != null){
+        if (contentView != null) {
             var close: View? = contentView.findViewById(R.id.close_iv)
+            var versionTv: TextView? = contentView.findViewById(R.id.version_tv)
+            var deviceTv: TextView? = contentView.findViewById(R.id.device_tv)
+
             close?.setOnClickListener {
                 powerWindow.dismiss()
             }
+
+            val openfde = getContext().resources.getString(R.string.openfde_version)
+            val version = Utils.getProperty("ro.openfde.version", "2.0.1")
+            versionTv?.text = "$openfde $version"
+
+            val androidv = getContext().resources.getString(R.string.android_version)
+            val majorVersion = Utils.getMajorVersion()
+            deviceTv?.text = "$androidv $majorVersion"
+
         }
+
     }
 
     private fun showSetting() {
