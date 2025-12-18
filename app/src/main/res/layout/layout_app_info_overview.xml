@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:layout_width="188dp"
-    android:layout_height="196dp"
+    android:layout_width="@dimen/overview_app_width"
+    android:layout_height="@dimen/overview_app_height"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     >
+
     <FrameLayout
         android:id="@+id/app_click_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="25dp"
+        android:padding="3dp"
         >
         <ImageView
             android:id="@+id/app_info_icon"
@@ -20,7 +22,7 @@
             android:scaleType="fitCenter"
             android:src="@mipmap/default_icon_round"
             />
-        
+
         <ImageView
             android:id="@+id/app_info_badge"
             android:layout_width="@dimen/overview_badge_icon_size"

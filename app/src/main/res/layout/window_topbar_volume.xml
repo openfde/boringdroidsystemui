@@ -40,7 +40,7 @@
                 android:layout_marginTop="56dp"
                 android:layout_marginHorizontal="20dp"
                 android:layout_width="wrap_content"
-                android:layout_height="25dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 >
@@ -65,7 +65,7 @@
                 <TextView
                     android:id="@+id/volume_tv"
                     android:layout_width="50dp"
-                    android:layout_height="24dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:textColor="#d9000000"
                     android:textSize="18sp"
@@ -84,29 +84,31 @@
 
             <LinearLayout
                 android:layout_width="336dp"
-                android:layout_height="32dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="106dp"
                 android:orientation="horizontal"
+                android:id="@+id/device_ll"
                 android:background="@drawable/round_rect_6dp_0a"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="3dp"
+                android:paddingVertical="3dp"
                 >
+
                 <Button
                     android:id="@+id/out_bt"
-                    android:gravity="center"
-                    android:layout_width="164dp"
-                    android:layout_height="26dp"
                     style="?android:attr/buttonBarStyle"
+                    android:layout_width="164dp"
+                    android:layout_height="32dp"
                     android:background="@drawable/round_rect_4dp_ff"
-                    android:textColor="#ff292929"
-                    android:textSize="14sp"
+                    android:gravity="center"
                     android:text="@string/set_output"
-                    />
+                    android:textColor="#ff292929"
+                    android:textSize="14sp" />
                 <Button
                     android:id="@+id/in_bt"
                     android:layout_width="164dp"
-                    android:layout_height="26dp"
+                    android:layout_height="32dp"
                     style="?android:attr/buttonBarStyle"
                     android:textColor="#ff292929"
                     android:textSize="14sp"
@@ -118,9 +120,10 @@
                 android:id="@+id/in_rv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="154dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="60dp"
                 android:layout_marginHorizontal="14dp"
+                android:layout_below="@+id/device_ll"
                 android:visibility="gone"
                 />
 
@@ -128,9 +131,10 @@
                 android:id="@+id/out_rv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="154dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="60dp"
                 android:layout_marginHorizontal="14dp"
+                android:layout_below="@+id/device_ll"
                 />
             <View
                 android:layout_width="match_parent"
