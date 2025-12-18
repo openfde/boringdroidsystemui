@@ -172,6 +172,7 @@ object Utils {
         }
     }
 
+    @JvmStatic
     fun getProperty(key: String?, defaultValue: Int?): Int? {
         var value = defaultValue
 

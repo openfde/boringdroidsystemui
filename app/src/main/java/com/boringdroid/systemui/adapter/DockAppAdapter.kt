@@ -188,7 +188,7 @@ class DockAppAdapter(private val context: Context) :
         if(contextWindow != null && contextWindow?.isShowing() == true){
             contextWindow?.dismiss()
         }
-        contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.dock_context_layout)
+        contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.dock_context_layout)
             .gravity(Gravity.BOTTOM or Gravity.LEFT)
             .locate( paddingX , 0)
             .build(AbsTopPopWindow.WindowType.DockContext) as DockContextWindow
@@ -218,7 +218,7 @@ class DockAppAdapter(private val context: Context) :
         if(contextWindow != null && contextWindow?.isShowing() == true){
             contextWindow?.dismiss()
         }
-        contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.dock_context_layout)
+        contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.dock_context_layout)
             .gravity(Gravity.BOTTOM or Gravity.LEFT)
             .locate( paddingX , 0)
             .build(AbsTopPopWindow.WindowType.DockContext) as DockContextWindow
@@ -321,7 +321,7 @@ class DockAppAdapter(private val context: Context) :
         val running = app.isRunning()
         val top = app.isTop()
         if (contextWindow == null){
-            contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.dock_app_context)
+            contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.dock_app_context)
                 .gravity(Gravity.BOTTOM or Gravity.LEFT)
                 .locate( paddingX - 16 , CONTEXT_WINDOW_PADDING_Y)
                 .build(AbsTopPopWindow.WindowType.Default) as DockContextWindow

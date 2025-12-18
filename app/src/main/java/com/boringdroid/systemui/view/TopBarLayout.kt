@@ -279,7 +279,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeNotificationWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_notification_width).toInt()
         val height = calculateNotificationHeight()
-        notificationsWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_notification)
+        notificationsWindow = AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.window_topbar_notification)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(TopBarNotificationWindow.WINDOW_PADDING_RIGHT , TopBarNotificationWindow.WINDOW_PADDING_TOP)
             .provider(null)
@@ -299,7 +299,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getInputMethods()
         val width = context.resources.getDimension(R.dimen.ime_switch_window_width_expand).toInt()
         val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + resources.getDimension(R.dimen.ime_margin_vert).toInt()
-        imeSwitchWindow = AbsTopPopWindow.Builder(context, WRAP_CONTENT, height, R.layout.window_topbar_ime)
+        imeSwitchWindow = AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.window_topbar_ime)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .provider(null)
             .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
@@ -448,7 +448,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getInputMethods()
         val height =
             (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + + resources.getDimension(R.dimen.ime_margin_vert).toInt()
-        imeSwitchWindow?.updateLayoutParams(WRAP_CONTENT, height)
+        imeSwitchWindow?.updateLayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         imeSwitchWindow?.showPopupWindow()
         imeSwitchWindow?.setSelect(currentInputMethod)
         imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)

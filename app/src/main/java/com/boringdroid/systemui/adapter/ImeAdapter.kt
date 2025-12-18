@@ -38,7 +38,7 @@ class ImeAdapter(private val context: Context, private val list: MutableList<Inp
         if(TextUtils.equals(currentInputMethod, inputMethodInfo.id)){
             holder.select?.visibility = View.VISIBLE
         } else{
-            holder.select?.visibility = View.GONE
+            holder.select?.visibility = View.INVISIBLE
         }
     }
 

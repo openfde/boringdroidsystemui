@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="230dp"
-    android:layout_height="@dimen/item_ime_height"
+    android:layout_width="250dp"
+    android:layout_height="wrap_content"
     android:id="@+id/item_view"
     android:paddingHorizontal="8dp"
+    android:layout_marginVertical="4dp"
     >
 
 
@@ -31,13 +32,23 @@
         style="@style/style_55"
         />
 
+<!--    <ImageView-->
+<!--        android:id="@+id/select"-->
+<!--        android:layout_width="16dp"-->
+<!--        android:layout_height="16dp"-->
+<!--        android:layout_centerVertical="true"-->
+<!--        android:layout_toRightOf="@+id/title"-->
+<!--        android:layout_marginLeft="30dp"-->
+<!--        android:src="@drawable/icon_select"-->
+<!--        />-->
+
     <ImageView
         android:id="@+id/select"
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="12dp"
+        android:layout_marginRight="10dp"
         android:src="@drawable/icon_select"
         />
 

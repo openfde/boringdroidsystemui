@@ -28,8 +28,11 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.AppProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
+import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
+import com.boringdroid.systemui.view.LoadedOverviewRecycleView.Companion.NUMBER_OF_COLUMNS
+import kotlin.collections.chunked
 
 
 class AppOverviewWindow(
@@ -82,7 +85,20 @@ class AppOverviewWindow(
         appsVp?.overviewWindow = this
         bgView = mContentView?.findViewById(R.id.bg_view)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
-        appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
+
+
+        val screenHeight = ScreenSizeUtils.getInstance(getContext()).screenHeight
+        val dimensionPixelSize1 =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_top)
+        val dimensionPixelSize2 =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
+//        val dimensionPixelSize3 =
+//            getContext().resources.getDimensionPixelSize(R.dimen.overview_indicator_margin)
+        val dimensionPixelSize =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
+        val div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
+        Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div")
+        appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
         appsVp?.setOnClickListener(this)

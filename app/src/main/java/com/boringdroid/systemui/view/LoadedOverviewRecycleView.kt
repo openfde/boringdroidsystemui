@@ -48,7 +48,7 @@ constructor(
     var list: MutableList<AppData> ?= null
 
     companion object {
-        private const val NUMBER_OF_COLUMNS = 7
+        public const val NUMBER_OF_COLUMNS = 7
         private const val TAG = "LoadedRecycleView"
         private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
     }
@@ -183,7 +183,7 @@ constructor(
             val x = location[0] + 132
             val y = location[1] + 32
             if(contextWindow == null){
-                contextWindow =  AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.layout_app_context_overview)
+                contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.layout_app_context_overview)
                     .gravity(Gravity.TOP or Gravity.START)
                     .locate( x , y)
                     .build(AbsTopPopWindow.WindowType.Default)

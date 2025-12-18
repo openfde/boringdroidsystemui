@@ -23,9 +23,16 @@ public class ScreenSizeUtils {
         WindowManager manager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
         manager.getDefaultDisplay().getMetrics(dm);
-        screenWidth = dm.widthPixels;// 获取屏幕分辨率宽度
-        screenHeight = dm.heightPixels;// 获取屏幕分辨率高度
+        if(screenWidth == 0 || screenHeight == 0){
+            screenHeight = Utils.getProperty("openfde.display_height", 1080);
+            screenWidth = Utils.getProperty("openfde.display_width", 1920);
+        }
+//        screenWidth = dm.widthPixels;// 获取屏幕分辨率宽度
+//        screenHeight = dm.heightPixels;// 获取屏幕分辨率高度
         density = dm.density;
+
+
+
     }
 
     //获取屏幕宽度
