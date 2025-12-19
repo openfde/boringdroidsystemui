@@ -91,8 +91,13 @@ class DockAppAdapter(private val context: Context) :
         if(app.program.equals("Apps")){
             holder.iconIV.setImageResource(R.drawable.icon_menu)
         } else if( !app.isLinux()){
-            val appIcon = packageManager.getApplicationIcon(app.packageName)
-            holder.iconIV.setImageDrawable(appIcon)
+            try {
+                val appIcon = packageManager.getApplicationIcon(app.packageName)
+                holder.iconIV.setImageDrawable(appIcon)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         } else if(app.icon != null){
             holder.iconIV.setImageDrawable(app.icon)
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){

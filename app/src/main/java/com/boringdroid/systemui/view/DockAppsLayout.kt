@@ -1,12 +1,19 @@
 package com.boringdroid.systemui.view
 
+import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS
 import android.app.ActivityManager
+import android.app.PendingIntent
+import android.app.RemoteAction
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.UserManager
 import android.text.TextUtils
@@ -18,8 +25,10 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
+import android.view.accessibility.AccessibilityManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.TaskInfo
 import com.boringdroid.systemui.adapter.DockAppAdapter
@@ -30,6 +39,7 @@ import com.boringdroid.systemui.provider.DockAppsProvider
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.receiver.UninstallReceiver
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
@@ -67,6 +77,8 @@ constructor(
 
     var status: View?= null
     var navi: View?= null
+    val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
+    var accessibilityManager: AccessibilityManager? = null
 
     private var itemDecoration: DockAppItemDecoration? = null
     var appOverviewWindow: AppOverviewWindow ?= null
@@ -128,6 +140,25 @@ constructor(
         dockAppAdapter?.dockAppLayout = this
         updateNaviWidth(tasks.size)
         dockProvider.registerTaskStackListener()
+        val globalSearchRecevier = GlobalSearchRecevier()
+        val filter = IntentFilter()
+        filter.addAction(SYSTEM_ALL_APP_ACTION)
+        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
+        val broadcast = PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(SYSTEM_ALL_APP_ACTION),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
+        accessibilityManager!!.registerSystemAction(
+            RemoteAction(
+                Icon.createWithResource(context, R.drawable.icon_menu),
+                context.getString(R.string.search),
+                context.getString(R.string.search),
+                broadcast
+            ),
+            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
     }
 
     override fun removeTask(taskId: Int) {
@@ -196,13 +227,18 @@ constructor(
                 val groupMargin =
                     context?.resources?.getDimension(R.dimen.dock_group_margin)?.toInt()!! * 2
                 params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                val width = count * (itemWidth + itemMargin ) + groupMargin + context?.resources?.getDimension(R.dimen.dock_width_margin)?.toInt()!!
+                var width = count * (itemWidth + itemMargin ) + groupMargin + context?.resources?.getDimension(R.dimen.dock_width_margin)?.toInt()!!
                 val px = Utils.dpToPx(context, width)
                 Log.d(TAG, "updateNaviWidth: px:$px width:$width")
+                if(ScreenSizeUtils.getInstance( context).screenWidth < width){
+                    width = ScreenSizeUtils.getInstance( context).screenWidth
+                }
+
                 params.width = width
                 if(view.isAttachedToWindow){
                     windowManager.updateViewLayout(view, params)
                 }
+
             }
         }
     }
@@ -272,6 +308,22 @@ constructor(
             onItemClick(dockContext.name, dockContext.taskInfo!!)
         }
 
+    }
+
+    internal inner class GlobalSearchRecevier : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive() called with: context = ${context?.packageName}, intent = $intent")
+
+            if(SYSTEM_ALL_APP_ACTION != intent?.action){
+                return
+            }
+            Log.d(TAG, "onReceive isShowing: $appOverviewWindow ${appOverviewWindow?.isShowing()}")
+            if(appOverviewWindow?.isShowing() == true){
+                appOverviewWindow?.dismiss()
+            } else {
+                appOverviewWindow?.showPopupWindow()
+            }
+        }
     }
 
     override fun onItemClick(action: String?, taskInfo: TaskInfo) {

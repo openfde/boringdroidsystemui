@@ -170,25 +170,25 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         inited = true
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
-        val globalSearchRecevier = GlobalSearchRecevier()
-        val filter = IntentFilter()
-        filter.addAction(SYSTEM_ALL_APP_ACTION)
-        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
-        val broadcast = PendingIntent.getBroadcast(
-            context,
-            0,
-            Intent(SYSTEM_ALL_APP_ACTION),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
-        accessibilityManager!!.registerSystemAction(
-            RemoteAction(
-                Icon.createWithResource(context, R.drawable.icon_menu),
-                context.getString(R.string.search),
-                context.getString(R.string.search),
-                broadcast
-            ),
-            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+//        val globalSearchRecevier = GlobalSearchRecevier()
+//        val filter = IntentFilter()
+//        filter.addAction(SYSTEM_ALL_APP_ACTION)
+//        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
+//        val broadcast = PendingIntent.getBroadcast(
+//            context,
+//            0,
+//            Intent(SYSTEM_ALL_APP_ACTION),
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
+//        accessibilityManager!!.registerSystemAction(
+//            RemoteAction(
+//                Icon.createWithResource(context, R.drawable.icon_menu),
+//                context.getString(R.string.search),
+//                context.getString(R.string.search),
+//                broadcast
+//            ),
+//            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
 
         if(needUpdateBattery){
             onBatteryChanged(percentage, status, plugged)
