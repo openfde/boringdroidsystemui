@@ -47,7 +47,7 @@ class DockContextWindow(
         super.showPopupWindow()
         initViews()
         val imageView = enterView?.findViewById<ImageView>(R.id.app_icon_iv)
-        imageView?.applyGrayFilter()
+//        imageView?.applyGrayFilter()
         Log.d(TAG, "showPopupWindow() called")
     }
 
@@ -62,7 +62,7 @@ class DockContextWindow(
     override fun dismiss() {
         super.dismiss()
         val imageView = enterView?.findViewById<ImageView>(R.id.app_icon_iv)
-        imageView?.clearColorFilter()
+//        imageView?.clearColorFilter()
     }
 
     fun createSlideUpEnterAnimator(view: View): ObjectAnimator {
