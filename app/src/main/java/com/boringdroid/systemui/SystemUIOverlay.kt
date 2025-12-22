@@ -478,6 +478,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
             }
         }
+        dockAppsLayout?.onDestroy()
         topBarLayout?.unregisterNotification()
         pluginContext = null
         status?.removeAllViews()
@@ -647,7 +648,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun showNotification() {
-        Log.w("SysteUIOverlay","showNotification")
+        Log.d("SysteUIOverlay","showNotification")
         systemUIContext?.sendBroadcast(
             Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
                 "action",
@@ -657,7 +658,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun hideNotification() {
-        Log.w("SysteUIOverlay","hideNotification")
+        Log.d("SysteUIOverlay","hideNotification")
         systemUIContext?.sendBroadcast(
             Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
                 "action",
@@ -711,7 +712,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun hideNotificationWindow() {
-        Log.w("SysteUIOverlay","showNotification")
+        Log.d("SysteUIOverlay","showNotification")
         systemUIContext?.sendBroadcast(
             Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
                 "action",
@@ -722,7 +723,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun showNotificationWindow() {
-        Log.w("SysteUIOverlay","hideNotification")
+        Log.d("SysteUIOverlay","hideNotification")
         systemUIContext?.sendBroadcast(
             Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
                 "action",
@@ -747,7 +748,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             if (currentTime - lastClickTime >= 2000) {
                 lastClickTime = currentTime
             } else {
-                Log.w(TAG, "NetWorkBroadcastReceiver-bsystemui lost info")
+                Log.d(TAG, "NetWorkBroadcastReceiver-bsystemui lost info")
                 return ;
             }
 
