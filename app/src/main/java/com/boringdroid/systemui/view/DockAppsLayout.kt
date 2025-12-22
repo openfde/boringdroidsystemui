@@ -274,7 +274,7 @@ constructor(
     override fun onItemClick(dockContext: DockContext) {
         if(appOverviewWindow != null && appOverviewWindow?.isShowing() == true){
             appOverviewWindow?.dismiss()
-            return
+//            return
         }
         if(dockContext.type == TYPE_APP){
             dockContext.app ?.let { appData ->
