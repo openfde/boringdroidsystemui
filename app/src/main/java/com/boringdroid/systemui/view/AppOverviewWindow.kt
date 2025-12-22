@@ -75,6 +75,11 @@ class AppOverviewWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        try {
+            throw IllegalArgumentException("showPopupWindow")
+        } catch (e: Exception){
+            e.printStackTrace()
+        }
         initViews()
     }
 

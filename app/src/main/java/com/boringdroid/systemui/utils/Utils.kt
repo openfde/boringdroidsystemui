@@ -188,20 +188,42 @@ object Utils {
     }
 
 
-    @JvmStatic fun  getPinyin(chinese : String) : String{
-        val pinyin = java.lang.StringBuilder()
-        // 将汉字转换为拼音
+
+    @JvmStatic
+    fun getPinyin(chinese: String): String {
+        val pinyin = StringBuilder()
+
         for (c in chinese.toCharArray()) {
             if (c.toString().matches("[\\u4E00-\\u9FA5]+".toRegex())) {
                 val pinyins = PinyinHelper.toHanyuPinyinStringArray(c)
-                if (pinyins != null && pinyins.size > 0) {
-                    pinyin.append(pinyins[0])
+                if (pinyins != null && pinyins.isNotEmpty()) {
+                    // 移除声调数字
+                    val toneFree = removeToneNumber(pinyins[0])
+                    pinyin.append(toneFree)
                 }
             } else {
                 pinyin.append(c)
             }
         }
-        return pinyin.toString()
+        val toString = pinyin.toString()
+//        Log.d(TAG, "getPinyin() called with: chinese = $chinese  返回:${toString}")
+        return toString
+    }
+
+    /**
+     * 移除拼音中的声调数字
+     * 例如：zhong1 → zhong, lv3 → lv
+     */
+    private fun removeToneNumber(pinyinWithTone: String): String {
+        // 匹配结尾的数字 0-5（Pinyin4j 使用 1-5 表示声调，0 表示轻声）
+        return pinyinWithTone.replace(Regex("[0-5]$"), "")
+    }
+
+    /**
+     * 或者更彻底的版本，移除所有数字
+     */
+    private fun removeToneNumberV2(pinyinWithTone: String): String {
+        return pinyinWithTone.filterNot { it.isDigit() }
     }
 
     @TargetApi(value = 31)

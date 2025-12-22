@@ -83,6 +83,10 @@ constructor(
     private var itemDecoration: DockAppItemDecoration? = null
     var appOverviewWindow: AppOverviewWindow ?= null
 
+    var globalSearchRecevier:GlobalSearchRecevier ?= null
+    var filter: IntentFilter ?= null
+    var broadcast :PendingIntent ?= null
+
     companion object {
         private const val TAG = "DockAppsLayout"
         private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
@@ -140,11 +144,11 @@ constructor(
         dockAppAdapter?.dockAppLayout = this
         updateNaviWidth(tasks.size)
         dockProvider.registerTaskStackListener()
-        val globalSearchRecevier = GlobalSearchRecevier()
-        val filter = IntentFilter()
-        filter.addAction(SYSTEM_ALL_APP_ACTION)
+        globalSearchRecevier = GlobalSearchRecevier()
+        filter = IntentFilter()
+        filter?.addAction(SYSTEM_ALL_APP_ACTION)
         context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
-        val broadcast = PendingIntent.getBroadcast(
+        broadcast = PendingIntent.getBroadcast(
             context,
             0,
             Intent(SYSTEM_ALL_APP_ACTION),
@@ -156,7 +160,7 @@ constructor(
                 Icon.createWithResource(context, R.drawable.icon_menu),
                 context.getString(R.string.search),
                 context.getString(R.string.search),
-                broadcast
+                broadcast!!
             ),
             GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
     }
@@ -310,14 +314,20 @@ constructor(
 
     }
 
-    internal inner class GlobalSearchRecevier : BroadcastReceiver(){
+    inner class GlobalSearchRecevier : BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive() called with: context = ${context?.packageName}, intent = $intent")
 
             if(SYSTEM_ALL_APP_ACTION != intent?.action){
                 return
             }
-            Log.d(TAG, "onReceive isShowing: $appOverviewWindow ${appOverviewWindow?.isShowing()}")
+
+//            if(appOverviewWindow == null){
+                makeOverviewWinow()
+//            }
+
+            Log.d(TAG, "onReceive isShowing: ${this@DockAppsLayout}" +
+                    "  $appOverviewWindow ${appOverviewWindow?.isShowing()}")
             if(appOverviewWindow?.isShowing() == true){
                 appOverviewWindow?.dismiss()
             } else {
@@ -472,6 +482,12 @@ constructor(
 
     fun dimissWindow() {
         AbsTopPopWindow.dissmissWindow(appOverviewWindow)
+    }
+
+    fun onDestroy() {
+        appOverviewWindow?.dismiss()
+        context.unregisterReceiver(globalSearchRecevier)
+        accessibilityManager!!.unregisterSystemAction(GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
     }
 
 }
