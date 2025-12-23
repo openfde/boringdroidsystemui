@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -97,7 +98,7 @@ class SlideNotificationAdapter(
         if (actions != null) {
             val actionLayoutParams = LinearLayout.LayoutParams(
                 0,
-                actionsHeight
+                WRAP_CONTENT,
             )
             actionLayoutParams.marginStart = Utils.dpToPx(context, 20)
             actionLayoutParams.weight = 1f
