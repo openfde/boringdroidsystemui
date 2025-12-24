@@ -136,7 +136,6 @@ constructor(
         tasks.addAll(dockProvider.providePersistApps())
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
-        Log.d(TAG, "initApps: ")
         dockAppAdapter?.dockScaleFactor = dockScaleFactor
         dockAppAdapter?.setData(tasks)
         dockAppAdapter?.listener = this
@@ -144,25 +143,26 @@ constructor(
         dockAppAdapter?.dockAppLayout = this
         updateNaviWidth(tasks.size)
         dockProvider.registerTaskStackListener()
-        globalSearchRecevier = GlobalSearchRecevier()
-        filter = IntentFilter()
-        filter?.addAction(SYSTEM_ALL_APP_ACTION)
-        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
-        broadcast = PendingIntent.getBroadcast(
-            context,
-            0,
-            Intent(SYSTEM_ALL_APP_ACTION),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
-        accessibilityManager!!.registerSystemAction(
-            RemoteAction(
-                Icon.createWithResource(context, R.drawable.icon_menu),
-                context.getString(R.string.search),
-                context.getString(R.string.search),
-                broadcast!!
-            ),
-            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+//        globalSearchRecevier = GlobalSearchRecevier()
+//        filter = IntentFilter()
+//        filter?.addAction(SYSTEM_ALL_APP_ACTION)
+//        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
+//        broadcast = PendingIntent.getBroadcast(
+//            context,
+//            0,
+//            Intent(SYSTEM_ALL_APP_ACTION),
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
+//        accessibilityManager!!.registerSystemAction(
+//            RemoteAction(
+//                Icon.createWithResource(context, R.drawable.icon_menu),
+//                context.getString(R.string.search),
+//                context.getString(R.string.search),
+//                broadcast!!
+//            ),
+//            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+        Log.d(TAG, "$this initApps: $globalSearchRecevier")
     }
 
     override fun removeTask(taskId: Int) {
@@ -224,7 +224,7 @@ constructor(
 
                 params.height = dock_height_scaled!!.toInt()
                 val dock_item_width = context?.resources?.getDimension(R.dimen.dock_icon_width)
-                val dock_item_width_scaled = dock_item_width
+                val dock_item_width_scaled = dock_item_width?.times(dockScaleFactor)?.plus(0.5f)
                 val itemWidth = dock_item_width_scaled!!.toInt()
                 val itemMargin =
                     context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 4
@@ -233,7 +233,7 @@ constructor(
                 params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 var width = count * (itemWidth + itemMargin ) + groupMargin + context?.resources?.getDimension(R.dimen.dock_width_margin)?.toInt()!!
                 val px = Utils.dpToPx(context, width)
-                Log.d(TAG, "updateNaviWidth: px:$px width:$width")
+                Log.d(TAG, "$this updateNaviWidth: px:$px width:$width")
                 if(ScreenSizeUtils.getInstance( context).screenWidth < width){
                     width = ScreenSizeUtils.getInstance( context).screenWidth
                 }
@@ -321,13 +321,13 @@ constructor(
             if(SYSTEM_ALL_APP_ACTION != intent?.action){
                 return
             }
-
+            Log.d(TAG, "onReceive    ${this} : ${this@DockAppsLayout}" +
+                    "  $appOverviewWindow ${appOverviewWindow?.isShowing()}")
 //            if(appOverviewWindow == null){
                 makeOverviewWinow()
 //            }
 
-            Log.d(TAG, "onReceive isShowing: ${this@DockAppsLayout}" +
-                    "  $appOverviewWindow ${appOverviewWindow?.isShowing()}")
+
             if(appOverviewWindow?.isShowing() == true){
                 appOverviewWindow?.dismiss()
             } else {
@@ -485,9 +485,15 @@ constructor(
     }
 
     fun onDestroy() {
+        Log.d(TAG, "$this onDestroy() $globalSearchRecevier")
         appOverviewWindow?.dismiss()
-        context.unregisterReceiver(globalSearchRecevier)
-        accessibilityManager!!.unregisterSystemAction(GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+        globalSearchRecevier?.also { receiver ->
+            context.unregisterReceiver(receiver)
+            globalSearchRecevier = null
+        }
+        accessibilityManager?.let { acm ->
+            acm.unregisterSystemAction(GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+        }
     }
 
 }
