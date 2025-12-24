@@ -131,6 +131,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         generateTopBar()
     }
     private fun updateNaviDock() {
+        dockAppsLayout?.onDestroy()
         val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
         layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
@@ -234,7 +235,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
         systemUIContext!!.registerReceiver(networkChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         registPackageUpdate()
-        XserverHelper.listenXserverStatus(pluginContext,null)
+//        XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
         tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
         tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
@@ -278,6 +279,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 "dock_scale", 1.0f)
             Log.d(TAG, "onChange() called with: selfChange = $selfChange, scaleFactor = $scaleFactor")
             mDockScaleFactor = scaleFactor
+            dockAppsLayout?.onDestroy()
             updateNaviDock()
         }
     }
@@ -483,6 +485,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         pluginContext = null
         status?.removeAllViews()
         pluginContext?.unregisterReceiver(receiver)
+
+        systemUIContext?.contentResolver?.unregisterContentObserver(mDockContentObserver)
     }
 
     @SuppressLint("PrivateApi")
