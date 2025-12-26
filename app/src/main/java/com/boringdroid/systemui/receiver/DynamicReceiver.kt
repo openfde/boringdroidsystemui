@@ -3,9 +3,6 @@ package com.boringdroid.systemui.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import com.boringdroid.systemui.NotificationService
-import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 
 
@@ -27,7 +24,9 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
                 }
 
                 TYEP_SCREEN_NOTIFY ->{
-                    notificationListener?.onScreenRecordStateChange(intent.getIntExtra("id",0))
+                    notificationListener?.onScreenRecordStateChange(intent.getIntExtra("id",0)
+                        , intent.getStringExtra("groupkey")
+                        )
                 }
 
             }
@@ -39,7 +38,7 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
     interface NotificationListener {
         fun onNotifyCount(count: Int)
         fun onNotificationPanelVisibleChanged(boolean: Boolean)
-        fun onScreenRecordStateChange(state: Int)
+        fun onScreenRecordStateChange(state: Int, groupkey: String?)
     }
 
     companion object {
@@ -61,9 +60,13 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
         val TYEP_UPDATE_NOTIFY = 9
         val TYEP_SCREEN_NOTIFY = 10
         val WIFI_STATUS = 80
-        val NOTIFICATION_RECORDING_ID = 4274   //screen record
-        val NOTIFICATION_PROCESSING_ID = 4275  //screen record process
-        val NOTIFICATION_VIEW_ID = 4273        //screen record ready
+//        val NOTIFICATION_RECORDING_ID = 4273   //screen record
+//        val NOTIFICATION_PROCESSING_ID = 4274  //screen record process
+//        val NOTIFICATION_VIEW_ID = 4273        //screen record ready
+
+         val NOTIF_BASE_ID: Int = 4273
+         val PROGRESS_NOTIF_ID: Int = 4274
+         val ERROR_NOTIF_ID: Int = 4275
     }
 
 }

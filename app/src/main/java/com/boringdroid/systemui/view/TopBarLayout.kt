@@ -18,6 +18,7 @@ import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.os.BatteryManager
 import android.provider.Settings
+import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
@@ -573,8 +574,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     }
 
-    override fun onScreenRecordStateChange(state: Int) {
-        controlWindow?.onScreenRecordStateChange(state)
+    override fun onScreenRecordStateChange(state: Int, sbn: String?) {
+        controlWindow?.onScreenRecordStateChange(state, sbn)
     }
 
     fun dimissWindow() {
