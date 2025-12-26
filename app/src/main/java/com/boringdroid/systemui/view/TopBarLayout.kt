@@ -53,7 +53,6 @@ import com.boringdroid.systemui.receiver.NotificationReceiver
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationUpdater
-import com.boringdroid.systemui.receiver.WifiBroadcastReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
 import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_REQUEST_DOCK
 import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK
@@ -125,7 +124,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private var btnList: MutableList<ImageView?> ?= null
-    private var wifiBroadcastReceiver: WifiBroadcastReceiver? = null
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
