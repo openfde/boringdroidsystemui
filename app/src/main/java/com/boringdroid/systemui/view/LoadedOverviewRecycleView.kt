@@ -183,7 +183,8 @@ constructor(
             val x = location[0] + 132
             val y = location[1] + 32
             if(contextWindow == null){
-                contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.layout_app_context_overview)
+                contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT,
+                    WRAP_CONTENT, R.layout.layout_app_context_overview)
                     .gravity(Gravity.TOP or Gravity.START)
                     .locate( x , y)
                     .build(AbsTopPopWindow.WindowType.Default)
@@ -194,13 +195,13 @@ constructor(
                     && y == contextWindow?.offsetY){
                     contextWindow?.dismiss()
                 } else if(contextWindow?.isShowing() != true){
-                    contextWindow?.updateLayoutParams(width, WRAP_CONTENT, x, y,
+                    contextWindow?.updateLayoutParams(WRAP_CONTENT, WRAP_CONTENT, x, y,
                         Gravity.TOP or Gravity.START)
                     contextWindow?.showPopupWindow()
                     Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
                 }
             }
-            Log.d(TAG, "makeAndFillContextWindow() called with: appData = $appData, v = $v")
+            Log.d(TAG, "makeAndFillContextWindow() called with: width = $width, v = $v")
             val isLinuxApp = appData.linuxInfo != null
             var isSystem = false
             if(!isLinuxApp){
@@ -267,7 +268,9 @@ constructor(
 
             list.add(openTv)
             list.add(compatTv)
-            list.add(shortTv)
+            if(!isLinuxApp){
+                list.add(shortTv)
+            }
             list.add(ifPinTv)
             list.add(uninstallTv)
 

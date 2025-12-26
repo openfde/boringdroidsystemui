@@ -27,9 +27,6 @@ import com.boringdroid.systemui.adapter.NotificationAdapter
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.receiver.DynamicReceiver
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_PROCESSING_ID
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_RECORDING_ID
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_VIEW_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_COUNT_NOTIFY
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TYEP_SCREEN_NOTIFY
@@ -152,7 +149,8 @@ class NotificationService : NotificationListenerService(),
         updateNotificationCount()
         if(TextUtils.equals("screen_record", sbn.notification.channelId)){
 //        if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
-            sendBroadcast( Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY).putExtra("id", sbn.id))
+            sendBroadcast( Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY)
+                .putExtra("id", sbn.id).putExtra("groupkey", sbn.groupKey))
         }  else {
             broadcastNotification(NOTIFI_ACTION_POST,sbn)
         }
