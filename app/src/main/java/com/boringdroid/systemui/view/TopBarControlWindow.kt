@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.AudioSystem
 import android.os.Handler
 import android.provider.Settings
+import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
@@ -20,9 +21,9 @@ import android.widget.Toast
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_PROCESSING_ID
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_RECORDING_ID
-import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIFICATION_VIEW_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.ERROR_NOTIF_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIF_BASE_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.PROGRESS_NOTIF_ID
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 
@@ -320,21 +321,24 @@ class TopBarControlWindow(
                 setImageResource(if (wifiStatus == 0) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
             }
         }
-
     }
 
 
-
-    fun onScreenRecordStateChange(state: Int) {
-//        Log.d(TAG, "onScreenRecordStateChange() called with: state = $state recordTextView = $recordTextView")
-        if(state == NOTIFICATION_RECORDING_ID || state == NOTIFICATION_PROCESSING_ID || state == NOTIFICATION_VIEW_ID){
+    fun onScreenRecordStateChange(state: Int, groupKey: String?) {
+        Log.d(TAG, "onScreenRecordStateChange() called with: groupKey = $groupKey state = $state  ${groupKey?.contains("screen_record_saved")}")
+        if(state == NOTIF_BASE_ID || state == PROGRESS_NOTIF_ID){
             isRecording = true
             recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
-        } else if(isRecording && recordTextView != null){
+        } else if(isRecording && recordTextView != null
+            && groupKey?.contains("screen_record_saved") == true
+        ){
 //            Log.d(TAG, "onScreenRecordStateChange: show finish toast")
             isRecording = false
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
             Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()
+        } else if (state == ERROR_NOTIF_ID) {
+            isRecording = false
+            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
         }
     }
 
