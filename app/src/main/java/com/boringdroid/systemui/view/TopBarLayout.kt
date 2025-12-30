@@ -124,7 +124,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private var btnList: MutableList<ImageView?> ?= null
-
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -214,6 +213,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     fun wifiStatusListen(){
         controlWindow?.wifiStatusListen()
+        val netStatus = Utils.isNetworkAvailable(getContext());
+        wifiBtn?.apply {
+            setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.ic_wifi_on)
+        }
     }
 
     private fun makeVolumeWindow(imageView: ImageView?) {

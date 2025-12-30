@@ -13,6 +13,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.media.AudioSystem
 import android.net.Uri
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
@@ -456,5 +458,18 @@ object Utils {
             e.printStackTrace()
         }
         return output.toString()
+    }
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        if (connectivityManager != null) {
+            val capabilities: NetworkCapabilities? =
+                connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork())
+            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || capabilities.hasTransport(
+                NetworkCapabilities.TRANSPORT_CELLULAR
+            ) || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+        }
+        return false
     }
 }

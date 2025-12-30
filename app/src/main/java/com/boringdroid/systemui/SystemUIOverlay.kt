@@ -65,7 +65,6 @@ import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
-
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
     UninstallReceiver.AppUninstallListener {
@@ -749,10 +748,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             val currentTime = System.currentTimeMillis()
+            Log.d(TAG, "NetWorkBroadcastReceiver-action: "+action +",currentTime : "+currentTime)
             if (currentTime - lastClickTime >= 2000) {
                 lastClickTime = currentTime
             } else {
-                Log.d(TAG, "NetWorkBroadcastReceiver-bsystemui lost info")
                 return ;
             }
 
