@@ -12,8 +12,10 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.media.AudioSystem
+import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
@@ -393,6 +395,49 @@ object Utils {
 
         return context.getString(R.string.just_now)
 
+    }
+
+    fun getScreenBrightness(context: Context): Int {
+        return try {
+            // 获取系统亮度值（范围 0-255）
+            val brightness = Settings.System.getInt(
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS
+            )
+            brightness
+        } catch (e: Settings.SettingNotFoundException) {
+            // 如果设置不存在，返回默认值（如 128）
+            128
+        }
+    }
+
+    fun setScreenBrightness(context: Context, brightness: Int) {
+        // 确保亮度值在有效范围内（0-255）
+        val adjustedBrightness = brightness.coerceIn(0, 255)
+
+        // 检查权限（Android 6.0+ 需要特殊处理）
+        if (Settings.System.canWrite(context)) {
+            // 有权限，直接设置
+            Settings.System.putInt(
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS,
+                adjustedBrightness
+            )
+
+            // 可选：设置为手动模式，避免自动亮度干扰
+            Settings.System.putInt(
+                context.contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+            )
+        } else {
+            // 无权限，引导用户去设置页授权
+            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                data = Uri.parse("package:${context.packageName}")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        }
     }
 
     fun executeCommand(command: String?): String? {

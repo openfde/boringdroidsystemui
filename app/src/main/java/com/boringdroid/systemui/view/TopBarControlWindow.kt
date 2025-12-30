@@ -2,10 +2,12 @@ package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.content.Intent
+import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.media.AudioSystem
 import android.os.Handler
 import android.provider.Settings
+import android.providers.settings.GlobalSettingsProto
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
@@ -49,8 +51,10 @@ class TopBarControlWindow(
     private var volumeCenterIv: ImageView?= null
     private var wifiCv: LinearLayout?= null
     private var volumeSeekBar: SeekBar?= null
+    private var brightnessSeekBar: SeekBar?= null
     private var audioDevice: AudioDevice? = null
     private var recordTextView: TextView?= null
+    private val dm: DisplayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private  val SETTINGS_PACKAGE =  "com.android.settings"
     private  val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
 
@@ -100,6 +104,16 @@ class TopBarControlWindow(
         initViews()
         initVolumeSeekbar()
         initVolumes()
+        initBrightnessSeekbar()
+    }
+
+    private fun initBrightnessSeekbar() {
+        val currentBrightness = Utils.getScreenBrightness(context = getContext())
+        brightnessSeekBar?.min = 0
+        brightnessSeekBar?.max = 255
+        Log.d(TAG, "initViews: screenBrightness $currentBrightness")
+        brightnessSeekBar?.progress = currentBrightness
+        brightnessSeekBar?.setOnSeekBarChangeListener(brightnessChangeListener)
     }
 
     private fun initVolumes() {
@@ -174,6 +188,31 @@ class TopBarControlWindow(
     }
 
 
+    private val brightnessChangeListener = object : OnSeekBarChangeListener {
+        override fun onProgressChanged(
+            seekBar: SeekBar?,
+            progress: Int,
+            fromUser: Boolean
+        ) {
+            Log.d(
+                TAG,
+                "onProgressChanged() called with: seekBar = $seekBar, progress = $progress, fromUser = $fromUser"
+            )
+            Utils.setScreenBrightness(context, progress)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+        }
+
+
+    }
+
+
     // Returns results such as :
     // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
     private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
@@ -220,6 +259,7 @@ class TopBarControlWindow(
         recordBtn = mContentView?.findViewById(R.id.record_iv)
         settingBtn = mContentView?.findViewById(R.id.setting_iv)
         volumeSeekBar = mContentView?.findViewById(R.id.volume_seekbar)
+        brightnessSeekBar = mContentView?.findViewById(R.id.brightness_seekbar)
         volumeImage = mContentView?.findViewById(R.id.volume_iv)
         wifiImage = mContentView?.findViewById(R.id.wifi_img)
         tvWifiName = mContentView?.findViewById(R.id.tv_wifi_name)
