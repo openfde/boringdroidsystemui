@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.view
 
+import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
@@ -58,17 +59,7 @@ class TopBarPowerWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
-        val enterAnim =
-            ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, -getHeight().toFloat(), 0f)
-        enterAnim.duration = FADE_DURATION
-        enterAnim.interpolator = LinearInterpolator()
-        val exitAnim =
-            ObjectAnimator.ofFloat(mContentView, View.TRANSLATION_Y, 0f, -getHeight().toFloat())
-        exitAnim.duration = FADE_DURATION
-        exitAnim.interpolator = LinearInterpolator()
-        this.enter = enterAnim
-        this.exit = exitAnim
-        enter?.start()
+        runWindowAnim(WindowGravity.top, true)
         initViews()
     }
 

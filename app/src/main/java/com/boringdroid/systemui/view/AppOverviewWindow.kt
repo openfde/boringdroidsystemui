@@ -1,7 +1,13 @@
 package com.boringdroid.systemui.view
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
@@ -18,9 +24,14 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.core.view.doOnLayout
+import androidx.core.view.postDelayed
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
@@ -50,17 +61,20 @@ class AppOverviewWindow(
     var focusView: View ?= null
     private val apps: MutableList<AppData> = ArrayList()
     private var appPages: MutableList<MutableList<AppData>> = ArrayList()
-
+    var wallpaperView: ImageView ?= null
     //    private var recycleView: LoadedRecycleView?= null
-     var searchEt: EditText ?= null
-     var searchLl: LinearLayout ?= null
-     var bgView : View ?= null
-     var appsVp: LoadedViewPager ?= null
+    var searchEt: EditText ?= null
+    var searchLl: LinearLayout ?= null
+    var bgView : View ?= null
+    var appsVp: LoadedViewPager ?= null
     private var indicatorMi: LoadedIndicator ?= null
     private var runnable: FilterRunnable ?= null
     var appProvider : AppProvider ?= null
     var dockProvider : DockAppsProvider ?= null
     var appsPagerAdapter : AppsPagerAdapter ?= null
+    var wallpaperManager :WallpaperManager ?= null
+    var wallpaperBitmap : Bitmap ?= null
+    var blurWallPaperRadius : Float ?= 0.0f
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -75,12 +89,13 @@ class AppOverviewWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
-        try {
-            throw IllegalArgumentException("showPopupWindow")
-        } catch (e: Exception){
-            e.printStackTrace()
-        }
         initViews()
+//        runFadeAnimationWithTransition(true, null, null)
+        getContentView()?.doOnLayout {
+//            runFadeAnimationSet(true, null, null)
+        }
+        blurWallPaper(1.0f * OVERVIEW_BG_RADIUS)
+
     }
 
     private fun initViews() {
@@ -91,14 +106,11 @@ class AppOverviewWindow(
         bgView = mContentView?.findViewById(R.id.bg_view)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
 
-
         val screenHeight = ScreenSizeUtils.getInstance(getContext()).screenHeight
         val dimensionPixelSize1 =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_top)
         val dimensionPixelSize2 =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
-//        val dimensionPixelSize3 =
-//            getContext().resources.getDimensionPixelSize(R.dimen.overview_indicator_margin)
         val dimensionPixelSize =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
         val div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
@@ -110,7 +122,6 @@ class AppOverviewWindow(
         bgView?.setOnClickListener(this)
         searchLl?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
-        blurWallPaper()
         updateChannel()
         if(runnable == null){
             runnable = appProvider?.let { FilterRunnable(it)}
@@ -159,31 +170,101 @@ class AppOverviewWindow(
                 focusView?.requestFocus()
                 return@setOnKeyListener true
             } else {
-                Log.d(TAG, "initViews() called with: v = $v, keyCode = $keyCode, event = $event")
                 return@setOnKeyListener false
             }
         }
 
     }
 
-    private fun blurWallPaper() {
-        val wallpaperView = getContentView()?.findViewById<ImageView>(R.id.bg_iv)
+    private fun blurWallPaper(radius: Float) {
+        if(blurWallPaperRadius == radius && blurWallPaperRadius != 120f){
+            return
+        }
+        this.blurWallPaperRadius = radius
+        wallpaperView = getContentView()?.findViewById<ImageView>(R.id.bg_iv)
+//        Log.d(TAG, "blurWallPaper() called with: radius = $radius  ${radius.toInt()}")
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
-            Utils.setBackgroundBlurRadius(getContentView(), OVERVIEW_BG_RADIUS)
+            Utils.setBackgroundBlurRadius(getContentView(), radius.toInt())
             wallpaperView?.visibility = View.GONE
         } else {
-            val wallpaperManager = WallpaperManager.getInstance(getContext())
-            wallpaperManager.desiredMinimumHeight
-            val wallpaperDrawable = wallpaperManager.drawable as Drawable
-            val wallpaperBitmap =
-                (wallpaperDrawable as BitmapDrawable?)!!.bitmap
-
-            wallpaperView?.setImageBitmap(wallpaperBitmap)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val blurEffect = RenderEffect.createBlurEffect(120f, 120f, Shader.TileMode.CLAMP)
-                wallpaperView?.setRenderEffect(blurEffect)
+            wallpaperManager = WallpaperManager.getInstance(getContext())
+            if(wallpaperBitmap == null){
+                val wallpaperDrawable = wallpaperManager?.drawable as Drawable
+                wallpaperBitmap =
+                    (wallpaperDrawable as BitmapDrawable?)!!.bitmap
             }
+            wallpaperView?.setImageBitmap(wallpaperBitmap)
+            updateBlurEffect(radius)
+        }
+    }
+
+    private fun updateBlurEffect(radius: Float) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val blurEffect = RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP)
+            wallpaperView?.setRenderEffect(blurEffect)
+        }
+    }
+
+
+    fun runFadeAnimationSet(
+        isEnter: Boolean,
+        onStart: (() -> Unit)?,
+        onEnd: (() -> Unit)?
+    ) {
+
+        val startAlpha = if (isEnter) 0f else 1f
+        val endAlpha = if (isEnter) 1f else 0f
+
+        ObjectAnimator.ofFloat(appsVp, View.ALPHA, startAlpha, endAlpha).apply {
+            duration = 120
+            interpolator = LinearInterpolator()
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {
+                }
+                override fun onAnimationEnd(animation: Animator) {
+                    if(isEnter){
+                        blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
+//                        getContentView()?.postDelayed(300,
+//                            {
+//                                blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
+//                            })
+                    } else {
+                        destroy()
+                    }
+                }
+                override fun onAnimationCancel(animation: Animator) {}
+                override fun onAnimationRepeat(animation: Animator) {}
+            })
+            var fraction = if(isEnter) 0.0f else 1.0f
+            addUpdateListener( object : ValueAnimator.AnimatorUpdateListener{
+                override fun onAnimationUpdate(animation: ValueAnimator) {
+                    if(isEnter){
+                        if(animation.animatedFraction < 0.3f ){
+                            fraction = 0.3f
+                        } else if(animation.animatedFraction == 1.0f ){
+                            fraction = 1.0f
+                        } else if(animation.animatedFraction - fraction > 0.2f ){
+                            fraction = animation.animatedFraction
+                        }
+                        if(fraction > 0 ){
+//                            blurWallPaper(fraction * OVERVIEW_BG_RADIUS)
+                        }
+                    } else {
+                        if(1 - animation.animatedFraction < 0.3f ){
+                            fraction = 0.3f
+                        } else if( 1- animation.animatedFraction == 1.0f ){
+                            fraction = 1.0f
+                        } else if(fraction - animation.animatedFraction > 0.2f ){
+                            fraction = animation.animatedFraction
+                        }
+                        if(fraction < 1 ){
+//                            blurWallPaper(fraction * OVERVIEW_BG_RADIUS)
+                        }
+                    }
+
+                }
+            })
+            start()
         }
     }
 
@@ -225,13 +306,18 @@ class AppOverviewWindow(
                 Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
                 indicatorMi?.onPageScrollStateChanged(state)
 //                if(state == 0){
-                    appsVp?.blockScroll = false
+                appsVp?.blockScroll = false
 //                }
             }
         })
     }
 
     override fun dismiss() {
+//        runFadeAnimationSet(false, null, null)
+        destroy()
+    }
+
+    fun destroy(){
         super.dismiss()
         filterApps(null, 0)
         focusView = null

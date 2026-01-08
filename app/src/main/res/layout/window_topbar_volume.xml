@@ -55,7 +55,7 @@
 
                 <SeekBar
                     android:id="@+id/volume_seekbar"
-                    android:layout_width="262dp"
+                    android:layout_width="256dp"
                     android:layout_height="18dp"
                     android:layout_marginLeft="11dp"
                     android:progressDrawable="@drawable/seekbar_bg"
@@ -64,7 +64,7 @@
                     />
                 <TextView
                     android:id="@+id/volume_tv"
-                    android:layout_width="50dp"
+                    android:layout_width="56dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:textColor="#d9000000"

@@ -52,6 +52,7 @@ class TopBarVolumeWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        runWindowAnim(WindowGravity.top, true)
         initViews()
         val inDevices = getDevices(true)
         updateVolume(inDevices, true)

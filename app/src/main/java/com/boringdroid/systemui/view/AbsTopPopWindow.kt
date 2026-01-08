@@ -1,19 +1,35 @@
 package com.boringdroid.systemui.view
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.WallpaperManager
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.transition.Fade
+import android.transition.Scene
+import android.transition.Transition
+import android.transition.TransitionManager
 import android.util.Log
+import android.util.Property
 import android.view.*
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
+import androidx.core.animation.addListener
+import com.boringdroid.systemui.R
 
 open class AbsTopPopWindow(
     private var context: Context,
@@ -59,8 +75,9 @@ open class AbsTopPopWindow(
     protected var enter: ObjectAnimator? = null
     protected var exit: ObjectAnimator? = null
     val handler = Handler(Looper.getMainLooper())
-    private var dismissListener: WindowDismissListener ?= null
+    var dismissListener: WindowDismissListener ?= null
     private var params :WindowManager.LayoutParams?= null
+    private var windowGravity: WindowGravity ?= null
     open fun showPopupWindow() {
         shown = true
         Log.d(TAG, "showPopupWindow: ${mContentView?.isAttachedToWindow} $this isshowing: ${isShowing()}")
@@ -89,10 +106,6 @@ open class AbsTopPopWindow(
         }
     }
 
-    fun setDismissListener(dismissListener: WindowDismissListener){
-        this.dismissListener = dismissListener
-    }
-
     fun getWidth(): Int {
         return width
     }
@@ -116,13 +129,13 @@ open class AbsTopPopWindow(
     }
 
     open fun dismiss() {
-        exit?.start()
-        removeViews()
-//        handler.removeCallbacksAndMessages(null)
-//        handler.postDelayed(this::removeViews, 0)
         shown = false
-        dismissListener?.onWindowDismiss()
-
+        windowGravity?.let { windowGravity ->
+            runWindowAnim(windowGravity, false)
+        } ?: run {
+            removeViews()
+            dismissListener?.onWindowDismiss()
+        }
     }
 
     private fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
@@ -138,6 +151,81 @@ open class AbsTopPopWindow(
             this.gravity = winGravity
             this.x = offsetX
             this.y = offsetY
+        }
+    }
+
+    sealed class WindowGravity {
+        object top : WindowGravity()
+        object right : WindowGravity()
+        object bottom : WindowGravity()
+        object left : WindowGravity()
+        object overview : WindowGravity()
+
+    }
+
+    fun runWindowAnim(gravity: WindowGravity, isEnter: Boolean) {
+        this.windowGravity = gravity
+        val translation: Property<View, Float>
+        val startValue: Float
+        val endValue: Float
+
+        val padding = getContext().resources.getDimension(R.dimen.control_window_padding)
+
+        val actualHeight = getHeight().toFloat()
+        val actualWidth = getWidth().toFloat()
+
+        val measuredHeight = getContentView()?.measuredHeight?.toFloat() ?: 0f
+        val measuredWidth = getContentView()?.measuredWidth?.toFloat() ?: 0f
+
+        val h = if (actualHeight > 0) actualHeight else measuredHeight
+        val w = if (actualWidth > 0) actualWidth else measuredWidth
+
+        when (gravity) {
+            WindowGravity.top -> {
+                translation = View.TRANSLATION_Y
+                startValue = if (isEnter) -h + padding else 0f
+                endValue = if (isEnter) 0f else -h
+            }
+            WindowGravity.bottom -> {
+                translation = View.TRANSLATION_Y
+                startValue = if (isEnter)  h - padding else 0f
+                endValue = if (isEnter) 0f else h
+            }
+            WindowGravity.left -> {
+                translation = View.TRANSLATION_X
+                startValue = if (isEnter) -w + padding else 0f
+                endValue = if (isEnter) 0f else -w
+            }
+            WindowGravity.right -> {
+                translation = View.TRANSLATION_X
+                startValue = if (isEnter)  w - padding else 0f
+                endValue = if (isEnter) 0f else w
+            }
+            WindowGravity.overview -> {
+                translation = View.ALPHA
+                startValue = if (isEnter) 0f else 1f
+                endValue = if (isEnter) 1f else 0f
+            }
+        }
+
+        Log.d(TAG, "runWindowAnim() called with: startValue = $startValue, endValue = $endValue  , isEnter = $isEnter")
+        val targetView = mContentView ?: return // 如果为 null 直接返回，不执行动画
+        ObjectAnimator.ofFloat(targetView, translation, startValue, endValue).apply {
+            duration = FADE_DURATION
+            interpolator = LinearInterpolator()
+            if(!isEnter){
+                addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                    }
+                    override fun onAnimationEnd(animation: Animator) {
+                        removeViews()
+                        dismissListener?.onWindowDismiss()
+                    }
+                    override fun onAnimationCancel(animation: Animator) {}
+                    override fun onAnimationRepeat(animation: Animator) {}
+                })
+            }
+            start()
         }
     }
 

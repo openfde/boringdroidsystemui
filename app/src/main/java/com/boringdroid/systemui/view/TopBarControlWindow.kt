@@ -1,5 +1,6 @@
 package com.boringdroid.systemui.view
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
@@ -14,6 +15,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -101,6 +103,7 @@ class TopBarControlWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        runWindowAnim(WindowGravity.top, true)
         initViews()
         initVolumeSeekbar()
         initVolumes()
