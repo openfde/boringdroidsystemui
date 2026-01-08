@@ -1,6 +1,5 @@
 package com.boringdroid.systemui.adapter
 
-import android.animation.ObjectAnimator
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
@@ -12,13 +11,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.view.postDelayed
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.boringdroid.systemui.GlobalSystemUIContext
@@ -36,14 +34,13 @@ import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow
 import com.bumptech.glide.Glide
 import com.boringdroid.systemui.data.DockContext
-import com.boringdroid.systemui.provider.DockAppsProvider.Companion.ACTION_DOCK_OVERVIEW
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.TASK_CLICK_ACTION
 import com.boringdroid.systemui.view.DockAppsLayout
 import com.boringdroid.systemui.view.DockContextWindow
-import com.boringdroid.systemui.view.LoadedDockContextRecycleView
 import com.boringdroid.systemui.view.LoadedDockContextRecycleView.Companion.TYPE_ACTION
 import com.boringdroid.systemui.view.LoadedDockContextRecycleView.Companion.TYPE_APP
 import com.boringdroid.systemui.view.LoadedDockContextRecycleView.Companion.TYPE_NAME
+import com.boringdroid.systemui.view.DockIconView.Companion.RELEASE_DURATION
 
 class DockAppAdapter(private val context: Context) :
     Adapter<DockAppAdapter.ViewHolder>() {
@@ -57,6 +54,7 @@ class DockAppAdapter(private val context: Context) :
     private var contextWindow : DockContextWindow ?= null
     var listener: DockItemClickListener ?= null
     var dockAppLayout: DockAppsLayout ? = null
+    var animating : Boolean ?= null
 
     companion object {
         private const val TAG = "DockAppAdapter"
@@ -128,6 +126,22 @@ class DockAppAdapter(private val context: Context) :
             } else {
                 listener?.onItemClick(context.resources.getString(R.string.minimize), app)
             }
+        }
+        holder.iconIV.setOnClickListener{
+            Log.d(TAG, "iconIV click ${holder.iconIV}")
+            animating = true
+            contextWindow?.dismiss()
+            if(app.id == 0){
+                listener?.onItemClick(context.resources.getString(R.string.open), app)
+            }else if(!isShowing(app.id)){
+                context.sendBroadcast(Intent(TASK_CLICK_ACTION))
+                listener?.onItemClick(context.resources.getString(R.string.show), app)
+            } else {
+                listener?.onItemClick(context.resources.getString(R.string.minimize), app)
+            }
+            holder.iconIV.postDelayed( RELEASE_DURATION, {
+                animating = false
+            })
         }
         holder.appll.setOnContextClickListener { v->
             if(!ACTION_DOCK_OVERVIEW.equals(app.action)) {
@@ -202,11 +216,11 @@ class DockAppAdapter(private val context: Context) :
         }
         contextWindow?.showPopupWindow()
         Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
-        contextWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener {
-            override fun onWindowDismiss() {
-
-            }
-        })
+//        contextWindow?.dismissListener = object : AbsTopPopWindow.WindowDismissListener {
+//            override fun onWindowDismiss() {
+//
+//            }
+//        }
         contextWindow?.listener = listener
         contextWindow?.divider = -1
         contextWindow?.setData(createContextActionList(app),
@@ -232,11 +246,6 @@ class DockAppAdapter(private val context: Context) :
         }
         contextWindow?.showPopupWindow()
         Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
-        contextWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener {
-            override fun onWindowDismiss() {
-
-            }
-        })
         contextWindow?.listener = listener
         val list: MutableList<DockContext> =ArrayList()
         list.add(DockContext(context.resources.getString(R.string.dock_settings),
@@ -422,7 +431,13 @@ class DockAppAdapter(private val context: Context) :
 //            val taskPackageName = getRunningTaskInfoPackageName(task)
 //            Log.d(TAG, "notifyDataSetChangedWapper: label:$label taskPackageName:$taskPackageName")
 //        }
-        notifyDataSetChanged()
+        if(animating == true){
+            dockAppLayout?.post {
+                notifyDataSetChangedWapper()
+            }
+        } else {
+            notifyDataSetChanged()
+        }
     }
 
     fun getRunningTaskInfoPackageName(runningTaskInfo: RunningTaskInfo): String? {

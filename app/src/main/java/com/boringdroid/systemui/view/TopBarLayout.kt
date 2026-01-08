@@ -227,11 +227,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(0 , 0)
             .build(AbsTopPopWindow.WindowType.Volume) as TopBarVolumeWindow
-        volumeWindow?.setDismissListener(object  : WindowDismissListener {
+        volumeWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.volumeBtn?.background = null
             }
-        })
+        }
         volumeWindow?.enterView = imageView
         windowList.add(volumeWindow!!)
 
@@ -246,20 +246,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
         Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow = $globalSearchWindow")
-        globalSearchWindow?.setDismissListener(object  : WindowDismissListener {
+        globalSearchWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.searchBtn?.background = null
-//                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-//                if (runningTasks != null && launcherResumeFlag == true) {
-//                    for (runningTask in runningTasks){
-//                        if(Utils.isLauncher(context, runningTask.topActivity)){
-//                            activityManager?.moveTaskToBack(true, runningTask.taskId)
-//                        }
-//                    }
-//                }
                 launcherResumeFlag = false
             }
-        })
+        }
         globalSearchWindow?.overviewProvider = overviewProvider
         globalSearchWindow?.enterView = imageView
         windowList.add(globalSearchWindow!!)
@@ -288,11 +280,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .locate(TopBarNotificationWindow.WINDOW_PADDING_RIGHT , TopBarNotificationWindow.WINDOW_PADDING_TOP)
             .provider(null)
             .build(AbsTopPopWindow.WindowType.Notification) as TopBarNotificationWindow
-        notificationsWindow?.setDismissListener(object  : WindowDismissListener {
+        notificationsWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.notificationBtn?.background = null
             }
-        })
+        }
         notificationsWindow?.systemUIContext = systemUIContext
         notificationsWindow?.enterView = imageView
         notificationsWindow?.setNotifications(notifications)
@@ -309,11 +301,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.IME) as TopBarImeSwitchWindow
         imeSwitchWindow?.setInputMethodList(inputMethodList)
-        imeSwitchWindow?.setDismissListener(object  : WindowDismissListener {
+        imeSwitchWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.imeBtn?.background = null
             }
-        })
+        }
         imeSwitchWindow?.systemUIContext = systemUIContext
         imeSwitchWindow?.enterView = imageView
         windowList.add(imeSwitchWindow!!)
@@ -378,11 +370,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             })
             .locate(0 , 0)
             .build(AbsTopPopWindow.WindowType.Power) as TopBarPowerWindow
-        powerWindow?.setDismissListener(object  : WindowDismissListener {
+        powerWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.powerBtn?.background = null
             }
-        })
+        }
         powerWindow?.enterView = imageView
         windowList.add(powerWindow!!)
     }
@@ -394,11 +386,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(0 , 0)
             .build(AbsTopPopWindow.WindowType.Control) as TopBarControlWindow
-        controlWindow?.setDismissListener(object  : WindowDismissListener {
+        controlWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.controlBtn?.background = null
             }
-        })
+        }
         controlWindow?.enterView = imageView
         controlWindow?.topbarController = this
         windowList.add(controlWindow!!)

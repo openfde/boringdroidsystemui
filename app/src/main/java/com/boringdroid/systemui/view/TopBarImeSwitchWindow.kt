@@ -46,6 +46,7 @@ class TopBarImeSwitchWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        runWindowAnim(WindowGravity.top, true)
         initViews()
     }
 

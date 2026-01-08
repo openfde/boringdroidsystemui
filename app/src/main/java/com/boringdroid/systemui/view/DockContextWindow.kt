@@ -12,6 +12,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
+import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.DockAppAdapter.DockItemClickListener
@@ -49,6 +50,10 @@ class DockContextWindow(
         val imageView = enterView?.findViewById<ImageView>(R.id.app_icon_iv)
 //        imageView?.applyGrayFilter()
         Log.d(TAG, "showPopupWindow() called")
+        getContentView()?.doOnLayout {
+            // 此时布局已完成
+            runWindowAnim(WindowGravity.bottom, true)
+        }
     }
 
     fun ImageView.applyGrayFilter() {

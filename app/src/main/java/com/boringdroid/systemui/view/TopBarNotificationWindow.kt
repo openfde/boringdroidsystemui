@@ -49,6 +49,7 @@ class TopBarNotificationWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        runWindowAnim(WindowGravity.right, true)
         initViews()
         val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {

@@ -439,7 +439,7 @@ constructor(
                 .paramType(TYPE_SEARCH_BAR)
                 .build(AbsTopPopWindow.WindowType.Overview) as AppOverviewWindow
             appOverviewWindow?.updateAppList(overviewApps)
-            appOverviewWindow?.setDismissListener(object : AbsTopPopWindow.WindowDismissListener{
+            appOverviewWindow?.dismissListener = object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
                     status?.visibility = View.VISIBLE
                     try {
@@ -457,7 +457,7 @@ constructor(
 //                    }
                     launcherResumeFlag = false
                 }
-            })
+            }
             appOverviewWindow?.appProvider = overviewProvider
             appOverviewWindow?.dockProvider = dockProvider
         }

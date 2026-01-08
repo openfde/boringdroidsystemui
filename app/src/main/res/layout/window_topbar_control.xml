@@ -191,7 +191,7 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="12dp"
                     >
                     <ImageView
                         android:id="@+id/regionshot_iv"
@@ -221,7 +221,7 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="12dp"
                     >
                     <ImageView
                         android:id="@+id/record_iv"
@@ -252,7 +252,7 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="22dp"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="12dp"
                     >
                     <ImageView
                         android:id="@+id/setting_iv"
