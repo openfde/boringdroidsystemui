@@ -7,6 +7,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.BUTTON_PRIMARY
+import android.view.MotionEvent.BUTTON_SECONDARY
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -22,7 +24,7 @@ class DockIconView @JvmOverloads constructor(
     companion object {
         private const val PRESS_DURATION = 120L
         const val RELEASE_DURATION = 300L
-        private const val TAG = "SimpleDockIconView"
+        private const val TAG = "DockIconView"
     }
 
     init {
@@ -30,20 +32,20 @@ class DockIconView @JvmOverloads constructor(
 
         setOnTouchListener { _, event ->
 
-//            Log.d(TAG, "ontouch event = ${event.deviceId}")
+            Log.d(TAG, "ontouch event = ${event}")
 
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> animatePress()
                 MotionEvent.ACTION_UP -> {
                     animateRelease()
-                    if(event.deviceId == 3){
-                        performClick()
-                    }
+//                    if(event.deviceId == 3){
+//                        performClick()
+//                    }
                 }
                 MotionEvent.ACTION_CANCEL -> animateRelease()
             }
-            true
+            false
         }
     }
 
