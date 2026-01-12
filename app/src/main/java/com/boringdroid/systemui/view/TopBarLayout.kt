@@ -215,7 +215,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         controlWindow?.wifiStatusListen()
         val netStatus = Utils.isNetworkAvailable(getContext());
         wifiBtn?.apply {
-            setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.ic_wifi_on)
+            setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
         }
     }
 
