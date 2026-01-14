@@ -25,6 +25,7 @@ import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.EditText
@@ -91,7 +92,9 @@ class AppOverviewWindow(
         super.showPopupWindow()
         initViews()
 //        runFadeAnimationWithTransition(true, null, null)
-        getContentView()?.doOnLayout {
+        appsVp?.doOnLayout {
+            val anim = AnimationUtils.loadAnimation(getContext(), R.anim.lp_enter)
+            appsVp?.startAnimation(anim)
 //            runFadeAnimationSet(true, null, null)
         }
         blurWallPaper(1.0f * OVERVIEW_BG_RADIUS)
@@ -160,6 +163,7 @@ class AppOverviewWindow(
                 layoutParams1.leftMargin = 100
                 getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
+                searchEt?.getText()?.clear();
             }
         }
         searchEt?.requestFocus()
