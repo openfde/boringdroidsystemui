@@ -43,7 +43,6 @@
                 android:layout_marginTop="15dp"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
-                android:paddingBottom="15dp"
                 >
                 <ImageView
                     android:id="@+id/wifi_img"
@@ -51,7 +50,6 @@
                     android:layout_height="44dp"
                     android:layout_gravity="center_vertical"
                     android:padding="10dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginLeft="10dp"
                     android:src="@drawable/icon_wifi_select_full"
                     android:background="@drawable/control_oval_blue"
@@ -61,6 +59,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginLeft="6dp"
+                    android:layout_marginBottom="15dp"
                     >
                     <TextView
                         android:layout_width="wrap_content"
@@ -98,7 +97,6 @@
                 android:layout_alignParentRight="true"
                 android:background="@drawable/round_rect_12dp_top"
                 android:elevation="@dimen/elevation_control_panel"
-                android:paddingBottom="15dp"
                 >
                 <ImageView
                     android:layout_width="44dp"
@@ -107,7 +105,6 @@
                     android:layout_marginLeft="10dp"
                     android:src="@drawable/icon_light_unselect"
                     android:padding="10dp"
-                    android:layout_marginTop="8dp"
                     android:background="@drawable/control_oval_gray"
                     />
                 <LinearLayout
@@ -115,6 +112,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginLeft="6dp"
+                    android:layout_marginBottom="15dp"
                     >
                     <TextView
                         android:layout_width="wrap_content"
