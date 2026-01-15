@@ -302,7 +302,7 @@ class TopBarControlWindow(
         try {
             wifiStatus = Settings.Global.getInt(getContext().contentResolver, "wifi_status")
             wifiImage?.apply {
-                setBackgroundResource(if (wifiStatus == 1) R.drawable.control_oval_blue else R.drawable.control_oval_grep)
+                setBackgroundResource(if (wifiStatus == 1) R.drawable.control_oval_blue else R.drawable.control_oval_gray_22)
                 setImageResource(if (wifiStatus == 1) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
             }
             val wifiName = Settings.Global.getString(getContext().contentResolver, "wifi_name")
@@ -360,7 +360,7 @@ class TopBarControlWindow(
             getContext().sendBroadcast(intent)
 
             wifiImage?.apply {
-                setBackgroundResource(if (wifiStatus == 0) R.drawable.control_oval_blue else R.drawable.control_oval_grep)
+                setBackgroundResource(if (wifiStatus == 0) R.drawable.control_oval_blue else R.drawable.control_oval_gray_22)
                 setImageResource(if (wifiStatus == 0) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
             }
         }

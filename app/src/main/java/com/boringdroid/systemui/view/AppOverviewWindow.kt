@@ -25,6 +25,7 @@ import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
@@ -317,8 +318,21 @@ class AppOverviewWindow(
     }
 
     override fun dismiss() {
-//        runFadeAnimationSet(false, null, null)
-        destroy()
+//        val anim = AnimationUtils.loadAnimation(getContext(), R.anim.lp_exit)
+//
+//        anim.setAnimationListener(object : Animation.AnimationListener {
+//            override fun onAnimationStart(animation: Animation) {
+//            }
+//
+//            override fun onAnimationEnd(animation: Animation) {
+                destroy()
+//            }
+
+//            override fun onAnimationRepeat(animation: Animation) {
+//            }
+//        })
+//
+//        appsVp?.startAnimation(anim)
     }
 
     fun destroy(){
