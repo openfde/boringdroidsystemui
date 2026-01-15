@@ -400,17 +400,8 @@ object Utils {
     }
 
     fun getScreenBrightness(context: Context): Int {
-        return try {
-            // 获取系统亮度值（范围 0-255）
-            val brightness = Settings.System.getInt(
-                context.contentResolver,
-                Settings.System.SCREEN_BRIGHTNESS
-            )
-            brightness
-        } catch (e: Settings.SettingNotFoundException) {
-            // 如果设置不存在，返回默认值（如 128）
-            128
-        }
+        val backlight = Light.getInstance(context).backlight
+        return if (backlight > 0) backlight else 255
     }
 
     fun setScreenBrightness(context: Context, brightness: Int) {
