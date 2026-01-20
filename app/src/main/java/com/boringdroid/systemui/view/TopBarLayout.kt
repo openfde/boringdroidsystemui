@@ -47,6 +47,7 @@ import com.boringdroid.systemui.SystemUIOverlay.Companion
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
+import com.boringdroid.systemui.provider.VolumeProvider
 import com.boringdroid.systemui.receiver.BatteryReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.NotificationListener
 import com.boringdroid.systemui.receiver.NotificationReceiver
@@ -193,6 +194,20 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         if(needUpdateBattery){
             onBatteryChanged(percentage, status, plugged)
         }
+        initVolume()
+    }
+
+    private fun initVolume() {
+        val volume = VolumeProvider().getVolume()
+        if (volume == 0) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_mute)
+        } else if (volume < 100.div(3)) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+        } else if (volume < (100.div(3) * 2)) {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_middle)
+        } else {
+            volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+        }
     }
 
     internal inner class GlobalSearchRecevier : BroadcastReceiver(){
@@ -233,6 +248,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             }
         }
         volumeWindow?.enterView = imageView
+        volumeWindow?.topBarVolumeImage = volumeBtn
         windowList.add(volumeWindow!!)
 
     }
@@ -391,6 +407,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 this@TopBarLayout.controlBtn?.background = null
             }
         }
+        controlWindow?.topBarVolumeImage = volumeBtn
         controlWindow?.enterView = imageView
         controlWindow?.topbarController = this
         windowList.add(controlWindow!!)
