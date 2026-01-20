@@ -59,6 +59,7 @@ class TopBarControlWindow(
     private val dm: DisplayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private  val SETTINGS_PACKAGE =  "com.android.settings"
     private  val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
+    var topBarVolumeImage: ImageView?= null
 
 
     var topbarController: TopbarLayoutController ?=null
@@ -105,7 +106,7 @@ class TopBarControlWindow(
         super.showPopupWindow()
         runWindowAnim(WindowGravity.top, true)
         initViews()
-        initVolumeSeekbar()
+//        initVolumeSeekbar()
         initVolumes()
         initBrightnessSeekbar()
     }
@@ -130,6 +131,22 @@ class TopBarControlWindow(
         volumeSeekBar?.max = streamMaxVolume
         volumeSeekBar?.progress = currentVolume
         volumeSeekBar?.setOnSeekBarChangeListener(volumeChangeListener)
+        if (currentVolume == 0) {
+            volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_mute)
+        } else if (currentVolume < volumeSeekBar?.max!!.div(3)) {
+//                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+            volumeImage?.setImageResource(R.drawable.icon_volume_min)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_min)
+        } else if (currentVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
+//                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+            volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_middle)
+        } else {
+//                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+            volumeImage?.setImageResource(R.drawable.icon_volume_max)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_max)
+        }
     }
 
     private fun initVolumeSeekbar() {
@@ -156,17 +173,21 @@ class TopBarControlWindow(
             Log.w(TAG, "progress: $progress ")
 //            val am = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
-            if(progress == 0){
+            if (progress == 0) {
                 volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_mute)
             } else if (progress < volumeSeekBar?.max!!.div(3)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
                 volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_min)
             } else if (progress < (volumeSeekBar?.max!!.div(3) * 2)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
                 volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_middle)
             } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
                 volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_max)
             }
 
             if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){

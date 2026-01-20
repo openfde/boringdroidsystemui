@@ -17,6 +17,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.View
@@ -173,6 +174,8 @@ class AppOverviewWindow(
                 return@setOnKeyListener true
             } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
                 focusView?.requestFocus()
+                return@setOnKeyListener true
+            } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP){
                 return@setOnKeyListener true
             } else {
                 return@setOnKeyListener false

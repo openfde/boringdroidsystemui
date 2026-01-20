@@ -233,6 +233,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             }
         }
         volumeWindow?.enterView = imageView
+        volumeWindow?.topBarVolumeImage = volumeBtn
         windowList.add(volumeWindow!!)
 
     }
@@ -391,6 +392,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 this@TopBarLayout.controlBtn?.background = null
             }
         }
+        controlWindow?.topBarVolumeImage = volumeBtn
         controlWindow?.enterView = imageView
         controlWindow?.topbarController = this
         windowList.add(controlWindow!!)
