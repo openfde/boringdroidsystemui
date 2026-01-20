@@ -17,6 +17,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.View
@@ -77,6 +78,7 @@ class AppOverviewWindow(
     var wallpaperManager :WallpaperManager ?= null
     var wallpaperBitmap : Bitmap ?= null
     var blurWallPaperRadius : Float ?= 0.0f
+    var div : Int  = 1
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -117,7 +119,7 @@ class AppOverviewWindow(
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
         val dimensionPixelSize =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
-        val div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
+        div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
         Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div")
         appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
@@ -174,6 +176,8 @@ class AppOverviewWindow(
             } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
                 focusView?.requestFocus()
                 return@setOnKeyListener true
+            } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP){
+                return@setOnKeyListener true
             } else {
                 return@setOnKeyListener false
             }
@@ -229,10 +233,6 @@ class AppOverviewWindow(
                 override fun onAnimationEnd(animation: Animator) {
                     if(isEnter){
                         blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
-//                        getContentView()?.postDelayed(300,
-//                            {
-//                                blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
-//                            })
                     } else {
                         destroy()
                     }
@@ -310,29 +310,13 @@ class AppOverviewWindow(
             override fun onPageScrollStateChanged(state: Int) {
                 Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
                 indicatorMi?.onPageScrollStateChanged(state)
-//                if(state == 0){
                 appsVp?.blockScroll = false
-//                }
             }
         })
     }
 
     override fun dismiss() {
-//        val anim = AnimationUtils.loadAnimation(getContext(), R.anim.lp_exit)
-//
-//        anim.setAnimationListener(object : Animation.AnimationListener {
-//            override fun onAnimationStart(animation: Animation) {
-//            }
-//
-//            override fun onAnimationEnd(animation: Animation) {
-                destroy()
-//            }
-
-//            override fun onAnimationRepeat(animation: Animation) {
-//            }
-//        })
-//
-//        appsVp?.startAnimation(anim)
+        destroy()
     }
 
     fun destroy(){
@@ -361,8 +345,7 @@ class AppOverviewWindow(
     fun updateAppList(apps: MutableList<AppData>) {
         this.apps.clear()
         this.apps.addAll(apps)
-//        apps.forEach { app-> Log.d(TAG, "updateAppList: app:$app") }
-        appPages = apps.chunked(MAX_TASKS_ONE_PAGE) as MutableList<MutableList<AppData>>
+        appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsVp?.adapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter?.notifyDataSetChanged()
         updateChannel()
@@ -402,7 +385,6 @@ class AppsPagerAdapter(
     }
 
     override fun getItemPosition(`object`: Any): Int {
-//        val recycleView = `object` as LoadedOverviewRecycleView
         val view = `object` as View
         val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
         val list : MutableList<AppData>? = recycleView.list
