@@ -1,11 +1,8 @@
 package com.boringdroid.systemui.adapter
 
-import android.app.Notification
 import android.app.PendingIntent.CanceledException
 import android.content.Context
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.drawable.GradientDrawable
+import android.graphics.Typeface
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.NotificationService
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.DesktopNotification
-import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.IconParserUtilities
 import com.boringdroid.systemui.utils.Utils
 
@@ -97,10 +93,10 @@ class SlideNotificationAdapter(
 
         if (actions != null) {
             val actionLayoutParams = LinearLayout.LayoutParams(
-                0,
+                WRAP_CONTENT,
                 WRAP_CONTENT,
             )
-            actionLayoutParams.marginStart = Utils.dpToPx(context, 20)
+            actionLayoutParams.marginStart = Utils.dpToPx(context, 10)
             actionLayoutParams.weight = 1f
 //            if (isMediaNotification(sbn)) {
 //                for (action in actions) {
@@ -131,10 +127,18 @@ class SlideNotificationAdapter(
                 actionTv.setTextColor(context.getColor(R.color.notification_text_color))
                 actionTv.isSingleLine = true
                 actionTv.text = action.title
+
+                val params = ViewGroup.LayoutParams(
+                    WRAP_CONTENT,
+                    WRAP_CONTENT
+                )
+                actionTv.layoutParams = params
+                actionTv.setTypeface(Typeface.DEFAULT_BOLD); // 使用系统默认加粗字体
                 actionTv.setOnClickListener {
                     try {
                         action.actionIntent.send()
-                        itemClickListener?.onItemClick(sbn, holder.root)
+//                        itemClickListener?.onItemClick(sbn, holder.root)
+                        itemClickListener?.onItemClick(sbn, holder.root, action.title.toString())
                     } catch (_: CanceledException) {
                     }
                 }
@@ -283,5 +287,8 @@ class SlideNotificationAdapter(
 
 interface OnNotificationItemClickListener {
     fun onItemClick(sbn: DesktopNotification, item: View?)
+
+    fun onItemClick(sbn: DesktopNotification, item: View?, action:String)
+
     fun onItemCancelClick(sbn: DesktopNotification, item: View?)
 }

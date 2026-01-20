@@ -35,8 +35,8 @@ android {
 		applicationId "com.boringdroid.systemui"
 		minSdkVersion 30
 		targetSdkVersion 34
-		versionCode 153
-		versionName "1.5.3"
+		versionCode 154
+		versionName "1.5.4"
 
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 	}
@@ -151,6 +151,11 @@ dependencies {
 	kapt "androidx.room:room-compiler:2.6.1"
 	implementation 'com.github.hackware1993:MagicIndicator:1.7.0' // for androidx
 	implementation 'com.belerweb:pinyin4j:2.5.1'
+
+	implementation("androidx.work:work-runtime-ktx:2.9.0")
+	implementation("androidx.core:core-ktx:1.12.0")
+	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+	implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
 
 
 }

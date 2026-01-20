@@ -38,6 +38,9 @@
     <!-- 如果需要扫描，Android 10+ 需要位置权限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application tools:ignore="AllowBackup,MissingApplicationIcon"
         android:usesCleartextTraffic="true"
@@ -68,6 +71,8 @@
             </intent-filter>
         </service>
 
+        <service android:name=".DownloadService"
+            android:exported="false"/>
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -76,6 +81,27 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.boringdroid.systemui.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+<!--        <receiver-->
+<!--            android:name=".receiver.UpdateActionReceiver"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.boringdroid.systemui.ACTION_UPDATE_NOW" />-->
+<!--                <action android:name="com.boringdroid.systemui.ACTION_DEFER_UPDATE" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
     </application>
 
 </manifest>

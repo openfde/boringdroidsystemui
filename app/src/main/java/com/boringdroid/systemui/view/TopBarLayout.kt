@@ -84,6 +84,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         var inited: Boolean = false
     }
 
+    var aboutWindow: AboutWindow ?= null
     private var needUpdateBattery: Boolean = false
     private var plugged: Int = 0
     private var status: Int = 0
@@ -329,6 +330,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         notificationsWindow?.systemUIContext = systemUIContext
         notificationsWindow?.enterView = imageView
         notificationsWindow?.setNotifications(notifications)
+        notificationsWindow?.topBarLayout = this
         windowList.add(notificationsWindow!!)
     }
 
@@ -421,6 +423,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         powerWindow?.fdeModeResult = fdeModeResult
         powerWindow?.enterView = imageView
+        powerWindow?.topBarLayout = this
         windowList.add(powerWindow!!)
     }
 

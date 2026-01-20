@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 支持应用私有目录（保留原有） -->
+    <external-files-path name="download_private" path="Download/" />
+
+    <!-- 👇 新增：支持公共 Download 目录 -->
+    <external-path name="download_public" path="Download/" />
+
+    <!-- 或者更通用（不推荐，但可行）：
+    <external-path name="external_storage" path="." />
+    -->
+</paths>

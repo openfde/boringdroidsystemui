@@ -95,7 +95,7 @@ class DockAppAdapter(private val context: Context) :
 
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Log.d(TAG, "Glide with png: ${Utils.linuxRootPath}${info.iconPath}")
-            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+            Glide.with(GlobalSystemUIContext.getContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.icon_menu))
