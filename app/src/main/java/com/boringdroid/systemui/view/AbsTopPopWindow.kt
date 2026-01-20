@@ -60,6 +60,8 @@ open class AbsTopPopWindow(
         object Power : WindowType()
         object Control : WindowType()
         object DockContext : WindowType()
+        object About : WindowType()
+
         object Default : WindowType()
     }
 
@@ -331,6 +333,7 @@ open class AbsTopPopWindow(
                 is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.DockContext -> DockContextWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.About -> AboutWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam)
             }
 

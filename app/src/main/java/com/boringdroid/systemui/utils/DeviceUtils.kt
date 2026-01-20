@@ -19,6 +19,9 @@ import android.util.DisplayMetrics
 import android.view.Display
 import androidx.core.content.ContextCompat
 import com.boringdroid.systemui.Log
+import com.boringdroid.systemui.data.UpdateResponse
+import com.boringdroid.systemui.data.VersionCheckResponse
+import com.boringdroid.systemui.view.VersionCheckCallback
 import com.google.gson.Gson
 import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
@@ -30,6 +33,7 @@ import java.io.*
 object DeviceUtils {
 
 
+    private val TAG: String = "DeviceUtils"
     const val BASIP = "127.0.0.1"
 
     //    const val BASIP = "localhost"
@@ -46,6 +50,10 @@ object DeviceUtils {
     const val URL_GET_BRIGHTNESS = "/api/v1/brightness"
     const val URL_SET_BRIGHTNESS = "/api/v1/brightness"
     const val URL_DETECT_BRIGHTNESS = "/api/v1/brightness/detect"
+
+    const val URL_CHECK_VERSION = "/api/v1/version/check"
+    const val URL_UPDATE_VERSION = "/api/v1/version/update "
+
 
     fun lockScreen(context: Context): Boolean {
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -289,6 +297,51 @@ object DeviceUtils {
                 }
 
                 override fun onSuccess(call: Call, response: String) {
+                }
+            })
+    }
+
+    fun checkVersion(version: String?, callback: VersionCheckCallback){
+        android.util.Log.d(TAG, "checkVersion() called with: version = $version")
+        QuietOkHttp.post(BASEURL + URL_CHECK_VERSION)
+            .addParams("Version", version)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<VersionCheckResponse>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: VersionCheckResponse) {
+                    callback.onCallback(response)
+                    android.util.Log.d(
+                        TAG,
+                        "onSuccess() called with: call = $call, response = $response"
+                    )
+                }
+            })
+    }
+
+    fun startInstall(version: String?, Path: String?, Policy: String?, callback: VersionCheckCallback){
+        android.util.Log.d(
+            TAG,
+            "startInstall() called with: version = $version, Path = $Path, Policy = $Policy"
+        )
+        QuietOkHttp.post(BASEURL + URL_UPDATE_VERSION)
+            .addParams("CurrentVersion", version)
+            .addParams("Path", Path)
+            .addParams("Policy", Policy)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<UpdateResponse>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: UpdateResponse) {
+                    callback.onUpdateCallback(response)
+                    android.util.Log.d(
+                        TAG,
+                        "onSuccess() called with: call = $call, response = $response"
+                    )
                 }
             })
     }

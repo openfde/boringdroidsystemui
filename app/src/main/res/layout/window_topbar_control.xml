@@ -239,6 +239,8 @@
                         android:layout_marginTop="64dp"
                         android:layout_gravity="center_horizontal"
                         android:gravity="center"
+                        android:breakStrategy="balanced"
+                        android:justificationMode="inter_word"
                         android:textColor="#ff292929"
                         android:textSize="13sp"
                         android:alpha="1"
