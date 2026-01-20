@@ -8,6 +8,7 @@
     <string name="search">Search...</string>
     <string name="power_off">Power off</string>
     <string name="restart">Restart</string>
+    <string name="resume_todownload">Restart</string>
     <string name="soft_restart">Soft restart</string>
     <string name="lock">Log Out</string>
     <string name="pin">Pin</string>
@@ -133,6 +134,14 @@
 
     <string name="openfde_version">OpenFDE version</string>
     <string name="android_version">Android version</string>
-
+    <string name="check_verson">Check version</string>
+    <string name="already_latest">Already latested</string>
+    <string name="update_to_version">Update to version</string>
+    <string name="pause">pause</string>
+    <string name="update_now">Update now</string>
+    <string name="update_next">Update on next startup</string>
+    <string name="download_complete">Download complete</string>
+    <string name="update">update</string>
+    <string name="version_update">Update OpenFDE</string>
 
 </resources>

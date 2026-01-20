@@ -32,6 +32,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
+import com.boringdroid.systemui.data.SystemDataHolder
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.receiver.BatteryReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver
@@ -181,14 +182,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     override fun onCreate(
         sysUIContext: Context,
-        pluginContext_1: Context,
+        sysPluginContext: Context,
     ) {
         systemUIContext = sysUIContext
-        pluginContext = pluginContext_1
-        GlobalSystemUIContext.setGlobalSystemuiContext(systemUIContext)
+        pluginContext = sysPluginContext
+        GlobalSystemUIContext.setContext(sysUIContext)
+        SystemDataHolder.initialize(sysUIContext).initSystemData()
         ImageUtils.init(sysUIContext)
         initOKhttp()
-        SPUtils.pluginContext = systemUIContext
+        SPUtils.pluginContext = pluginContext
         navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
@@ -378,7 +380,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     private fun initOKhttp() {
         val logInterceptor = HttpLoggingInterceptor(HttpLog("fde-systemui"))
-        logInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
         val sOkHttpClient = OkHttpClient.Builder()
             .readTimeout(10, TimeUnit.SECONDS)
             .addInterceptor(logInterceptor)
@@ -766,13 +768,18 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
 
 object GlobalSystemUIContext {
-    private var globalSystemuiContext: Context ?= null
+    @Volatile
+    private lateinit var globalSystemUIContext: Context
 
-    fun getGlobalSystemuiContext(): Context?{
-        return globalSystemuiContext
+    fun setContext(context: Context) {
+        // 可选：只允许设置一次，避免覆盖
+        if (!::globalSystemUIContext.isInitialized) {
+            globalSystemUIContext = context.applicationContext
+        }
     }
 
-    fun setGlobalSystemuiContext(context: Context?){
-        this.globalSystemuiContext = context
+    fun getContext(): Context {
+        // 如果未初始化就调用，会抛出异常（符合非空语义）
+        return globalSystemUIContext
     }
 }

@@ -178,7 +178,7 @@ class AppOverviewWindow(
                 return@setOnKeyListener true
             } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP){
                 return@setOnKeyListener true
-            } else {
+            }else {
                 return@setOnKeyListener false
             }
         }
