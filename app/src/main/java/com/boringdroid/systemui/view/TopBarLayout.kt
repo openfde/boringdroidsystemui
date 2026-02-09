@@ -285,6 +285,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             context.unregisterReceiver(notificationReceiver)
         } catch (e: IllegalArgumentException) {
         }
+        controlWindow?.destroy()
     }
 
 
