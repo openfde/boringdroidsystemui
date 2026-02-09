@@ -99,11 +99,12 @@
                 android:elevation="@dimen/elevation_control_panel"
                 >
                 <ImageView
+                    android:id="@+id/ble_img"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
-                    android:src="@drawable/icon_light_unselect"
+                    android:src="@drawable/icon_ble_unselect"
                     android:padding="10dp"
                     android:background="@drawable/control_oval_gray"
                     />
@@ -115,6 +116,7 @@
                     android:layout_marginBottom="15dp"
                     >
                     <TextView
+                        android:id="@+id/ble_title_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
@@ -122,11 +124,11 @@
                         android:layout_centerVertical="true"
                         android:textColor="#ff262626"
                         android:textSize="14sp"
-                        android:text="夜间模式"
+                        android:text="@string/bluetooth"
                         style="@style/style_55"
                         />
-
                     <TextView
+                        android:id="@+id/ble_name_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
@@ -134,10 +136,9 @@
                         android:textColor="#59000000"
                         android:textSize="12sp"
                         android:layout_marginTop="3dp"
-                        android:text="未开启"
+                        android:text="@string/not_open"
                         style="@style/style_55"
                         />
-
                 </LinearLayout>
             </LinearLayout>
 

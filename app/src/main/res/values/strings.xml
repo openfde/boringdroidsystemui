@@ -133,6 +133,8 @@
 
     <string name="openfde_version">OpenFDE version</string>
     <string name="android_version">Android version</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="not_open">Not enabled</string>
 
 
 </resources>

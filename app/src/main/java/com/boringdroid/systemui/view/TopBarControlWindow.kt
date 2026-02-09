@@ -1,8 +1,14 @@
 package com.boringdroid.systemui.view
 
+import android.Manifest
 import android.animation.ObjectAnimator
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.media.AudioSystem
@@ -22,6 +28,8 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
+import androidx.core.content.ContextCompat.registerReceiver
 import com.android.internal.util.ScreenshotHelper
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
@@ -30,6 +38,9 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIF_BASE_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.PROGRESS_NOTIF_ID
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Runnable
 
 class TopBarControlWindow(
     context: Context,
@@ -39,9 +50,11 @@ class TopBarControlWindow(
     layoutResId: Int,
     typeParam: Int
 )
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener,View.OnLongClickListener {
+    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam),
+    View.OnClickListener,View.OnLongClickListener {
 
 
+    private var bleRegisted: Boolean = false
     private var isRecording: Boolean = false
     private var screenshotBtn: ImageView?= null
     private var regionshotBtn: ImageView?= null
@@ -50,6 +63,8 @@ class TopBarControlWindow(
     private var volumeImage: ImageView?= null
     private var wifiImage: ImageView?= null
     private var tvWifiName: TextView?= null
+    private var bleImage: ImageView ?= null
+    private var tvBleName: TextView ?= null
     private var volumeCenterIv: ImageView?= null
     private var wifiCv: LinearLayout?= null
     private var volumeSeekBar: SeekBar?= null
@@ -59,10 +74,10 @@ class TopBarControlWindow(
     private val dm: DisplayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     private  val SETTINGS_PACKAGE =  "com.android.settings"
     private  val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
-    var topBarVolumeImage: ImageView?= null
+    var topBarVolumeImage: ImageView ?= null
+    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
-
-    var topbarController: TopbarLayoutController ?=null
+    var topbarController: TopbarLayoutController ?= null
     var formUser: Boolean = false
     var recordHandler: Handler ?= null
 
@@ -106,9 +121,10 @@ class TopBarControlWindow(
         super.showPopupWindow()
         runWindowAnim(WindowGravity.top, true)
         initViews()
-//        initVolumeSeekbar()
+        wifiStatusListen()
         initVolumes()
         initBrightnessSeekbar()
+        initBle()
     }
 
     private fun initBrightnessSeekbar() {
@@ -292,6 +308,10 @@ class TopBarControlWindow(
         wifiCv = mContentView?.findViewById(R.id.wifi_cv)
         wifiCv?.setOnClickListener(this)
         wifiCv?.setOnLongClickListener (this)
+        bleImage = mContentView?.findViewById(R.id.ble_img)
+        tvBleName = mContentView?.findViewById(R.id.ble_name_tv)
+        bleImage?.setOnClickListener(this)
+        bleImage?.setOnLongClickListener(this)
 
         screenshotBtn?.setOnTouchListener(touchListener)
         screenshotBtn?.setOnHoverListener(hoverListener)
@@ -314,9 +334,6 @@ class TopBarControlWindow(
         } else {
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
         }
-
-        wifiStatusListen()
-
     }
 
     fun wifiStatusListen(){
@@ -358,23 +375,10 @@ class TopBarControlWindow(
         } else if(v == recordBtn){
             dismiss()
             recordHandler?.obtainMessage(2, 0, 0, null)?.sendToTarget()
-//            Utils.sendKeyCode(KeyEvent.KEYCODE_MEDIA_RECORD)
-//            val inst = Instrumentation()
-//            inst.sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_RECORD)
-//            val launcherComponent: ComponentName = ComponentName(
-//                SYSUI_PACKAGE,
-//                SYSUI_SCREENRECORD_LAUNCHER
-//            )
-//            val intent = Intent()
-//            intent.component = launcherComponent
-//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//            getContext().startActivity(intent)
         } else if(v == volumeCenterIv){
             dismiss()
             topbarController?.showVolumeWindow()
         }else if(v ==wifiCv){
-//            dismiss()
-//            AppUtils.toWifiPage(getContext() )
             val intent = Intent(Wifi_ACTION)
             intent.putExtra("wifiStatus", 1 - wifiStatus!!)
             intent.setPackage(SETTINGS_PACKAGE)
@@ -384,9 +388,91 @@ class TopBarControlWindow(
                 setBackgroundResource(if (wifiStatus == 0) R.drawable.control_oval_blue else R.drawable.control_oval_gray_22)
                 setImageResource(if (wifiStatus == 0) R.drawable.icon_wifi_select_full else R.drawable.icon_wifi_select_empty)
             }
+        } else if(v == bleImage){
+            val enabled = bluetoothAdapter?.isEnabled
+//            Log.d(TAG, "onClick() called with: enabled = $enabled")
+            if (enabled == true) {
+                bluetoothAdapter?.disable()
+            } else {
+                bluetoothAdapter?.enable()
+            }
         }
     }
 
+
+    private fun initBle() {
+        val enabled = bluetoothAdapter?.isEnabled
+//        Log.d(TAG, "initBle() called $enabled")
+        bleImage?.apply {
+            setBackgroundResource(if (enabled == true) R.drawable.control_oval_blue else R.drawable.control_oval_gray_22)
+            setImageResource(if (enabled == true) R.drawable.icon_ble_select else R.drawable.icon_ble_unselect)
+        }
+        if (bluetoothAdapter?.isEnabled == true) {
+            // 获取已配对设备
+            val pairedDevices = bluetoothAdapter?.bondedDevices
+            Log.d(TAG, "initBle() called $pairedDevices")
+            pairedDevices?.forEach { device ->
+//                Log.d(TAG, "名称: ${device.name}, 地址: ${device.address}")
+            }
+            pairedDevices?.size?.let {
+                if(it > 0){
+                    tvBleName?.text = pairedDevices?.first()?.name
+                }
+            }
+            bluetoothAdapter.getProfileProxy(getContext(), object : BluetoothProfile.ServiceListener {
+                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                    if (profile == BluetoothProfile.A2DP) {
+                        val connected = proxy.connectedDevices
+                        connected.forEach { dev ->
+//                            Log.d(TAG, "当前连接的设备: ${dev.name}")
+                        }
+                        bluetoothAdapter.closeProfileProxy(profile, proxy)
+                    }
+                }
+                override fun onServiceDisconnected(profile: Int) {}
+            }, BluetoothProfile.A2DP)
+        } else {
+            tvBleName?.text = getContext().resources.getString(R.string.not_open)
+//            Log.d(TAG, "蓝牙未开启")
+        }
+        if(!bleRegisted){
+            val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            getContext().registerReceiver(bluetoothStateReceiver, filter)
+            bleRegisted = true
+        }
+    }
+
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+//            Log.d(TAG, "onReceive: $action")
+            if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                when (state) {
+                    BluetoothAdapter.STATE_OFF -> {
+//                        Log.d(TAG, "蓝牙已关闭")
+                        handler.removeCallbacks { null }
+                        handler.postDelayed(Runnable {
+                            initBle()
+                        }, 500)
+                    }
+                    BluetoothAdapter.STATE_TURNING_ON -> {
+//                        Log.d(TAG, "蓝牙正在开启...")
+                    }
+                    BluetoothAdapter.STATE_ON -> {
+//                        Log.d(TAG, "蓝牙已开启")
+                        handler.removeCallbacks { null }
+                        handler.postDelayed(Runnable {
+                            initBle()
+                        }, 500)
+                    }
+                    BluetoothAdapter.STATE_TURNING_OFF -> {
+//                        Log.d(TAG, "蓝牙正在关闭...")
+                    }
+                }
+            }
+        }
+    }
 
     fun onScreenRecordStateChange(state: Int, groupKey: String?) {
         Log.d(TAG, "onScreenRecordStateChange() called with: groupKey = $groupKey state = $state  ${groupKey?.contains("screen_record_saved")}")
@@ -416,5 +502,12 @@ class TopBarControlWindow(
             AppUtils.toWifiPage(getContext() )
         }
         return  false;
+    }
+
+    fun destroy() {
+        if(bleRegisted){
+            getContext().unregisterReceiver(bluetoothStateReceiver)
+            bleRegisted = false
+        }
     }
 }
