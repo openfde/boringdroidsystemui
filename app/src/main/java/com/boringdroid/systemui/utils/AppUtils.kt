@@ -386,4 +386,10 @@ object AppUtils {
         mContext.startActivity(intent)
     }
 
+    fun toBlePage(mContext: Context) {
+        val intent = Intent("android.settings.BLUETOOTH_PAIRING_SETTINGS")
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        mContext.startActivity(intent)
+    }
+
 }
