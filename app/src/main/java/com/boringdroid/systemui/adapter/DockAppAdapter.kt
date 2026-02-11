@@ -96,14 +96,15 @@ class DockAppAdapter(private val context: Context) :
                 e.printStackTrace()
             }
 
-        } else if(app.icon != null){
-            holder.iconIV.setImageDrawable(app.icon)
-        } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
+        }  else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
+            Log.d(TAG, "Glide with png: ${Utils.linuxRootPath}${info.iconPath}")
             Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
                 .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.icon_menu))
                 .into(holder.iconIV);
+        } else if(app.icon != null){
+            holder.iconIV.setImageDrawable(app.icon)
         }
 
         if(app.getState() == STATE_UNFEFINED){
