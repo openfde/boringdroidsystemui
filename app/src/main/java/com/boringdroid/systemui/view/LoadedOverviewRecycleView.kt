@@ -9,6 +9,7 @@ import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.net.Uri
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
@@ -107,7 +108,7 @@ constructor(
                         .into(holder.iconIV!!)
                 }
                 holder.badgeIv?.visibility = VISIBLE
-                if ("zh".equals(languageCode)) {
+                if ("zh".equals(languageCode) && !TextUtils.isEmpty(appData?.linuxInfo?.zhName)) {
                     holder.nameTV?.text = appData?.linuxInfo?.zhName
                 } else {
                     holder.nameTV?.text = appData?.name
