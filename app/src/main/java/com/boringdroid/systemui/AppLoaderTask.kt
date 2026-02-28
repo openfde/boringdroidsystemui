@@ -14,6 +14,7 @@ import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.AppListResult
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
+import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
 import com.boringdroid.systemui.utils.DeviceUtils.URL_GETALLAPP
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack

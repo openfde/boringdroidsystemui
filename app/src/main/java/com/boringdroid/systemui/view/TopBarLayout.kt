@@ -40,11 +40,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextClock
+import com.boringdroid.systemui.AppLoaderTask
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.SystemUIOverlay
 import com.boringdroid.systemui.SystemUIOverlay.Companion
+import com.boringdroid.systemui.data.AppListResult
 import com.boringdroid.systemui.data.DesktopNotification
+import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.data.WindowAttr
 import com.boringdroid.systemui.provider.AllAppsProvider
 import com.boringdroid.systemui.provider.VolumeProvider
@@ -60,6 +63,8 @@ import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK
 import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK_ALL
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
+import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
@@ -67,6 +72,9 @@ import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDO
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_SHADOW
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_RADIUS
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_SHADOW
+import com.xwdz.http.QuietOkHttp
+import com.xwdz.http.callback.JsonCallBack
+import okhttp3.Call
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
@@ -110,7 +118,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     var overviewProvider: AllAppsProvider?= null
     var  xserverEventInputer: XserverHelper.XserverEventInputer ?= null
     var  xserverWindowInjector: XserverHelper.XserverWindowInjector ?= null
-
+    var fdeModeResult: FdeModeResult ?= null
     private var powerWindow:TopBarPowerWindow? = null
     var controlWindow:TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
@@ -195,6 +203,22 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             onBatteryChanged(percentage, status, plugged)
         }
         initVolume()
+        getFdeMode()
+    }
+
+    fun getFdeMode(){
+        QuietOkHttp.get(BASEURL + URL_FDEMODE)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<FdeModeResult>() {
+                override fun onFailure(call: Call?, e: Exception?) {
+                }
+
+                override fun onSuccess(call: Call?, response: FdeModeResult?) {
+                    fdeModeResult = response
+                    Log.d(TAG, "onSuccess() called with: call = $call, response = $response")
+                    makePowerWindow(powerBtn)
+                }
+            })
     }
 
     private fun initVolume() {
@@ -261,7 +285,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
             .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
             .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
-        Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow = $globalSearchWindow")
+//        Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow = $globalSearchWindow")
         globalSearchWindow?.dismissListener = object  : WindowDismissListener {
             override fun onWindowDismiss() {
                 this@TopBarLayout.searchBtn?.background = null
@@ -377,7 +401,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun makePowerWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_power_width).toInt() + 32
-        val height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt() + 32
+        var height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt() + 32
+        if(!fdeModeResult?.data?.FDEMode.equals("environment")){
+            height = context.resources.getDimension(R.dimen.top_bar_power_height_small).toInt() + 32
+        }
         powerWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_power)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .provider(object : ViewOutlineProvider() {
@@ -392,6 +419,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 this@TopBarLayout.powerBtn?.background = null
             }
         }
+        powerWindow?.fdeModeResult = fdeModeResult
         powerWindow?.enterView = imageView
         windowList.add(powerWindow!!)
     }
@@ -437,6 +465,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun powerBtnClick() {
+        getFdeMode()
+        powerWindow?.fdeModeResult = fdeModeResult
         powerWindow?.showPopupWindow()
         Utils.setBackgroundBlurRadius(powerWindow?.getContentView()?.findViewById(R.id.root_blur), POWER_OUTLINE_SHADOW, POWER_OUTLINE_RADIUS)
         powerBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
@@ -524,7 +554,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     override fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
-        Log.d(TAG, "updateState: ${notifications?.size}")
+//        Log.d(TAG, "updateState: ${notifications?.size}")
         val width = notificationsWindow?.getWidth()
         if (width != null) {
             notificationsWindow?.updateLayoutParams(width,  calculateNotificationHeight())
@@ -789,7 +819,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             val isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC ||
                     plugged == BatteryManager.BATTERY_PLUGGED_USB ||
                     plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
-            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
+//            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
             isPlugged
         } else {
             charging

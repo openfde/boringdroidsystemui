@@ -112,6 +112,7 @@
                 style="@style/style_55"
                 />
             <View
+                android:id="@+id/divider"
                 android:layout_marginVertical="5dp"
                 android:layout_width="130dp"
                 android:layout_height="1dp"

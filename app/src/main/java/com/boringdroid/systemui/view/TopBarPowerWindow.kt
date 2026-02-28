@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.Outline
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -15,6 +16,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import com.boringdroid.systemui.R
+import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 
@@ -34,9 +36,13 @@ class TopBarPowerWindow(
         const val TAG: String = "TopBarPowerWindow"
     }
 
+    var fdeModeResult: FdeModeResult ?= null
     private var aboutBtn: TextView? = null
     private var settingBtn: TextView? = null
     private var sleepBtn: TextView? = null
+    private var divider: View? = null
+    private var rootView: View? = null
+
     private var shutdownBtn: TextView? = null
     private var rebootBtn: TextView? = null
     private var logoutBtn: TextView? = null
@@ -71,6 +77,8 @@ class TopBarPowerWindow(
         rebootBtn = mContentView?.findViewById(R.id.reboot_tv)
         logoutBtn = mContentView?.findViewById(R.id.logout_tv)
         lockBtn = mContentView?.findViewById(R.id.lock_tv)
+        divider = mContentView?.findViewById(R.id.divider)
+        rootView = mContentView?.findViewById(R.id.root_blur)
 
         aboutBtn?.setOnClickListener(this)
         settingBtn?.setOnClickListener(this)
@@ -88,19 +96,17 @@ class TopBarPowerWindow(
         logoutBtn?.setOnHoverListener(hoverListener)
         lockBtn?.setOnHoverListener(hoverListener)
 
-//        val cardView = getContentView()?.findViewById<CardView>(R.id.root)
-//        cardView?.elevation = 8f
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            // 设置阴影偏移（X轴向右，Y轴向下）
-//            cardView?.outlineProvider = object : ViewOutlineProvider() {
-//                override fun getOutline(view: View, outline: Outline) {
-//                    outline.setRoundRect(0, 0, view.width, view.height - 4, 8f)
-//                }
-//            }
-//            cardView?.elevation = 8f
-//        }
-
+        Log.d(TAG, "initViews() $fdeModeResult")
+        if(!fdeModeResult?.data?.FDEMode.equals("environment")){
+            sleepBtn?.visibility = View.GONE
+            rebootBtn?.visibility = View.GONE
+            logoutBtn?.visibility = View.GONE
+            lockBtn?.visibility = View.GONE
+            divider?.visibility = View.GONE
+            val params = rootView?.layoutParams
+            params?.height = getContext().resources.getDimension(R.dimen.top_bar_power_height_small).toInt()
+            rootView?.layoutParams = params
+        }
     }
 
 
