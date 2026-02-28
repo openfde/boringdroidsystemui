@@ -69,6 +69,8 @@ constructor(
 
     private class AppListAdapter(private val context: Context) :
         Adapter<AppListAdapter.ViewHolder>() {
+
+        val languageCode = context.getResources().getConfiguration().getLocales().get(0).language;
         private var appOverviewWindow: AppOverviewWindow? = null
         private val apps: MutableList<AppData?> = ArrayList()
         private var contextWindow :AbsTopPopWindow ?= null
@@ -105,10 +107,15 @@ constructor(
                         .into(holder.iconIV!!)
                 }
                 holder.badgeIv?.visibility = VISIBLE
+                if ("zh".equals(languageCode)) {
+                    holder.nameTV?.text = appData?.linuxInfo?.zhName
+                } else {
+                    holder.nameTV?.text = appData?.name
+                }
             } else {
+                holder.nameTV?.text = appData?.name
                 holder.iconIV?.setImageDrawable(appData!!.icon)
             }
-            holder.nameTV?.text = appData?.name
             holder.clickView?.setOnClickListener{
                 if(contextWindow?.isShowing() == true){
                     contextWindow?.dismiss()
