@@ -102,6 +102,7 @@
     <dimen name="topbar_icon_tray_padding">3dp</dimen>
     <dimen name="top_bar_power_width">150dp</dimen>
     <dimen name="top_bar_power_height">254dp</dimen>
+    <dimen name="top_bar_power_height_small">125dp</dimen>
     <dimen name="top_text_margin">4dp</dimen>
     <dimen name="top_text_padding">20dp</dimen>
     <dimen name="top_bar_about_width">430dp</dimen>

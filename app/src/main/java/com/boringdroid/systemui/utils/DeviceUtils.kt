@@ -35,6 +35,8 @@ object DeviceUtils {
     //    const val BASIP = "localhost"
     const val BASEURL = "http://$BASIP:18080"
     const val URL_GETALLAPP = "/api/v1/apps"
+    const val URL_FDEMODE = "/api/v1/fde_mode"
+
     const val URL_STARTAPP = "/api/v1/vnc"
     const val URL_STOPAPP = "/api/v1/vnc"
 
