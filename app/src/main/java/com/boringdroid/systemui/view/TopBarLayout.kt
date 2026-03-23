@@ -394,8 +394,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         val notificationSize =  if (notifications.isNullOrEmpty()) 1 else notifications!!.size
         var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
         // 128 means navi + statusbr + space
-        height = if (height >( size.y - 128)) (size.y - 128) else height
-//        Log.d(TAG, "calculateNotificationHeight() returned: $height size:$notificationSize")
+        height = if (height >( size.y - context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt()))
+                (size.y - context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt()) else height
         return height
     }
 
