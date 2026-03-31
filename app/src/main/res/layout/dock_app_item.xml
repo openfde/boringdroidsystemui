@@ -18,7 +18,6 @@
             android:layout_width="@dimen/dock_icon_width"
             android:layout_height="@dimen/dock_icon_width"
             android:layout_marginHorizontal="@dimen/dock_icon_margin"
-            android:scaleType="fitXY"
             android:layout_gravity="center"
             android:src="@drawable/icon_menu"
             />
