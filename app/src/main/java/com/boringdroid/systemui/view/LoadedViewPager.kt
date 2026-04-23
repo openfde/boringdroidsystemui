@@ -24,7 +24,7 @@ constructor(
     private var mStartX = 0f
     private var mStartY = 0f
     private var mIsHorizontalScroll = false
-    val TAG = "ViewPager"
+    val TAG = "LoadedViewPager"
     var blockScroll : Boolean = false
 
     init {
@@ -51,6 +51,7 @@ constructor(
     private var lastInterceptY : Float = -1f
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        Log.d(TAG, "onInterceptTouchEvent() called with: ev = $ev")
         when (ev!!.action) {
             MotionEvent.ACTION_DOWN -> {
                 mStartX = ev!!.x
@@ -58,7 +59,6 @@ constructor(
                 lastInterceptX = -1f
                 lastInterceptY = -1f
             }
-
             MotionEvent.ACTION_MOVE -> {
                 if(blockScroll){
                     lastInterceptX = -1f
@@ -68,7 +68,7 @@ constructor(
                     lastInterceptX = ev!!.x
                     lastInterceptY = ev!!.y
                 } else {
-                    if(lastInterceptX == ev!!.x){
+                    if(lastInterceptX == ev!!.x ){
                         lastInterceptX = -1f
                         if(lastInterceptY > ev!!.y){
                             goToNextPage()
@@ -82,7 +82,9 @@ constructor(
 
                 val dx = Math.abs(ev!!.x - mStartX)
                 val dy = Math.abs(ev!!.y - mStartY)
+                Log.d(TAG, "onInterceptTouchEvent: dx:$dx dy:$dy slop:${ViewConfiguration.get(context).scaledTouchSlop}")
                 if (dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop) {
+                    Log.d(TAG, "Intercept move TouchEvent")
                     return true // 拦截横向滑动
                 }
             }
@@ -106,6 +108,7 @@ constructor(
     }
 
     private fun handleTouchEvent(event: MotionEvent): Boolean {
+//        Log.d(TAG, "handleTouchEvent() called with: event = $event")
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 mStartX = event.x
@@ -113,10 +116,18 @@ constructor(
                 mIsHorizontalScroll = false
             }
 
-            MotionEvent.ACTION_MOVE -> if (!mIsHorizontalScroll) {
-                val dx = abs((event.x - mStartX).toDouble()).toFloat()
-                val dy = abs((event.y - mStartY).toDouble()).toFloat()
-                mIsHorizontalScroll = dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop
+            MotionEvent.ACTION_MOVE ->  {
+                val dx = (event.x - mStartX).toDouble().toFloat()
+                val dy = (event.y - mStartY).toDouble().toFloat()
+//                mIsHorizontalScroll = dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop
+                Log.d(TAG, "handleTouchEvent: dx:$dx dy:$dy $blockScroll")
+                if(!blockScroll ) {
+                    if(dx < 0){
+                        goToNextPage()
+                    } else {
+                        goToPreviousPage()
+                    }
+                }
             }
 
             MotionEvent.ACTION_UP ->
@@ -124,17 +135,18 @@ constructor(
 //                if (mIsHorizontalScroll) {
             {
                 val dx = event.x - mStartX
-                if (abs(dx.toDouble()) > mTriggerDistance) {
-                    val current = currentItem
-                    val next = if (dx > 0) current - 1 else current + 1
-
-                    val toIndex = max(0.0, min(next.toDouble(), (adapter!!.count - 1).toDouble()))
-                        .toInt()
-                    setCurrentItem(
-                        toIndex, true
-                    )
-                    return true // 已处理滑动
-                }
+//                Log.d(TAG, "handleTouchEvent() called with: dx = $dx")
+//                if (abs(dx.toDouble()) > mTriggerDistance) {
+//                    val current = currentItem
+//                    val next = if (dx > 0) current - 1 else current + 1
+//
+//                    val toIndex = max(0.0, min(next.toDouble(), (adapter!!.count - 1).toDouble()))
+//                        .toInt()
+//                    setCurrentItem(
+//                        toIndex, true
+//                    )
+//                    return true // 已处理滑动
+//                }
             }
 
 //                }
