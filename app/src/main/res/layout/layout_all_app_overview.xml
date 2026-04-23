@@ -73,6 +73,7 @@
                 android:id="@+id/apps_vp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:overScrollMode="never"
                 android:layout_marginTop="@dimen/overview_margin_top"
                 android:layout_marginBottom="@dimen/overview_margin_bottom"
                 />
