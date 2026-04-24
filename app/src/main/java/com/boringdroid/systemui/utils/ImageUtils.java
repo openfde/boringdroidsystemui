@@ -175,7 +175,7 @@ public class ImageUtils {
         if (SURFFIX_SVG.equals(iconType) || SURFFIX_SVGZ.equals(iconType)) {
             byte[] decodedData = Base64.decode(imageStr, Base64.DEFAULT);
             FileOutputStream svgFile = null;
-            Context globalSystemuiContext = GlobalSystemUIContext.INSTANCE.getGlobalSystemuiContext();
+            Context globalSystemuiContext = GlobalSystemUIContext.INSTANCE.getContext();
             File file = new File(globalSystemuiContext.getFilesDir(), name + "_output.svg");
             try {
                 svgFile = new FileOutputStream(file.getAbsolutePath());

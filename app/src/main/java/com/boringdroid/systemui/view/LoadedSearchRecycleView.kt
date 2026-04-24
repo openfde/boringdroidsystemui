@@ -129,7 +129,7 @@ constructor(
                             )
                             holder.iconIV?.setImageDrawable(svgDrawable)
                         } else {
-                            Glide.with(GlobalSystemUIContext.getGlobalSystemuiContext()!!)
+                            Glide.with(GlobalSystemUIContext.getContext())
                                 .load("${Utils.linuxRootPath}${appData?.iconPath}")
                                 .centerCrop()
                                 .placeholder(context.getDrawable(R.drawable.linux_x11))

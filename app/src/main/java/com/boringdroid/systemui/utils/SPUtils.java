@@ -74,13 +74,13 @@ public class SPUtils {
         return shared_user_info.getInt(key, 0);
     }
 
-    public static void putIntUserInfo(Context context, String key, int values) {
-        SharedPreferences shared_user_info = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
-        shared_user_info.edit().putInt(key, values).commit();
-    }
-
     public static void cleanUserInfo(Context context) {
         SharedPreferences shared_user_info = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
         shared_user_info.edit().clear().commit();
+    }
+
+    public static void putIntUserInfo(Context context, String key, int values) {
+        SharedPreferences shared_user_info = context.getSharedPreferences(USER_INFO, context.MODE_PRIVATE);
+        shared_user_info.edit().putInt(key, values).commit();
     }
 }

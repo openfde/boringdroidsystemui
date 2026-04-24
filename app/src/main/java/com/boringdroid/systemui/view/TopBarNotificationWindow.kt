@@ -1,24 +1,25 @@
 package com.boringdroid.systemui.view
 
 import android.app.NotificationManager
-import android.app.PendingIntent.CanceledException
 import android.content.Context
 import android.content.Intent
-import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_ID
-import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ALL_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CLICK_ACTION
+import com.boringdroid.systemui.view.AboutWindow.Companion.ACTION_DEFER_UPDATE
+import com.boringdroid.systemui.view.AboutWindow.Companion.ACTION_UPDATE_NOW
+import com.boringdroid.systemui.view.AboutWindow.Companion.NOTIFI_CHANAL_ID
 
 class TopBarNotificationWindow(
     context: Context,
@@ -44,6 +45,8 @@ class TopBarNotificationWindow(
     private var clearTv: TextView? = null
     private var notificationAdapter: SlideNotificationAdapter? = null
     var systemUIContext: Context? = null
+    var topBarLayout: TopBarLayout? = null
+
     private var notifications: Array<DesktopNotification> ? = null
     private var rootRl:RelativeLayout ? = null
     private var nm: NotificationManager ? = null
@@ -52,7 +55,7 @@ class TopBarNotificationWindow(
         super.showPopupWindow()
         runWindowAnim(WindowGravity.right, true)
         initViews()
-        val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
+        val systemService = GlobalSystemUIContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {
             nm = systemService as NotificationManager
         }
@@ -72,6 +75,7 @@ class TopBarNotificationWindow(
     }
 
     override fun onItemClick(sbn: DesktopNotification, item: View?) {
+        Log.d(TAG, "onItemClick() called with: sbn = $sbn, contentIntent = ${sbn.contentIntent}")
         if (sbn.contentIntent != null) {
             dismiss()
             val intent = Intent(NOTIFI_CLICK_ACTION)
@@ -80,7 +84,40 @@ class TopBarNotificationWindow(
             if (sbn.isClearable) {
                 nm?.cancel(sbn.id)
             }
+        } else if(sbn.id == NOTIFI_CHANAL_ID){
+
         }
+    }
+
+    override fun onItemClick(
+        sbn: DesktopNotification,
+        item: View?,
+        action: String
+    ) {
+        Log.d(TAG, "onItemClick() called with: sbn = $sbn, contentIntent = ${sbn.contentIntent} $action")
+        if (sbn.contentIntent != null) {
+            dismiss()
+            val intent = Intent(NOTIFI_CLICK_ACTION)
+            intent.putExtra(NOTIFICATION_ID, sbn.id)
+            getContext().sendBroadcast(intent)
+        } else if(sbn.id == NOTIFI_CHANAL_ID){
+            if(action.equals(getContext().resources.getString(R.string.update_now))){
+                val intent = Intent(ACTION_UPDATE_NOW)
+                intent.setPackage("com.boringdroid.systemui")
+                getContext().sendBroadcast(intent)
+                topBarLayout?.aboutWindow?.onAction(ACTION_UPDATE_NOW)
+            } else if(action.equals(getContext().resources.getString(R.string.update_next))){
+                val intent = Intent(ACTION_DEFER_UPDATE)
+                intent.setPackage("com.boringdroid.systemui")
+                getContext().sendBroadcast(intent)
+                topBarLayout?.aboutWindow?.onAction(ACTION_DEFER_UPDATE)
+            }
+        }
+        Log.d(TAG, "onItemClick: ${sbn.isClearable} $nm")
+        if (sbn.isClearable) {
+            nm?.cancel(sbn.id)
+        }
+        dismiss()
     }
 
 
