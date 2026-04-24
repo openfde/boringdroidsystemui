@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install wget zip git openjdk-17-jre cmake -y
+          sudo apt-get install wget zip git openjdk-17-jre -y
 
       - name: Download Android cmdline-tools
         if: steps.cache-android.outputs.cache-hit != 'true'
@@ -54,7 +54,8 @@ jobs:
             "platform-tools" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
-            "ndk;21.1.6352462"
+            "ndk;21.1.6352462" \
+            "cmake;3.10.2"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
