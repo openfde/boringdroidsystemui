@@ -1,0 +1,71 @@
+name: Android Build APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Android environment
+        run: |
+          echo "ANDROID_SDK_ROOT=$HOME/sdk_root" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$HOME/sdk_root" >> "$GITHUB_ENV"
+          echo "$HOME/cmdline-tools/bin" >> "$GITHUB_PATH"
+
+      - name: Cache Android SDK and cmdline-tools
+        id: cache-android
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/sdk_root
+            ~/cmdline-tools
+          key: ${{ runner.os }}-android-sdk-10406996-34.0.0-android34-ndk21.1.6352462
+
+      - name: Install system dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install wget zip git openjdk-17-jre -y
+
+      - name: Download Android cmdline-tools
+        if: steps.cache-android.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          wget "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip"
+          unzip -q commandlinetools-linux-10406996_latest.zip -d "$HOME"
+          mkdir -p "$HOME/sdk_root"
+
+      - name: Install Android SDK packages
+        if: steps.cache-android.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          (yes || true) | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;21.1.6352462"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-artifacts
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: warn
