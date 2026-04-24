@@ -3,6 +3,7 @@ package com.boringdroid.systemui.view
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -10,6 +11,7 @@ import android.widget.TextView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.UpdateResponse
 import com.boringdroid.systemui.data.VersionCheckResponse
+import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.utils.DeviceUtils
 
 class TopBarPowerWindow(
@@ -28,9 +30,13 @@ class TopBarPowerWindow(
         const val TAG: String = "TopBarPowerWindow"
     }
 
+    var fdeModeResult: FdeModeResult ?= null
     private var aboutBtn: TextView? = null
     private var settingBtn: TextView? = null
     private var sleepBtn: TextView? = null
+    private var divider: View? = null
+    private var rootView: View? = null
+
     private var shutdownBtn: TextView? = null
     private var rebootBtn: TextView? = null
     private var logoutBtn: TextView? = null
@@ -67,6 +73,8 @@ class TopBarPowerWindow(
         rebootBtn = mContentView?.findViewById(R.id.reboot_tv)
         logoutBtn = mContentView?.findViewById(R.id.logout_tv)
         lockBtn = mContentView?.findViewById(R.id.lock_tv)
+        divider = mContentView?.findViewById(R.id.divider)
+        rootView = mContentView?.findViewById(R.id.root_blur)
         aboutBtn?.setOnClickListener(this)
         settingBtn?.setOnClickListener(this)
         sleepBtn?.setOnClickListener(this)
@@ -81,6 +89,20 @@ class TopBarPowerWindow(
         rebootBtn?.setOnHoverListener(hoverListener)
         logoutBtn?.setOnHoverListener(hoverListener)
         lockBtn?.setOnHoverListener(hoverListener)
+
+
+        Log.d(TAG, "initViews() $fdeModeResult")
+        if(!fdeModeResult?.data?.FDEMode.equals("environment")){
+            sleepBtn?.visibility = View.GONE
+            rebootBtn?.visibility = View.GONE
+            logoutBtn?.visibility = View.GONE
+            lockBtn?.visibility = View.GONE
+            divider?.visibility = View.GONE
+            val params = rootView?.layoutParams
+            params?.height = getContext().resources.getDimension(R.dimen.top_bar_power_height_small).toInt()
+            rootView?.layoutParams = params
+        }
+
     }
 
 

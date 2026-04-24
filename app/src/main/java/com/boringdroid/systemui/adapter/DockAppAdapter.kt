@@ -81,9 +81,6 @@ class DockAppAdapter(private val context: Context) :
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
-        if(position == 1){
-            Log.d(TAG, "onBindViewHolder() called with: app = $app, islinux = ${app.isLinux()}")
-        }
         val info = app.linuxInfo
         Log.d(TAG, "onBindViewHolder: ${app.program}  ${!app.isLinux()} ${app.icon} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
         if(app.program.equals("Apps")){
@@ -96,14 +93,23 @@ class DockAppAdapter(private val context: Context) :
                 e.printStackTrace()
             }
 
-        } else if(app.icon != null){
-            holder.iconIV.setImageDrawable(app.icon)
         } else if(info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)){
             Glide.with(GlobalSystemUIContext.getContext())
                 .load("${Utils.linuxRootPath}${info.iconPath}")
                 .centerCrop()
                 .placeholder(context.getDrawable(R.drawable.icon_menu))
                 .into(holder.iconIV);
+        } else if(info?.iconType == ImageUtils.SURFFIX_SVG || info?.iconType == ImageUtils.SURFFIX_SVGZ){
+            Log.d(TAG, "Glide with svg: ${Utils.linuxRootPath}${info.iconPath}")
+            val svgDrawable = ImageUtils.getSVGDrawable(
+                "${Utils.linuxRootPath}${info?.iconPath}",
+                context
+            )
+            Log.d(TAG, "onBindViewHolder: $svgDrawable")
+            holder.iconIV.setImageDrawable(svgDrawable)
+
+        } else if(app.icon != null){
+            holder.iconIV.setImageDrawable(app.icon)
         }
 
         if(app.getState() == STATE_UNFEFINED){

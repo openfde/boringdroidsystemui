@@ -143,5 +143,8 @@
     <string name="download_complete">Download complete</string>
     <string name="update">update</string>
     <string name="version_update">Update OpenFDE</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="not_open">Not enabled</string>
+    <string name="enabled">Enabled</string>
 
 </resources>

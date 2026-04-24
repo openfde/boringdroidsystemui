@@ -132,6 +132,7 @@
 
     <string name="openfde_version">OpenFDE 版本</string>
     <string name="android_version">Android 版本</string>
+
     <string name="check_verson">检查版本更新</string>
     <string name="already_latest">已经是最新版本</string>
     <string name="update_to_version">更新版本到</string>
@@ -142,5 +143,10 @@
     <string name="download_complete">下载成功</string>
     <string name="update">更新</string>
     <string name="version_update">版本更新</string>
+
+    <string name="bluetooth">蓝牙</string>
+    <string name="not_open">未开启</string>
+    <string name="enabled">已开启</string>
+
 
 </resources>

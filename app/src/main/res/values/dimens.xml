@@ -102,6 +102,7 @@
     <dimen name="topbar_icon_tray_padding">3dp</dimen>
     <dimen name="top_bar_power_width">150dp</dimen>
     <dimen name="top_bar_power_height">254dp</dimen>
+    <dimen name="top_bar_power_height_small">125dp</dimen>
     <dimen name="top_text_margin">4dp</dimen>
     <dimen name="top_text_padding">20dp</dimen>
     <dimen name="top_bar_about_width">430dp</dimen>
@@ -118,8 +119,8 @@
     <dimen name="top_bar_notification_height_item">150dp</dimen>
     <dimen name="top_bar_notification_height_devide">8dp</dimen>
     <dimen name="top_bar_notification_margin_vert">13dp</dimen>
-    <dimen name="top_bar_notification_fade_length">40dp</dimen>
-
+    <dimen name="top_bar_notification_fade_length">10dp</dimen>
+    <dimen name="top_bar_reverse_height">80dp</dimen>
     <dimen name="control_window_padding">8dp</dimen>
 
 

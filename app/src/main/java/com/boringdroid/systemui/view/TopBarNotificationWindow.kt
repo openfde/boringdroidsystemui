@@ -36,8 +36,9 @@ class TopBarNotificationWindow(
         const val WINDOW_PADDING_TOP = 8
         const val WINDOW_PADDING_RIGHT = 0
         const val TAG:String = "TopBarNotificationWindow"
-        const val MAX_NOTIFICATIONS_ONE_SCREEN : Int = 7
     }
+
+    private val MAX_NOTIFICATIONS_ONE_SCREEN : Int = 8
 
     private var mRecyclerView: RecyclerView? = null
     private var countTv: TextView? = null

@@ -203,15 +203,19 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
 
     private fun topTask(runningTaskInfo: RunningTaskInfo, isTop: Boolean = true) {
-//        Log.d(TAG, "topTask() called with: runningTaskInfo = ${runningTaskInfo.baseActivity?.packageName}, isTop = $isTop")
-        if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)) {
+        Log.d(TAG, "topTask() called with: runningTaskInfo = ${runningTaskInfo.baseActivity?.packageName}, isTop = $isTop")
+        if (((runningTaskInfo.baseIntent.flags and 0x00800000) == 0x00800000)
+            && !("com.iflytek.inputmethod".equals(runningTaskInfo.baseActivity?.packageName))) {
+            Log.d(TAG, "FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS")
             return
         }
         var packageName = getRunningTaskInfoPackageName(runningTaskInfo)
         if(packageName == null){
+            Log.d(TAG, "Can't get package name")
             return
         }
         if(isLauncher(context, runningTaskInfo.topActivity)){
+            Log.d(TAG, "isLauncher")
 //            updater.setTop(null, false, isTop)
             return
         }
@@ -251,7 +255,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         }else {
             taskInfo?.setState(STATE_RUNNING)
         }
-//        Log.d(TAG, "topTask: ${taskInfo}")
+        Log.d(TAG, "topTask: ${taskInfo}")
         taskInfo?.setBaseActivityComponentName(runningTaskInfo.baseActivity)
         taskInfo?.setRealActivityComponentName(runningTaskInfo.topActivity)
         val userHandles = userManager.userProfiles
@@ -271,7 +275,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         var icon = taskInfo?.icon
         icon = if (icon == null && context != null)  context.getDrawable(R.mipmap.default_icon_round) else icon
         taskInfo?.icon = icon
-//        Log.d(TAG, "icon: ${taskInfo?.icon}")
+        Log.d(TAG, "icon: ${taskInfo?.icon}")
         updater.setTop(taskInfo, needAdd, isTop)
     }
 
@@ -336,7 +340,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             } catch (e: PackageManager.NameNotFoundException){
             }
         }
-//        Log.d(TAG, "mayFillTaskInfo finish: $app")
+        Log.d(TAG, "mayFillTaskInfo finish: $app")
     }
 
     private fun getTaskInfoFromActive(packageName: String):TaskInfo? {
@@ -522,13 +526,13 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         }
 
         fun logByTaskid(event: String, taskid: Int) {
-//            Log.d(TAG, "event = $event, taskid = $taskid")
-//            activityManager?.getRunningTasks(MAX_RUNNING_TASKS)?.forEach {
-//                Log.d(
-//                    TAG, "foreach: runningtask taskId:${it.taskId} " +
-//                            "topActivity:${it.topActivity}"
-//                )
-//            }
+            Log.d(TAG, "event = $event, taskid = $taskid")
+            activityManager?.getRunningTasks(MAX_RUNNING_TASKS)?.forEach {
+                Log.d(
+                    TAG, "foreach: runningtask taskId:${it.taskId} " +
+                            "topActivity:${it.topActivity}"
+                )
+            }
         }
     }
 

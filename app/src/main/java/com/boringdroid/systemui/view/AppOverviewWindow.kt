@@ -1,8 +1,6 @@
 package com.boringdroid.systemui.view
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
@@ -25,28 +23,26 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.view.doOnLayout
-import androidx.core.view.postDelayed
 import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import androidx.viewpager.widget.ViewPager.SCROLL_STATE_DRAGGING
+import androidx.viewpager.widget.ViewPager.SCROLL_STATE_IDLE
+import androidx.viewpager.widget.ViewPager.SCROLL_STATE_SETTLING
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.AppProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
+import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.LoadedOverviewRecycleView.Companion.NUMBER_OF_COLUMNS
-import kotlin.collections.chunked
 
 
 class AppOverviewWindow(
@@ -310,7 +306,9 @@ class AppOverviewWindow(
             override fun onPageScrollStateChanged(state: Int) {
                 Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
                 indicatorMi?.onPageScrollStateChanged(state)
-                appsVp?.blockScroll = false
+                if(state == SCROLL_STATE_IDLE){
+                    appsVp?.blockScroll = false
+                }
             }
         })
     }
