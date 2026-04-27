@@ -12,15 +12,15 @@ import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_COMPLETED
 import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_DOWNLOADING
 import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_FAILED
 import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_PAUSED
-import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class DownloadService : Service(), CoroutineScope {
 
@@ -48,26 +48,29 @@ class DownloadService : Service(), CoroutineScope {
         }
 
         fun pauseDownload(context: Context, downloadId: String) {
-            val intent = Intent(context, DownloadService::class.java).apply {
-                action = ACTION_PAUSE_DOWNLOAD
-                putExtra("downloadId", downloadId)
-            }
+            val intent =
+                Intent(context, DownloadService::class.java).apply {
+                    action = ACTION_PAUSE_DOWNLOAD
+                    putExtra("downloadId", downloadId)
+                }
             context.startService(intent)
         }
 
         fun resumeDownload(context: Context, downloadId: String) {
-            val intent = Intent(context, DownloadService::class.java).apply {
-                action = ACTION_RESUME_DOWNLOAD
-                putExtra("downloadId", downloadId)
-            }
+            val intent =
+                Intent(context, DownloadService::class.java).apply {
+                    action = ACTION_RESUME_DOWNLOAD
+                    putExtra("downloadId", downloadId)
+                }
             context.startService(intent)
         }
 
         fun cancelDownload(context: Context, downloadId: String) {
-            val intent = Intent(context, DownloadService::class.java).apply {
-                action = ACTION_CANCEL_DOWNLOAD
-                putExtra("downloadId", downloadId)
-            }
+            val intent =
+                Intent(context, DownloadService::class.java).apply {
+                    action = ACTION_CANCEL_DOWNLOAD
+                    putExtra("downloadId", downloadId)
+                }
             context.startService(intent)
         }
     }
@@ -81,40 +84,40 @@ class DownloadService : Service(), CoroutineScope {
     private val downloadJobs = ConcurrentHashMap<String, Job>()
     private val callbacks = CopyOnWriteArrayList<InterfaceDownloadCallback>()
 
-    private val binder = object :IDownloadService.Stub() {
-        override fun startDownload(url: String, fileName: String): String? {
-            return this@DownloadService.startDownload(url, fileName)
-        }
+    private val binder =
+        object : IDownloadService.Stub() {
+            override fun startDownload(url: String, fileName: String): String? {
+                return this@DownloadService.startDownload(url, fileName)
+            }
 
-        override fun pauseDownload(downloadId: String) {
-            this@DownloadService.pauseDownload(downloadId)
-        }
+            override fun pauseDownload(downloadId: String) {
+                this@DownloadService.pauseDownload(downloadId)
+            }
 
-        override fun resumeDownload(downloadId: String) {
-            this@DownloadService.resumeDownload(downloadId)
-        }
+            override fun resumeDownload(downloadId: String) {
+                this@DownloadService.resumeDownload(downloadId)
+            }
 
-        override fun cancelDownload(downloadId: String) {
-            this@DownloadService.cancelDownload(downloadId)
-        }
+            override fun cancelDownload(downloadId: String) {
+                this@DownloadService.cancelDownload(downloadId)
+            }
 
-        override fun getDownloadInfo(downloadId: String): DownloadInfo? {
-            return this@DownloadService.getDownloadInfo(downloadId)
-        }
+            override fun getDownloadInfo(downloadId: String): DownloadInfo? {
+                return this@DownloadService.getDownloadInfo(downloadId)
+            }
 
-        override fun getAllDownloads(): List<DownloadInfo>? {
-            return this@DownloadService.getAllDownloads()
-        }
+            override fun getAllDownloads(): List<DownloadInfo>? {
+                return this@DownloadService.getAllDownloads()
+            }
 
-        override fun registerCallback(callback: InterfaceDownloadCallback) {
-            this@DownloadService.registerCallback(callback)
-        }
+            override fun registerCallback(callback: InterfaceDownloadCallback) {
+                this@DownloadService.registerCallback(callback)
+            }
 
-        override fun unregisterCallback(callback: InterfaceDownloadCallback) {
-            this@DownloadService.unregisterCallback(callback)
+            override fun unregisterCallback(callback: InterfaceDownloadCallback) {
+                this@DownloadService.unregisterCallback(callback)
+            }
         }
-
-    }
 
     inner class DownloadBinder : Binder() {
         fun getService(): DownloadService = this@DownloadService
@@ -212,25 +215,26 @@ class DownloadService : Service(), CoroutineScope {
 
     private fun startDownloadInternal(url: String, fileName: String? = null): String {
         val downloadId = System.currentTimeMillis().toString()
-        val savePath = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            fileName ?: url.substringAfterLast("/")
-        ).absolutePath
+        val savePath =
+            File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    fileName ?: url.substringAfterLast("/")
+                )
+                .absolutePath
 
-        val downloadInfo = DownloadInfo(
-            url = url,
-            fileName = fileName,
-            downloadId = downloadId,
-            savePath = savePath,
-            status = STATUS_DOWNLOADING
-        )
+        val downloadInfo =
+            DownloadInfo(
+                url = url,
+                fileName = fileName,
+                downloadId = downloadId,
+                savePath = savePath,
+                status = STATUS_DOWNLOADING
+            )
 
         downloads[downloadId] = downloadInfo
 
         // 开始下载
-        downloadJobs[downloadId] = launch {
-            executeDownload(downloadInfo)
-        }
+        downloadJobs[downloadId] = launch { executeDownload(downloadInfo) }
 
         return downloadId
     }
@@ -251,9 +255,7 @@ class DownloadService : Service(), CoroutineScope {
         notifyCallbacks { it.onDownloadProgress(downloadInfo) }
         updateNotification(downloadInfo)
 
-        downloadJobs[downloadId] = launch {
-            executeDownload(downloadInfo)
-        }
+        downloadJobs[downloadId] = launch { executeDownload(downloadInfo) }
     }
 
     private fun cancelDownloadInternal(downloadId: String) {
@@ -284,24 +286,26 @@ class DownloadService : Service(), CoroutineScope {
             try {
                 Log.d(TAG, "开始下载: ${downloadInfo.url}")
 
-                val client = OkHttpClient.Builder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .build()
+                val client =
+                    OkHttpClient.Builder()
+                        .connectTimeout(30, TimeUnit.SECONDS)
+                        .readTimeout(30, TimeUnit.SECONDS)
+                        .build()
 
                 // 检查文件是否存在，获取已下载大小
                 val file = File(downloadInfo.savePath)
                 val existingSize = if (file.exists()) file.length() else 0L
 
                 // 创建带Range头的请求（支持断点续传）
-                val request = Request.Builder()
-                    .url(downloadInfo.url)
-                    .apply {
-                        if (existingSize > 0) {
-                            header("Range", "bytes=$existingSize-")
+                val request =
+                    Request.Builder()
+                        .url(downloadInfo.url)
+                        .apply {
+                            if (existingSize > 0) {
+                                header("Range", "bytes=$existingSize-")
+                            }
                         }
-                    }
-                    .build()
+                        .build()
 
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
@@ -309,10 +313,12 @@ class DownloadService : Service(), CoroutineScope {
                         return@withContext
                     }
 
-                    val body = response.body() ?: run {
-                        handleDownloadError(downloadInfo, "响应体为空")
-                        return@withContext
-                    }
+                    val body =
+                        response.body()
+                            ?: run {
+                                handleDownloadError(downloadInfo, "响应体为空")
+                                return@withContext
+                            }
 
                     // 如果是新下载，获取总大小
                     if (existingSize == 0L) {
@@ -369,7 +375,6 @@ class DownloadService : Service(), CoroutineScope {
                         }
 
                         showDownloadCompleteNotification(downloadInfo)
-
                     } finally {
                         randomAccessFile.close()
                         inputStream.close()
@@ -423,14 +428,11 @@ class DownloadService : Service(), CoroutineScope {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "下载服务",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "文件下载服务"
-                setShowBadge(false)
-            }
+            val channel =
+                NotificationChannel(CHANNEL_ID, "下载服务", NotificationManager.IMPORTANCE_LOW).apply {
+                    description = "文件下载服务"
+                    setShowBadge(false)
+                }
 
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager!!.createNotificationChannel(channel)
@@ -439,10 +441,13 @@ class DownloadService : Service(), CoroutineScope {
 
     private fun createNotification(content: String): Notification {
         val intent = packageManager.getLaunchIntentForPackage(packageName)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("文件下载服务")
@@ -456,27 +461,28 @@ class DownloadService : Service(), CoroutineScope {
     }
 
     private fun updateNotification(downloadInfo: DownloadInfo) {
-        val content = when (downloadInfo.status) {
-            STATUS_DOWNLOADING -> {
-                "${downloadInfo.fileName ?: "文件"} 下载中: ${downloadInfo.progress}%"
+        val content =
+            when (downloadInfo.status) {
+                STATUS_DOWNLOADING -> {
+                    "${downloadInfo.fileName ?: "文件"} 下载中: ${downloadInfo.progress}%"
+                }
+                STATUS_PAUSED -> {
+                    "${downloadInfo.fileName ?: "文件"} 已暂停: ${downloadInfo.progress}%"
+                }
+                STATUS_COMPLETED -> {
+                    "${downloadInfo.fileName ?: "文件"} 下载完成"
+                }
+                STATUS_FAILED -> {
+                    "${downloadInfo.fileName ?: "文件"} 下载失败"
+                }
+                else -> {
+                    "下载服务运行中"
+                }
             }
-            STATUS_PAUSED -> {
-                "${downloadInfo.fileName ?: "文件"} 已暂停: ${downloadInfo.progress}%"
-            }
-            STATUS_COMPLETED -> {
-                "${downloadInfo.fileName ?: "文件"} 下载完成"
-            }
-            STATUS_FAILED -> {
-                "${downloadInfo.fileName ?: "文件"} 下载失败"
-            }
-            else -> {
-                "下载服务运行中"
-            }
-        }
 
-//        val notification = createNotification(content)
-//        val notificationManager = getSystemService(NotificationManager::class.java)
-//        notificationManager!!.notify(NOTIFICATION_ID, notification)
+        //        val notification = createNotification(content)
+        //        val notificationManager = getSystemService(NotificationManager::class.java)
+        //        notificationManager!!.notify(NOTIFICATION_ID, notification)
     }
 
     private fun showDownloadCompleteNotification(downloadInfo: DownloadInfo) {
@@ -485,13 +491,9 @@ class DownloadService : Service(), CoroutineScope {
 
         // 创建通知渠道
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "下载完成",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "文件下载完成通知"
-            }
+            val channel =
+                NotificationChannel(channelId, "下载完成", NotificationManager.IMPORTANCE_DEFAULT)
+                    .apply { description = "文件下载完成通知" }
 
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager!!.createNotificationChannel(channel)
@@ -499,33 +501,36 @@ class DownloadService : Service(), CoroutineScope {
 
         // 创建打开文件的Intent
         val file = File(downloadInfo.savePath)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(
-                FileProvider.getUriForFile(
-                    this@DownloadService,
-                    "${packageName}.fileprovider",
-                    file
-                ),
-                getMimeType(file)
+        val intent =
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(
+                    FileProvider.getUriForFile(
+                        this@DownloadService,
+                        "${packageName}.fileprovider",
+                        file
+                    ),
+                    getMimeType(file)
+                )
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
 
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("下载完成")
-            .setContentText("$fileName 下载完成，点击打开")
-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+        val notification =
+            NotificationCompat.Builder(this, channelId)
+                .setContentTitle("下载完成")
+                .setContentText("$fileName 下载完成，点击打开")
+                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build()
 
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager!!.notify(downloadInfo.downloadId.hashCode(), notification)
@@ -534,7 +539,8 @@ class DownloadService : Service(), CoroutineScope {
     private fun getMimeType(file: File): String {
         return when (file.extension.toLowerCase()) {
             "pdf" -> "application/pdf"
-            "jpg", "jpeg" -> "image/jpeg"
+            "jpg",
+            "jpeg" -> "image/jpeg"
             "png" -> "image/png"
             "mp3" -> "audio/mpeg"
             "mp4" -> "video/mp4"

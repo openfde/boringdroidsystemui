@@ -9,5 +9,4 @@ data class MediaFile(
     val mimeType: String?,
     val uri: Uri,
     val lastModified: Long
-
 )

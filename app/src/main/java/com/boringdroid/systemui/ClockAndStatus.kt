@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiManager
@@ -148,10 +147,10 @@ class ClockAndStatus(
                 else -> R.drawable.ic_wifi_signal_1
             }
         val drawable = ContextCompat.getDrawable(context, wifiLevelResourceId)
-//        drawable?.setColorFilter(
-//            ContextCompat.getColor(context, R.color.wifi_strength_color),
-//            PorterDuff.Mode.SRC_IN
-//        )
+        //        drawable?.setColorFilter(
+        //            ContextCompat.getColor(context, R.color.wifi_strength_color),
+        //            PorterDuff.Mode.SRC_IN
+        //        )
         return drawable
     }
 }

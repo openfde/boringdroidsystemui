@@ -36,18 +36,15 @@ object AppUtils {
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val appsInfo = pm.queryIntentActivities(intent, 0)
 
-        //TODO: Filter Google App
+        // TODO: Filter Google App
         for (appInfo in appsInfo) {
             val label = appInfo.activityInfo.loadLabel(pm).toString()
             val icon = appInfo.activityInfo.loadIcon(pm)
             val packageName = appInfo.activityInfo.packageName
             apps.add(App(label, packageName, icon))
         }
-        Collections.sort(
-            apps
-        ) { p1: App, p2: App ->
-            p1.getName()!!
-                .compareTo(p2.getName()!!, ignoreCase = true)
+        Collections.sort(apps) { p1: App, p2: App ->
+            p1.getName()!!.compareTo(p2.getName()!!, ignoreCase = true)
         }
         return apps
     }
@@ -55,13 +52,7 @@ object AppUtils {
     fun getPinnedApps(context: Context?, pm: PackageManager?, type: String?): ArrayList<App> {
         val apps = ArrayList<App>()
         try {
-            val br = BufferedReader(
-                FileReader(
-                    File(
-                        context!!.filesDir, type
-                    )
-                )
-            )
+            val br = BufferedReader(FileReader(File(context!!.filesDir, type)))
             var applist: String
             try {
                 if (br.readLine().also { applist = it } != null) {
@@ -72,20 +63,19 @@ object AppUtils {
                             val appInfo = pm!!.getApplicationInfo(app, 0)
                             apps.add(
                                 App(
-                                    pm.getApplicationLabel(appInfo).toString(), app,
+                                    pm.getApplicationLabel(appInfo).toString(),
+                                    app,
                                     pm.getApplicationIcon(app)
                                 )
                             )
                         } catch (e: PackageManager.NameNotFoundException) {
-                            //app is no longer available, lets unpin it
+                            // app is no longer available, lets unpin it
                             unpinApp(context, app, type)
                         }
                     }
                 }
-            } catch (e: IOException) {
-            }
-        } catch (e: FileNotFoundException) {
-        }
+            } catch (e: IOException) {}
+        } catch (e: FileNotFoundException) {}
         return apps
     }
 
@@ -95,8 +85,7 @@ object AppUtils {
             val fw = FileWriter(file, true)
             fw.write("$app ")
             fw.close()
-        } catch (e: IOException) {
-        }
+        } catch (e: IOException) {}
     }
 
     fun unpinApp(context: Context?, app: String?, type: String?) {
@@ -110,8 +99,7 @@ object AppUtils {
                 fw.write(applist)
                 fw.close()
             }
-        } catch (e: IOException) {
-        }
+        } catch (e: IOException) {}
     }
 
     fun moveApp(context: Context, app: String?, type: String?, direction: Int) {
@@ -137,8 +125,7 @@ object AppUtils {
                 fw.write(applist)
                 fw.close()
             }
-        } catch (e: IOException) {
-        }
+        } catch (e: IOException) {}
     }
 
     fun findInArray(key: String?, array: Array<String>): Int {
@@ -150,19 +137,12 @@ object AppUtils {
 
     fun isPinned(context: Context?, app: String?, type: String?): Boolean {
         try {
-            val br = BufferedReader(
-                FileReader(
-                    File(
-                        context!!.filesDir, type
-                    )
-                )
-            )
+            val br = BufferedReader(FileReader(File(context!!.filesDir, type)))
             var applist: String
             if (br.readLine().also { applist = it } != null) {
                 return applist.contains(app!!)
             }
-        } catch (e: IOException) {
-        }
+        } catch (e: IOException) {}
         return false
     }
 
@@ -188,15 +168,15 @@ object AppUtils {
 
     fun setWindowMode(am: ActivityManager, taskId: Int, mode: Int) {
         try {
-            val setWindowMode = am.javaClass.getMethod(
-                "setTaskWindowingMode",
-                Int::class.javaPrimitiveType,
-                Int::class.javaPrimitiveType,
-                Boolean::class.javaPrimitiveType
-            )
+            val setWindowMode =
+                am.javaClass.getMethod(
+                    "setTaskWindowingMode",
+                    Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
+                    Boolean::class.javaPrimitiveType
+                )
             setWindowMode.invoke(am, taskId, mode, false)
-        } catch (e: Exception) {
-        }
+        } catch (e: Exception) {}
     }
 
     fun getRunningTasks(am: ActivityManager?, pm: PackageManager?, max: Int): ArrayList<AppTask?> {
@@ -205,37 +185,40 @@ object AppUtils {
         val appTasks = ArrayList<AppTask?>()
         for (taskInfo in tasksInfo) {
             try {
-                //Exclude systemui, launcher and other system apps from the tasklist
-                if (taskInfo.baseActivity!!.packageName.contains("com.android.systemui")
-                    || taskInfo.baseActivity!!.packageName.contains("com.google.android.packageinstaller")
-                ) continue
+                // Exclude systemui, launcher and other system apps from the tasklist
+                if (
+                    taskInfo.baseActivity!!.packageName.contains("com.android.systemui") ||
+                        taskInfo.baseActivity!!
+                            .packageName
+                            .contains("com.google.android.packageinstaller")
+                )
+                    continue
 
-                //Hack to save Dock settings activity ftom being excluded
-                if ((taskInfo.topActivity!!.className == "cu.axel.smartdock.activities.MainActivity" || taskInfo.topActivity!!.className != "cu.axel.smartdock.activities.DebugActivity" && taskInfo.topActivity!!.packageName == getCurrentLauncher(
-                        pm
-                    )
-                            )
-                ) continue
+                // Hack to save Dock settings activity ftom being excluded
+                if (
+                    (taskInfo.topActivity!!.className ==
+                        "cu.axel.smartdock.activities.MainActivity" ||
+                        taskInfo.topActivity!!.className !=
+                            "cu.axel.smartdock.activities.DebugActivity" &&
+                            taskInfo.topActivity!!.packageName == getCurrentLauncher(pm))
+                )
+                    continue
                 if (Build.VERSION.SDK_INT > 29) {
                     try {
                         val isRunning = taskInfo.javaClass.getField("isRunning")
                         val running = isRunning.getBoolean(taskInfo)
                         if (!running) continue
-                    } catch (e: Exception) {
-                    }
+                    } catch (e: Exception) {}
                 }
                 appTasks.add(
                     AppTask(
                         taskInfo.id,
-                        pm!!.getActivityInfo(taskInfo.topActivity!!, 0).loadLabel(
-                            pm
-                        ).toString(),
+                        pm!!.getActivityInfo(taskInfo.topActivity!!, 0).loadLabel(pm).toString(),
                         taskInfo.topActivity!!.packageName,
                         pm.getActivityIcon(taskInfo.topActivity!!)
                     )
                 )
-            } catch (e: PackageManager.NameNotFoundException) {
-            }
+            } catch (e: PackageManager.NameNotFoundException) {}
         }
         return appTasks
     }
@@ -243,31 +226,25 @@ object AppUtils {
     fun getRecentTasks(context: Context?, max: Int): ArrayList<AppTask> {
         val usm = context!!.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val start = System.currentTimeMillis() - SystemClock.elapsedRealtime()
-        val usageStats = usm.queryUsageStats(
-            UsageStatsManager.INTERVAL_BEST, start,
-            System.currentTimeMillis()
-        )
+        val usageStats =
+            usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, System.currentTimeMillis())
         val appTasks = ArrayList<AppTask>()
         Collections.sort(usageStats) { p1: UsageStats, p2: UsageStats ->
-            java.lang.Long.compare(
-                p2.lastTimeUsed,
-                p1.lastTimeUsed
-            )
+            java.lang.Long.compare(p2.lastTimeUsed, p1.lastTimeUsed)
         }
         for (stat in usageStats) {
             val app = stat.packageName
             try {
-                if (isLaunchable(context, app) && app != getCurrentLauncher(
-                        context.packageManager
+                if (isLaunchable(context, app) && app != getCurrentLauncher(context.packageManager))
+                    appTasks.add(
+                        AppTask(
+                            -1,
+                            getPackageLabel(context, app),
+                            app,
+                            context.packageManager.getApplicationIcon(app)
+                        )
                     )
-                ) appTasks.add(
-                    AppTask(
-                        -1, getPackageLabel(context, app), app,
-                        context.packageManager.getApplicationIcon(app)
-                    )
-                )
-            } catch (e: PackageManager.NameNotFoundException) {
-            }
+            } catch (e: PackageManager.NameNotFoundException) {}
             if (appTasks.size >= max) break
         }
         return appTasks
@@ -276,16 +253,23 @@ object AppUtils {
     fun isSystemApp(context: Context?, app: String?): Boolean {
         return try {
             val appInfo = context!!.packageManager.getApplicationInfo(app!!, 0)
-            appInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            appInfo.flags and
+                (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         } catch (e: PackageManager.NameNotFoundException) {
             false
         }
     }
 
     private fun isLaunchable(context: Context?, app: String): Boolean {
-        val resolveInfo = context!!.packageManager.queryIntentActivities(
-            Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(app), 0
-        )
+        val resolveInfo =
+            context!!
+                .packageManager
+                .queryIntentActivities(
+                    Intent(Intent.ACTION_MAIN)
+                        .addCategory(Intent.CATEGORY_LAUNCHER)
+                        .setPackage(app),
+                    0
+                )
         return resolveInfo.size > 0
     }
 
@@ -303,21 +287,19 @@ object AppUtils {
             val pm = context!!.packageManager
             val appInfo = pm.getApplicationInfo(packageName!!, 0)
             return pm.getApplicationLabel(appInfo).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
-        }
+        } catch (e: PackageManager.NameNotFoundException) {}
         return ""
     }
 
     fun getAppIcon(context: Context?, app: String?): Drawable? {
         try {
             return context!!.packageManager.getApplicationIcon(app!!)
-        } catch (e: PackageManager.NameNotFoundException) {
-        }
+        } catch (e: PackageManager.NameNotFoundException) {}
         return context!!.getDrawable(android.R.drawable.sym_def_app_icon)
     }
 
     public fun uninstallApp(mContext: Context, appData: AppData) {
-        LogTools.i("uninstallApp2  "+appData.packageName)
+        LogTools.i("uninstallApp2  " + appData.packageName)
         val packageUri = Uri.parse("package:${appData.packageName}")
         val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
         mContext?.startActivity(uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -325,63 +307,61 @@ object AppUtils {
 
     @SuppressLint("SoonBlockedPrivateApi")
     public fun createShortcut(mContext: Context, app: AppData) {
-//                Log.d("TAG", "createShortcut() called with: app = [${app.name}]")
-//        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-//        val shortcutManager: ShortcutManager? =
-//            mContext?.getSystemService(ShortcutManager::class.java)
-//        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-//            val launchIntentForPackage: Intent = mContext?.getPackageManager()
-//                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
-//            launchIntentForPackage.action = Intent.ACTION_MAIN
-//            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
-//                .setLongLabel(app.name!!)
-//                .setShortLabel(app.name!!)
-//                .setIcon(icon)
-//                .setIntent(launchIntentForPackage)
-//                .build()
-//            val pinnedShortcutCallbackIntent =
-//                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
-//            val successCallback = PendingIntent.getBroadcast(
-//                mContext, 0,
-//                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
-//            )
-//            shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
-//        }
+        //                Log.d("TAG", "createShortcut() called with: app = [${app.name}]")
+        //        val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+        //        val shortcutManager: ShortcutManager? =
+        //            mContext?.getSystemService(ShortcutManager::class.java)
+        //        if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+        //            val launchIntentForPackage: Intent = mContext?.getPackageManager()
+        //                ?.getLaunchIntentForPackage(app.packageName!!) as Intent
+        //            launchIntentForPackage.action = Intent.ACTION_MAIN
+        //            val pinShortcutInfo = ShortcutInfo.Builder(mContext, app.name)
+        //                .setLongLabel(app.name!!)
+        //                .setShortLabel(app.name!!)
+        //                .setIcon(icon)
+        //                .setIntent(launchIntentForPackage)
+        //                .build()
+        //            val pinnedShortcutCallbackIntent =
+        //                shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+        //            val successCallback = PendingIntent.getBroadcast(
+        //                mContext, 0,
+        //                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+        //            )
+        //            shortcutManager.requestPinShortcut(pinShortcutInfo,
+        // successCallback.intentSender)
+        //        }
 
-        val shortcut = ShortcutInfoCompat.Builder(mContext, "myshortcutid")
-            .setShortLabel("Website")
-            .setLongLabel("Open the website")
-            .setIcon(IconCompat.createWithResource(mContext, R.drawable.round_rect))
-            .setIntent(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://www.abc.com/")
-                )
-            )
-            .build()
+        val shortcut =
+            ShortcutInfoCompat.Builder(mContext, "myshortcutid")
+                .setShortLabel("Website")
+                .setLongLabel("Open the website")
+                .setIcon(IconCompat.createWithResource(mContext, R.drawable.round_rect))
+                .setIntent(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.abc.com/")))
+                .build()
 
         ShortcutManagerCompat.pushDynamicShortcut(mContext, shortcut)
-
-
-
-
     }
 
     public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {
         val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$PrivacyDashboardActivity")
-        intent.component = cn;
+        val cn: ComponentName? =
+            ComponentName.unflattenFromString(
+                "com.android.settings/.Settings\$PrivacyDashboardActivity"
+            )
+        intent.component = cn
         intent.putExtra("appName", appName)
-        intent.putExtra("packageName",packageName)
+        intent.putExtra("packageName", packageName)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         mContext.startActivity(intent)
     }
 
-
     public fun toWifiPage(mContext: Context) {
         val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$NetworkDashboardActivity")
-        intent.component = cn;
+        val cn: ComponentName? =
+            ComponentName.unflattenFromString(
+                "com.android.settings/.Settings\$NetworkDashboardActivity"
+            )
+        intent.component = cn
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         mContext.startActivity(intent)
     }
@@ -391,5 +371,4 @@ object AppUtils {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         mContext.startActivity(intent)
     }
-
 }

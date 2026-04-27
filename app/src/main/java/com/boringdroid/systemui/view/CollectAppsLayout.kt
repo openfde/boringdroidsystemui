@@ -17,13 +17,13 @@ import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.LogTools
 import com.boringdroid.systemui.utils.SPUtils
 
-class CollectAppsLayout @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0
-) : RecyclerView(context, attrs, defStyle) {
+class CollectAppsLayout
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
+    RecyclerView(context, attrs, defStyle) {
     private val appListAdapter: AppListAdapter
     private lateinit var appsWindow: AllAppsWindow
+
     fun setData(apps: List<AppData?>?) {
         var collApps = apps?.filter { "1".equals(SPUtils.getUserInfo(context, it?.packageName)) }
         appListAdapter.setData(collApps)
@@ -44,9 +44,11 @@ class CollectAppsLayout @JvmOverloads constructor(
         private val apps: MutableList<AppData?> = ArrayList()
         private var handler: Handler? = null
         private var appsWindow: AllAppsWindow? = null
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val appInfoLayout = LayoutInflater.from(context)
-                .inflate(R.layout.item_layout_collect, parent, false) as ViewGroup
+            val appInfoLayout =
+                LayoutInflater.from(context).inflate(R.layout.item_layout_collect, parent, false)
+                    as ViewGroup
             return ViewHolder(appInfoLayout)
         }
 
@@ -65,15 +67,17 @@ class CollectAppsLayout @JvmOverloads constructor(
                 }
             }
 
-            holder.appInfoLayout.setOnContextClickListener(OnContextClickListener {
-                LogTools.i("setOnContextClickListener ....1  ")
-                if (appData != null) {
-                    appsWindow?.showUserContextMenu(holder.appInfoLayout, appData, true)
-                } else {
-                    LogTools.e("appData is null ....")
+            holder.appInfoLayout.setOnContextClickListener(
+                OnContextClickListener {
+                    LogTools.i("setOnContextClickListener ....1  ")
+                    if (appData != null) {
+                        appsWindow?.showUserContextMenu(holder.appInfoLayout, appData, true)
+                    } else {
+                        LogTools.e("appData is null ....")
+                    }
+                    false
                 }
-                false
-            })
+            )
         }
 
         override fun getItemCount(): Int {
@@ -93,12 +97,12 @@ class CollectAppsLayout @JvmOverloads constructor(
             appsWindow = allAppsWindow
         }
 
-        private class ViewHolder(val appInfoLayout: ViewGroup) : RecyclerView.ViewHolder(
-            appInfoLayout
-        ) {
+        private class ViewHolder(val appInfoLayout: ViewGroup) :
+            RecyclerView.ViewHolder(appInfoLayout) {
             val iconIV: ImageView? = appInfoLayout.findViewById(R.id.app_info_icon)
             val nameTV: TextView? = appInfoLayout.findViewById(R.id.app_info_name)
-//            var clickView: RightClickView? = appInfoLayout.findViewById(R.id.app_click_view)
+            //            var clickView: RightClickView? =
+            // appInfoLayout.findViewById(R.id.app_click_view)
 
         }
 

@@ -11,18 +11,19 @@ object DownloadManager {
     private var downloadService: DownloadService? = null
     private var isBound = false
 
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as DownloadService.DownloadBinder
-            downloadService = binder.getService()
-            isBound = true
-        }
+    private val serviceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                val binder = service as DownloadService.DownloadBinder
+                downloadService = binder.getService()
+                isBound = true
+            }
 
-        override fun onServiceDisconnected(name: ComponentName?) {
-            downloadService = null
-            isBound = false
+            override fun onServiceDisconnected(name: ComponentName?) {
+                downloadService = null
+                isBound = false
+            }
         }
-    }
 
     fun bindService(context: Context) {
         if (!isBound) {

@@ -28,17 +28,18 @@ class TopBarNotificationWindow(
     gravity: Int,
     layoutResId: Int,
     typeParam: Int
-)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener,
+) :
+    AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam),
+    View.OnClickListener,
     OnNotificationItemClickListener {
 
     companion object {
         const val WINDOW_PADDING_TOP = 8
         const val WINDOW_PADDING_RIGHT = 0
-        const val TAG:String = "TopBarNotificationWindow"
+        const val TAG: String = "TopBarNotificationWindow"
     }
 
-    private val MAX_NOTIFICATIONS_ONE_SCREEN : Int = 8
+    private val MAX_NOTIFICATIONS_ONE_SCREEN: Int = 8
 
     private var mRecyclerView: RecyclerView? = null
     private var countTv: TextView? = null
@@ -47,20 +48,20 @@ class TopBarNotificationWindow(
     var systemUIContext: Context? = null
     var topBarLayout: TopBarLayout? = null
 
-    private var notifications: Array<DesktopNotification> ? = null
-    private var rootRl:RelativeLayout ? = null
-    private var nm: NotificationManager ? = null
+    private var notifications: Array<DesktopNotification>? = null
+    private var rootRl: RelativeLayout? = null
+    private var nm: NotificationManager? = null
 
     override fun showPopupWindow() {
         super.showPopupWindow()
         runWindowAnim(WindowGravity.right, true)
         initViews()
-        val systemService = GlobalSystemUIContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE)
+        val systemService =
+            GlobalSystemUIContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {
             nm = systemService as NotificationManager
         }
     }
-
 
     private fun initViews() {
         mRecyclerView = mContentView?.findViewById(R.id.notification_rv)
@@ -84,29 +85,26 @@ class TopBarNotificationWindow(
             if (sbn.isClearable) {
                 nm?.cancel(sbn.id)
             }
-        } else if(sbn.id == NOTIFI_CHANAL_ID){
-
-        }
+        } else if (sbn.id == NOTIFI_CHANAL_ID) {}
     }
 
-    override fun onItemClick(
-        sbn: DesktopNotification,
-        item: View?,
-        action: String
-    ) {
-        Log.d(TAG, "onItemClick() called with: sbn = $sbn, contentIntent = ${sbn.contentIntent} $action")
+    override fun onItemClick(sbn: DesktopNotification, item: View?, action: String) {
+        Log.d(
+            TAG,
+            "onItemClick() called with: sbn = $sbn, contentIntent = ${sbn.contentIntent} $action"
+        )
         if (sbn.contentIntent != null) {
             dismiss()
             val intent = Intent(NOTIFI_CLICK_ACTION)
             intent.putExtra(NOTIFICATION_ID, sbn.id)
             getContext().sendBroadcast(intent)
-        } else if(sbn.id == NOTIFI_CHANAL_ID){
-            if(action.equals(getContext().resources.getString(R.string.update_now))){
+        } else if (sbn.id == NOTIFI_CHANAL_ID) {
+            if (action.equals(getContext().resources.getString(R.string.update_now))) {
                 val intent = Intent(ACTION_UPDATE_NOW)
                 intent.setPackage("com.boringdroid.systemui")
                 getContext().sendBroadcast(intent)
                 topBarLayout?.aboutWindow?.onAction(ACTION_UPDATE_NOW)
-            } else if(action.equals(getContext().resources.getString(R.string.update_next))){
+            } else if (action.equals(getContext().resources.getString(R.string.update_next))) {
                 val intent = Intent(ACTION_DEFER_UPDATE)
                 intent.setPackage("com.boringdroid.systemui")
                 getContext().sendBroadcast(intent)
@@ -120,17 +118,15 @@ class TopBarNotificationWindow(
         dismiss()
     }
 
-
     override fun onItemCancelClick(sbn: DesktopNotification, item: View?) {
         dismiss()
         nm?.cancel(sbn.id)
     }
 
-
     override fun onClick(v: View?) {
-        if(clearTv == v){
+        if (clearTv == v) {
             dismiss()
-//            nm?.cancelAll()
+            //            nm?.cancelAll()
             val intent = Intent(NOTIFI_CANCEL_ALL_ACTION)
             getContext().sendBroadcast(intent)
         }
@@ -140,11 +136,16 @@ class TopBarNotificationWindow(
         this.notifications = notifications
         notificationAdapter?.notifyData(notifications)
         var notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size
-//        notificationSize = 5
-        countTv?.text = String.format(getContext().getString(R.string.message_count), notificationSize)
-        if(notificationSize >= MAX_NOTIFICATIONS_ONE_SCREEN){
-            mRecyclerView?.setFadingEdgeLength(getContext().resources.getDimension(R.dimen.top_bar_notification_fade_length)
-                .toInt())
+        //        notificationSize = 5
+        countTv?.text =
+            String.format(getContext().getString(R.string.message_count), notificationSize)
+        if (notificationSize >= MAX_NOTIFICATIONS_ONE_SCREEN) {
+            mRecyclerView?.setFadingEdgeLength(
+                getContext()
+                    .resources
+                    .getDimension(R.dimen.top_bar_notification_fade_length)
+                    .toInt()
+            )
         } else {
             mRecyclerView?.setFadingEdgeLength(0)
         }
@@ -152,9 +153,9 @@ class TopBarNotificationWindow(
 
     interface WindowListener {
         fun hideNotificationWindow()
+
         fun showNotificationWindow()
+
         fun syncVisibleWindow(which: Int)
     }
-
-
 }

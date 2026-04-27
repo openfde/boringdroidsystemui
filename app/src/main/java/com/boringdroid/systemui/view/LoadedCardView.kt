@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
 
-
 class LoadedCardView
 @JvmOverloads
 constructor(

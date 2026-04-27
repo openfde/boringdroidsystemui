@@ -17,7 +17,8 @@ class UpdateActionReceiver : BroadcastReceiver() {
                 // TODO: 执行“下次开机更新”逻辑（如保存标记）
                 android.util.Log.d("UpdateActionReceiver", "User chose: Defer to Boot")
                 // 例如：保存到 SharedPreferences
-                context.getSharedPreferences("update_prefs", Context.MODE_PRIVATE)
+                context
+                    .getSharedPreferences("update_prefs", Context.MODE_PRIVATE)
                     .edit()
                     .putBoolean("defer_update_on_boot", true)
                     .apply()

@@ -1,14 +1,7 @@
-/**
- * show notification in right bottom to replace status bar
- */
+/** show notification in right bottom to replace status bar */
 package com.boringdroid.systemui
 
 import android.app.Notification
-import android.app.Notification.EXTRA_BIG_TEXT
-import android.app.Notification.EXTRA_INFO_TEXT
-import android.app.Notification.EXTRA_SUB_TEXT
-import android.app.Notification.EXTRA_SUMMARY_TEXT
-import android.app.Notification.EXTRA_TITLE_BIG
 import android.app.PendingIntent.CanceledException
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -47,10 +40,10 @@ import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
 
-class NotificationService : NotificationListenerService(),
+class NotificationService :
+    NotificationListenerService(),
     NotificationAdapter.OnNotificationClickListener,
-    SlideNotificationAdapter.OnNotificationClickListener
-{
+    SlideNotificationAdapter.OnNotificationClickListener {
     private var wm: WindowManager? = null
     private var notificationLayout: ViewGroup? = null
     private var handler: Handler? = null
@@ -84,20 +77,22 @@ class NotificationService : NotificationListenerService(),
         val notifications = activeNotifications ?: return null
         if (notifications.isEmpty()) return null
 
-        return notifications.mapNotNull { sbn ->
-            try {
-                createDesktopNotification(sbn)
-            } catch (e: Exception) {
-                Log.e("Notification", "Failed to convert notification ${sbn.id}", e)
-                null
+        return notifications
+            .mapNotNull { sbn ->
+                try {
+                    createDesktopNotification(sbn)
+                } catch (e: Exception) {
+                    Log.e("Notification", "Failed to convert notification ${sbn.id}", e)
+                    null
+                }
             }
-        }.toTypedArray()
+            .toTypedArray()
     }
 
     private fun createDesktopNotification(sbn: StatusBarNotification): DesktopNotification? {
         val notification = sbn.notification ?: return null
         val extras = notification.extras ?: return null
-        if(notification.contentView != null){
+        if (notification.contentView != null) {
             return null
         }
         return DesktopNotification().apply {
@@ -109,11 +104,11 @@ class NotificationService : NotificationListenerService(),
             actions = sbn.notification?.actions
             val posttime = sbn.postTime
             val currentTime = System.currentTimeMillis()
-            computeElapsedTime = context?.let {
-                Utils.computeElapsedTime(posttime, currentTime, it)
-            }.orEmpty()
-            notificationText = if (content.isNotEmpty()) content
-            else AppUtils.getPackageLabel(context, packageName).orEmpty()
+            computeElapsedTime =
+                context?.let { Utils.computeElapsedTime(posttime, currentTime, it) }.orEmpty()
+            notificationText =
+                if (content.isNotEmpty()) content
+                else AppUtils.getPackageLabel(context, packageName).orEmpty()
             contentIntent = notification.contentIntent
             isClearable = sbn.isClearable
             postTime = posttime
@@ -121,11 +116,19 @@ class NotificationService : NotificationListenerService(),
     }
 
     private fun broadcastNotifications(type: Int) {
-        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type).putExtra(NOTIFICATION_LIST_KEY, getNotifications())   )
+        sendBroadcast(
+            Intent(NOTIFI_ACTION)
+                .putExtra(NOTIFI_ACTION_TYPE_KEY, type)
+                .putExtra(NOTIFICATION_LIST_KEY, getNotifications())
+        )
     }
 
     private fun broadcastNotification(type: Int, sbn: StatusBarNotification) {
-        sendBroadcast(Intent(NOTIFI_ACTION).putExtra(NOTIFI_ACTION_TYPE_KEY, type).putExtra(NOTIFICATION_KEY, createDesktopNotification(sbn)))
+        sendBroadcast(
+            Intent(NOTIFI_ACTION)
+                .putExtra(NOTIFI_ACTION_TYPE_KEY, type)
+                .putExtra(NOTIFICATION_KEY, createDesktopNotification(sbn))
+        )
     }
 
     override fun onListenerConnected() {
@@ -142,17 +145,21 @@ class NotificationService : NotificationListenerService(),
         updateNotificationCount()
     }
 
-
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         Log.d(TAG, "onNotificationPosted() called with: sbn = $sbn")
         super.onNotificationPosted(sbn)
         updateNotificationCount()
-        if(TextUtils.equals("screen_record", sbn.notification.channelId)){
-//        if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id == NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
-            sendBroadcast( Intent(SERVICE_ACTION).putExtra("type", TYEP_SCREEN_NOTIFY)
-                .putExtra("id", sbn.id).putExtra("groupkey", sbn.groupKey))
-        }  else {
-            broadcastNotification(NOTIFI_ACTION_POST,sbn)
+        if (TextUtils.equals("screen_record", sbn.notification.channelId)) {
+            //        if (sbn.id == NOTIFICATION_RECORDING_ID || sbn.id ==
+            // NOTIFICATION_PROCESSING_ID || sbn.id == NOTIFICATION_VIEW_ID) {
+            sendBroadcast(
+                Intent(SERVICE_ACTION)
+                    .putExtra("type", TYEP_SCREEN_NOTIFY)
+                    .putExtra("id", sbn.id)
+                    .putExtra("groupkey", sbn.groupKey)
+            )
+        } else {
+            broadcastNotification(NOTIFI_ACTION_POST, sbn)
         }
     }
 
@@ -164,10 +171,9 @@ class NotificationService : NotificationListenerService(),
             count++
             if (notification.isClearable) cancelableCount++
         }
-        Log.w(TAG,"updateNotificationCount count: $count")
+        Log.w(TAG, "updateNotificationCount count: $count")
         sendBroadcast(
-            Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY)
-                .putExtra("count", count)
+            Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY).putExtra("count", count)
         )
         broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
     }
@@ -175,11 +181,12 @@ class NotificationService : NotificationListenerService(),
     fun showNotificationPanel() {
         Log.d(TAG, "showNotificationPanel() called activeNotifications{$activeNotifications[0]}")
         Utils.notificationPanelVisible = true
-        if(notificationLayout?.visibility == View.VISIBLE){
+        if (notificationLayout?.visibility == View.VISIBLE) {
             notificationLayout?.visibility = View.GONE
         }
         sendBroadcast(
-            Intent(SERVICE_ACTION).putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
+            Intent(SERVICE_ACTION)
+                .putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
                 .putExtra("panel_visible", true)
         )
     }
@@ -187,16 +194,16 @@ class NotificationService : NotificationListenerService(),
     internal inner class DockServiceReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(TAG, "onReceive() action = ${intent.action}")
-            if(intent.action.equals(NOTIFI_AQUIRE_ACTION)){
+            if (intent.action.equals(NOTIFI_AQUIRE_ACTION)) {
                 broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
-            } else if(intent.action.equals(NOTIFI_CLICK_ACTION)){
+            } else if (intent.action.equals(NOTIFI_CLICK_ACTION)) {
                 val id = intent.getIntExtra(NOTIFICATION_ID, -1)
-                if(id !=-1){
+                if (id != -1) {
                     val foundNotification = activeNotifications.find { it.id == id }
                     foundNotification?.notification?.contentIntent?.send()
                     if (foundNotification!!.isClearable) cancelNotification(foundNotification.key)
                 }
-            } else if(intent.action.equals(NOTIFI_CANCEL_ALL_ACTION)){
+            } else if (intent.action.equals(NOTIFI_CANCEL_ALL_ACTION)) {
                 cancelAllNotifications()
             }
         }
@@ -208,15 +215,13 @@ class NotificationService : NotificationListenerService(),
             try {
                 notification.contentIntent.send()
                 if (sbn.isClearable) cancelNotification(sbn.key)
-            } catch (e: CanceledException) {
-            }
+            } catch (e: CanceledException) {}
         }
     }
 
-    override fun onNotificationLongClicked(notification: StatusBarNotification?, item: View?) {
-    }
+    override fun onNotificationLongClicked(notification: StatusBarNotification?, item: View?) {}
+
     override fun onNotificationCancelClicked(notification: StatusBarNotification, item: View?) {
         cancelNotification(notification.key)
     }
-
 }

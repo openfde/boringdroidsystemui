@@ -1,13 +1,10 @@
 package com.boringdroid.systemui.view
 
-import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.ShortcutInfo
-import android.content.pm.ShortcutManager
-import android.graphics.drawable.Icon
+import android.graphics.Rect
 import android.net.Uri
 import android.text.TextUtils
 import android.util.AttributeSet
@@ -31,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
-import com.boringdroid.systemui.data.DockContext
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.Utils
@@ -45,8 +41,9 @@ constructor(
     defStyle: Int = 0,
 ) : RecyclerView(context, attrs, defStyle) {
     private var appListAdapter: AppListAdapter
-    var overviewWindow: AppOverviewWindow ?= null
-    var list: MutableList<AppData> ?= null
+    var overviewWindow: AppOverviewWindow? = null
+    var list: MutableList<AppData>? = null
+    private var rowSpacingDecoration: RowSpacingDecoration? = null
 
     companion object {
         public const val NUMBER_OF_COLUMNS = 7
@@ -67,38 +64,71 @@ constructor(
         appListAdapter.setData(apps)
     }
 
+    fun setGridConfig(rowsPerPage: Int, rowSpacingPx: Int) {
+        rowSpacingDecoration?.let { removeItemDecoration(it) }
+        if (rowsPerPage > 1 && rowSpacingPx > 0) {
+            rowSpacingDecoration = RowSpacingDecoration(NUMBER_OF_COLUMNS, rowSpacingPx)
+            addItemDecoration(rowSpacingDecoration!!)
+        } else {
+            rowSpacingDecoration = null
+        }
+    }
+
+    private class RowSpacingDecoration(private val columns: Int, private val rowSpacingPx: Int) :
+        RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+            if (position == NO_POSITION) {
+                return
+            }
+            val itemCount = state.itemCount
+            val totalRows = (itemCount + columns - 1) / columns
+            val rowIndex = position / columns
+            if (rowIndex < totalRows - 1) {
+                outRect.bottom = rowSpacingPx
+            }
+        }
+    }
 
     private class AppListAdapter(private val context: Context) :
         Adapter<AppListAdapter.ViewHolder>() {
 
-        val languageCode = context.getResources().getConfiguration().getLocales().get(0).language;
+        val languageCode = context.getResources().getConfiguration().getLocales().get(0).language
+
         private var appOverviewWindow: AppOverviewWindow? = null
         private val apps: MutableList<AppData?> = ArrayList()
-        private var contextWindow :AbsTopPopWindow ?= null
+        private var contextWindow: AbsTopPopWindow? = null
 
         override fun onCreateViewHolder(
             parent: ViewGroup,
             viewType: Int,
         ): ViewHolder {
             val appInfoLayout =
-                LayoutInflater.from(context).inflate(R.layout.layout_app_info_overview,
-                    parent, false)
-                        as ViewGroup
+                LayoutInflater.from(context)
+                    .inflate(R.layout.layout_app_info_overview, parent, false) as ViewGroup
             return ViewHolder(appInfoLayout)
         }
-
 
         override fun onBindViewHolder(
             holder: ViewHolder,
             position: Int,
         ) {
             val appData = apps[position]
-            if(appData?.linuxInfo != null){
-                if(appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVGZ){
-                    val svgDrawable = ImageUtils.getSVGDrawable(
-                        "${Utils.linuxRootPath}${appData?.iconPath}",
-                        context
-                    )
+            if (appData?.linuxInfo != null) {
+                if (
+                    appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVG ||
+                        appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVGZ
+                ) {
+                    val svgDrawable =
+                        ImageUtils.getSVGDrawable(
+                            "${Utils.linuxRootPath}${appData?.iconPath}",
+                            context
+                        )
                     holder.iconIV?.setImageDrawable(svgDrawable)
                 } else {
                     Glide.with(GlobalSystemUIContext.getContext())
@@ -117,15 +147,15 @@ constructor(
                 holder.nameTV?.text = appData?.name
                 holder.iconIV?.setImageDrawable(appData!!.icon)
             }
-            holder.clickView?.setOnClickListener{
-                if(contextWindow?.isShowing() == true){
+            holder.clickView?.setOnClickListener {
+                if (contextWindow?.isShowing() == true) {
                     contextWindow?.dismiss()
                 } else {
                     shouldStartApp(appData)
                 }
             }
             holder.clickView?.background = null
-            holder.clickView?.setOnContextClickListener { v->
+            holder.clickView?.setOnContextClickListener { v ->
                 if (appData != null) {
                     makeAndFillContextWindow(appData, v)
                 }
@@ -134,17 +164,17 @@ constructor(
             holder.itemView.isFocusable = true
             holder.itemView.isClickable = true
             holder.itemView.isFocusableInTouchMode = true
-            if(appOverviewWindow?.focusView == null){
+            if (appOverviewWindow?.focusView == null) {
                 appOverviewWindow?.focusView = holder.itemView
             }
             holder.itemView.setOnKeyListener { v, keyCode, event ->
-                if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN){
+                if (keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN) {
                     return@setOnKeyListener true
-                } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
+                } else if (keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
                     appOverviewWindow?.searchEt?.requestFocus()
                     return@setOnKeyListener true
-                } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                    if(holder.itemView == appOverviewWindow?.focusView){
+                } else if (keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                    if (holder.itemView == appOverviewWindow?.focusView) {
                         holder.clickView?.performClick()
                         return@setOnKeyListener true
                     } else {
@@ -155,7 +185,7 @@ constructor(
                 }
             }
             holder.itemView.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
-                if( hasFocus){
+                if (hasFocus) {
                     appOverviewWindow?.focusView = v
                 }
                 Log.d(TAG, "initViews() called with: v = $v, hasFocus = $hasFocus")
@@ -165,11 +195,11 @@ constructor(
         private fun shouldStartApp(appData: AppData?) {
             appOverviewWindow?.dismiss()
             try {
-                if(appData?.linuxInfo != null){
+                if (appData?.linuxInfo != null) {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
                     val linuxInfo = appData.linuxInfo
-                    intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
+                    intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                 } else {
@@ -190,50 +220,81 @@ constructor(
             v.getLocationOnScreen(location)
             val x = location[0] + 132
             val y = location[1] + 32
-            if(contextWindow == null){
-                contextWindow =  AbsTopPopWindow.Builder(context, WRAP_CONTENT,
-                    WRAP_CONTENT, R.layout.layout_app_context_overview)
-                    .gravity(Gravity.TOP or Gravity.START)
-                    .locate( x , y)
-                    .build(AbsTopPopWindow.WindowType.Default)
+            if (contextWindow == null) {
+                contextWindow =
+                    AbsTopPopWindow.Builder(
+                            context,
+                            WRAP_CONTENT,
+                            WRAP_CONTENT,
+                            R.layout.layout_app_context_overview
+                        )
+                        .gravity(Gravity.TOP or Gravity.START)
+                        .locate(x, y)
+                        .build(AbsTopPopWindow.WindowType.Default)
                 contextWindow?.showPopupWindow()
-                Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
+                Utils.setBackgroundBlurRadius(
+                    contextWindow?.getContentView()?.findViewById(R.id.root_blur),
+                    40,
+                    8f
+                )
             } else {
-                if(contextWindow?.isShowing() == true && x == contextWindow?.offsetX
-                    && y == contextWindow?.offsetY){
+                if (
+                    contextWindow?.isShowing() == true &&
+                        x == contextWindow?.offsetX &&
+                        y == contextWindow?.offsetY
+                ) {
                     contextWindow?.dismiss()
-                } else if(contextWindow?.isShowing() != true){
-                    contextWindow?.updateLayoutParams(WRAP_CONTENT, WRAP_CONTENT, x, y,
-                        Gravity.TOP or Gravity.START)
+                } else if (contextWindow?.isShowing() != true) {
+                    contextWindow?.updateLayoutParams(
+                        WRAP_CONTENT,
+                        WRAP_CONTENT,
+                        x,
+                        y,
+                        Gravity.TOP or Gravity.START
+                    )
                     contextWindow?.showPopupWindow()
-                    Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
+                    Utils.setBackgroundBlurRadius(
+                        contextWindow?.getContentView()?.findViewById(R.id.root_blur),
+                        40,
+                        8f
+                    )
                 }
             }
             Log.d(TAG, "makeAndFillContextWindow() called with: width = $width, v = $v")
             val isLinuxApp = appData.linuxInfo != null
             var isSystem = false
-            if(!isLinuxApp){
-                val applicationInfo = context.packageManager.getApplicationInfo(appData.packageName!!, 0)
+            if (!isLinuxApp) {
+                val applicationInfo =
+                    context.packageManager.getApplicationInfo(appData.packageName!!, 0)
                 isSystem =
-                    applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+                    applicationInfo.flags and
+                        (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) !=
+                        0
             }
             val isPersistDockApp =
                 appOverviewWindow?.dockProvider?.isPersistDockApp(appData.packageName!!)
 
-            val openTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.open_tv)
-            val compatTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
-            val shortTv: TextView ?= contextWindow?.getContentView()?.findViewById<TextView>(R.id.short_tv)
-            val ifPinTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.ifpin_tv)
-            ifPinTv?.setText(if(isPersistDockApp == true) R.string.unpin else R.string.pin)
+            val openTv: TextView? =
+                contextWindow?.getContentView()?.findViewById<TextView>(R.id.open_tv)
+            val compatTv: TextView? =
+                contextWindow?.getContentView()?.findViewById<TextView>(R.id.compat_tv)
+            val shortTv: TextView? =
+                contextWindow?.getContentView()?.findViewById<TextView>(R.id.short_tv)
+            val ifPinTv: TextView? =
+                contextWindow?.getContentView()?.findViewById<TextView>(R.id.ifpin_tv)
+            ifPinTv?.setText(if (isPersistDockApp == true) R.string.unpin else R.string.pin)
             val divide: View? = contextWindow?.getContentView()?.findViewById<View>(R.id.divide)
-            val uninstallTv: TextView? = contextWindow?.getContentView()?.findViewById<TextView>(R.id.uninstall_tv)
-            val root: LinearLayout? = contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.root)
-            val contexLl: LinearLayout? = contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.contex_ll)
+            val uninstallTv: TextView? =
+                contextWindow?.getContentView()?.findViewById<TextView>(R.id.uninstall_tv)
+            val root: LinearLayout? =
+                contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.root)
+            val contexLl: LinearLayout? =
+                contextWindow?.getContentView()?.findViewById<LinearLayout>(R.id.contex_ll)
             contextWindow?.enterView?.background = null
             contextWindow?.enterView = v
             contextWindow?.enterView?.setBackgroundResource(R.drawable.round_rect_20dp)
-//            Utils.setBackgroundBlurRadius(root, 40)
-            if(isSystem || isLinuxApp){
+            //            Utils.setBackgroundBlurRadius(root, 40)
+            if (isSystem || isLinuxApp) {
                 divide?.visibility = View.GONE
                 uninstallTv?.visibility = View.GONE
             } else {
@@ -241,50 +302,48 @@ constructor(
                 uninstallTv?.visibility = View.VISIBLE
             }
 
-            openTv?.setOnClickListener{
+            openTv?.setOnClickListener {
                 contextWindow?.dismiss()
                 shouldStartApp(appData)
             }
-            compatTv?.setOnClickListener{
+            compatTv?.setOnClickListener {
                 contextWindow?.dismiss()
                 shouldStartCompat(appData)
             }
-            ifPinTv?.setOnClickListener{
+            ifPinTv?.setOnClickListener {
                 contextWindow?.dismiss()
-                if (isPersistDockApp == true) appOverviewWindow?.dockProvider?.unpin(appData.packageName!!)
+                if (isPersistDockApp == true)
+                    appOverviewWindow?.dockProvider?.unpin(appData.packageName!!)
                 else appOverviewWindow?.dockProvider?.pin(appData.packageName!!)
             }
-            uninstallTv?.setOnClickListener{
+            uninstallTv?.setOnClickListener {
                 contextWindow?.dismiss()
                 appOverviewWindow?.dismiss()
                 AppUtils.uninstallApp(context, appData)
             }
-            if(isLinuxApp){
+            if (isLinuxApp) {
                 shortTv?.setTextColor(context.resources.getColor(R.color.md_theme_dark_outline))
             } else {
                 shortTv?.setTextColor(context.resources.getColor(R.color.notification_text_color))
                 shortTv?.setOnClickListener {
                     contextWindow?.dismiss()
                     appOverviewWindow?.dismiss()
-                    createShortcut( appData)
+                    createShortcut(appData)
                 }
             }
             appOverviewWindow?.contextWindow = contextWindow
-
 
             var list: MutableList<View?> = ArrayList()
 
             list.add(openTv)
             list.add(compatTv)
-            if(!isLinuxApp){
+            if (!isLinuxApp) {
                 list.add(shortTv)
             }
             list.add(ifPinTv)
             list.add(uninstallTv)
 
-            list.forEach {
-                it?.setOnHoverListener(hoverListener)
-            }
+            list.forEach { it?.setOnHoverListener(hoverListener) }
         }
 
         private val hoverListener = OnHoverListener { v, event ->
@@ -293,7 +352,6 @@ constructor(
                 MotionEvent.ACTION_HOVER_ENTER -> {
                     v?.setBackgroundResource(R.drawable.round_rect_4dp)
                 }
-
                 MotionEvent.ACTION_HOVER_EXIT -> {
                     v?.setBackgroundResource(R.drawable.round_rect_4dp_null)
                 }
@@ -307,7 +365,7 @@ constructor(
                 val packageNam = appData.componentName?.packageName
                 val appNam = appData.name
                 if (packageNam != null && appNam != null) {
-                    AppUtils.toConpatiblePage(context, packageNam,appNam)
+                    AppUtils.toConpatiblePage(context, packageNam, appNam)
                 }
             } catch (e: ActivityNotFoundException) {
                 Log.e(TAG, "shouldStartCompat: ${e.message}")
@@ -322,14 +380,12 @@ constructor(
             this.apps.clear()
             this.apps.addAll(apps!!)
             notifyDataSetChanged()
-
         }
 
         fun setWindow(window: AppOverviewWindow?) {
             this.appOverviewWindow = window
             this.appOverviewWindow?.focusView = null
         }
-
 
         private class ViewHolder(appInfoLayout: ViewGroup) :
             RecyclerView.ViewHolder(
@@ -339,7 +395,6 @@ constructor(
             val nameTV = appInfoLayout.findViewById<TextView?>(R.id.app_info_name)
             var clickView = appInfoLayout.findViewById<FrameLayout?>(R.id.app_click_view)
             var badgeIv = appInfoLayout.findViewById<ImageView?>(R.id.app_info_badge)
-
         }
 
         fun createShortcut(app: AppData) {
@@ -349,28 +404,29 @@ constructor(
             inte.putExtra("appName", app.name!!)
             inte.setPackage("com.android.launcher3")
             context.sendBroadcast(inte)
-//            val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
-//            val shortcutManager: ShortcutManager? =
-//                context?.getSystemService(ShortcutManager::class.java)
-//            if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
-//                val launchIntentForPackage: Intent = context?.getPackageManager()
-//                    ?.getLaunchIntentForPackage(app.packageName!!) as Intent
-//                launchIntentForPackage.action = Intent.ACTION_MAIN
-//                val pinShortcutInfo = ShortcutInfo.Builder(context, app.name)
-//                    .setLongLabel(app.packageName!!)
-//                    .setShortLabel(app.name!!)
-//                    .setIcon(icon)
-//                    .setIntent(launchIntentForPackage)
-//                    .build()
-//                val pinnedShortcutCallbackIntent =
-//                    shortcutManager.createShortcutResultIntent(pinShortcutInfo)
-//                val successCallback = PendingIntent.getBroadcast(
-//                    context, 0,
-//                    pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
-//                )
-//                shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
-//            }
+            //            val icon = Icon.createWithBitmap(Utils.drawableToBitmap(app.icon!!))
+            //            val shortcutManager: ShortcutManager? =
+            //                context?.getSystemService(ShortcutManager::class.java)
+            //            if (shortcutManager != null &&
+            // shortcutManager.isRequestPinShortcutSupported) {
+            //                val launchIntentForPackage: Intent = context?.getPackageManager()
+            //                    ?.getLaunchIntentForPackage(app.packageName!!) as Intent
+            //                launchIntentForPackage.action = Intent.ACTION_MAIN
+            //                val pinShortcutInfo = ShortcutInfo.Builder(context, app.name)
+            //                    .setLongLabel(app.packageName!!)
+            //                    .setShortLabel(app.name!!)
+            //                    .setIcon(icon)
+            //                    .setIntent(launchIntentForPackage)
+            //                    .build()
+            //                val pinnedShortcutCallbackIntent =
+            //                    shortcutManager.createShortcutResultIntent(pinShortcutInfo)
+            //                val successCallback = PendingIntent.getBroadcast(
+            //                    context, 0,
+            //                    pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE
+            //                )
+            //                shortcutManager.requestPinShortcut(pinShortcutInfo,
+            // successCallback.intentSender)
+            //            }
         }
-
     }
 }

@@ -21,8 +21,7 @@ import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 
-class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
-    LinearLayout(context, attrs) {
+class SystemStateLayout(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
     //    private var bluetoothBtn:ImageView ?= null
     private var imeBtn: ImageView? = null
@@ -32,11 +31,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private var controlBtn: ImageView? = null
     private var homeBtn: LinearLayout? = null
     private var dateBtn: TextClock? = null
-//    private var controlCenterWindow: ControlCenterWindow? = null
-//    private var netCenterWindow: NetCenterWindow? = null
+    //    private var controlCenterWindow: ControlCenterWindow? = null
+    //    private var netCenterWindow: NetCenterWindow? = null
     private var imeSwitchWindow: ImeSwitchWindow? = null
-//    private var notificationWindow: NotificationWindow? = null
-//    private var volumeCenterWindow: VolumeCenterWindow? = null
+    //    private var notificationWindow: NotificationWindow? = null
+    //    private var volumeCenterWindow: VolumeCenterWindow? = null
     private var screenRecordState: Int = 0
 
     private var notificationBtn: ImageView? = null
@@ -46,11 +45,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 
     private var windowManager: WindowManager? = null
     private var windowContentView: View? = null
-    private var audioManager: AudioManager? = null;
+    private var audioManager: AudioManager? = null
+
     private var notificationCount: Int? = 0
 
-
-    var isShowDlg: Boolean? = false;
+    var isShowDlg: Boolean? = false
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -65,40 +64,41 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
-    private val volumeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val progress = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
-            val streamMaxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            if (progress != null) {
-                if (progress == 0) {
-                    volumeBtn?.setImageResource(R.drawable.icon_volume_none)
-                } else if (progress < streamMaxVolume!!.div(3)) {
-                    volumeBtn?.setImageResource(R.drawable.icon_volume_min)
-                } else if (progress < (streamMaxVolume!!.div(3) * 2)) {
-                    volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
-                } else {
-                    volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+    private val volumeReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val progress = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
+                val streamMaxVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                if (progress != null) {
+                    if (progress == 0) {
+                        volumeBtn?.setImageResource(R.drawable.icon_volume_none)
+                    } else if (progress < streamMaxVolume!!.div(3)) {
+                        volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+                    } else if (progress < (streamMaxVolume!!.div(3) * 2)) {
+                        volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+                    } else {
+                        volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+                    }
                 }
             }
         }
-    }
 
     fun initState() {
-//        bluetoothBtn = findViewById(R.id.bluetooth_btn)
+        //        bluetoothBtn = findViewById(R.id.bluetooth_btn)
         imeBtn = findViewById(R.id.imeswitch_btn)
         wifiBtn = findViewById(R.id.wifi_btn)
-//        homeBtn = findViewById(R.id.layout_home)
+        //        homeBtn = findViewById(R.id.layout_home)
         dateBtn = findViewById(R.id.date_btn)
         volumeBtn = findViewById(R.id.volume_btn)
         batteryBtn = findViewById(R.id.battery_btn)
         controlBtn = findViewById(R.id.control_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         Log.d(TAG, "initState() context: $context")
-//        netCenterWindow = NetCenterWindow(context)
+        //        netCenterWindow = NetCenterWindow(context)
         imeSwitchWindow = ImeSwitchWindow(context)
-//        controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
-//        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
-//        notificationWindow = NotificationWindow(context, activeNotifications)
+        //        controlCenterWindow = ControlCenterWindow(context, volumeBtn, screenRecordState)
+        //        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
+        //        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
             Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
@@ -109,79 +109,85 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
                 Utils.notificationPanelVisible = true
                 listener?.syncVisible(Utils.NOTIFICATION_VISIBLE)
             }
-//            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
+            //            notificationWindow?.ifShowNotificationWindow(notificationBtn!!)
         }
-//        bluetoothBtn?.setOnClickListener { this }
+        //        bluetoothBtn?.setOnClickListener { this }
         wifiBtn?.setOnClickListener { wifiClick() }
         volumeBtn?.setOnClickListener {
             volumeCenterClick(volumeBtn!!)
-//            controlCenterClick(volumeBtn!!)
+            //            controlCenterClick(volumeBtn!!)
         }
         batteryBtn?.setOnClickListener { batteryClick() }
-//        homeBtn?.setOnClickListener { homeClick() }
+        //        homeBtn?.setOnClickListener { homeClick() }
         controlBtn?.setOnClickListener { controlCenterClick(controlBtn!!) }
-//        if(Settings.Global.getInt(context.contentResolver,"wifi_status") == 1){
-//            wifiBtn?.tooltipText = "已连接";
-//        }else{
-//            wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
-//        }
+        //        if(Settings.Global.getInt(context.contentResolver,"wifi_status") == 1){
+        //            wifiBtn?.tooltipText = "已连接";
+        //        }else{
+        //            wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
+        //        }
 
         val filter = IntentFilter()
         filter.addAction("android.media.VOLUME_CHANGED_ACTION")
         filter.addAction("android.media.STREAM_MUTE_CHANGED_ACTION")
         context!!.registerReceiver(volumeReceiver, filter)
 
-        wifiBtn?.setOnHoverListener(object : View.OnHoverListener {
-            override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
-//                try {
-//                    val curWifi = WifiUtils.queryCurWifi(context)
-//                    val status = WifiUtils.getWifiStatus(context)
-//                    var ipAddress =
-//                        Settings.Global.getString(context.contentResolver, "ip_address");
-//                    if (curWifi != null && status == 1) {
-//                        if (ipAddress == null) {
-//                            ipAddress = "";
-//                        }
-//                        wifiBtn?.tooltipText = curWifi + " " + ipAddress;
-//                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
-//                    } else if (status == 2) {
-//                        wifiBtn?.tooltipText = context.getString(R.string.fde_no_wifi_module)
-////                        wifiBtn?.setImageResource(R.drawable.icon_no_wifi)
-//                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
-//                    } else {
-//                        wifiBtn?.tooltipText = context.getString(R.string.fde_notification_network)
-//                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
-//                    }
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                }
-                return false
+        wifiBtn?.setOnHoverListener(
+            object : View.OnHoverListener {
+                override fun onHover(p0: View?, p1: MotionEvent?): Boolean {
+                    //                try {
+                    //                    val curWifi = WifiUtils.queryCurWifi(context)
+                    //                    val status = WifiUtils.getWifiStatus(context)
+                    //                    var ipAddress =
+                    //                        Settings.Global.getString(context.contentResolver,
+                    // "ip_address");
+                    //                    if (curWifi != null && status == 1) {
+                    //                        if (ipAddress == null) {
+                    //                            ipAddress = "";
+                    //                        }
+                    //                        wifiBtn?.tooltipText = curWifi + " " + ipAddress;
+                    //                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
+                    //                    } else if (status == 2) {
+                    //                        wifiBtn?.tooltipText =
+                    // context.getString(R.string.fde_no_wifi_module)
+                    ////                        wifiBtn?.setImageResource(R.drawable.icon_no_wifi)
+                    //                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
+                    //                    } else {
+                    //                        wifiBtn?.tooltipText =
+                    // context.getString(R.string.fde_notification_network)
+                    //                        wifiBtn?.setImageResource(R.drawable.icon_wifi)
+                    //                    }
+                    //                } catch (e: Exception) {
+                    //                    e.printStackTrace()
+                    //                }
+                    return false
+                }
             }
-        });
+        )
 
         volumeBtn?.tooltipText = context.getString(R.string.fde_notification_volume)
         controlBtn?.tooltipText = context.getString(R.string.fde_control_center)
         batteryBtn?.tooltipText = context.getString(R.string.fde_notification_battery)
         notificationBtn?.tooltipText = context.getString(R.string.fde_notification_message)
-//        removeHorizontalMargin()
+        //        removeHorizontalMargin()
 
-//        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
-//        frameLayout.setOnClickListener(View.OnClickListener {
-//            controlCenterWindow?.dismiss()
-//            if (Utils.notificationPanelVisible) {
-//                listener?.hideNotification()
-//                Utils.notificationPanelVisible = false
-//            }
-//        })
+        //        val frameLayout = (parent as FrameLayout).parent.parent.parent as FrameLayout
+        //        frameLayout.setOnClickListener(View.OnClickListener {
+        //            controlCenterWindow?.dismiss()
+        //            if (Utils.notificationPanelVisible) {
+        //                listener?.hideNotification()
+        //                Utils.notificationPanelVisible = false
+        //            }
+        //        })
 
         imeBtn?.setOnClickListener {
             imeSwitchClick(imeBtn!!)
-//            val intent = Intent(Settings.ACTION_SETTINGS)
-//            intent.putExtra(Settings.EXTRA_SUB_ID, 3)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            context!!.startActivity(intent)
-//            val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//            imm.switchToLastInputMethod(null);
+            //            val intent = Intent(Settings.ACTION_SETTINGS)
+            //            intent.putExtra(Settings.EXTRA_SUB_ID, 3)
+            //            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            //            context!!.startActivity(intent)
+            //            val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as
+            // InputMethodManager
+            //            imm.switchToLastInputMethod(null);
         }
         getInputMethod()
         registInputMethodChange()
@@ -192,7 +198,6 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
         if (Utils.imeSwitchWindoVisible) {
             listener?.syncVisible(Utils.IMESWITCHWINDOW_VISIBLE)
         }
-
     }
 
     private fun registInputMethodChange() {
@@ -213,10 +218,13 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     private fun getInputMethod() {
         val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val currentInputMethod =
-            Settings.Secure.getString(context!!.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD)
+            Settings.Secure.getString(
+                context!!.getContentResolver(),
+                Settings.Secure.DEFAULT_INPUT_METHOD
+            )
         val inputMethodList: List<InputMethodInfo> = imm.enabledInputMethodList
         inputMethodList.forEach({
-            if(currentInputMethod == it.id){
+            if (currentInputMethod == it.id) {
                 imeBtn?.visibility = View.VISIBLE
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
             }
@@ -224,12 +232,11 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun volumeCenterClick(volumeBtn: ImageView) {
-//        volumeCenterWindow?.ifShowVolumeCenterWindow(volumeBtn)
-//        if (Utils.volumeCenterWindowVisible) {
-//            listener?.syncVisible(Utils.VOLUMECENTERWINDOW_VISIBLE)
-//        }
+        //        volumeCenterWindow?.ifShowVolumeCenterWindow(volumeBtn)
+        //        if (Utils.volumeCenterWindowVisible) {
+        //            listener?.syncVisible(Utils.VOLUMECENTERWINDOW_VISIBLE)
+        //        }
     }
-
 
     private fun removeHorizontalMargin() {
         val viewGroup = (parent as LinearLayout).parent.parent.parent as LinearLayout
@@ -241,111 +248,111 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun homeClick() {
-//        DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
+        //        DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
     }
-
 
     private fun showTips(content: String, right: Float) {
-//        if (!"".equals(content)) {
-//            if (isShowDlg == true) {
-//                return;
-//            }
-//            val windowWidth = resources.getDimension(R.dimen.wifi_status_window_width).toInt()
-//            val windowHeight = resources.getDimension(R.dimen.wifi_status_window_height).toInt()
-//            val layoutParams = WindowManager.LayoutParams(
-//                windowWidth,
-//                windowHeight,
-//                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
-//                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-//                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-//                        or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-//                PixelFormat.RGB_565
-//            )
-//            layoutParams.gravity = Gravity.BOTTOM or Gravity.RIGHT
-//            layoutParams.horizontalMargin = right
-//            layoutParams.verticalMargin = 0.04f
-//            windowContentView =
-//                LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
-//            var txtName: TextView
-//            txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
-//            txtName.setText(content)
-//            windowManager?.addView(windowContentView, layoutParams)
-//            isShowDlg = true;
-//        } else {
-//            try {
-//                if (windowContentView != null) {
-//                    windowManager?.removeViewImmediate(windowContentView)
-//                }
-//            } catch (e: IllegalArgumentException) {
-//            }
-//            windowContentView = null
-//            isShowDlg = false;
-//        }
+        //        if (!"".equals(content)) {
+        //            if (isShowDlg == true) {
+        //                return;
+        //            }
+        //            val windowWidth =
+        // resources.getDimension(R.dimen.wifi_status_window_width).toInt()
+        //            val windowHeight =
+        // resources.getDimension(R.dimen.wifi_status_window_height).toInt()
+        //            val layoutParams = WindowManager.LayoutParams(
+        //                windowWidth,
+        //                windowHeight,
+        //                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+        //                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        //                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        //                        or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+        //                PixelFormat.RGB_565
+        //            )
+        //            layoutParams.gravity = Gravity.BOTTOM or Gravity.RIGHT
+        //            layoutParams.horizontalMargin = right
+        //            layoutParams.verticalMargin = 0.04f
+        //            windowContentView =
+        //                LayoutInflater.from(context).inflate(R.layout.layout_status_tips, null)
+        //            var txtName: TextView
+        //            txtName = windowContentView!!.findViewById<TextView>(R.id.txtName);
+        //            txtName.setText(content)
+        //            windowManager?.addView(windowContentView, layoutParams)
+        //            isShowDlg = true;
+        //        } else {
+        //            try {
+        //                if (windowContentView != null) {
+        //                    windowManager?.removeViewImmediate(windowContentView)
+        //                }
+        //            } catch (e: IllegalArgumentException) {
+        //            }
+        //            windowContentView = null
+        //            isShowDlg = false;
+        //        }
     }
 
-    /**
-     * network wifi click
-     */
+    /** network wifi click */
     private fun wifiClick() {
         AppUtils.toWifiPage(context)
-//        showTips("",0.05f)
-//
-//        val intent = Intent()
-//        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
-////        val cn: ComponentName = ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
-//        intent.component = cn;
-//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//        context.startActivity(intent)
-//        netCenterWindow?.ifShowNetCenterView()
-//        listener?.syncVisible(Utils.WIFIWINDOW_VISIBLE)
-//
-//
-//        GlobalScope.launch(Dispatchers.Main) {
-//            // not ui thread
-//            val result = withContext(Dispatchers.IO) {
-//                //
-//                NetApi.isWifiEnable(context);
-//            }
-//        }
+        //        showTips("",0.05f)
+        //
+        //        val intent = Intent()
+        //        val cn: ComponentName? =
+        // ComponentName.unflattenFromString("com.android.settings/.Settings\$SetNetworkFromHostActivity")
+        ////        val cn: ComponentName =
+        // ComponentName.unflattenFromString("com.android.settings/.Settings\$SetWifiFromHostActivity")
+        //        intent.component = cn;
+        //        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        //        context.startActivity(intent)
+        //        netCenterWindow?.ifShowNetCenterView()
+        //        listener?.syncVisible(Utils.WIFIWINDOW_VISIBLE)
+        //
+        //
+        //        GlobalScope.launch(Dispatchers.Main) {
+        //            // not ui thread
+        //            val result = withContext(Dispatchers.IO) {
+        //                //
+        //                NetApi.isWifiEnable(context);
+        //            }
+        //        }
     }
 
-    /**
-     * network battery click
-     */
+    /** network battery click */
     private fun batteryClick() {
-//        val intent = Intent()
-//        val cn: ComponentName =
-//            ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
-//        intent.component = cn;
-//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//        context.startActivity(intent)
+        //        val intent = Intent()
+        //        val cn: ComponentName =
+        //
+        // ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+        //        intent.component = cn;
+        //        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        //        context.startActivity(intent)
     }
-
 
     private fun controlCenterClick(imageView: ImageView) {
-//        controlCenterWindow?.ifShowControlCenterView(imageView)
-//        if (Utils.controlCenterWindoVisible) {
-//            listener?.syncVisible(Utils.CONTROLCENTERWINDOW_VISIBLE)
-//        }
+        //        controlCenterWindow?.ifShowControlCenterView(imageView)
+        //        if (Utils.controlCenterWindoVisible) {
+        //            listener?.syncVisible(Utils.CONTROLCENTERWINDOW_VISIBLE)
+        //        }
     }
-
 
     interface NotificationListener {
         fun hideNotification()
+
         fun showNotification()
+
         fun syncVisible(which: Int)
     }
 
     fun onNotifyCount(count: Int?) {
         notificationCount = count
-//        Log.d("TAG", "onNotifyCount() called with: count = $count")
+        //        Log.d("TAG", "onNotifyCount() called with: count = $count")
         notificationBtn?.visibility = VISIBLE
         if (count!! > 0) {
             notificationBtn?.setImageResource(R.drawable.icon_notification_coming)
         } else {
             notificationBtn?.setImageResource(R.drawable.icon_notification)
         }
-//        notificationBtn?.setText(count.toString() + "")
+        //        notificationBtn?.setText(count.toString() + "")
     }
 
     fun onNotificationPanelVisibleChanged(boolean: Boolean) {
@@ -359,26 +366,25 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun onScreenRecordStateChange(state: Int) {
-//        screenRecordState = state
-//        controlCenterWindow?.onScreenRecordStateChange(state)
+        //        screenRecordState = state
+        //        controlCenterWindow?.onScreenRecordStateChange(state)
     }
 
     fun hideControlWindow() {
-//        controlCenterWindow?.dismiss()
+        //        controlCenterWindow?.dismiss()
     }
 
     fun hideWifiWindow() {
-//        netCenterWindow?.dismiss()
+        //        netCenterWindow?.dismiss()
     }
 
     fun hideVolumeCenterWindow() {
-//        Log.w(TAG, "hideVolumeCenterWindow")
-//        volumeCenterWindow?.dismiss()
+        //        Log.w(TAG, "hideVolumeCenterWindow")
+        //        volumeCenterWindow?.dismiss()
     }
 
     fun hideImeSwitchWindow() {
-//        Log.w(TAG, "hideVolumeCenterWindow")
-//        imeSwitchWindow?.dismiss()
+        //        Log.w(TAG, "hideVolumeCenterWindow")
+        //        imeSwitchWindow?.dismiss()
     }
-
 }

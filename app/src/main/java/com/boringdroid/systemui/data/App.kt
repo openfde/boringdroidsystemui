@@ -2,7 +2,7 @@ package com.boringdroid.systemui.data
 
 import android.graphics.drawable.Drawable
 
-open class App (name: String, packageName: String?, icon: Drawable?) {
+open class App(name: String, packageName: String?, icon: Drawable?) {
 
     private var name: String? = null
     private var packageName: String? = null
@@ -18,11 +18,9 @@ open class App (name: String, packageName: String?, icon: Drawable?) {
         return name
     }
 
-
     open fun getPackageName(): String? {
         return packageName
     }
-
 
     open fun getIcon(): Drawable? {
         return icon
@@ -31,5 +29,4 @@ open class App (name: String, packageName: String?, icon: Drawable?) {
     override fun toString(): String {
         return name!!
     }
-
 }

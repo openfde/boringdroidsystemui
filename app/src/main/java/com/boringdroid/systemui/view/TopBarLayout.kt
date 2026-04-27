@@ -1,11 +1,7 @@
 package com.boringdroid.systemui.view
 
-import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS
 import android.app.ActivityManager
-import android.app.PendingIntent
-import android.app.RemoteAction
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
@@ -14,11 +10,9 @@ import android.graphics.Bitmap
 import android.graphics.Outline
 import android.graphics.Point
 import android.graphics.Rect
-import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.os.BatteryManager
 import android.provider.Settings
-import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
@@ -40,12 +34,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextClock
-import com.boringdroid.systemui.AppLoaderTask
-import com.boringdroid.systemui.GlobalSystemUIContext
 import com.boringdroid.systemui.R
-import com.boringdroid.systemui.SystemUIOverlay
-import com.boringdroid.systemui.SystemUIOverlay.Companion
-import com.boringdroid.systemui.data.AppListResult
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.data.WindowAttr
@@ -77,14 +66,18 @@ import com.xwdz.http.callback.JsonCallBack
 import okhttp3.Call
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
-    RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
-    TopBarControlWindow.TopbarLayoutController, NotificationListener, BatteryReceiver.BatteryListener {
+    RelativeLayout(context, attrs),
+    View.OnClickListener,
+    NotificationUpdater,
+    TopBarControlWindow.TopbarLayoutController,
+    NotificationListener,
+    BatteryReceiver.BatteryListener {
 
     companion object {
         var inited: Boolean = false
     }
 
-    var aboutWindow: AboutWindow ?= null
+    var aboutWindow: AboutWindow? = null
     private var needUpdateBattery: Boolean = false
     private var plugged: Int = 0
     private var status: Int = 0
@@ -92,8 +85,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var windowAttr: WindowAttr? = null
     private val TAG: String = "TopBarLayout"
     val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
-    var systemUIContext: Context ? = null
-    var notificationListener : TopBarNotificationWindow.WindowListener? = null
+    var systemUIContext: Context? = null
+    var notificationListener: TopBarNotificationWindow.WindowListener? = null
     var accessibilityManager: AccessibilityManager? = null
     private var imeBtn: ImageView? = null
     private var wifiBtn: ImageView? = null
@@ -104,36 +97,34 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var homeBtn: LinearLayout? = null
     private var powerBtn: ImageView? = null
     private var desktopBtn: LinearLayout? = null
-    private var systemTray: LinearLayout?= null
+    private var systemTray: LinearLayout? = null
     private var notificationBtn: ImageView? = null
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
     private var activityManager: ActivityManager? = null
     private var audioManager: AudioManager? = null
-    private var notificationWindow:SingleNotificationWindow ? = null
-    private var notificationsWindow:TopBarNotificationWindow? = null
-    private var imeSwitchWindow:TopBarImeSwitchWindow? = null
+    private var notificationWindow: SingleNotificationWindow? = null
+    private var notificationsWindow: TopBarNotificationWindow? = null
+    private var imeSwitchWindow: TopBarImeSwitchWindow? = null
     private var globalSearchWindow: TopBarGlobalSearchWindow? = null
     private var imm: InputMethodManager
     private val inputMethodList: MutableList<InputMethodInfo> = ArrayList()
-    var overviewProvider: AllAppsProvider?= null
-    var  xserverEventInputer: XserverHelper.XserverEventInputer ?= null
-    var  xserverWindowInjector: XserverHelper.XserverWindowInjector ?= null
-    var fdeModeResult: FdeModeResult ?= null
-    private var powerWindow:TopBarPowerWindow? = null
-    var controlWindow:TopBarControlWindow? = null
+    var overviewProvider: AllAppsProvider? = null
+    var xserverEventInputer: XserverHelper.XserverEventInputer? = null
+    var xserverWindowInjector: XserverHelper.XserverWindowInjector? = null
+    var fdeModeResult: FdeModeResult? = null
+    private var powerWindow: TopBarPowerWindow? = null
+    var controlWindow: TopBarControlWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<DesktopNotification>? = null
-    private var launcherResumeFlag: Boolean ?= false
-    private var currentInputMethod :String ?= null
-    val windowList: MutableList<AbsTopPopWindow> by lazy {
-        mutableListOf()
-    }
-    private var volumeWindow:TopBarVolumeWindow? = null
+    private var launcherResumeFlag: Boolean? = false
+    private var currentInputMethod: String? = null
+    val windowList: MutableList<AbsTopPopWindow> by lazy { mutableListOf() }
+    private var volumeWindow: TopBarVolumeWindow? = null
     private val x11TrayImageViesList: MutableList<ImageView> = ArrayList()
 
+    private var btnList: MutableList<ImageView?>? = null
 
-    private var btnList: MutableList<ImageView?> ?= null
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -163,7 +154,17 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         searchBtn = findViewById(R.id.search_btn)
         searchBtn?.tooltipText = context.resources.getString(R.string.top_search)
         systemTray = findViewById(R.id.system_tray)
-        btnList = mutableListOf(imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
+        btnList =
+            mutableListOf(
+                imeBtn,
+                wifiBtn,
+                volumeBtn,
+                batteryBtn,
+                controlBtn,
+                powerBtn,
+                searchBtn,
+                notificationBtn
+            )
         registerNotification()
         registInputMethodChange()
         makePowerWindow(powerBtn)
@@ -173,53 +174,55 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         makeSingleNotiWinodw()
         makeGlobalSearchWindow(searchBtn)
         makeVolumeWindow(volumeBtn)
-        btnList?.forEach{ imageView ->
+        btnList?.forEach { imageView ->
             imageView?.setOnTouchListener(touchListener)
             imageView?.setOnHoverListener(hoverListener)
             imageView?.setOnClickListener(this)
         }
         inited = true
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
-//        val globalSearchRecevier = GlobalSearchRecevier()
-//        val filter = IntentFilter()
-//        filter.addAction(SYSTEM_ALL_APP_ACTION)
-//        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
-//        val broadcast = PendingIntent.getBroadcast(
-//            context,
-//            0,
-//            Intent(SYSTEM_ALL_APP_ACTION),
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//        accessibilityManager =  GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
-//        accessibilityManager!!.registerSystemAction(
-//            RemoteAction(
-//                Icon.createWithResource(context, R.drawable.icon_menu),
-//                context.getString(R.string.search),
-//                context.getString(R.string.search),
-//                broadcast
-//            ),
-//            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
+        //        val globalSearchRecevier = GlobalSearchRecevier()
+        //        val filter = IntentFilter()
+        //        filter.addAction(SYSTEM_ALL_APP_ACTION)
+        //        context.registerReceiver(globalSearchRecevier, filter, RECEIVER_EXPORTED)
+        //        val broadcast = PendingIntent.getBroadcast(
+        //            context,
+        //            0,
+        //            Intent(SYSTEM_ALL_APP_ACTION),
+        //            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        //        )
+        //        accessibilityManager =
+        // GlobalSystemUIContext.getGlobalSystemuiContext()?.getSystemService(AccessibilityManager::class.java)
+        //        accessibilityManager!!.registerSystemAction(
+        //            RemoteAction(
+        //                Icon.createWithResource(context, R.drawable.icon_menu),
+        //                context.getString(R.string.search),
+        //                context.getString(R.string.search),
+        //                broadcast
+        //            ),
+        //            GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS)
 
-        if(needUpdateBattery){
+        if (needUpdateBattery) {
             onBatteryChanged(percentage, status, plugged)
         }
         initVolume()
         getFdeMode()
     }
 
-    fun getFdeMode(){
+    fun getFdeMode() {
         QuietOkHttp.get(BASEURL + URL_FDEMODE)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<FdeModeResult>() {
-                override fun onFailure(call: Call?, e: Exception?) {
-                }
+            .execute(
+                object : JsonCallBack<FdeModeResult>() {
+                    override fun onFailure(call: Call?, e: Exception?) {}
 
-                override fun onSuccess(call: Call?, response: FdeModeResult?) {
-                    fdeModeResult = response
-                    Log.d(TAG, "onSuccess() called with: call = $call, response = $response")
-                    makePowerWindow(powerBtn)
+                    override fun onSuccess(call: Call?, response: FdeModeResult?) {
+                        fdeModeResult = response
+                        Log.d(TAG, "onSuccess() called with: call = $call, response = $response")
+                        makePowerWindow(powerBtn)
+                    }
                 }
-            })
+            )
     }
 
     private fun initVolume() {
@@ -235,15 +238,21 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    internal inner class GlobalSearchRecevier : BroadcastReceiver(){
+    internal inner class GlobalSearchRecevier : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(TAG, "onReceive() called with: context = ${context?.packageName}, intent = $intent")
+            Log.d(
+                TAG,
+                "onReceive() called with: context = ${context?.packageName}, intent = $intent"
+            )
 
-            if(SYSTEM_ALL_APP_ACTION != intent?.action){
+            if (SYSTEM_ALL_APP_ACTION != intent?.action) {
                 return
             }
-            Log.d(TAG, "onReceive isShowing: $globalSearchWindow ${globalSearchWindow?.isShowing()}")
-            if(globalSearchWindow?.isShowing() == true){
+            Log.d(
+                TAG,
+                "onReceive isShowing: $globalSearchWindow ${globalSearchWindow?.isShowing()}"
+            )
+            if (globalSearchWindow?.isShowing() == true) {
                 globalSearchWindow?.dismiss()
             } else {
                 globalSearchWindow?.showPopupWindow()
@@ -251,9 +260,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun wifiStatusListen(){
+    fun wifiStatusListen() {
         controlWindow?.wifiStatusListen()
-        val netStatus = Utils.isNetworkAvailable(getContext());
+        val netStatus = Utils.isNetworkAvailable(getContext())
         wifiBtn?.apply {
             setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
         }
@@ -263,36 +272,43 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getInputMethods()
         val width = resources.getDimension(R.dimen.volume_window_width_expand).toInt()
         val height = resources.getDimension(R.dimen.volume_window_height_expand).toInt()
-        volumeWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_volume)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(0 , 0)
-            .build(AbsTopPopWindow.WindowType.Volume) as TopBarVolumeWindow
-        volumeWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.volumeBtn?.background = null
+        volumeWindow =
+            AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_volume)
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .locate(0, 0)
+                .build(AbsTopPopWindow.WindowType.Volume) as TopBarVolumeWindow
+        volumeWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.volumeBtn?.background = null
+                }
             }
-        }
         volumeWindow?.enterView = imageView
         volumeWindow?.topBarVolumeImage = volumeBtn
         windowList.add(volumeWindow!!)
-
     }
 
     private fun makeGlobalSearchWindow(imageView: ImageView?) {
         getInputMethods()
         val width = resources.getDimension(R.dimen.top_bar_search_width_expand).toInt()
-//        val height = resources.getDimension(R.dimen.top_bar_search_height).toInt()
-        globalSearchWindow = AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.window_topbar_search)
-            .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
-            .locate(TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT , TopBarGlobalSearchWindow.WINDOW_PADDING_TOP)
-            .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
-//        Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow = $globalSearchWindow")
-        globalSearchWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.searchBtn?.background = null
-                launcherResumeFlag = false
+        //        val height = resources.getDimension(R.dimen.top_bar_search_height).toInt()
+        globalSearchWindow =
+            AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.window_topbar_search)
+                .gravity(Gravity.CENTER_HORIZONTAL or Gravity.TOP)
+                .locate(
+                    TopBarGlobalSearchWindow.WINDOW_PADDING_LEFT,
+                    TopBarGlobalSearchWindow.WINDOW_PADDING_TOP
+                )
+                .build(AbsTopPopWindow.WindowType.Search) as TopBarGlobalSearchWindow
+        //        Log.d(TAG, "makeGlobalSearchWindow() $this and globalSearchWindow =
+        // $globalSearchWindow")
+        globalSearchWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.searchBtn?.background = null
+                    launcherResumeFlag = false
+                }
             }
-        }
         globalSearchWindow?.overviewProvider = overviewProvider
         globalSearchWindow?.enterView = imageView
         windowList.add(globalSearchWindow!!)
@@ -300,7 +316,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun registerNotification() {
         notificationReceiver = NotificationReceiver(this)
-        var intentFilter  = IntentFilter()
+        var intentFilter = IntentFilter()
         intentFilter.addAction(NOTIFI_ACTION)
         context.registerReceiver(notificationReceiver, intentFilter, RECEIVER_EXPORTED)
     }
@@ -308,25 +324,33 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     public fun unregisterNotification() {
         try {
             context.unregisterReceiver(notificationReceiver)
-        } catch (e: IllegalArgumentException) {
-        }
+        } catch (e: IllegalArgumentException) {}
         controlWindow?.destroy()
     }
-
 
     private fun makeNotificationWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_notification_width).toInt()
         val height = calculateNotificationHeight()
-        notificationsWindow = AbsTopPopWindow.Builder(context, width, WRAP_CONTENT, R.layout.window_topbar_notification)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(TopBarNotificationWindow.WINDOW_PADDING_RIGHT , TopBarNotificationWindow.WINDOW_PADDING_TOP)
-            .provider(null)
-            .build(AbsTopPopWindow.WindowType.Notification) as TopBarNotificationWindow
-        notificationsWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.notificationBtn?.background = null
+        notificationsWindow =
+            AbsTopPopWindow.Builder(
+                    context,
+                    width,
+                    WRAP_CONTENT,
+                    R.layout.window_topbar_notification
+                )
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .locate(
+                    TopBarNotificationWindow.WINDOW_PADDING_RIGHT,
+                    TopBarNotificationWindow.WINDOW_PADDING_TOP
+                )
+                .provider(null)
+                .build(AbsTopPopWindow.WindowType.Notification) as TopBarNotificationWindow
+        notificationsWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.notificationBtn?.background = null
+                }
             }
-        }
         notificationsWindow?.systemUIContext = systemUIContext
         notificationsWindow?.enterView = imageView
         notificationsWindow?.setNotifications(notifications)
@@ -337,18 +361,25 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeImeSwitchWindow(imageView: ImageView?) {
         getInputMethods()
         val width = context.resources.getDimension(R.dimen.ime_switch_window_width_expand).toInt()
-        val height = (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + resources.getDimension(R.dimen.ime_margin_vert).toInt()
-        imeSwitchWindow = AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.window_topbar_ime)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .provider(null)
-            .locate(TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT , TopBarImeSwitchWindow.WINDOW_PADDING_TOP)
-            .build(AbsTopPopWindow.WindowType.IME) as TopBarImeSwitchWindow
+        val height =
+            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) +
+                resources.getDimension(R.dimen.ime_margin_vert).toInt()
+        imeSwitchWindow =
+            AbsTopPopWindow.Builder(context, WRAP_CONTENT, WRAP_CONTENT, R.layout.window_topbar_ime)
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .provider(null)
+                .locate(
+                    TopBarImeSwitchWindow.WINDOW_PADDING_RIGHT,
+                    TopBarImeSwitchWindow.WINDOW_PADDING_TOP
+                )
+                .build(AbsTopPopWindow.WindowType.IME) as TopBarImeSwitchWindow
         imeSwitchWindow?.setInputMethodList(inputMethodList)
-        imeSwitchWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.imeBtn?.background = null
+        imeSwitchWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.imeBtn?.background = null
+                }
             }
-        }
         imeSwitchWindow?.systemUIContext = systemUIContext
         imeSwitchWindow?.enterView = imageView
         windowList.add(imeSwitchWindow!!)
@@ -358,9 +389,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         inputMethodList.clear()
         inputMethodList.addAll(imm.enabledInputMethodList)
         currentInputMethod =
-            Settings.Secure.getString(context!!.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
+            Settings.Secure.getString(
+                context!!.contentResolver,
+                Settings.Secure.DEFAULT_INPUT_METHOD
+            )
         inputMethodList.forEach {
-//            Log.d(TAG, "getInputMethods: ${it.packageName}")
+            //            Log.d(TAG, "getInputMethods: ${it.packageName}")
             if (currentInputMethod == it.id) {
                 imeBtn?.visibility = VISIBLE
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
@@ -390,37 +424,60 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         val size = Point()
         windowManager?.defaultDisplay?.getRealSize(size)
-        val height_reverse = 48 + context.resources.getDimension(R.dimen.top_bar_notification_margin_vert).toInt()
-        val height_item = context.resources.getDimension(R.dimen.top_bar_notification_height_item).toInt()
-        val height_devide = context.resources.getDimension(R.dimen.top_bar_notification_height_devide).toInt()
-        val notificationSize =  if (notifications.isNullOrEmpty()) 1 else notifications!!.size
-        var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
+        val height_reverse =
+            48 + context.resources.getDimension(R.dimen.top_bar_notification_margin_vert).toInt()
+        val height_item =
+            context.resources.getDimension(R.dimen.top_bar_notification_height_item).toInt()
+        val height_devide =
+            context.resources.getDimension(R.dimen.top_bar_notification_height_devide).toInt()
+        val notificationSize = if (notifications.isNullOrEmpty()) 1 else notifications!!.size
+        var height =
+            notificationSize * height_item +
+                (notificationSize - 1) * height_devide +
+                height_reverse +
+                height_reverse
         // 128 means navi + statusbr + space
-        height = if (height >( size.y - context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt()))
-                (size.y - context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt()) else height
+        height =
+            if (
+                height >
+                    (size.y -
+                        context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt())
+            )
+                (size.y - context.resources.getDimension(R.dimen.top_bar_reverse_height).toInt())
+            else height
         return height
     }
 
     private fun makePowerWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_power_width).toInt() + 32
         var height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt() + 32
-        if(!fdeModeResult?.data?.FDEMode.equals("environment")){
+        if (!fdeModeResult?.data?.FDEMode.equals("environment")) {
             height = context.resources.getDimension(R.dimen.top_bar_power_height_small).toInt() + 32
         }
-        powerWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_power)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .provider(object : ViewOutlineProvider() {
-                override fun getOutline(view: View, outline: Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, POWER_OUTLINE_RADIUS)
+        powerWindow =
+            AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_power)
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .provider(
+                    object : ViewOutlineProvider() {
+                        override fun getOutline(view: View, outline: Outline) {
+                            outline.setRoundRect(
+                                0,
+                                0,
+                                view.width,
+                                view.height,
+                                POWER_OUTLINE_RADIUS
+                            )
+                        }
+                    }
+                )
+                .locate(0, 0)
+                .build(AbsTopPopWindow.WindowType.Power) as TopBarPowerWindow
+        powerWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.powerBtn?.background = null
                 }
-            })
-            .locate(0 , 0)
-            .build(AbsTopPopWindow.WindowType.Power) as TopBarPowerWindow
-        powerWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.powerBtn?.background = null
             }
-        }
         powerWindow?.fdeModeResult = fdeModeResult
         powerWindow?.enterView = imageView
         powerWindow?.topBarLayout = this
@@ -430,15 +487,17 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeControlWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_control_width_expand).toInt()
         val height = context.resources.getDimension(R.dimen.top_bar_control_height_expand).toInt()
-        controlWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_control)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(0 , 0)
-            .build(AbsTopPopWindow.WindowType.Control) as TopBarControlWindow
-        controlWindow?.dismissListener = object  : WindowDismissListener {
-            override fun onWindowDismiss() {
-                this@TopBarLayout.controlBtn?.background = null
+        controlWindow =
+            AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_control)
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .locate(0, 0)
+                .build(AbsTopPopWindow.WindowType.Control) as TopBarControlWindow
+        controlWindow?.dismissListener =
+            object : WindowDismissListener {
+                override fun onWindowDismiss() {
+                    this@TopBarLayout.controlBtn?.background = null
+                }
             }
-        }
         controlWindow?.topBarVolumeImage = volumeBtn
         controlWindow?.enterView = imageView
         controlWindow?.topbarController = this
@@ -447,8 +506,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private val touchListener = OnTouchListener { v, event ->
         if (event?.getAction() == MotionEvent.ACTION_DOWN) {
-            v?.setBackgroundResource(R.drawable.top_oval_click);
-        } else if (event?.getAction() == MotionEvent.ACTION_UP || event?.getAction() == MotionEvent.ACTION_CANCEL) {
+            v?.setBackgroundResource(R.drawable.top_oval_click)
+        } else if (
+            event?.getAction() == MotionEvent.ACTION_UP ||
+                event?.getAction() == MotionEvent.ACTION_CANCEL
+        ) {
             v?.background = null
         }
         false
@@ -471,136 +533,158 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getFdeMode()
         powerWindow?.fdeModeResult = fdeModeResult
         powerWindow?.showPopupWindow()
-        Utils.setBackgroundBlurRadius(powerWindow?.getContentView()?.findViewById(R.id.root_blur), POWER_OUTLINE_SHADOW, POWER_OUTLINE_RADIUS)
-        powerBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        Utils.setBackgroundBlurRadius(
+            powerWindow?.getContentView()?.findViewById(R.id.root_blur),
+            POWER_OUTLINE_SHADOW,
+            POWER_OUTLINE_RADIUS
+        )
+        powerBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
     private fun controlBtnClick() {
         controlWindow?.showPopupWindow()
-        Utils.setBackgroundBlurRadius(controlWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
-        controlBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        Utils.setBackgroundBlurRadius(
+            controlWindow?.getContentView()?.findViewById(R.id.root_blur),
+            CONTROL_WINDOW_SHADOW,
+            CONTROL_WINDOW_RADIUS
+        )
+        controlBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
     private fun notificationBtnClick() {
-        if(notifications?.size == 0){
+        if (notifications?.size == 0) {
             return
         }
-        notificationBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        notificationBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
         notificationsWindow?.showPopupWindow()
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
     }
 
-
     private fun imeBtnClick() {
         getInputMethods()
         val height =
-            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) + + resources.getDimension(R.dimen.ime_margin_vert).toInt()
+            (resources.getDimension(R.dimen.item_ime_height).toInt() * inputMethodList.size) +
+                +resources.getDimension(R.dimen.ime_margin_vert).toInt()
         imeSwitchWindow?.updateLayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         imeSwitchWindow?.showPopupWindow()
         imeSwitchWindow?.setSelect(currentInputMethod)
         imeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
-        Utils.setBackgroundBlurRadius(imeSwitchWindow?.getContentView()?.findViewById(R.id.root_blur), 30, 8f)
+        Utils.setBackgroundBlurRadius(
+            imeSwitchWindow?.getContentView()?.findViewById(R.id.root_blur),
+            30,
+            8f
+        )
     }
 
     private fun searchBtnClick() {
-        searchBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        searchBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
         globalSearchWindow?.showPopupWindow()
         launcherResumeFlag = true
-//        val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
-//        if (runningTasks != null) {
-//            for (runningTask in runningTasks){
-//                if(Utils.isLauncher(context, runningTask.topActivity)){
-//                    activityManager?.moveTaskToFront( runningTask.taskId, ActivityManager.MOVE_TASK_NO_USER_ACTION)
-//                }
-//            }
-//        }
+        //        val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
+        //        if (runningTasks != null) {
+        //            for (runningTask in runningTasks){
+        //                if(Utils.isLauncher(context, runningTask.topActivity)){
+        //                    activityManager?.moveTaskToFront( runningTask.taskId,
+        // ActivityManager.MOVE_TASK_NO_USER_ACTION)
+        //                }
+        //            }
+        //        }
     }
 
     private fun volumeBtnClick() {
         volumeWindow?.showPopupWindow()
-//        Utils.setBackgroundBlurRadius(volumeWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
-        volumeBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+        //
+        // Utils.setBackgroundBlurRadius(volumeWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
+        volumeBtn?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
     override fun onClick(v: View?) {
         windowList.forEach { window ->
-            if(window.isShowing()){
+            if (window.isShowing()) {
                 window.dismiss()
                 return
             }
         }
-        if(v == powerBtn){
+        if (v == powerBtn) {
             powerBtnClick()
-        } else if( v == controlBtn){
+        } else if (v == controlBtn) {
             controlBtnClick()
-        } else if( v == notificationBtn){
+        } else if (v == notificationBtn) {
             notificationBtnClick()
-        } else if( v == imeBtn){
+        } else if (v == imeBtn) {
             imeBtnClick()
-        } else if( v == searchBtn){
+        } else if (v == searchBtn) {
             searchBtnClick()
-        } else if( v == volumeBtn){
+        } else if (v == volumeBtn) {
             volumeBtnClick()
-        } else if( v == desktopBtn){
+        } else if (v == desktopBtn) {
             DeviceUtils.sendKeyCode(KeyEvent.KEYCODE_HOME)
-        }else if(v == wifiBtn){
+        } else if (v == wifiBtn) {
             AppUtils.toWifiPage(context)
-        } else if(v == batteryBtn){
-//            val intent = Intent()
-//            val cn: ComponentName? =
-//                ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
-//            intent.component = cn;
-//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//            context.startActivity(intent)
+        } else if (v == batteryBtn) {
+            //            val intent = Intent()
+            //            val cn: ComponentName? =
+            //
+            // ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
+            //            intent.component = cn;
+            //            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            //            context.startActivity(intent)
         }
     }
 
-    override fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
+    override fun updateState(
+        type: NotificationReceiver.ACTIONTYPE,
+        notifications: Array<DesktopNotification>?
+    ) {
         this.notifications = notifications
-//        Log.d(TAG, "updateState: ${notifications?.size}")
+        //        Log.d(TAG, "updateState: ${notifications?.size}")
         val width = notificationsWindow?.getWidth()
         if (width != null) {
-            notificationsWindow?.updateLayoutParams(width,  calculateNotificationHeight())
+            notificationsWindow?.updateLayoutParams(width, calculateNotificationHeight())
         }
         notificationsWindow?.setNotifications(notifications)
-
     }
 
-    override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
+    override fun updateCount(
+        type: NotificationReceiver.ACTIONTYPE,
+        notifications: Array<DesktopNotification>?
+    ) {
         this.notifications = notifications
-        val count =  if (notifications.isNullOrEmpty()) 0 else notifications!!.size
-//        Log.d(TAG, "updateCount: $count")
-        if(count > 0){
+        val count = if (notifications.isNullOrEmpty()) 0 else notifications!!.size
+        //        Log.d(TAG, "updateCount: $count")
+        if (count > 0) {
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
         } else {
             notificationBtn?.setImageResource(R.drawable.icon_notification)
         }
         val width = notificationsWindow?.getWidth()
         if (width != null) {
-            notificationsWindow?.updateLayoutParams(width,  calculateNotificationHeight())
+            notificationsWindow?.updateLayoutParams(width, calculateNotificationHeight())
         }
         notificationsWindow?.setNotifications(notifications)
     }
 
-    override fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: DesktopNotification?) {
-    }
+    override fun updateClick(
+        type: NotificationReceiver.ACTIONTYPE,
+        notification: DesktopNotification?
+    ) {}
 
     override fun postNotification(sbn: DesktopNotification?) {
-//        if (sbn?.contentView == null) {
+        //        if (sbn?.contentView == null) {
         notificationWindow?.postNotificaton(sbn)
-//        }
+        //        }
     }
 
-
     fun makeSingleNotiWinodw() {
-        val width = context.resources.getDimension(R.dimen.top_bar_single_notification_width).toInt()
-        val height = context.resources.getDimension(R.dimen.top_bar_single_notification_height).toInt()
-        notificationWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.layout_notification_single)
-            .gravity(Gravity.TOP or Gravity.RIGHT)
-            .locate(
-                SINGLE_NOTIFICATION_WINDOW_PADDING,
-                SINGLE_NOTIFICATION_WINDOW_PADDING
-            ).build(AbsTopPopWindow.WindowType.SingleNotification) as SingleNotificationWindow
+        val width =
+            context.resources.getDimension(R.dimen.top_bar_single_notification_width).toInt()
+        val height =
+            context.resources.getDimension(R.dimen.top_bar_single_notification_height).toInt()
+        notificationWindow =
+            AbsTopPopWindow.Builder(context, width, height, R.layout.layout_notification_single)
+                .gravity(Gravity.TOP or Gravity.RIGHT)
+                .locate(SINGLE_NOTIFICATION_WINDOW_PADDING, SINGLE_NOTIFICATION_WINDOW_PADDING)
+                .build(AbsTopPopWindow.WindowType.SingleNotification) as SingleNotificationWindow
     }
 
     override fun showVolumeWindow() {
@@ -608,17 +692,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onNotifyCount(count: Int) {
-        if(count > 0){
+        if (count > 0) {
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
         } else {
             notificationBtn?.setImageResource(R.drawable.icon_notification)
         }
     }
 
-
-    override fun onNotificationPanelVisibleChanged(boolean: Boolean) {
-
-    }
+    override fun onNotificationPanelVisibleChanged(boolean: Boolean) {}
 
     override fun onScreenRecordStateChange(state: Int, sbn: String?) {
         controlWindow?.onScreenRecordStateChange(state, sbn)
@@ -636,37 +717,33 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     fun updateSystemTrayIcon(icon: Bitmap?, window: Long, action: Long, title: String?) {
 
-        if(action == SYSTEM_TRAY_UNDOCK_ALL){
+        if (action == SYSTEM_TRAY_UNDOCK_ALL) {
             x11TrayImageViesList.clear()
             systemTray?.removeAllViews()
             return
         }
 
-        if(window.toInt() == -1){
+        if (window.toInt() == -1) {
             return
         }
 
-        val imageView = x11TrayImageViesList.firstOrNull {
-            it.tag == window
-        }
+        val imageView = x11TrayImageViesList.firstOrNull { it.tag == window }
 
-        x11TrayImageViesList.forEach {
-            Log.d(TAG, "updateSystemTrayIcon() tag: ${it.tag}")
-        }
+        x11TrayImageViesList.forEach { Log.d(TAG, "updateSystemTrayIcon() tag: ${it.tag}") }
 
         Log.d(
             TAG,
             "updateSystemTrayIcon() called with: icon = $icon, window = $window, action = $action, title = $title, imageView = $imageView"
         )
 
-        if(action == SYSTEM_TRAY_REQUEST_DOCK && imageView == null){
+        if (action == SYSTEM_TRAY_REQUEST_DOCK && imageView == null) {
             val imageView = ImageView(context)
             imageView.setImageBitmap(icon)
             val sizeInPx = (30 * resources.displayMetrics.density).toInt()
             val params = LinearLayout.LayoutParams(sizeInPx, sizeInPx)
-//            val paddingInPx = (7 * resources.displayMetrics.density).toInt()
-//            imageView.setPadding(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
-//            params.setMargins(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
+            //            val paddingInPx = (7 * resources.displayMetrics.density).toInt()
+            //            imageView.setPadding(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
+            //            params.setMargins(paddingInPx, paddingInPx, paddingInPx, paddingInPx)
             imageView.layoutParams = params
             imageView.scaleType = ImageView.ScaleType.FIT_CENTER
             systemTray?.addView(imageView, 0)
@@ -676,35 +753,40 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 Log.d(TAG, "setOnTouchListener  event:${event}")
                 var detail = BUTTON_PRIMARY
                 var down = event.action == MotionEvent.ACTION_DOWN
-                if(event.action == MotionEvent.ACTION_DOWN){
-                    if(event.buttonState == BUTTON_SECONDARY){
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    if (event.buttonState == BUTTON_SECONDARY) {
                         detail = 3
                     }
-                } else if(event.action == MotionEvent.ACTION_UP){
+                } else if (event.action == MotionEvent.ACTION_UP) {
                     detail = BUTTON_PRIMARY
                     down = false
-                } else if(event.action == MotionEvent.ACTION_CANCEL){
+                } else if (event.action == MotionEvent.ACTION_CANCEL) {
                     detail = 3
                     down = false
                 }
-//                xserverEventInputer?.mouseEvent(0,
-//                    0, detail, down)
+                //                xserverEventInputer?.mouseEvent(0,
+                //                    0, detail, down)
                 false
             }
             imageView.setOnHoverListener(hoverListener)
             imageView.setOnGenericMotionListener { v, event ->
                 Log.d(TAG, "setOnGenericMotionListener, event = $event")
-                if(event.action == MotionEvent.ACTION_HOVER_MOVE){
-                    xserverEventInputer?.mouseEvent(event.rawX.toInt(), event.rawY.toInt(), 0, false)
-                } else if(event.action == MotionEvent.ACTION_BUTTON_PRESS){
+                if (event.action == MotionEvent.ACTION_HOVER_MOVE) {
+                    xserverEventInputer?.mouseEvent(
+                        event.rawX.toInt(),
+                        event.rawY.toInt(),
+                        0,
+                        false
+                    )
+                } else if (event.action == MotionEvent.ACTION_BUTTON_PRESS) {
                     var detail = BUTTON_PRIMARY
-                    if(event.actionButton == BUTTON_SECONDARY){
+                    if (event.actionButton == BUTTON_SECONDARY) {
                         detail = 3
                     }
                     xserverEventInputer?.mouseEvent(0, 0, detail, true)
-                } else if(event.action == MotionEvent.ACTION_BUTTON_RELEASE){
+                } else if (event.action == MotionEvent.ACTION_BUTTON_RELEASE) {
                     var detail = BUTTON_PRIMARY
-                    if(event.actionButton == BUTTON_SECONDARY){
+                    if (event.actionButton == BUTTON_SECONDARY) {
                         detail = 3
                     }
                     xserverEventInputer?.mouseEvent(0, 0, detail, false)
@@ -712,73 +794,88 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 true
             }
             imageView.tooltipText = title
-
-        } else if(action == SYSTEM_TRAY_UNDOCK){
+        } else if (action == SYSTEM_TRAY_UNDOCK) {
             systemTray?.removeView(imageView)
             x11TrayImageViesList.remove(imageView)
         }
-
     }
 
-    fun startSystray(){
+    fun startSystray() {
         startSystray(windowAttr)
     }
 
-    fun startSystray(attr: WindowAttr?){
-        if(attr == null){
+    fun startSystray(attr: WindowAttr?) {
+        if (attr == null) {
             return
         }
         this.windowAttr = attr
-        if(xserverWindowInjector == null){
+        if (xserverWindowInjector == null) {
             return
         }
-        val rect  = attr.rect
+        val rect = attr.rect
         val window = attr.window
         val pwin = attr.pwin
-        val index =  attr.index
+        val index = attr.index
         rect?.let { absoluteRect ->
-            val surfaceView = SurfaceView(context).apply {
-                id = generateViewId()
-                layoutParams = LinearLayout.LayoutParams(
-                    absoluteRect.width() ,
-                    absoluteRect.height()
-                )
-            }
+            val surfaceView =
+                SurfaceView(context).apply {
+                    id = generateViewId()
+                    layoutParams =
+                        LinearLayout.LayoutParams(absoluteRect.width(), absoluteRect.height())
+                }
             systemTray?.addView(surfaceView)
             setupSurfaceView(surfaceView, window, pwin, index, rect)
         }
     }
 
+    private fun setupSurfaceView(
+        surfaceView: SurfaceView,
+        window: Long,
+        pwin: Long,
+        index: Int,
+        rect: Rect
+    ) {
+        surfaceView.holder.addCallback(
+            object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) {
+                    Log.d(TAG, "Surface created for index: $index, window: $window")
+                }
 
-    private fun setupSurfaceView(surfaceView: SurfaceView, window: Long, pwin: Long, index: Int, rect: Rect) {
-        surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                Log.d(TAG, "Surface created for index: $index, window: $window")
-            }
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) {
+                    Log.d(
+                        TAG,
+                        "surfaceChanged for index: $index - $width x $height $xserverWindowInjector"
+                    )
+                    xserverWindowInjector?.windowChanged(
+                        holder.surface,
+                        rect.left.toFloat(),
+                        rect.top.toFloat(),
+                        (rect.right - rect.left).toFloat(),
+                        (rect.bottom - rect.top).toFloat(),
+                        index,
+                        pwin,
+                        window
+                    )
+                }
 
-            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-                Log.d(TAG, "surfaceChanged for index: $index - $width x $height $xserverWindowInjector")
-                xserverWindowInjector?.windowChanged(holder.surface, rect.left.toFloat(),
-                    rect.top.toFloat(), (rect.right - rect.left).toFloat(), (rect.bottom - rect.top).toFloat(),
-                    index, pwin, window)
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
+                    Log.d(TAG, "Surface destroyed for index: $index")
+                }
             }
-
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                Log.d(TAG, "Surface destroyed for index: $index")
-            }
-        })
+        )
     }
 
-    override fun onBatteryChanged(
-        percentage: Float,
-        status: Int,
-        plugged: Int
-    ) {
+    override fun onBatteryChanged(percentage: Float, status: Int, plugged: Int) {
         this.percentage = percentage
         this.status = status
         this.plugged = plugged
 
-        if(batteryBtn == null){
+        if (batteryBtn == null) {
             needUpdateBattery = true
             return
         }
@@ -804,66 +901,84 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             else -> pluggedText = "未充电"
         }
 
-        Log.d("BatteryAnalysis",
-            "电量: " + percentage + "%\n" + batteryBtn + " $batteryBtn " +
-                    "状态: " + statusText + " (代码:" + status + ")\n" +
-                    "充电方式: " + pluggedText + " (代码:" + plugged + ")")
+        Log.d(
+            "BatteryAnalysis",
+            "电量: " +
+                percentage +
+                "%\n" +
+                batteryBtn +
+                " $batteryBtn " +
+                "状态: " +
+                statusText +
+                " (代码:" +
+                status +
+                ")\n" +
+                "充电方式: " +
+                pluggedText +
+                " (代码:" +
+                plugged +
+                ")"
+        )
 
         // 更准确的充电状态判断
-        val charging = when (status) {
-            BatteryManager.BATTERY_STATUS_CHARGING -> true
-            BatteryManager.BATTERY_STATUS_FULL -> true  // 已充满也算充电状态
-            else -> false
-        }
+        val charging =
+            when (status) {
+                BatteryManager.BATTERY_STATUS_CHARGING -> true
+                BatteryManager.BATTERY_STATUS_FULL -> true // 已充满也算充电状态
+                else -> false
+            }
 
         // 如果是未知状态，可以根据 plugged 来判断是否在充电
-        val isActuallyCharging = if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
-            // 未知状态时，通过 plugged 判断
-            val isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC ||
-                    plugged == BatteryManager.BATTERY_PLUGGED_USB ||
-                    plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
-//            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
-            isPlugged
-        } else {
-            charging
-        }
+        val isActuallyCharging =
+            if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+                // 未知状态时，通过 plugged 判断
+                val isPlugged =
+                    plugged == BatteryManager.BATTERY_PLUGGED_AC ||
+                        plugged == BatteryManager.BATTERY_PLUGGED_USB ||
+                        plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+                //            Log.d(TAG, "onBatteryChanged: 未知状态，通过充电方式判断: $isPlugged")
+                isPlugged
+            } else {
+                charging
+            }
 
-        val iconRes = when {
-            isActuallyCharging -> {
-                when {
-                    percentage == 0.0f -> R.drawable.icon_battery_chargeing_0
-                    percentage <= 10.0f -> R.drawable.icon_battery_chargeing_10
-                    percentage <= 20.0f -> R.drawable.icon_battery_chargeing_20
-                    percentage <= 30.0f -> R.drawable.icon_battery_chargeing_30
-                    percentage <= 40.0f -> R.drawable.icon_battery_chargeing_40
-                    percentage <= 50.0f -> R.drawable.icon_battery_chargeing_50
-                    percentage <= 60.0f -> R.drawable.icon_battery_chargeing_60
-                    percentage <= 70.0f -> R.drawable.icon_battery_chargeing_70
-                    percentage <= 80.0f -> R.drawable.icon_battery_chargeing_80
-                    percentage <= 90.0f -> R.drawable.icon_battery_chargeing_90
-                    else -> R.drawable.icon_battery_chargeing_100
+        val iconRes =
+            when {
+                isActuallyCharging -> {
+                    when {
+                        percentage == 0.0f -> R.drawable.icon_battery_chargeing_0
+                        percentage <= 10.0f -> R.drawable.icon_battery_chargeing_10
+                        percentage <= 20.0f -> R.drawable.icon_battery_chargeing_20
+                        percentage <= 30.0f -> R.drawable.icon_battery_chargeing_30
+                        percentage <= 40.0f -> R.drawable.icon_battery_chargeing_40
+                        percentage <= 50.0f -> R.drawable.icon_battery_chargeing_50
+                        percentage <= 60.0f -> R.drawable.icon_battery_chargeing_60
+                        percentage <= 70.0f -> R.drawable.icon_battery_chargeing_70
+                        percentage <= 80.0f -> R.drawable.icon_battery_chargeing_80
+                        percentage <= 90.0f -> R.drawable.icon_battery_chargeing_90
+                        else -> R.drawable.icon_battery_chargeing_100
+                    }
+                }
+                else -> {
+                    when {
+                        percentage == 0.0f -> R.drawable.icon_battery_0
+                        percentage <= 10.0f -> R.drawable.icon_battery_10
+                        percentage <= 20.0f -> R.drawable.icon_battery_20
+                        percentage <= 30.0f -> R.drawable.icon_battery_30
+                        percentage <= 40.0f -> R.drawable.icon_battery_40
+                        percentage <= 50.0f -> R.drawable.icon_battery_50
+                        percentage <= 60.0f -> R.drawable.icon_battery_60
+                        percentage <= 70.0f -> R.drawable.icon_battery_70
+                        percentage <= 80.0f -> R.drawable.icon_battery_80
+                        percentage <= 90.0f -> R.drawable.icon_battery_90
+                        else -> R.drawable.icon_battery_100
+                    }
                 }
             }
-            else -> {
-                when {
-                    percentage == 0.0f -> R.drawable.icon_battery_0
-                    percentage <= 10.0f -> R.drawable.icon_battery_10
-                    percentage <= 20.0f -> R.drawable.icon_battery_20
-                    percentage <= 30.0f -> R.drawable.icon_battery_30
-                    percentage <= 40.0f -> R.drawable.icon_battery_40
-                    percentage <= 50.0f -> R.drawable.icon_battery_50
-                    percentage <= 60.0f -> R.drawable.icon_battery_60
-                    percentage <= 70.0f -> R.drawable.icon_battery_70
-                    percentage <= 80.0f -> R.drawable.icon_battery_80
-                    percentage <= 90.0f -> R.drawable.icon_battery_90
-                    else -> R.drawable.icon_battery_100
-                }
-            }
-        }
         batteryBtn?.setImageResource(iconRes)
-//        var p = 80.0f
+        //        var p = 80.0f
         var tips: CharSequence = "%.0f%%".format(percentage)
-                if(plugged == 0 && status == BatteryManager.BATTERY_STATUS_UNKNOWN){
+        if (plugged == 0 && status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             tips = "AC"
             batteryBtn?.setImageResource(R.drawable.icon_battery_chargeing_100)
         }

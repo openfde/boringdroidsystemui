@@ -2,13 +2,10 @@ package com.boringdroid.systemui.view
 
 import android.graphics.Canvas
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.boringdroid.systemui.R
-
 
 class DockAppItemDecoration(private val classify: AppClassify) : ItemDecoration() {
 
@@ -47,7 +44,7 @@ class DockAppItemDecoration(private val classify: AppClassify) : ItemDecoration(
     }
 
     private fun getDividerSize(position: Int): Int {
-        if(hasDivider(position)){
+        if (hasDivider(position)) {
             return 10
         } else {
             return 0
@@ -73,10 +70,8 @@ class DockAppItemDecoration(private val classify: AppClassify) : ItemDecoration(
 
     interface AppClassify {
 
-        fun classifyPersit():Int
-        fun classifyActive():Int
+        fun classifyPersit(): Int
 
+        fun classifyActive(): Int
     }
 }
-
-

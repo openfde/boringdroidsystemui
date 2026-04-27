@@ -1,6 +1,5 @@
 package com.boringdroid.systemui.data
 
-
 class AudioDevice(
     val physicalName: String,
     val showName: String,

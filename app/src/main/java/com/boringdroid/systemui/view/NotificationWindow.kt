@@ -7,7 +7,6 @@ import android.graphics.Outline
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
-import android.service.notification.StatusBarNotification
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
@@ -38,8 +37,8 @@ class NotificationWindow(
 ) {
     var notifications: Array<DesktopNotification>? = null
     private var shown = false
-    private var windowWidth:Int
-    private var windowHeight:Int
+    private var windowWidth: Int
+    private var windowHeight: Int
     private val windowManager: WindowManager
     private var windowContentView: View? = null
     private var achor: ImageView? = null
@@ -48,12 +47,13 @@ class NotificationWindow(
     private var mEmptyView: View? = null
 
     private var notificationAdapter: SlideNotificationAdapter? = null
-    private val mSpaceDecoration :RecyclerView.ItemDecoration
+    private val mSpaceDecoration: RecyclerView.ItemDecoration
 
     private fun showNotificationView(notificationArray: Array<DesktopNotification>) {
         val height = mContext!!.resources.getDimension(R.dimen.notification_window_height).toInt()
         val layoutParams = generateLayoutParams(mContext, windowManager, height)
-        windowContentView = LayoutInflater.from(mContext).inflate(R.layout.layout_notification_window, null)
+        windowContentView =
+            LayoutInflater.from(mContext).inflate(R.layout.layout_notification_window, null)
         mRecyclerView = windowContentView?.findViewById(R.id.recyclerView_notification)
         cancelAllBtn = windowContentView?.findViewById(R.id.tv_clear)
         mEmptyView = windowContentView?.findViewById(R.id.tv_empty)
@@ -61,18 +61,20 @@ class NotificationWindow(
         notificationAdapter = SlideNotificationAdapter(mContext!!, notifications, listener)
         mRecyclerView?.adapter = notificationAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(mContext)
-        mRecyclerView?.addItemDecoration(mSpaceDecoration);
+        mRecyclerView?.addItemDecoration(mSpaceDecoration)
         val cornerRadius = mContext!!.resources.getDimension(R.dimen.control_center_window_radius)
         val elevation = mContext!!.resources.getInteger(R.integer.control_center_elevation)
         windowContentView!!.elevation = elevation.toFloat()
-        windowContentView!!.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+        windowContentView!!.outlineProvider =
+            object : ViewOutlineProvider() {
+                override fun getOutline(view: View, outline: Outline) {
+                    outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+                }
             }
-        }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
-        val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_X, windowWidth.toFloat(), 0f)
+        val animator =
+            ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_X, windowWidth.toFloat(), 0f)
         animator.duration = NotificationWindow.FADE_DURATION
         animator.interpolator = LinearInterpolator()
         animator.start()
@@ -83,9 +85,7 @@ class NotificationWindow(
             }
             false
         }
-        cancelAllBtn?.setOnClickListener(View.OnClickListener {
-            listener.cancelAllNotifications()
-        })
+        cancelAllBtn?.setOnClickListener(View.OnClickListener { listener.cancelAllNotifications() })
         updateIfNotify(false)
         Utils.setBackgroundBlurRadius(windowContentView!!, 20)
     }
@@ -98,24 +98,23 @@ class NotificationWindow(
         val resources = context!!.resources
         windowWidth = resources.getDimension(R.dimen.notification_window_width).toInt()
         windowHeight = height
-//        windowHeight = resources.getDimension(R.dimen.notification_window_height).toInt()
-        val layoutParams = WindowManager.LayoutParams(
-            windowWidth,
-            windowHeight,
-            WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.RGBA_8888
-        )
+        //        windowHeight = resources.getDimension(R.dimen.notification_window_height).toInt()
+        val layoutParams =
+            WindowManager.LayoutParams(
+                windowWidth,
+                windowHeight,
+                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.RGBA_8888
+            )
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val size = Point()
         windowManager.defaultDisplay.getRealSize(size)
-        val marginStart = resources.getDimension(R.dimen.control_center_window_margin)
-            .toInt()
-        val marginVertical = resources.getDimension(R.dimen.control_center_window_margin)
-            .toInt()
+        val marginStart = resources.getDimension(R.dimen.control_center_window_margin).toInt()
+        val marginVertical = resources.getDimension(R.dimen.control_center_window_margin).toInt()
         layoutParams.gravity = Gravity.TOP or Gravity.RIGHT
         layoutParams.x = marginStart
         layoutParams.y = displayMetrics.heightPixels - windowHeight - marginVertical * 8
@@ -131,10 +130,10 @@ class NotificationWindow(
             state: RecyclerView.State
         ) {
             val position: Int = parent.getChildAdapterPosition(view)
-            if ( position != state.getItemCount() - 1 ) {
-                outRect.set(0,0,0, Utils.dpToPx(context,8))
+            if (position != state.getItemCount() - 1) {
+                outRect.set(0, 0, 0, Utils.dpToPx(context, 8))
             } else {
-                outRect.set(0,0,0, Utils.dpToPx(context,16))
+                outRect.set(0, 0, 0, Utils.dpToPx(context, 16))
             }
         }
     }
@@ -148,10 +147,11 @@ class NotificationWindow(
             return
         } else {
             context?.sendBroadcast(
-                Intent(DynamicReceiver.SERVICE_ACTION).putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
+                Intent(DynamicReceiver.SERVICE_ACTION)
+                    .putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
                     .putExtra("panel_visible", true)
             )
-            showNotificationView(activeNotifications);
+            showNotificationView(activeNotifications)
         }
     }
 
@@ -159,7 +159,13 @@ class NotificationWindow(
         Utils.notificationPanelVisible = false
         achor?.background = null
         achor = null
-        val animator = ObjectAnimator.ofFloat(windowContentView, View.TRANSLATION_X, 0f, windowHeight.toFloat())
+        val animator =
+            ObjectAnimator.ofFloat(
+                windowContentView,
+                View.TRANSLATION_X,
+                0f,
+                windowHeight.toFloat()
+            )
         animator.duration = NotificationWindow.FADE_DURATION
         animator.interpolator = LinearInterpolator()
         animator.start()
@@ -176,13 +182,14 @@ class NotificationWindow(
             shown = false
         }
         context?.sendBroadcast(
-            Intent(DynamicReceiver.SERVICE_ACTION).putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
+            Intent(DynamicReceiver.SERVICE_ACTION)
+                .putExtra("type", DynamicReceiver.TYEP_PANEL_CHANGE_NOTIFY)
                 .putExtra("panel_visible", false)
         )
     }
 
     fun updateIfNotify(boolean: Boolean) {
-        if(notifications.isNullOrEmpty()){
+        if (notifications.isNullOrEmpty()) {
             mRecyclerView?.visibility = View.GONE
             mEmptyView?.visibility = View.VISIBLE
             resizeNotificationWindow(0)
@@ -191,24 +198,24 @@ class NotificationWindow(
             mEmptyView?.visibility = View.GONE
             resizeNotificationWindow(notifications?.size)
         }
-        if(boolean){
+        if (boolean) {
             notificationAdapter?.notifyData(notifications)
         }
     }
 
     private fun resizeNotificationWindow(size: Int?) {
-        if(size!! < 4 ){
+        if (size!! < 4) {
             return
         }
-        if(windowContentView != null){
+        if (windowContentView != null) {
             val height = mContext!!.resources.getDimension(R.dimen.notification_info_height).toInt()
             val space = Utils.dpToPx(mContext, 8)
             val decoration = Utils.dpToPx(mContext, 64)
             var total = (height + space) * size + decoration
-            val margin = mContext!!.resources.getDimension(R.dimen.control_center_window_margin)
-                .toInt() * 2
+            val margin =
+                mContext!!.resources.getDimension(R.dimen.control_center_window_margin).toInt() * 2
             val screenHeight = ScreenSizeUtils.getInstance(mContext).screenHeight - margin
-            if(total > screenHeight) {
+            if (total > screenHeight) {
                 total = screenHeight
             }
             val layoutParams = generateLayoutParams(mContext, windowManager, total)
@@ -218,7 +225,7 @@ class NotificationWindow(
 
     companion object {
         private const val TAG = "NotificationWindow"
-        private const val FADE_DURATION :Long = 120
+        private const val FADE_DURATION: Long = 120
     }
 
     init {
@@ -227,6 +234,4 @@ class NotificationWindow(
         windowHeight = mContext!!.resources.getDimension(R.dimen.notification_window_height).toInt()
         mSpaceDecoration = NotifiDecoration(mContext)
     }
-
-
 }

@@ -21,25 +21,24 @@ import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.utils.IconParserUtilities
 import com.boringdroid.systemui.utils.Utils
 
-
 class SlideNotificationAdapter(
     private val context: Context,
     private val notifications: Array<DesktopNotification>?,
     private val listener: NotificationService?,
-) : RecyclerView.Adapter<SlideNotificationAdapter.ViewHolder>(){
-    var notificationList: ArrayList<DesktopNotification> ? = null
-    var itemClickListener: OnNotificationItemClickListener ? = null
+) : RecyclerView.Adapter<SlideNotificationAdapter.ViewHolder>() {
+    var notificationList: ArrayList<DesktopNotification>? = null
+    var itemClickListener: OnNotificationItemClickListener? = null
     private val actionsHeight = Utils.dpToPx(context, 20)
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val controlInfoLayout = LayoutInflater.from(context)
-            .inflate(R.layout.layout_notification_item, parent, false) as ViewGroup
+        val controlInfoLayout =
+            LayoutInflater.from(context).inflate(R.layout.layout_notification_item, parent, false)
+                as ViewGroup
         return ViewHolder(controlInfoLayout)
     }
 
     override fun getItemCount(): Int {
-        if(notificationList.isNullOrEmpty()){
+        if (notificationList.isNullOrEmpty()) {
             return 0
         }
         return notificationList!!.size
@@ -47,26 +46,24 @@ class SlideNotificationAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val sbn = notificationList?.get(position)
-//        Log.d(TAG, "onBindViewHolder() called with: sbn = $sbn, position = $position")
+        //        Log.d(TAG, "onBindViewHolder() called with: sbn = $sbn, position = $position")
         holder.iconIv.setImageDrawable(
-            IconParserUtilities(context)!!.getPackageThemedIcon(
-                sbn?.packageName
-            )
+            IconParserUtilities(context)!!.getPackageThemedIcon(sbn?.packageName)
         )
         holder.nameTv.text = sbn?.name
-        holder.titleTv.text = sbn?.title //notificationTitle.toString() + p
+        holder.titleTv.text = sbn?.title // notificationTitle.toString() + p
         holder.titleTv.setSingleLine()
-        holder.contentTv.text  =  sbn?.notificationText
+        holder.contentTv.text = sbn?.notificationText
         holder.elapsedTv.text = sbn?.computeElapsedTime
-//        val actions = notification?.actions
+        //        val actions = notification?.actions
         holder.elapsedTv.visibility = View.VISIBLE
         Utils.setBackgroundBlurRadius(holder.root as View, 70)
-        holder.root.setOnClickListener{
+        holder.root.setOnClickListener {
             if (sbn != null) {
                 itemClickListener?.onItemClick(sbn, holder.root)
             }
         }
-        holder.closeIv.setOnClickListener{
+        holder.closeIv.setOnClickListener {
             if (sbn != null) {
                 itemClickListener?.onItemCancelClick(sbn, holder.closeIv)
             }
@@ -75,14 +72,13 @@ class SlideNotificationAdapter(
             when (event.action) {
                 MotionEvent.ACTION_HOVER_EXIT -> {
                     if (isTouchInsideView(event, holder.closeIv)) {
-//                        hoverEnter(view)
+                        //                        hoverEnter(view)
                     } else {
                         hoverExit(view)
                     }
                 }
-                else ->{
+                else -> {
                     hoverEnter(view)
-
                 }
             }
             false
@@ -92,62 +88,59 @@ class SlideNotificationAdapter(
         holder.actions.removeAllViews()
 
         if (actions != null) {
-            val actionLayoutParams = LinearLayout.LayoutParams(
-                WRAP_CONTENT,
-                WRAP_CONTENT,
-            )
+            val actionLayoutParams =
+                LinearLayout.LayoutParams(
+                    WRAP_CONTENT,
+                    WRAP_CONTENT,
+                )
             actionLayoutParams.marginStart = Utils.dpToPx(context, 10)
             actionLayoutParams.weight = 1f
-//            if (isMediaNotification(sbn)) {
-//                for (action in actions) {
-//                    val actionIv = ImageView(context)
-//                    val resources = context.packageManager
-//                        .getResourcesForApplication(sbn.packageName)
-//                    val drawable = resources.getDrawable(
-//                        resources.getIdentifier(
-//                            action.icon.toString() + "",
-//                            "drawable",
-//                            sbn.packageName
-//                        )
-//                    )
-//                    drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
-//                    actionIv.setImageDrawable(drawable)
-//                    actionIv.setOnClickListener {
-//                        try {
-//                            action.actionIntent.send()
-//                            itemClickListener?.onItemClick(sbn, holder.root)
-//                        } catch (_: CanceledException) {
-//                        }
-//                    }
-//                    holder.actions.addView(actionIv, actionLayoutParams)
-//                }
-//            } else {
+            //            if (isMediaNotification(sbn)) {
+            //                for (action in actions) {
+            //                    val actionIv = ImageView(context)
+            //                    val resources = context.packageManager
+            //                        .getResourcesForApplication(sbn.packageName)
+            //                    val drawable = resources.getDrawable(
+            //                        resources.getIdentifier(
+            //                            action.icon.toString() + "",
+            //                            "drawable",
+            //                            sbn.packageName
+            //                        )
+            //                    )
+            //                    drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+            //                    actionIv.setImageDrawable(drawable)
+            //                    actionIv.setOnClickListener {
+            //                        try {
+            //                            action.actionIntent.send()
+            //                            itemClickListener?.onItemClick(sbn, holder.root)
+            //                        } catch (_: CanceledException) {
+            //                        }
+            //                    }
+            //                    holder.actions.addView(actionIv, actionLayoutParams)
+            //                }
+            //            } else {
             for (action in actions) {
                 val actionTv = TextView(context)
                 actionTv.setTextColor(context.getColor(R.color.notification_text_color))
                 actionTv.isSingleLine = true
                 actionTv.text = action.title
 
-                val params = ViewGroup.LayoutParams(
-                    WRAP_CONTENT,
-                    WRAP_CONTENT
-                )
+                val params = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
                 actionTv.layoutParams = params
-                actionTv.setTypeface(Typeface.DEFAULT_BOLD); // 使用系统默认加粗字体
+                actionTv.setTypeface(Typeface.DEFAULT_BOLD)
+                // 使用系统默认加粗字体
                 actionTv.setOnClickListener {
                     try {
                         action.actionIntent.send()
-//                        itemClickListener?.onItemClick(sbn, holder.root)
+                        //                        itemClickListener?.onItemClick(sbn, holder.root)
                         itemClickListener?.onItemClick(sbn, holder.root, action.title.toString())
-                    } catch (_: CanceledException) {
-                    }
+                    } catch (_: CanceledException) {}
                 }
                 holder.actions.addView(actionTv, actionLayoutParams)
             }
-//            }
+            //            }
         }
     }
-
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
@@ -157,31 +150,32 @@ class SlideNotificationAdapter(
     private fun isTouchInsideView(event: MotionEvent, view: View): Boolean {
         val x = event.x
         val y = event.y
-        // seams event hover not work in background drawable state hover, must in  onGenericMotion and it should conflict with view include itself when child is a buttom
-        return x >= 320 && x <= 360  && y >= 0 && y <= 36
+        // seams event hover not work in background drawable state hover, must in  onGenericMotion
+        // and it should conflict with view include itself when child is a buttom
+        return x >= 320 && x <= 360 && y >= 0 && y <= 36
     }
 
-    val hoverListener = View.OnHoverListener { v, event ->
-        val what = event?.action
-        Log.d(TAG, "null() called with: v = $v, event = $event")
-        when (what) {
-            MotionEvent.ACTION_HOVER_ENTER -> {
-                hoverEnter(v)
+    val hoverListener =
+        View.OnHoverListener { v, event ->
+            val what = event?.action
+            Log.d(TAG, "null() called with: v = $v, event = $event")
+            when (what) {
+                MotionEvent.ACTION_HOVER_ENTER -> {
+                    hoverEnter(v)
+                }
+                MotionEvent.ACTION_HOVER_EXIT -> {
+                    event.x < v.x + v.width - 5
+                    hoverExit(v)
+                }
             }
-
-            MotionEvent.ACTION_HOVER_EXIT -> {
-                event.x < v.x + v.width - 5
-                hoverExit(v)
-            }
+            false
         }
-        false
-    }
-    val closeHoverListener = View.OnHoverListener { v, event ->
-        val viewGroup = v.parent as ViewGroup
-        hoverEnter(viewGroup)
-        false
-    }
-
+    val closeHoverListener =
+        View.OnHoverListener { v, event ->
+            val viewGroup = v.parent as ViewGroup
+            hoverEnter(viewGroup)
+            false
+        }
 
     private fun hoverExit(v: View?) {
         v?.setBackgroundResource(R.drawable.round_rect_10dp_bf)
@@ -201,11 +195,13 @@ class SlideNotificationAdapter(
 
     interface OnNotificationClickListener {
         fun onNotificationClicked(notification: StatusBarNotification, item: View?)
+
         fun onNotificationLongClicked(notification: StatusBarNotification?, item: View?)
+
         fun onNotificationCancelClicked(notification: StatusBarNotification, item: View?)
     }
 
-    class ViewHolder( appInfoLayout: ViewGroup)  : RecyclerView.ViewHolder(appInfoLayout){
+    class ViewHolder(appInfoLayout: ViewGroup) : RecyclerView.ViewHolder(appInfoLayout) {
 
         val iconIv: ImageView = appInfoLayout.findViewById(R.id.image_icon)!!
         val nameTv: TextView = appInfoLayout.findViewById(R.id.tv_name)!!
@@ -217,56 +213,50 @@ class SlideNotificationAdapter(
         val rootBlur: ViewGroup = appInfoLayout.findViewById(R.id.root_blur)!!
         val actions: ViewGroup = appInfoLayout.findViewById(R.id.notification_actions_layout)!!
 
-
-        fun bind(notification: StatusBarNotification,
-                 listener: NotificationService) {
+        fun bind(notification: StatusBarNotification, listener: NotificationService) {
             itemView.setOnClickListener { v: View? ->
-                listener.onNotificationClicked(
-                    notification,
-                    v
-                )
+                listener.onNotificationClicked(notification, v)
             }
             itemView.setOnLongClickListener { v: View? ->
                 listener.onNotificationLongClicked(notification, v)
                 true
             }
 
-            val closeHoverListener = object :View.OnHoverListener {
-                override fun onHover(v: View?, event: MotionEvent?): Boolean {
-                    val what = event?.action
-                    when (what) {
-                        MotionEvent.ACTION_HOVER_ENTER -> {
-                            closeIv.background = itemView.context.resources.getDrawable(R.drawable.gray_circle)
+            val closeHoverListener =
+                object : View.OnHoverListener {
+                    override fun onHover(v: View?, event: MotionEvent?): Boolean {
+                        val what = event?.action
+                        when (what) {
+                            MotionEvent.ACTION_HOVER_ENTER -> {
+                                closeIv.background =
+                                    itemView.context.resources.getDrawable(R.drawable.gray_circle)
+                            }
+                            MotionEvent.ACTION_HOVER_EXIT -> {
+                                closeIv.background = null
+                            }
                         }
-
-                        MotionEvent.ACTION_HOVER_EXIT -> {
-                            closeIv.background = null
-                        }
+                        return false
                     }
-                    return false
                 }
-            }
-//            closeIv.setOnHoverListener(closeHoverListener)
-            closeIv.setOnClickListener {
-                listener.cancelNotification(notification.key)
-            }
-            if(notification.isClearable){
+            //            closeIv.setOnHoverListener(closeHoverListener)
+            closeIv.setOnClickListener { listener.cancelNotification(notification.key) }
+            if (notification.isClearable) {
                 closeIv.visibility = View.VISIBLE
-            }else{
+            } else {
                 closeIv.visibility = View.GONE
             }
         }
     }
 
     fun notifyData(notifications: Array<DesktopNotification>?) {
-        if(!notifications.isNullOrEmpty()){
+        if (!notifications.isNullOrEmpty()) {
             val toMutableList = notifications?.toMutableList()
             notificationList?.clear()
             if (toMutableList != null) {
                 notificationList?.addAll(toMutableList)
-//                for(i in 1..5){
-//                    notificationList?.addAll(toMutableList)
-//                }
+                //                for(i in 1..5){
+                //                    notificationList?.addAll(toMutableList)
+                //                }
             }
             notificationList?.stream()?.sorted { o1, o2 ->
                 (o1?.postTime ?: 0L).compareTo(o2?.postTime ?: 0L)
@@ -288,7 +278,7 @@ class SlideNotificationAdapter(
 interface OnNotificationItemClickListener {
     fun onItemClick(sbn: DesktopNotification, item: View?)
 
-    fun onItemClick(sbn: DesktopNotification, item: View?, action:String)
+    fun onItemClick(sbn: DesktopNotification, item: View?, action: String)
 
     fun onItemCancelClick(sbn: DesktopNotification, item: View?)
 }

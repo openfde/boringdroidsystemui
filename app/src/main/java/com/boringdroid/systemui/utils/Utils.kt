@@ -12,9 +12,9 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.media.AudioSystem
-import android.net.Uri
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
@@ -32,13 +32,12 @@ import com.boringdroid.systemui.view.TopBarControlWindow
 import com.boringdroid.systemui.view.TopBarVolumeWindow
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import net.sourceforge.pinyin4j.PinyinHelper
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
-
+import net.sourceforge.pinyin4j.PinyinHelper
 
 object Utils {
 
@@ -49,21 +48,23 @@ object Utils {
     @JvmField var shouldPlayChargeComplete = false
     @JvmField var volumeCenterWindowVisible = false
     @JvmField var imeSwitchWindoVisible = false
-    @JvmField
-    var linuxRootPath:String ?= null
+    @JvmField var linuxRootPath: String? = null
 
-    const val ALL_INVISIBLE:Int = 0x1111
-    const val NOTIFICATION_VISIBLE:Int = 1
-    const val ALLAPPWINDOW_VISIBLE:Int = 2
-    const val CONTROLCENTERWINDOW_VISIBLE:Int = 4
-    const val WIFIWINDOW_VISIBLE:Int = 8
-    const val VOLUMECENTERWINDOW_VISIBLE : Int = 16
-    const val IMESWITCHWINDOW_VISIBLE : Int = 32
+    const val ALL_INVISIBLE: Int = 0x1111
+    const val NOTIFICATION_VISIBLE: Int = 1
+    const val ALLAPPWINDOW_VISIBLE: Int = 2
+    const val CONTROLCENTERWINDOW_VISIBLE: Int = 4
+    const val WIFIWINDOW_VISIBLE: Int = 8
+    const val VOLUMECENTERWINDOW_VISIBLE: Int = 16
+    const val IMESWITCHWINDOW_VISIBLE: Int = 32
     const val TAG = "Utils"
     const val CLASS_NAME: String = "android.os.SystemProperties"
 
-    @JvmStatic fun makeWindowParams(
-        width: Int, height: Int, context: Context,
+    @JvmStatic
+    fun makeWindowParams(
+        width: Int,
+        height: Int,
+        context: Context,
         preferLastDisplay: Boolean
     ): WindowManager.LayoutParams? {
         val displayWidth = DeviceUtils.getDisplayMetrics(context, preferLastDisplay).widthPixels
@@ -72,17 +73,22 @@ object Utils {
         layoutParams.format = PixelFormat.TRANSLUCENT
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         layoutParams.type =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE
         layoutParams.width = Math.min(displayWidth, width)
         layoutParams.height = Math.min(displayHeight, height)
         return layoutParams
     }
-    @JvmStatic fun isX11App(packageName: String, topActivity: ComponentName?): Boolean {
-        return TextUtils.equals(PACKAGE_X11, packageName)
-                && (topActivity?.className?.contains("MainActivity") ?: false)
+
+    @JvmStatic
+    fun isX11App(packageName: String, topActivity: ComponentName?): Boolean {
+        return TextUtils.equals(PACKAGE_X11, packageName) &&
+            (topActivity?.className?.contains("MainActivity") ?: false)
     }
 
-    @JvmStatic fun isLauncher(context: Context, componentName: ComponentName?): Boolean {
+    @JvmStatic
+    fun isLauncher(context: Context, componentName: ComponentName?): Boolean {
         if (componentName == null) {
             return false
         }
@@ -103,7 +109,8 @@ object Utils {
         return false
     }
 
-    @JvmStatic fun getLinuxRootFileName(context: Context) {
+    @JvmStatic
+    fun getLinuxRootFileName(context: Context) {
         try {
             val file = File("/volumes/.fde_path_key")
             if (!file.exists()) {
@@ -122,20 +129,18 @@ object Utils {
     }
 
     data class VolumeInfo(
-        @SerializedName("UUID")
-        val uuid: String,
-        @SerializedName("Path")
-        val path: String
+        @SerializedName("UUID") val uuid: String,
+        @SerializedName("Path") val path: String
     )
 
     /**
      * 获取Android大版本号（数字）
+     *
      * @return 大版本号，如 14、13、12 等
      */
     fun getMajorVersion(): Int {
         // 根据API Level判断大版本
         val apiLevel = Build.VERSION.SDK_INT
-
 
         // API Level与大版本对应关系（持续更新）
         if (apiLevel >= 34) {
@@ -191,8 +196,6 @@ object Utils {
         }
     }
 
-
-
     @JvmStatic
     fun getPinyin(chinese: String): String {
         val pinyin = StringBuilder()
@@ -210,34 +213,30 @@ object Utils {
             }
         }
         val toString = pinyin.toString()
-//        Log.d(TAG, "getPinyin() called with: chinese = $chinese  返回:${toString}")
+        //        Log.d(TAG, "getPinyin() called with: chinese = $chinese  返回:${toString}")
         return toString
     }
 
-    /**
-     * 移除拼音中的声调数字
-     * 例如：zhong1 → zhong, lv3 → lv
-     */
+    /** 移除拼音中的声调数字 例如：zhong1 → zhong, lv3 → lv */
     private fun removeToneNumber(pinyinWithTone: String): String {
         // 匹配结尾的数字 0-5（Pinyin4j 使用 1-5 表示声调，0 表示轻声）
         return pinyinWithTone.replace(Regex("[0-5]$"), "")
     }
 
-    /**
-     * 或者更彻底的版本，移除所有数字
-     */
+    /** 或者更彻底的版本，移除所有数字 */
     private fun removeToneNumberV2(pinyinWithTone: String): String {
         return pinyinWithTone.filterNot { it.isDigit() }
     }
 
     @TargetApi(value = 31)
-    @JvmStatic fun setBackgroundBlurRadius(view: View?, radius: Int) {
+    @JvmStatic
+    fun setBackgroundBlurRadius(view: View?, radius: Int) {
         if (view == null) {
             return
         }
-        var target : ViewParent ?= view.parent
-        while (target != null){
-            if(target is ViewRootImpl){
+        var target: ViewParent? = view.parent
+        while (target != null) {
+            if (target is ViewRootImpl) {
                 break
             }
             target = target.parent
@@ -254,13 +253,14 @@ object Utils {
     }
 
     @TargetApi(value = 31)
-    @JvmStatic fun setBackgroundBlurRadius(view: View?, radius: Int, cornerRadius: Float) {
+    @JvmStatic
+    fun setBackgroundBlurRadius(view: View?, radius: Int, cornerRadius: Float) {
         if (view == null) {
             return
         }
-        var target : ViewParent ?= view.parent
-        while (target != null){
-            if(target is ViewRootImpl){
+        var target: ViewParent? = view.parent
+        while (target != null) {
+            if (target is ViewRootImpl) {
                 break
             }
             target = target.parent
@@ -276,44 +276,51 @@ object Utils {
         }
     }
 
-    @JvmStatic fun makeWindowParams(width: Int, height: Int): WindowManager.LayoutParams? {
+    @JvmStatic
+    fun makeWindowParams(width: Int, height: Int): WindowManager.LayoutParams? {
         val layoutParams = WindowManager.LayoutParams()
         layoutParams.format = PixelFormat.TRANSLUCENT
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         layoutParams.type =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE
         layoutParams.width = width
         layoutParams.height = height
         return layoutParams
     }
 
-
-    @JvmStatic fun toggleBuiltinNavigation(editor: SharedPreferences.Editor, value: Boolean) {
+    @JvmStatic
+    fun toggleBuiltinNavigation(editor: SharedPreferences.Editor, value: Boolean) {
         editor.putBoolean("enable_nav_back", value)
         editor.putBoolean("enable_nav_home", value)
         editor.putBoolean("enable_nav_recents", value)
         editor.commit()
     }
 
-    @JvmStatic fun dpToPx(context: Context, dp: Int): Int {
+    @JvmStatic
+    fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
     }
 
-    @JvmStatic fun sendKeyCode(keyCode: Int) {
+    @JvmStatic
+    fun sendKeyCode(keyCode: Int) {
         object : Thread() {
-            override fun run() {
-                try {
-                    sleep(400)
-                    val inst = Instrumentation()
-                    inst.sendKeyDownUpSync(keyCode)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                override fun run() {
+                    try {
+                        sleep(400)
+                        val inst = Instrumentation()
+                        inst.sendKeyDownUpSync(keyCode)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
-        }.start()
+            .start()
     }
 
-    @JvmStatic fun parseAudioDevice(result:String, typeInput:Boolean): ArrayList<AudioDevice>{
+    @JvmStatic
+    fun parseAudioDevice(result: String, typeInput: Boolean): ArrayList<AudioDevice> {
         val devicesResult = AudioSystem.getDevs(typeInput)
         val audioDeviceList = ArrayList<AudioDevice>()
 
@@ -329,7 +336,8 @@ object Utils {
         return audioDeviceList
     }
 
-    @JvmStatic fun parseDevice(result: String, type: Boolean, isSelected: Boolean): AudioDevice? {
+    @JvmStatic
+    fun parseDevice(result: String, type: Boolean, isSelected: Boolean): AudioDevice? {
         try {
             val deviceInfo = result.split('=')
             val audioDevice = AudioDevice(deviceInfo[0], deviceInfo[1], type, isSelected)
@@ -341,7 +349,10 @@ object Utils {
             }
             return audioDevice
         } catch (e: Exception) {
-            com.boringdroid.systemui.Log.e(TopBarControlWindow.TAG, "parseDevs exception: ${e.message}")
+            com.boringdroid.systemui.Log.e(
+                TopBarControlWindow.TAG,
+                "parseDevs exception: ${e.message}"
+            )
             return null
         }
     }
@@ -350,13 +361,14 @@ object Utils {
         val downTime = SystemClock.uptimeMillis()
         val eventTime = SystemClock.uptimeMillis()
 
-        val keyEvent = KeyEvent(
-            downTime,
-            eventTime,
-            action,
-            keyCode,
-            0 // repeat count
-        )
+        val keyEvent =
+            KeyEvent(
+                downTime,
+                eventTime,
+                action,
+                keyCode,
+                0 // repeat count
+            )
 
         // 使用 Instrumentation 发送按键事件（需要 INJECT_EVENTS 权限）
         Instrumentation().sendKeySync(keyEvent)
@@ -365,38 +377,39 @@ object Utils {
     fun drawableToBitmap(drawable: Drawable): Bitmap? {
         val width = drawable.intrinsicWidth
         val height = drawable.intrinsicHeight
-        val bitmap = Bitmap.createBitmap(
-            width,
-            height,
-            if (drawable.opacity != PixelFormat.OPAQUE) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
-        )
+        val bitmap =
+            Bitmap.createBitmap(
+                width,
+                height,
+                if (drawable.opacity != PixelFormat.OPAQUE) Bitmap.Config.ARGB_8888
+                else Bitmap.Config.RGB_565
+            )
         val canvas = Canvas(bitmap)
-        //canvas.drawColor(0xff33B5E5);
+        // canvas.drawColor(0xff33B5E5);
         drawable.setBounds(0, 0, width, height)
         drawable.draw(canvas)
         return bitmap
     }
 
-    fun computeElapsedTime(postTime: Long, currentTimeMillis: Long, context:Context): String {
+    fun computeElapsedTime(postTime: Long, currentTimeMillis: Long, context: Context): String {
         val diffInMillis: Long = currentTimeMillis - postTime
         val days: Long = TimeUnit.MILLISECONDS.toDays(diffInMillis)
         val hours: Long = TimeUnit.MILLISECONDS.toHours(diffInMillis) % 24
         val minutes: Long = TimeUnit.MILLISECONDS.toMinutes(diffInMillis) % 60
         val seconds: Long = TimeUnit.MILLISECONDS.toSeconds(diffInMillis) % 60
-        if(days != 0L){
+        if (days != 0L) {
             return "${days}" + context.getString(R.string.days)
         }
 
-        if(hours != 0L){
+        if (hours != 0L) {
             return "${hours}" + context.getString(R.string.hours)
         }
 
-        if(minutes > 3L){
-            return "${minutes}"+ context.getString(R.string.minute)
+        if (minutes > 3L) {
+            return "${minutes}" + context.getString(R.string.minute)
         }
 
         return context.getString(R.string.just_now)
-
     }
 
     fun getScreenBrightness(context: Context): Int {
@@ -425,10 +438,11 @@ object Utils {
             )
         } else {
             // 无权限，引导用户去设置页授权
-            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                data = Uri.parse("package:${context.packageName}")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
+            val intent =
+                Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
             context.startActivity(intent)
         }
     }
@@ -457,9 +471,10 @@ object Utils {
         if (connectivityManager != null) {
             val capabilities: NetworkCapabilities? =
                 connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork())
-            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || capabilities.hasTransport(
-                NetworkCapabilities.TRANSPORT_CELLULAR
-            ) || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+            return capabilities != null &&
+                (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
         }
         return false
     }

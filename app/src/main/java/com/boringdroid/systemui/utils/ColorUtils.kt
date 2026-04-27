@@ -11,17 +11,16 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.google.android.material.color.DynamicColors
-import com.boringdroid.systemui.R
 
 object ColorUtils {
     fun getWallpaperColors(context: Context?): ArrayList<String> {
         val wallpaperColors = ArrayList<String>()
         /*
-		 Generate Wallpaper colors based on light and dark variation
-		 Accomplished by inspecting pixels in Wallpaper Bitmap without AndroidX palette library
-		 You will want to use a factor less than 1.0f to darken. try 0.8f.
-		
-		 */if (DeviceUtils.hasStoragePermission(context)) {
+        Generate Wallpaper colors based on light and dark variation
+        Accomplished by inspecting pixels in Wallpaper Bitmap without AndroidX palette library
+        You will want to use a factor less than 1.0f to darken. try 0.8f.
+
+        */ if (DeviceUtils.hasStoragePermission(context)) {
             val wallpaperManager = WallpaperManager.getInstance(context)
             val wallpaperDrawable = wallpaperManager.drawable
             wallpaperDrawable?.mutate()
@@ -38,15 +37,17 @@ object ColorUtils {
 
     fun getThemeColors(context: Context?, forceDark: Boolean): IntArray {
         val colors = IntArray(3)
-//        val variant =
-//            if (forceDark) R.style.ThemeOverlay_Material3_DynamicColors_Dark else R.style.ThemeOverlay_Material3_DynamicColors_DayNight
-//        val styledContext = DynamicColors.wrapContextIfAvailable(context!!, variant)
-//        val attrsToResolve = intArrayOf(R.attr.colorPrimary, R.attr.colorSurface, R.attr.colorError)
-//        val attrs = styledContext.obtainStyledAttributes(attrsToResolve)
-//        colors[0] = attrs.getColor(0, 0)
-//        colors[1] = attrs.getColor(1, 0)
-//        colors[2] = attrs.getColor(2, 0)
-//        attrs.recycle()
+        //        val variant =
+        //            if (forceDark) R.style.ThemeOverlay_Material3_DynamicColors_Dark else
+        // R.style.ThemeOverlay_Material3_DynamicColors_DayNight
+        //        val styledContext = DynamicColors.wrapContextIfAvailable(context!!, variant)
+        //        val attrsToResolve = intArrayOf(R.attr.colorPrimary, R.attr.colorSurface,
+        // R.attr.colorError)
+        //        val attrs = styledContext.obtainStyledAttributes(attrsToResolve)
+        //        colors[0] = attrs.getColor(0, 0)
+        //        colors[1] = attrs.getColor(1, 0)
+        //        colors[2] = attrs.getColor(2, 0)
+        //        attrs.recycle()
         return colors
     }
 
@@ -77,18 +78,20 @@ object ColorUtils {
                 return bitmapDrawable.bitmap
             }
         }
-        bitmap = if (drawable!!.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-            Bitmap.createBitmap(
-                1,
-                1,
-                Bitmap.Config.ARGB_8888
-            ) // Single color bitmap will be created of 1x1 pixel
-        } else {
-            Bitmap.createBitmap(
-                drawable.intrinsicWidth, drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-        }
+        bitmap =
+            if (drawable!!.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+                Bitmap.createBitmap(
+                    1,
+                    1,
+                    Bitmap.Config.ARGB_8888
+                ) // Single color bitmap will be created of 1x1 pixel
+            } else {
+                Bitmap.createBitmap(
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+                )
+            }
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
@@ -110,27 +113,24 @@ object ColorUtils {
                 mainColor = Color.parseColor("#212121")
                 secondaryColor = manipulateColor(mainColor, 1.35f)
             }
-
             "black" -> {
                 mainColor = Color.parseColor("#060606")
                 secondaryColor = manipulateColor(mainColor, 2.2f)
             }
-
             "transparent" -> {
                 mainColor = Color.parseColor("#050505")
                 secondaryColor = manipulateColor(mainColor, 2f)
                 alpha = 225
             }
-
-            "material_u" -> if (DynamicColors.isDynamicColorAvailable()) {
-                val surfaceColor = getThemeColors(context, true)[1]
-                mainColor = manipulateColor(surfaceColor, 0.9f)
-                secondaryColor = manipulateColor(surfaceColor, 1.2f)
-            } else {
-                mainColor = Color.parseColor(getWallpaperColors(context)[2])
-                secondaryColor = Color.parseColor(getWallpaperColors(context)[1])
-            }
-
+            "material_u" ->
+                if (DynamicColors.isDynamicColorAvailable()) {
+                    val surfaceColor = getThemeColors(context, true)[1]
+                    mainColor = manipulateColor(surfaceColor, 0.9f)
+                    secondaryColor = manipulateColor(surfaceColor, 1.2f)
+                } else {
+                    mainColor = Color.parseColor(getWallpaperColors(context)[2])
+                    secondaryColor = Color.parseColor(getWallpaperColors(context)[1])
+                }
             "custom" -> {
                 mainColor = Color.parseColor(sp.getString("theme_main_color", "#212121"))
                 secondaryColor = manipulateColor(mainColor, 1.2f)
@@ -141,12 +141,10 @@ object ColorUtils {
         colors[1] = alpha
         colors[2] = secondaryColor
         if (alpha < 255) alpha -= (alpha * 0.60).toInt()
-        //secondary color alpha
+        // secondary color alpha
         colors[3] = alpha
-        //separator color
-        colors[4] = if (theme == "black") colors[2] else manipulateColor(
-            colors[0], 0.8f
-        )
+        // separator color
+        colors[4] = if (theme == "black") colors[2] else manipulateColor(colors[0], 0.8f)
         return colors
     }
 

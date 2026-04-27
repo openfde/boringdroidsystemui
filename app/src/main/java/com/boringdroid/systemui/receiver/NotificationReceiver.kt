@@ -4,48 +4,51 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.boringdroid.systemui.data.DesktopNotification
 
-class NotificationReceiver(private val listener: NotificationUpdater)
-    : BroadcastReceiver() {
+class NotificationReceiver(private val listener: NotificationUpdater) : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onReceive(context: Context?, intent: Intent?) {
-//        Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
+        //        Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
         val type = intent?.getIntExtra(NOTIFI_ACTION_TYPE_KEY, 0)
         var notifications: Array<DesktopNotification>? = null
-            try {
-                notifications =   intent?.getParcelableArrayExtra(NOTIFICATION_LIST_KEY, DesktopNotification::class.java)
-            } catch (e: Exception){
-                Log.e(TAG, "onReceive: $e")
-            }
-        val notification: DesktopNotification? = intent?.getParcelableExtra(NOTIFICATION_KEY, DesktopNotification::class.java)
+        try {
+            notifications =
+                intent?.getParcelableArrayExtra(
+                    NOTIFICATION_LIST_KEY,
+                    DesktopNotification::class.java
+                )
+        } catch (e: Exception) {
+            Log.e(TAG, "onReceive: $e")
+        }
+        val notification: DesktopNotification? =
+            intent?.getParcelableExtra(NOTIFICATION_KEY, DesktopNotification::class.java)
 
-        when(type){
-            NOTIFI_ACTION_CREATE->{
+        when (type) {
+            NOTIFI_ACTION_CREATE -> {
                 listener.updateState(ACTIONTYPE.NOTIFI_ACTION_CREATE, notifications)
             }
-            NOTIFI_ACTION_CONNECT->{
+            NOTIFI_ACTION_CONNECT -> {
                 listener.updateState(ACTIONTYPE.NOTIFI_ACTION_CONNECT, notifications)
             }
-            NOTIFI_ACTION_DISCONNECT ->{
+            NOTIFI_ACTION_DISCONNECT -> {
                 listener.updateState(ACTIONTYPE.NOTIFI_ACTION_DISCONNECT, notifications)
             }
-            NOTIFI_ACTION_UPDATE_COUNT->{
+            NOTIFI_ACTION_UPDATE_COUNT -> {
                 listener.updateCount(ACTIONTYPE.NOTIFI_ACTION_UPDATE_COUNT, notifications)
             }
-            NOTIFI_ACTION_LONG_CLICK->{
+            NOTIFI_ACTION_LONG_CLICK -> {
                 listener.updateClick(ACTIONTYPE.NOTIFI_ACTION_LONG_CLICK, notification)
             }
-            NOTIFI_ACTION_CANCEL_CLICK->{
+            NOTIFI_ACTION_CANCEL_CLICK -> {
                 listener.updateClick(ACTIONTYPE.NOTIFI_ACTION_CANCEL_CLICK, notification)
             }
-            NOTIFI_ACTION_REMOVE->{
+            NOTIFI_ACTION_REMOVE -> {
                 listener.updateClick(ACTIONTYPE.NOTIFI_ACTION_REMOVE, notification)
             }
-            NOTIFI_ACTION_POST->{
+            NOTIFI_ACTION_POST -> {
                 listener.postNotification(notification)
             }
         }
@@ -73,24 +76,37 @@ class NotificationReceiver(private val listener: NotificationUpdater)
 
     sealed class ACTIONTYPE {
         object NOTIFI_ACTION_CREATE : ACTIONTYPE()
+
         object NOTIFI_ACTION_CONNECT : ACTIONTYPE()
+
         object NOTIFI_ACTION_DISCONNECT : ACTIONTYPE()
+
         object NOTIFI_ACTION_UPDATE_COUNT : ACTIONTYPE()
+
         object NOTIFI_ACTION_LONG_CLICK : ACTIONTYPE()
+
         object NOTIFI_ACTION_CANCEL_CLICK : ACTIONTYPE()
+
         object NOTIFI_ACTION_REMOVE : ACTIONTYPE()
 
         override fun toString(): String {
-            return this::class.simpleName?:"Unknow"
+            return this::class.simpleName ?: "Unknow"
         }
     }
-
 }
 
 interface NotificationUpdater {
-    fun updateState(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?)
-    fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?)
-    fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: DesktopNotification?)
-    fun postNotification(notification: DesktopNotification?)
+    fun updateState(
+        type: NotificationReceiver.ACTIONTYPE,
+        notifications: Array<DesktopNotification>?
+    )
 
+    fun updateCount(
+        type: NotificationReceiver.ACTIONTYPE,
+        notifications: Array<DesktopNotification>?
+    )
+
+    fun updateClick(type: NotificationReceiver.ACTIONTYPE, notification: DesktopNotification?)
+
+    fun postNotification(notification: DesktopNotification?)
 }

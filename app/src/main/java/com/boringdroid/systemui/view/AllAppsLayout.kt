@@ -12,7 +12,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
@@ -29,7 +28,7 @@ constructor(
     private lateinit var appsWindow: AllAppsWindow
 
     fun setData(apps: List<AppData?>?) {
-//        Log.d(TAG, "setData() called with: apps = $apps")
+        //        Log.d(TAG, "setData() called with: apps = $apps")
         appListAdapter.setData(apps)
         appListAdapter.notifyDataSetChanged()
     }
@@ -47,14 +46,14 @@ constructor(
         Adapter<AppListAdapter.ViewHolder>() {
         private val apps: MutableList<AppData?> = ArrayList()
         private var handler: Handler? = null
-        private var appsWindow: AllAppsWindow?= null
-
+        private var appsWindow: AllAppsWindow? = null
 
         override fun onCreateViewHolder(
             parent: ViewGroup,
             viewType: Int,
         ): ViewHolder {
-//            Log.d(TAG, "onCreateViewHolder() called with: parent = $parent, viewType = $viewType")
+            //            Log.d(TAG, "onCreateViewHolder() called with: parent = $parent, viewType =
+            // $viewType")
             val appInfoLayout =
                 LayoutInflater.from(context).inflate(R.layout.layout_app_info, parent, false)
                     as ViewGroup
@@ -69,30 +68,31 @@ constructor(
             holder: ViewHolder,
             position: Int,
         ) {
-//            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position = $position")
+            //            Log.d(TAG, "onBindViewHolder() called with: holder = $holder, position =
+            // $position")
             val appData = apps[position]
             holder.iconIV?.setImageDrawable(appData!!.icon)
             holder.nameTV?.text = appData?.name
 
-
-//            holder.clickView?.setListener(RightClickView.RightClickListener {
-//                if (it) {
-////                    showUserContextMenu(holder.clickView, appData)
-//                } else {
-//                    val intent = Intent()
-//                    intent.component = appData?.componentName
-//                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                    context.startActivity(intent)
-//                    if (handler != null) {
-//                        handler!!.sendEmptyMessage(com.boringdroid.systemui.constant.HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
-//                    } else {
-//                        com.boringdroid.systemui.Log.e(
-//                            TAG,
-//                            "Won't send dismiss event because of handler is null"
-//                        )
-//                    }
-//                }
-//            })
+            //            holder.clickView?.setListener(RightClickView.RightClickListener {
+            //                if (it) {
+            ////                    showUserContextMenu(holder.clickView, appData)
+            //                } else {
+            //                    val intent = Intent()
+            //                    intent.component = appData?.componentName
+            //                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            //                    context.startActivity(intent)
+            //                    if (handler != null) {
+            //
+            // handler!!.sendEmptyMessage(com.boringdroid.systemui.constant.HandlerConstant.H_DISMISS_ALL_APPS_WINDOW)
+            //                    } else {
+            //                        com.boringdroid.systemui.Log.e(
+            //                            TAG,
+            //                            "Won't send dismiss event because of handler is null"
+            //                        )
+            //                    }
+            //                }
+            //            })
 
             holder.appInfoLayout.setOnClickListener {
                 val intent = Intent()
@@ -106,17 +106,17 @@ constructor(
                 }
             }
 
-            holder.appInfoLayout.setOnContextClickListener(OnContextClickListener {
-                LogTools.i("setOnContextClickListener ....1  ")
-                if (appData != null) {
-                    appsWindow?.showUserContextMenu(holder.appInfoLayout, appData,true)
-                }else{
-                    LogTools.e("appData is null ....")
+            holder.appInfoLayout.setOnContextClickListener(
+                OnContextClickListener {
+                    LogTools.i("setOnContextClickListener ....1  ")
+                    if (appData != null) {
+                        appsWindow?.showUserContextMenu(holder.appInfoLayout, appData, true)
+                    } else {
+                        LogTools.e("appData is null ....")
+                    }
+                    false
                 }
-                false
-            })
-
-
+            )
         }
 
         override fun getItemCount(): Int {
@@ -138,7 +138,8 @@ constructor(
             ) {
             val iconIV = appInfoLayout.findViewById<ImageView?>(R.id.app_info_icon)
             val nameTV = appInfoLayout.findViewById<TextView?>(R.id.app_info_name)
-//            var clickView = appInfoLayout.findViewById<RightClickView?>(R.id.app_click_view)
+            //            var clickView =
+            // appInfoLayout.findViewById<RightClickView?>(R.id.app_click_view)
         }
 
         companion object {

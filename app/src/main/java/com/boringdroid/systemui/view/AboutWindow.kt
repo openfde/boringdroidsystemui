@@ -6,9 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
-import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -23,7 +21,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import com.boringdroid.systemui.DownloadInfo
 import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_DOWNLOADING
 import com.boringdroid.systemui.DownloadInfo.Companion.STATUS_PAUSED
@@ -38,10 +35,10 @@ import com.boringdroid.systemui.receiver.UpdateActionReceiver
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 class AboutWindow(
     context: Context,
@@ -57,14 +54,13 @@ class AboutWindow(
         const val POWER_OUTLINE_RADIUS = 8f
         const val POWER_OUTLINE_SHADOW = 60
         const val TAG: String = "AboutWindow"
-        const val TIMING_NOW_INSTALL  = 0
-        const val TIMING_LATER_INSTALL  = 1
-        const val TIMING_NOT_YET_INSTALL  = -1
+        const val TIMING_NOW_INSTALL = 0
+        const val TIMING_LATER_INSTALL = 1
+        const val TIMING_NOT_YET_INSTALL = -1
         const val ACTION_UPDATE_NOW = "com.boringdroid.systemui.ACTION_UPDATE_NOW"
         const val ACTION_DEFER_UPDATE = "com.boringdroid.systemui.ACTION_DEFER_UPDATE"
 
         const val NOTIFI_CHANAL_ID = 100
-
     }
 
     private var downloadId: String? = null
@@ -148,7 +144,6 @@ class AboutWindow(
         }
     }
 
-
     override fun onClick(v: View?) {
         if (v == close) {
             dismiss()
@@ -179,99 +174,97 @@ class AboutWindow(
         }
     }
 
-    private val callback = object : InterfaceDownloadCallback.Stub() {
-        override fun onDownloadProgress(info: DownloadInfo) {
-            Log.d(TAG, "onDownloadProgress() called with: info = $info")
-            showDownloadUI()
-            status = info.status
-            downloadId = info.downloadId
-            uiScope.launch {
-                fileNameTv?.text = info.fileName
-                progressbar?.progress = info.progress
-            }
-        }
-
-        override fun onDownloadComplete(info: DownloadInfo?) {
-            Log.d(TAG, "onDownloadComplete: ")
-            uiScope.launch {
-                Toast.makeText(
-                    getContext(),
-                    "${info?.fileName} ${context.getString(R.string.download_complete)}",
-                    Toast.LENGTH_LONG
-                ).show()
-                SPUtils.putUserInfo(SPUtils.pluginContext, "fde_deb_path", info?.savePath)
-                showInstallUI()
-                createNotification()
-            }
-            path = info?.savePath
-        }
-
-        override fun onDownloadFailed(
-            info: DownloadInfo?,
-            error: String?
-        ) {
-            Log.d(TAG, "onDownloadFailed() called with: info = $info, error = $error")
-        }
-
-    }
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            downloadService = IDownloadService.Stub.asInterface(service)
-            Log.d(
-                TAG,
-                "onServiceConnected() called with: name = $name, downloadService = $downloadService"
-            )
-            downloadService?.getAllDownloads()?.let { downloads ->
-                if (downloads.isNotEmpty()) {
-                    val info = downloads[0]
-                    path = info.savePath
-                    if (info.status == STATUS_PAUSED) {
-                        Log.d(TAG, "onServiceConnected() STATUS_PAUSED ")
-                        showDownloadUI()
-                        fileNameTv?.text = info.fileName
-                        statusBt?.text =
-                            getContext().resources.getString(R.string.resume_todownload)
-                        status = STATUS_PAUSE
-                        downloadId = info.downloadId
-                    } else if(info.status == STATUS_DOWNLOADING ){
-                        Log.d(TAG, "onServiceConnected()  STATUS_DOWNLOADING ")
-                        showDownloadUI()
-                    }
-                } else {
-                    showCheckResultUI()
-                    initUI()
+    private val callback =
+        object : InterfaceDownloadCallback.Stub() {
+            override fun onDownloadProgress(info: DownloadInfo) {
+                Log.d(TAG, "onDownloadProgress() called with: info = $info")
+                showDownloadUI()
+                status = info.status
+                downloadId = info.downloadId
+                uiScope.launch {
+                    fileNameTv?.text = info.fileName
+                    progressbar?.progress = info.progress
                 }
             }
-            downloadService?.registerCallback(callback)
+
+            override fun onDownloadComplete(info: DownloadInfo?) {
+                Log.d(TAG, "onDownloadComplete: ")
+                uiScope.launch {
+                    Toast.makeText(
+                            getContext(),
+                            "${info?.fileName} ${context.getString(R.string.download_complete)}",
+                            Toast.LENGTH_LONG
+                        )
+                        .show()
+                    SPUtils.putUserInfo(SPUtils.pluginContext, "fde_deb_path", info?.savePath)
+                    showInstallUI()
+                    createNotification()
+                }
+                path = info?.savePath
+            }
+
+            override fun onDownloadFailed(info: DownloadInfo?, error: String?) {
+                Log.d(TAG, "onDownloadFailed() called with: info = $info, error = $error")
+            }
         }
 
-        override fun onServiceDisconnected(name: ComponentName?) {
-            downloadService?.unregisterCallback(callback)
-            downloadService = null
-            isBound = false
+    private val serviceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                downloadService = IDownloadService.Stub.asInterface(service)
+                Log.d(
+                    TAG,
+                    "onServiceConnected() called with: name = $name, downloadService = $downloadService"
+                )
+                downloadService?.getAllDownloads()?.let { downloads ->
+                    if (downloads.isNotEmpty()) {
+                        val info = downloads[0]
+                        path = info.savePath
+                        if (info.status == STATUS_PAUSED) {
+                            Log.d(TAG, "onServiceConnected() STATUS_PAUSED ")
+                            showDownloadUI()
+                            fileNameTv?.text = info.fileName
+                            statusBt?.text =
+                                getContext().resources.getString(R.string.resume_todownload)
+                            status = STATUS_PAUSE
+                            downloadId = info.downloadId
+                        } else if (info.status == STATUS_DOWNLOADING) {
+                            Log.d(TAG, "onServiceConnected()  STATUS_DOWNLOADING ")
+                            showDownloadUI()
+                        }
+                    } else {
+                        showCheckResultUI()
+                        initUI()
+                    }
+                }
+                downloadService?.registerCallback(callback)
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                downloadService?.unregisterCallback(callback)
+                downloadService = null
+                isBound = false
+            }
         }
-    }
 
-
-    private fun showInstallUI(timing:Int) {
+    private fun showInstallUI(timing: Int) {
         Log.d(TAG, "showInstallUI() called with: timing = $timing")
         installLl?.visibility = View.VISIBLE
         checkversionbBt?.visibility = View.GONE
         latestedTv?.visibility = View.GONE
         updateLl?.visibility = View.GONE
         downloadLl?.visibility = View.GONE
-        if(timing == TIMING_NOW_INSTALL) {
+        if (timing == TIMING_NOW_INSTALL) {
             installNowTv?.visibility = View.VISIBLE
             installLaterTv?.visibility = View.GONE
-            updateNowBt?.visibility = View.GONE              
+            updateNowBt?.visibility = View.GONE
             updateLaterBt?.visibility = View.GONE
-        } else if(timing == TIMING_LATER_INSTALL) {
+        } else if (timing == TIMING_LATER_INSTALL) {
             installNowTv?.visibility = View.GONE
             installLaterTv?.visibility = View.VISIBLE
             updateNowBt?.visibility = View.GONE
             updateLaterBt?.visibility = View.GONE
-        } else if(timing == TIMING_NOT_YET_INSTALL) {
+        } else if (timing == TIMING_NOT_YET_INSTALL) {
             installNowTv?.visibility = View.GONE
             installLaterTv?.visibility = View.GONE
             updateNowBt?.visibility = View.VISIBLE
@@ -313,24 +306,28 @@ class AboutWindow(
         checkversionbBt?.visibility = View.VISIBLE
         downloadLl?.visibility = View.GONE
         installLl?.visibility = View.GONE
-        DeviceUtils.checkVersion(version, object : VersionCheckCallback {
-            override fun onCallback(response: VersionCheckResponse) {
-                val newer = response.data?.isNewer
-                this@AboutWindow.response = response
-                if (newer == 0) {
-                    showLatestUI()
-                } else if (newer == 1) {
-                    latestedTv?.visibility = View.GONE
-                    updateLl?.visibility = View.VISIBLE
-                    updateBt?.text =
-                        getContext().resources.getString(R.string.update_to_version) + "${response.data.version}"
+        DeviceUtils.checkVersion(
+            version,
+            object : VersionCheckCallback {
+                override fun onCallback(response: VersionCheckResponse) {
+                    val newer = response.data?.isNewer
+                    this@AboutWindow.response = response
+                    if (newer == 0) {
+                        showLatestUI()
+                    } else if (newer == 1) {
+                        latestedTv?.visibility = View.GONE
+                        updateLl?.visibility = View.VISIBLE
+                        updateBt?.text =
+                            getContext().resources.getString(R.string.update_to_version) +
+                                "${response.data.version}"
+                    }
+                }
+
+                override fun onUpdateCallback(response: UpdateResponse) {
+                    Log.d(TAG, "onUpdateCallback() called with: response = $response")
                 }
             }
-
-            override fun onUpdateCallback(response: UpdateResponse) {
-                Log.d(TAG, "onUpdateCallback() called with: response = $response")
-            }
-        })
+        )
     }
 
     private fun startDownloadDeb(response: VersionCheckResponse?) {
@@ -347,10 +344,10 @@ class AboutWindow(
         getContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-
     private fun createNotification() {
-        val notification= showUpdateNotification(GlobalSystemUIContext.getContext())
-        val systemService = GlobalSystemUIContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE)
+        val notification = showUpdateNotification(GlobalSystemUIContext.getContext())
+        val systemService =
+            GlobalSystemUIContext.getContext().getSystemService(Context.NOTIFICATION_SERVICE)
         createNotificationChannel(GlobalSystemUIContext.getContext())
         val currentUser: UserHandle? = UserHandle(0)
         if (systemService != null) {
@@ -361,88 +358,102 @@ class AboutWindow(
 
     private fun showUpdateNotification(context: Context): Notification {
         Log.d(TAG, "showUpdateNotification ${getContext()}")
-        val nowIntent = Intent(getContext(), UpdateActionReceiver::class.java).apply {
-            action = ACTION_UPDATE_NOW
-        }
+        val nowIntent =
+            Intent(getContext(), UpdateActionReceiver::class.java).apply {
+                action = ACTION_UPDATE_NOW
+            }
         nowIntent.setPackage("com.boringdroid.systemui")
 
         // “下次开机更新” 的 PendingIntent
-        val deferIntent = Intent(getContext(), UpdateActionReceiver::class.java).apply {
-            action = ACTION_DEFER_UPDATE
-        }
+        val deferIntent =
+            Intent(getContext(), UpdateActionReceiver::class.java).apply {
+                action = ACTION_DEFER_UPDATE
+            }
         deferIntent.setPackage("com.boringdroid.systemui")
 
-        val updateNowAction: Notification.Action = Notification.Action.Builder(
-            Icon.createWithResource(context, android.R.drawable.ic_dialog_info),
-            getContext().resources.getString(R.string.update_now),
-            PendingIntent.getService(
-                context,
-                mNotificationId,  /* unique request code */
-                nowIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-            .build()
+        val updateNowAction: Notification.Action =
+            Notification.Action.Builder(
+                    Icon.createWithResource(context, android.R.drawable.ic_dialog_info),
+                    getContext().resources.getString(R.string.update_now),
+                    PendingIntent.getService(
+                        context,
+                        mNotificationId, /* unique request code */
+                        nowIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+                .build()
 
-        val updateLaterAction: Notification.Action = Notification.Action.Builder(
-            Icon.createWithResource(context, android.R.drawable.ic_dialog_info),
-            getContext().resources.getString(R.string.update_next),
-            PendingIntent.getService(
-                context,
-                mNotificationId,  /* unique request code */
-                deferIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-            .build()
+        val updateLaterAction: Notification.Action =
+            Notification.Action.Builder(
+                    Icon.createWithResource(context, android.R.drawable.ic_dialog_info),
+                    getContext().resources.getString(R.string.update_next),
+                    PendingIntent.getService(
+                        context,
+                        mNotificationId, /* unique request code */
+                        deferIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+                .build()
 
         val extras = Bundle()
-        extras.putString(Notification.EXTRA_TITLE, "OpenFDE" + getContext().resources.getString(R.string.download_complete))
+        extras.putString(
+            Notification.EXTRA_TITLE,
+            "OpenFDE" + getContext().resources.getString(R.string.download_complete)
+        )
 
-        val builder = Notification.Builder(context, getContext().resources.getString(R.string.version_update))
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .addAction(updateNowAction)
-            .addAction(updateLaterAction)
-            .setAutoCancel(true)
-            .setGroup("fde_version_download")
-            .addExtras(extras)
+        val builder =
+            Notification.Builder(context, getContext().resources.getString(R.string.version_update))
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .addAction(updateNowAction)
+                .addAction(updateLaterAction)
+                .setAutoCancel(true)
+                .setGroup("fde_version_download")
+                .addExtras(extras)
 
         return builder.build()
     }
 
-    private fun createNotificationChannel(context: Context){
+    private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelId = "版本更新";
-            val name = "版本更新";
-            val importance = NotificationManager.IMPORTANCE_HIGH;
+            val channelId = "版本更新"
+            val name = "版本更新"
+            val importance = NotificationManager.IMPORTANCE_HIGH
 
-            val channel = NotificationChannel(channelId, name, importance);
-            channel.setDescription("系统版本更新通知");
+            val channel = NotificationChannel(channelId, name, importance)
+            channel.setDescription("系统版本更新通知")
 
             // 使用 SystemUI 的 NotificationManager
-            val notificationManager = context.getSystemService (Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel);
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
     fun onAction(action: String) {
-        var policy :String ?= null
-        if(action.equals(ACTION_UPDATE_NOW)){
+        var policy: String? = null
+        if (action.equals(ACTION_UPDATE_NOW)) {
             policy = "immediatly"
             SPUtils.putIntUserInfo(SPUtils.pluginContext, "timing_install", TIMING_NOW_INSTALL)
-        }else if(action.equals(ACTION_DEFER_UPDATE)){
+        } else if (action.equals(ACTION_DEFER_UPDATE)) {
             policy = "PreStart"
             SPUtils.putIntUserInfo(SPUtils.pluginContext, "timing_install", TIMING_LATER_INSTALL)
         }
-        DeviceUtils.startInstall(version,path, policy, object : VersionCheckCallback {
-            override fun onCallback(response: VersionCheckResponse) {
-                Log.d(TAG, "onCallback() called with: response = $response")
-            }
+        DeviceUtils.startInstall(
+            version,
+            path,
+            policy,
+            object : VersionCheckCallback {
+                override fun onCallback(response: VersionCheckResponse) {
+                    Log.d(TAG, "onCallback() called with: response = $response")
+                }
 
-            override fun onUpdateCallback(response: UpdateResponse) {
-                Log.d(TAG, "onUpdateCallback() called with: response = $response")
+                override fun onUpdateCallback(response: UpdateResponse) {
+                    Log.d(TAG, "onUpdateCallback() called with: response = $response")
+                }
             }
-        })
+        )
         initUI()
     }
 }

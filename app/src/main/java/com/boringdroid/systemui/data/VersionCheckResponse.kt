@@ -12,6 +12,6 @@ data class Data(
     @SerializedName("Version") val version: String,
     @SerializedName("IsNewer") val isNewer: Int, // 注意：JSON 中是数字 1/0，不是布尔值
     @SerializedName("DownloadURL") val downloadUrl: String,
-    @SerializedName("Size") val size: String,   // 注意：虽然是数字，但 JSON 中是字符串
+    @SerializedName("Size") val size: String, // 注意：虽然是数字，但 JSON 中是字符串
     @SerializedName("MD5") val md5: String
 )

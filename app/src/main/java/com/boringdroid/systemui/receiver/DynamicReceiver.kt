@@ -5,39 +5,41 @@ import android.content.Context
 import android.content.Intent
 import com.boringdroid.systemui.view.TopBarLayout
 
-
-class DynamicReceiver (private val notificationListener: NotificationListener?, topBarLayout: TopBarLayout?) : BroadcastReceiver(){
-
+class DynamicReceiver(
+    private val notificationListener: NotificationListener?,
+    topBarLayout: TopBarLayout?
+) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-//        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
-        if(intent.action.equals(SERVICE_ACTION)){
-            val type = intent.getIntExtra("type",-1)
-//        Log.d(TAG, "onReceive() called with: type = $type")
-            when(type){
-                TYEP_COUNT_NOTIFY ->{
-                    notificationListener?.onNotifyCount(intent.getIntExtra("count",0))
+        //        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent =
+        // ${intent.action}")
+        if (intent.action.equals(SERVICE_ACTION)) {
+            val type = intent.getIntExtra("type", -1)
+            //        Log.d(TAG, "onReceive() called with: type = $type")
+            when (type) {
+                TYEP_COUNT_NOTIFY -> {
+                    notificationListener?.onNotifyCount(intent.getIntExtra("count", 0))
                 }
-
-                TYEP_PANEL_CHANGE_NOTIFY ->{
-                    notificationListener?.onNotificationPanelVisibleChanged(intent.getBooleanExtra("panel_visible",false))
+                TYEP_PANEL_CHANGE_NOTIFY -> {
+                    notificationListener?.onNotificationPanelVisibleChanged(
+                        intent.getBooleanExtra("panel_visible", false)
+                    )
                 }
-
-                TYEP_SCREEN_NOTIFY ->{
-                    notificationListener?.onScreenRecordStateChange(intent.getIntExtra("id",0)
-                        , intent.getStringExtra("groupkey")
-                        )
+                TYEP_SCREEN_NOTIFY -> {
+                    notificationListener?.onScreenRecordStateChange(
+                        intent.getIntExtra("id", 0),
+                        intent.getStringExtra("groupkey")
+                    )
                 }
-
             }
-        } else if (intent.action.equals(INTENT_UPDATE_STATE)){
-        }
-
+        } else if (intent.action.equals(INTENT_UPDATE_STATE)) {}
     }
 
     interface NotificationListener {
         fun onNotifyCount(count: Int)
+
         fun onNotificationPanelVisibleChanged(boolean: Boolean)
+
         fun onScreenRecordStateChange(state: Int, groupkey: String?)
     }
 
@@ -60,13 +62,12 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
         val TYEP_UPDATE_NOTIFY = 9
         val TYEP_SCREEN_NOTIFY = 10
         val WIFI_STATUS = 80
-//        val NOTIFICATION_RECORDING_ID = 4273   //screen record
-//        val NOTIFICATION_PROCESSING_ID = 4274  //screen record process
-//        val NOTIFICATION_VIEW_ID = 4273        //screen record ready
+        //        val NOTIFICATION_RECORDING_ID = 4273   //screen record
+        //        val NOTIFICATION_PROCESSING_ID = 4274  //screen record process
+        //        val NOTIFICATION_VIEW_ID = 4273        //screen record ready
 
-         val NOTIF_BASE_ID: Int = 4273
-         val PROGRESS_NOTIF_ID: Int = 4274
-         val ERROR_NOTIF_ID: Int = 4275
+        val NOTIF_BASE_ID: Int = 4273
+        val PROGRESS_NOTIF_ID: Int = 4274
+        val ERROR_NOTIF_ID: Int = 4275
     }
-
 }

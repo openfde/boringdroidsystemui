@@ -31,19 +31,17 @@ import android.widget.LinearLayout
 import androidx.core.view.doOnLayout
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import androidx.viewpager.widget.ViewPager.SCROLL_STATE_DRAGGING
 import androidx.viewpager.widget.ViewPager.SCROLL_STATE_IDLE
-import androidx.viewpager.widget.ViewPager.SCROLL_STATE_SETTLING
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.provider.AppProvider
 import com.boringdroid.systemui.provider.DockAppsProvider
-import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.LoadedOverviewRecycleView.Companion.NUMBER_OF_COLUMNS
-
+import kotlin.collections.chunked
+import kotlin.math.max
 
 class AppOverviewWindow(
     context: Context,
@@ -52,52 +50,50 @@ class AppOverviewWindow(
     gravity: Int,
     layoutResId: Int,
     typeParam: Int
-)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener{
+) : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
-
-    var contextWindow: AbsTopPopWindow ?= null
-    var focusView: View ?= null
+    var contextWindow: AbsTopPopWindow? = null
+    var focusView: View? = null
     private val apps: MutableList<AppData> = ArrayList()
     private var appPages: MutableList<MutableList<AppData>> = ArrayList()
-    var wallpaperView: ImageView ?= null
+    var wallpaperView: ImageView? = null
     //    private var recycleView: LoadedRecycleView?= null
-    var searchEt: EditText ?= null
-    var searchLl: LinearLayout ?= null
-    var bgView : View ?= null
-    var appsVp: LoadedViewPager ?= null
-    private var indicatorMi: LoadedIndicator ?= null
-    private var runnable: FilterRunnable ?= null
-    var appProvider : AppProvider ?= null
-    var dockProvider : DockAppsProvider ?= null
-    var appsPagerAdapter : AppsPagerAdapter ?= null
-    var wallpaperManager :WallpaperManager ?= null
-    var wallpaperBitmap : Bitmap ?= null
-    var blurWallPaperRadius : Float ?= 0.0f
-    var div : Int  = 1
+    var searchEt: EditText? = null
+    var searchLl: LinearLayout? = null
+    var bgView: View? = null
+    var appsVp: LoadedViewPager? = null
+    private var indicatorMi: LoadedIndicator? = null
+    private var runnable: FilterRunnable? = null
+    var appProvider: AppProvider? = null
+    var dockProvider: DockAppsProvider? = null
+    var appsPagerAdapter: AppsPagerAdapter? = null
+    var wallpaperManager: WallpaperManager? = null
+    var wallpaperBitmap: Bitmap? = null
+    var blurWallPaperRadius: Float? = 0.0f
+    var div: Int = 1
+    var rowSpacingPx: Int = 0
 
     companion object {
         const val WINDOW_PADDING = 100
-        const val TAG:String = "AppOverviewWindow"
+        const val TAG: String = "AppOverviewWindow"
         const val TYPE_LINUX = 1
         const val TYPE_ANDROID = 2
         const val TYPE_ALL = 3
-        const val MAX_RUNNING_TASKS  = 50
-        const val MAX_TASKS_ONE_PAGE  = 28
+        const val MAX_RUNNING_TASKS = 50
+        const val MAX_TASKS_ONE_PAGE = 28
         const val OVERVIEW_BG_RADIUS = 120
     }
 
     override fun showPopupWindow() {
         super.showPopupWindow()
         initViews()
-//        runFadeAnimationWithTransition(true, null, null)
+        //        runFadeAnimationWithTransition(true, null, null)
         appsVp?.doOnLayout {
             val anim = AnimationUtils.loadAnimation(getContext(), R.anim.lp_enter)
             appsVp?.startAnimation(anim)
-//            runFadeAnimationSet(true, null, null)
+            //            runFadeAnimationSet(true, null, null)
         }
         blurWallPaper(1.0f * OVERVIEW_BG_RADIUS)
-
     }
 
     private fun initViews() {
@@ -115,8 +111,15 @@ class AppOverviewWindow(
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
         val dimensionPixelSize =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
-        div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
-        Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div")
+        val minRowSpacing =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_row_spacing_min)
+        val availableHeight = max(0, screenHeight - dimensionPixelSize1 - dimensionPixelSize2)
+        div = calculateRowsPerPage(availableHeight, dimensionPixelSize, minRowSpacing)
+        rowSpacingPx = calculateRowSpacing(availableHeight, dimensionPixelSize, div, minRowSpacing)
+        Log.d(
+            TAG,
+            "initViews: top=$dimensionPixelSize1 bottom=$dimensionPixelSize2 screen=$screenHeight itemHeight=$dimensionPixelSize rows=$div rowSpacing=$rowSpacingPx"
+        )
         appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
@@ -125,78 +128,82 @@ class AppOverviewWindow(
         searchLl?.setOnClickListener(this)
         mContentView?.setOnClickListener(this)
         updateChannel()
-        if(runnable == null){
-            runnable = appProvider?.let { FilterRunnable(it)}
+        if (runnable == null) {
+            runnable = appProvider?.let { FilterRunnable(it) }
         }
         searchEt?.setText("")
-        searchEt?.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+        searchEt?.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
-            override fun afterTextChanged(s: Editable?) {
-                filterApps(s.toString(), 100)
+                override fun afterTextChanged(s: Editable?) {
+                    filterApps(s.toString(), 100)
+                }
             }
-        })
-
+        )
 
         searchEt?.setOnFocusChangeListener { v, hasFocus ->
-            if(hasFocus){
-                if(getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null){
+            if (hasFocus) {
+                if (getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null) {
                     return@setOnFocusChangeListener
                 }
 
                 val layoutParams1 =
-                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
+                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams
+                        as LinearLayout.LayoutParams
                 layoutParams1.leftMargin = 10
                 getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
             } else {
-                if(getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null){
+                if (getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams == null) {
                     return@setOnFocusChangeListener
                 }
                 val layoutParams1 =
-                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams as LinearLayout.LayoutParams
+                    getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams
+                        as LinearLayout.LayoutParams
                 layoutParams1.leftMargin = 100
                 getContentView()?.findViewById<View>(R.id.search_iv)?.layoutParams = layoutParams1
                 getContentView()?.findViewById<View>(R.id.search_iv)?.requestLayout()
-                searchEt?.getText()?.clear();
+                searchEt?.getText()?.clear()
             }
         }
         searchEt?.requestFocus()
         searchEt?.setOnKeyListener { v, keyCode, event ->
-            if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN){
+            if (keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_DOWN) {
                 return@setOnKeyListener true
-            } else if(keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
+            } else if (keyCode == KEYCODE_TAB && event.action == KeyEvent.ACTION_UP) {
                 focusView?.requestFocus()
                 return@setOnKeyListener true
-            } else if(keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP){
+            } else if (keyCode == KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                 return@setOnKeyListener true
             } else {
                 return@setOnKeyListener false
             }
         }
-
     }
 
     private fun blurWallPaper(radius: Float) {
-        if(blurWallPaperRadius == radius && blurWallPaperRadius != 120f){
+        if (blurWallPaperRadius == radius && blurWallPaperRadius != 120f) {
             return
         }
         this.blurWallPaperRadius = radius
         wallpaperView = getContentView()?.findViewById<ImageView>(R.id.bg_iv)
-//        Log.d(TAG, "blurWallPaper() called with: radius = $radius  ${radius.toInt()}")
-        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
+        //        Log.d(TAG, "blurWallPaper() called with: radius = $radius  ${radius.toInt()}")
+        if (Utils.getProperty("fde.systemui.blurlevel", 0) == 0) {
             Utils.setBackgroundBlurRadius(getContentView(), radius.toInt())
             wallpaperView?.visibility = View.GONE
         } else {
             wallpaperManager = WallpaperManager.getInstance(getContext())
-            if(wallpaperBitmap == null){
+            if (wallpaperBitmap == null) {
                 val wallpaperDrawable = wallpaperManager?.drawable as Drawable
-                wallpaperBitmap =
-                    (wallpaperDrawable as BitmapDrawable?)!!.bitmap
+                wallpaperBitmap = (wallpaperDrawable as BitmapDrawable?)!!.bitmap
             }
             wallpaperView?.setImageBitmap(wallpaperBitmap)
             updateBlurEffect(radius)
@@ -210,12 +217,7 @@ class AppOverviewWindow(
         }
     }
 
-
-    fun runFadeAnimationSet(
-        isEnter: Boolean,
-        onStart: (() -> Unit)?,
-        onEnd: (() -> Unit)?
-    ) {
+    fun runFadeAnimationSet(isEnter: Boolean, onStart: (() -> Unit)?, onEnd: (() -> Unit)?) {
 
         val startAlpha = if (isEnter) 0f else 1f
         val endAlpha = if (isEnter) 1f else 0f
@@ -223,48 +225,55 @@ class AppOverviewWindow(
         ObjectAnimator.ofFloat(appsVp, View.ALPHA, startAlpha, endAlpha).apply {
             duration = 120
             interpolator = LinearInterpolator()
-            addListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator) {
-                }
-                override fun onAnimationEnd(animation: Animator) {
-                    if(isEnter){
-                        blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
-                    } else {
-                        destroy()
-                    }
-                }
-                override fun onAnimationCancel(animation: Animator) {}
-                override fun onAnimationRepeat(animation: Animator) {}
-            })
-            var fraction = if(isEnter) 0.0f else 1.0f
-            addUpdateListener( object : ValueAnimator.AnimatorUpdateListener{
-                override fun onAnimationUpdate(animation: ValueAnimator) {
-                    if(isEnter){
-                        if(animation.animatedFraction < 0.3f ){
-                            fraction = 0.3f
-                        } else if(animation.animatedFraction == 1.0f ){
-                            fraction = 1.0f
-                        } else if(animation.animatedFraction - fraction > 0.2f ){
-                            fraction = animation.animatedFraction
-                        }
-                        if(fraction > 0 ){
-//                            blurWallPaper(fraction * OVERVIEW_BG_RADIUS)
-                        }
-                    } else {
-                        if(1 - animation.animatedFraction < 0.3f ){
-                            fraction = 0.3f
-                        } else if( 1- animation.animatedFraction == 1.0f ){
-                            fraction = 1.0f
-                        } else if(fraction - animation.animatedFraction > 0.2f ){
-                            fraction = animation.animatedFraction
-                        }
-                        if(fraction < 1 ){
-//                            blurWallPaper(fraction * OVERVIEW_BG_RADIUS)
+            addListener(
+                object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {}
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (isEnter) {
+                            blurWallPaper(OVERVIEW_BG_RADIUS * 1.0f)
+                        } else {
+                            destroy()
                         }
                     }
 
+                    override fun onAnimationCancel(animation: Animator) {}
+
+                    override fun onAnimationRepeat(animation: Animator) {}
                 }
-            })
+            )
+            var fraction = if (isEnter) 0.0f else 1.0f
+            addUpdateListener(
+                object : ValueAnimator.AnimatorUpdateListener {
+                    override fun onAnimationUpdate(animation: ValueAnimator) {
+                        if (isEnter) {
+                            if (animation.animatedFraction < 0.3f) {
+                                fraction = 0.3f
+                            } else if (animation.animatedFraction == 1.0f) {
+                                fraction = 1.0f
+                            } else if (animation.animatedFraction - fraction > 0.2f) {
+                                fraction = animation.animatedFraction
+                            }
+                            if (fraction > 0) {
+                                //                            blurWallPaper(fraction *
+                                // OVERVIEW_BG_RADIUS)
+                            }
+                        } else {
+                            if (1 - animation.animatedFraction < 0.3f) {
+                                fraction = 0.3f
+                            } else if (1 - animation.animatedFraction == 1.0f) {
+                                fraction = 1.0f
+                            } else if (fraction - animation.animatedFraction > 0.2f) {
+                                fraction = animation.animatedFraction
+                            }
+                            if (fraction < 1) {
+                                //                            blurWallPaper(fraction *
+                                // OVERVIEW_BG_RADIUS)
+                            }
+                        }
+                    }
+                }
+            )
             start()
         }
     }
@@ -277,47 +286,48 @@ class AppOverviewWindow(
     }
 
     private fun updateChannel() {
-        if(appPages.size < 2){
+        if (appPages.size < 2) {
             return
         }
         val scaleCircleNavigator = ScaleCircleNavigator(getContext())
         scaleCircleNavigator.setCircleCount(appPages.size)
         scaleCircleNavigator.setCircleClickListener { index -> appsVp?.setCurrentItem(index) }
         indicatorMi?.setNavigator(scaleCircleNavigator)
-        appsVp?.addOnPageChangeListener(object :OnPageChangeListener{
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) {
-                Log.d(
-                    "ViewPager",
-                    "onPageScrolled() called with: position = $position, positionOffset = $positionOffset, positionOffsetPixels = $positionOffsetPixels"
-                )
-                indicatorMi?.onPageScrolled(position, positionOffset, positionOffsetPixels)
-            }
+        appsVp?.addOnPageChangeListener(
+            object : OnPageChangeListener {
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) {
+                    Log.d(
+                        "ViewPager",
+                        "onPageScrolled() called with: position = $position, positionOffset = $positionOffset, positionOffsetPixels = $positionOffsetPixels"
+                    )
+                    indicatorMi?.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                }
 
-            override fun onPageSelected(position: Int) {
-                Log.d("ViewPager", "onPageSelected() called with: position = $position")
-                indicatorMi?.onPageSelected(position)
+                override fun onPageSelected(position: Int) {
+                    Log.d("ViewPager", "onPageSelected() called with: position = $position")
+                    indicatorMi?.onPageSelected(position)
+                }
 
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
-                indicatorMi?.onPageScrollStateChanged(state)
-                if(state == SCROLL_STATE_IDLE){
-                    appsVp?.blockScroll = false
+                override fun onPageScrollStateChanged(state: Int) {
+                    Log.d("ViewPager", "onPageScrollStateChanged() called with: state = $state")
+                    indicatorMi?.onPageScrollStateChanged(state)
+                    if (state == SCROLL_STATE_IDLE) {
+                        appsVp?.blockScroll = false
+                    }
                 }
             }
-        })
+        )
     }
 
     override fun dismiss() {
         destroy()
     }
 
-    fun destroy(){
+    fun destroy() {
         super.dismiss()
         filterApps(null, 0)
         focusView = null
@@ -325,19 +335,14 @@ class AppOverviewWindow(
         contextWindow = null
     }
 
-
     override fun onClick(v: View?) {
-        if(v == getContentView()){
+        if (v == getContentView()) {
             dismiss()
-        } else if( v == searchLl){
-
-        } else if( v == appsVp){
+        } else if (v == searchLl) {} else if (v == appsVp) {
             dismiss()
-        } else if( v == bgView){
+        } else if (v == bgView) {
             dismiss()
-        } else if( v == searchEt){
-
-        }
+        } else if (v == searchEt) {}
     }
 
     fun updateAppList(apps: MutableList<AppData>) {
@@ -347,6 +352,35 @@ class AppOverviewWindow(
         appsVp?.adapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter?.notifyDataSetChanged()
         updateChannel()
+    }
+
+    private fun calculateRowsPerPage(
+        availableHeight: Int,
+        itemHeight: Int,
+        minRowSpacing: Int
+    ): Int {
+        var rows = max(1, availableHeight / max(1, itemHeight))
+        while (rows > 1) {
+            val requiredHeight = rows * itemHeight + (rows - 1) * minRowSpacing
+            if (requiredHeight <= availableHeight) {
+                break
+            }
+            rows--
+        }
+        return max(1, rows)
+    }
+
+    private fun calculateRowSpacing(
+        availableHeight: Int,
+        itemHeight: Int,
+        rows: Int,
+        minRowSpacing: Int
+    ): Int {
+        if (rows <= 1) {
+            return 0
+        }
+        val remainingHeight = max(0, availableHeight - rows * itemHeight)
+        return max(minRowSpacing, remainingHeight / (rows - 1))
     }
 }
 
@@ -366,12 +400,16 @@ class AppsPagerAdapter(
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val view = LayoutInflater.from(container.context)
-            .inflate(R.layout.layout_overview_item, container, false)
+        val view =
+            LayoutInflater.from(container.context)
+                .inflate(R.layout.layout_overview_item, container, false)
 
-        val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
-//        val recycleView = LoadedOverviewRecycleView(container.context)
+        val recycleView =
+            view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view)
+                as LoadedOverviewRecycleView
+        //        val recycleView = LoadedOverviewRecycleView(container.context)
         recycleView.overviewWindow = appOverviewWindow
+        recycleView.setGridConfig(appOverviewWindow.div, appOverviewWindow.rowSpacingPx)
         recycleView.setData(appPages[position])
         val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         container.addView(view, params)
@@ -384,18 +422,19 @@ class AppsPagerAdapter(
 
     override fun getItemPosition(`object`: Any): Int {
         val view = `object` as View
-        val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
-        val list : MutableList<AppData>? = recycleView.list
+        val recycleView =
+            view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view)
+                as LoadedOverviewRecycleView
+        val list: MutableList<AppData>? = recycleView.list
         val index = appPages.indexOf(list)
-        if(index >= 0){
+        if (index >= 0) {
             return index
         }
         return POSITION_NONE
     }
-
 }
 
-class FilterRunnable(private val provider: AppProvider): Runnable {
+class FilterRunnable(private val provider: AppProvider) : Runnable {
     var filter: String? = null
 
     override fun run() {

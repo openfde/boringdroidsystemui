@@ -10,18 +10,17 @@ import android.content.res.Resources
 import android.content.res.XmlResourceParser
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
-
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.boringdroid.systemui.Log
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.IOException
 import java.io.InputStream
 import java.lang.reflect.Field
 import java.util.Locale
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 
 class IconPackHelper {
     // Holds package/class -> drawable
@@ -89,7 +88,11 @@ class IconPackHelper {
                 }
 
                 // Validate format/length of component
-                if (!component.startsWith("ComponentInfo{") || !component.endsWith("}") || component.length < 16) {
+                if (
+                    !component.startsWith("ComponentInfo{") ||
+                        !component.endsWith("}") ||
+                        component.length < 16
+                ) {
                     continue
                 }
 
@@ -116,10 +119,9 @@ class IconPackHelper {
                 }
                 continue
             }
-            if (name.equals(ICON_MASK_TAG, ignoreCase = true) || name.equals(
-                    ICON_UPON_TAG,
-                    ignoreCase = true
-                )
+            if (
+                name.equals(ICON_MASK_TAG, ignoreCase = true) ||
+                    name.equals(ICON_UPON_TAG, ignoreCase = true)
             ) {
                 var icon = parser.getAttributeValue(null, "img")
                 if (icon == null) {
@@ -176,13 +178,12 @@ class IconPackHelper {
         if (scale != null) {
             try {
                 mIconScale = scale.toFloat()
-            } catch (ignored: NumberFormatException) {
-            }
+            } catch (ignored: NumberFormatException) {}
         }
         mLoading = false
     }
 
-    //new method from trebuchet
+    // new method from trebuchet
     private fun getIconPackResourcesNew(
         context: Context?,
         packageName: String?
@@ -191,12 +192,13 @@ class IconPackHelper {
             return null
         }
         val res: Resources
-        res = try {
-            context!!.packageManager.getResourcesForApplication(packageName!!)
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-            return null
-        }
+        res =
+            try {
+                context!!.packageManager.getResourcesForApplication(packageName!!)
+            } catch (e: PackageManager.NameNotFoundException) {
+                e.printStackTrace()
+                return null
+            }
         var parser: XmlPullParser? = null
         var inputStream: InputStream? = null
         val iconPackResources: MutableMap<String, String?> = HashMap()
@@ -229,8 +231,7 @@ class IconPackHelper {
                 if (inputStream != null) {
                     try {
                         inputStream.close()
-                    } catch (ignored: IOException) {
-                    }
+                    } catch (ignored: IOException) {}
                 }
             }
         }
@@ -276,15 +277,17 @@ class IconPackHelper {
         packageName: String?
     ) {
         val drawableItems: Array<Field>
-        drawableItems = try {
-            val appContext = context!!.createPackageContext(
-                packageName,
-                Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY
-            )
-            Class.forName("$packageName.R\$drawable", true, appContext.classLoader).fields
-        } catch (e: Exception) {
-            return
-        }
+        drawableItems =
+            try {
+                val appContext =
+                    context!!.createPackageContext(
+                        packageName,
+                        Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY
+                    )
+                Class.forName("$packageName.R\$drawable", true, appContext.classLoader).fields
+            } catch (e: Exception) {
+                return
+            }
         for (f in drawableItems) {
             var name = f.name
             val icon = name.lowercase(Locale.getDefault())
@@ -308,7 +311,10 @@ class IconPackHelper {
     }
 
     val isIconPackLoaded: Boolean
-        get() = mLoadedIconPackResource != null && mLoadedIconPackName != null && mIconPackResources != null
+        get() =
+            mLoadedIconPackResource != null &&
+                mLoadedIconPackName != null &&
+                mIconPackResources != null
 
     private fun getResourceIdForDrawable(resource: String?): Int {
         return mLoadedIconPackResource!!.getIdentifier(resource, "drawable", mLoadedIconPackName)
@@ -323,24 +329,27 @@ class IconPackHelper {
         if (!isIconPackLoaded || mLoading) {
             return 0
         }
-        //Try to match icon class by lower case, if not fallback to exact string
-        //Catch added for lower case exceptions
+        // Try to match icon class by lower case, if not fallback to exact string
+        // Catch added for lower case exceptions
         var drawable: String?
-        drawable = try {
-            mIconPackResources!![info.packageName.lowercase(Locale.getDefault()) + "." + info.name.lowercase(
-                Locale.getDefault()
-            )]
-        } catch (e: NullPointerException) {
-            mIconPackResources!![info.packageName + "." + info.name]
-        }
+        drawable =
+            try {
+                mIconPackResources!![
+                    info.packageName.lowercase(Locale.getDefault()) +
+                        "." +
+                        info.name.lowercase(Locale.getDefault())]
+            } catch (e: NullPointerException) {
+                mIconPackResources!![info.packageName + "." + info.name]
+            }
         if (drawable == null) {
             // Icon pack doesn't have an icon for the activity, fallback to package icon
-            //Catch added for lower case exceptions
-            drawable = try {
-                mIconPackResources!![info.packageName.lowercase(Locale.getDefault())]
-            } catch (e: NullPointerException) {
-                mIconPackResources!![info.packageName]
-            }
+            // Catch added for lower case exceptions
+            drawable =
+                try {
+                    mIconPackResources!![info.packageName.lowercase(Locale.getDefault())]
+                } catch (e: NullPointerException) {
+                    mIconPackResources!![info.packageName]
+                }
             if (drawable == null) {
                 return 0
             }
@@ -359,7 +368,7 @@ class IconPackHelper {
                 loadIconPack()
             } catch (i: NullPointerException) {
                 Log.d("Icon Pack Error", "Loading Error : $i")
-                //Icon Pack is not supported so wipe the icon pack data
+                // Icon Pack is not supported so wipe the icon pack data
                 prefs.edit().putString("icon_pack", "").apply()
                 Toast.makeText(mContext, "Unsupported Icon Pack", Toast.LENGTH_LONG).show()
             }
@@ -372,15 +381,13 @@ class IconPackHelper {
         private const val ICON_UPON_TAG = "iconupon"
         private const val ICON_SCALE_TAG = "scale"
 
-        @SuppressLint("StaticFieldLeak")
-        private var sInstance: IconPackHelper? = null
+        @SuppressLint("StaticFieldLeak") private var sInstance: IconPackHelper? = null
+
         fun getInstance(context: Context?): IconPackHelper? {
             if (sInstance == null) {
                 sInstance = IconPackHelper()
                 sInstance!!.setContext(context)
-                val prefs = PreferenceManager.getDefaultSharedPreferences(
-                    context!!
-                )
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context!!)
                 sInstance!!.init(prefs)
             }
             return sInstance

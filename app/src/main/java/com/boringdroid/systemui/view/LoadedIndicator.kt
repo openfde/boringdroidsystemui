@@ -10,7 +10,4 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
-) : MagicIndicator(context, attrs) {
-
-
-}
+) : MagicIndicator(context, attrs) {}

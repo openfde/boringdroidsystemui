@@ -37,10 +37,10 @@ constructor(
 ) : RecyclerView(context, attrs, defStyle) {
 
     var filter: String? = null
-    var type: Int ?= TYPE_APP
-    private var searchListAdapter : SearchListAdapter
-    var apps: MutableList<AppData> ?= null
-    var files: MutableList<MediaFile> ?= null
+    var type: Int? = TYPE_APP
+    private var searchListAdapter: SearchListAdapter
+    var apps: MutableList<AppData>? = null
+    var files: MutableList<MediaFile>? = null
 
     var limited: Boolean = true
     var rootWindow: AbsTopPopWindow? = null
@@ -58,7 +58,7 @@ constructor(
         adapter = searchListAdapter
     }
 
-    fun setAppData(apps: MutableList<AppData> ) {
+    fun setAppData(apps: MutableList<AppData>) {
         this.apps = apps
         searchListAdapter.setAppData(apps)
         searchListAdapter.rootWindow = rootWindow
@@ -72,61 +72,58 @@ constructor(
         searchListAdapter.filter = filter
     }
 
-
-    fun setLimit(limit : Boolean){
+    fun setLimit(limit: Boolean) {
         this.limited = limit
         searchListAdapter.limited = limit
         searchListAdapter.notifyDataSetChanged()
     }
 
-
     private class SearchListAdapter(private val context: Context) :
         Adapter<SearchListAdapter.ViewHolder>() {
-        var filter: String?= null
+        var filter: String? = null
         private val apps: MutableList<AppData?> = ArrayList()
         private val files: MutableList<MediaFile?> = ArrayList()
         var limited: Boolean = true
         var rootWindow: AbsTopPopWindow? = null
-        var type: Int ?= TYPE_APP
-
+        var type: Int? = TYPE_APP
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val appInfoLayout =
-                LayoutInflater.from(context).inflate(R.layout.item_search_list,
-                    parent, false)
-                        as ViewGroup
-            return ViewHolder(
-                appInfoLayout
-            )
+                LayoutInflater.from(context).inflate(R.layout.item_search_list, parent, false)
+                    as ViewGroup
+            return ViewHolder(appInfoLayout)
         }
 
         override fun getItemCount(): Int {
-            if(type == TYPE_APP) {
-                if(limited){
-                    return if(apps.size > SEARCH_LIMIT) SEARCH_LIMIT else apps.size
+            if (type == TYPE_APP) {
+                if (limited) {
+                    return if (apps.size > SEARCH_LIMIT) SEARCH_LIMIT else apps.size
                 } else {
                     return apps.size
                 }
             } else {
-                if(limited){
-                    return if(files.size > SEARCH_LIMIT) SEARCH_LIMIT else files.size
+                if (limited) {
+                    return if (files.size > SEARCH_LIMIT) SEARCH_LIMIT else files.size
                 } else {
                     return files.size
                 }
             }
-
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            when (type){
-                TYPE_APP->{
+            when (type) {
+                TYPE_APP -> {
                     val appData = apps[position]
-                    if(appData?.linuxInfo != null){
-                        if(appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVG || appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVGZ){
-                            val svgDrawable = ImageUtils.getSVGDrawable(
-                                "${Utils.linuxRootPath}${appData?.iconPath}",
-                                context
-                            )
+                    if (appData?.linuxInfo != null) {
+                        if (
+                            appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVG ||
+                                appData.linuxInfo?.iconType == ImageUtils.SURFFIX_SVGZ
+                        ) {
+                            val svgDrawable =
+                                ImageUtils.getSVGDrawable(
+                                    "${Utils.linuxRootPath}${appData?.iconPath}",
+                                    context
+                                )
                             holder.iconIV?.setImageDrawable(svgDrawable)
                         } else {
                             Glide.with(GlobalSystemUIContext.getContext())
@@ -144,17 +141,17 @@ constructor(
                     val targetText = filter!!
                     setTextBold(originString, spannableString, holder.nameTV, targetText)
                     holder.itemLl?.setOnHoverListener(hoverListener)
-                    holder.itemLl?.setOnClickListener{
+                    holder.itemLl?.setOnClickListener {
                         rootWindow?.dismiss()
-                        if(appData?.linuxInfo != null){
+                        if (appData?.linuxInfo != null) {
                             val intent = Intent(Intent.ACTION_VIEW)
                             intent.setDataAndType(Uri.EMPTY, "application/vnd.desktop")
                             val linuxInfo = appData.linuxInfo
-                            intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path  )
+                            intent.putExtra("openParams", linuxInfo?.name + "###" + linuxInfo?.path)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             try {
                                 context.startActivity(intent)
-                            } catch (e: Exception){
+                            } catch (e: Exception) {
                                 Log.e(TAG, e.message.toString())
                             }
                         } else {
@@ -163,47 +160,73 @@ constructor(
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             try {
                                 context.startActivity(intent)
-                            }  catch (e: Exception){
+                            } catch (e: Exception) {
                                 Log.e(TAG, e.message.toString())
                             }
                         }
                     }
                 }
-                TYPE_FILE->{
+                TYPE_FILE -> {
                     val file = files[position]
                     var resId = -1
-//                    Log.d(TAG, "onBindViewHolder() called with: file = $file, position = $position")
+                    //                    Log.d(TAG, "onBindViewHolder() called with: file = $file,
+                    // position = $position")
                     val fileType = file?.mimeType!!
-                    if(fileType.contains("png") || fileType.contains("jpg")||fileType.contains("svg")){
-                        resId =  R.drawable.ic_doc_image;
-                    }else if(fileType.contains("mp3") || fileType.contains("wav")|| fileType.contains("aac") || fileType.contains("flac") || fileType.contains("ogg")  ){
-                        resId =  R.drawable.ic_doc_audio;
-                    }else if(fileType.contains("mp4") || fileType.contains("avi") || fileType.contains("mov") || fileType.contains("wmv") || fileType.contains("mpg") || fileType.contains("flv") || fileType.contains("3gp")   ){
-                        resId =  R.drawable.ic_doc_video;
-                    }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
-                        resId =  R.drawable.ic_doc_document;
-                    }else if(fileType.contains("pdf") ){
-                        resId =  R.drawable.ic_doc_pdf;
-                    } else if(fileType.contains("kt") ){
-                        resId =  R.drawable.ic_kotlin;
-                    }else if(fileType.contains("sh") ){
-                        resId =  R.drawable.ic_shell;
-                    }else if(fileType.contains("db") || fileType.contains("sql") ){
-                        resId =  R.drawable.ic_sql;
-                    }else if(fileType.contains("apk") ){
-                        resId =  R.drawable.ic_doc_apk;
-                    } else if(fileType.contains("ppt")){
-                        resId =  R.drawable.ic_doc_powerpoint;
-                    } else if(fileType.contains("doc")){
-                        resId =  R.drawable.ic_doc_word;
-                    } else if(fileType.contains("xls")){
-                        resId =  R.drawable.ic_doc_excel;
-                    } else if(fileType.contains("rar")||fileType.contains("zip") ){
-                        resId =  R.drawable.ic_doc_compressed;
-                    } else if(fileType.contains("dir")){
-                        resId =  R.drawable.ic_doc_folder;
-                    } else{
-                        resId =  R.drawable.ic_unkown;
+                    if (
+                        fileType.contains("png") ||
+                            fileType.contains("jpg") ||
+                            fileType.contains("svg")
+                    ) {
+                        resId = R.drawable.ic_doc_image
+                    } else if (
+                        fileType.contains("mp3") ||
+                            fileType.contains("wav") ||
+                            fileType.contains("aac") ||
+                            fileType.contains("flac") ||
+                            fileType.contains("ogg")
+                    ) {
+                        resId = R.drawable.ic_doc_audio
+                    } else if (
+                        fileType.contains("mp4") ||
+                            fileType.contains("avi") ||
+                            fileType.contains("mov") ||
+                            fileType.contains("wmv") ||
+                            fileType.contains("mpg") ||
+                            fileType.contains("flv") ||
+                            fileType.contains("3gp")
+                    ) {
+                        resId = R.drawable.ic_doc_video
+                    } else if (
+                        fileType.contains("txt") ||
+                            fileType.contains("md") ||
+                            fileType.contains("xml") ||
+                            fileType.contains("java") ||
+                            fileType.contains("htm") ||
+                            fileType.contains("json")
+                    ) {
+                        resId = R.drawable.ic_doc_document
+                    } else if (fileType.contains("pdf")) {
+                        resId = R.drawable.ic_doc_pdf
+                    } else if (fileType.contains("kt")) {
+                        resId = R.drawable.ic_kotlin
+                    } else if (fileType.contains("sh")) {
+                        resId = R.drawable.ic_shell
+                    } else if (fileType.contains("db") || fileType.contains("sql")) {
+                        resId = R.drawable.ic_sql
+                    } else if (fileType.contains("apk")) {
+                        resId = R.drawable.ic_doc_apk
+                    } else if (fileType.contains("ppt")) {
+                        resId = R.drawable.ic_doc_powerpoint
+                    } else if (fileType.contains("doc")) {
+                        resId = R.drawable.ic_doc_word
+                    } else if (fileType.contains("xls")) {
+                        resId = R.drawable.ic_doc_excel
+                    } else if (fileType.contains("rar") || fileType.contains("zip")) {
+                        resId = R.drawable.ic_doc_compressed
+                    } else if (fileType.contains("dir")) {
+                        resId = R.drawable.ic_doc_folder
+                    } else {
+                        resId = R.drawable.ic_unkown
                     }
                     val originString = file.name
                     val spannableString = SpannableString(originString)
@@ -211,9 +234,9 @@ constructor(
                     setTextBold(originString, spannableString, holder.nameTV, targetText)
                     holder.iconIV?.setImageResource(resId)
                     holder.itemLl?.setOnHoverListener(hoverListener)
-                    holder.itemLl?.setOnClickListener{
+                    holder.itemLl?.setOnClickListener {
                         rootWindow?.dismiss()
-                        if(TextUtils.equals(fileType, "dir")){
+                        if (TextUtils.equals(fileType, "dir")) {
                             val intent = Intent(Intent.ACTION_VIEW)
                             intent.setDataAndType(file.uri, "vnd.android.document/directory")
                             intent.flags = FLAG_ACTIVITY_NEW_TASK
@@ -286,10 +309,6 @@ constructor(
             val iconIV = appInfoLayout.findViewById<ImageView?>(R.id.search_icon_iv)
             val nameTV = appInfoLayout.findViewById<TextView?>(R.id.search_name_tv)
             val itemLl = appInfoLayout.findViewById<LinearLayout?>(R.id.search_item_ll)
-
         }
-
     }
-
-
 }

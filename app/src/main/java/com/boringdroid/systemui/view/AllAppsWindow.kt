@@ -25,7 +25,6 @@ import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.view.View.OnApplyWindowInsetsListener
 import android.widget.*
 import com.boringdroid.systemui.AppLoaderTask
 import com.boringdroid.systemui.R
@@ -35,11 +34,10 @@ import com.boringdroid.systemui.data.Action
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.Collect
 import com.boringdroid.systemui.utils.*
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
-
 
 class AllAppsWindow(private val mContext: Context?, private val sContext: Context?) :
     View.OnClickListener {
@@ -69,7 +67,6 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
     private var list: MutableList<Collect>? = null
     var listener: SystemStateLayout.NotificationListener? = null
 
-
     @SuppressLint("ClickableViewAccessibility", "InflateParams")
     override fun onClick(v: View) {
         if (shown) {
@@ -94,7 +91,6 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         allAppsLayout!!.handler = handler
         collectAppsLayout!!.handler = handler
 
-
         val elevation = mContext!!.resources.getInteger(R.integer.all_apps_elevation)
         windowContentView!!.elevation = elevation.toFloat()
         windowContentView!!.setOnTouchListener { _: View?, event: MotionEvent ->
@@ -104,11 +100,12 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             false
         }
         val cornerRadius = mContext.resources.getDimension(R.dimen.all_apps_corner_radius)
-        windowContentView!!.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+        windowContentView!!.outlineProvider =
+            object : ViewOutlineProvider() {
+                override fun getOutline(view: View, outline: Outline) {
+                    outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+                }
             }
-        }
         windowContentView!!.clipToOutline = true
         windowManager.addView(windowContentView, layoutParams)
         appLoaderTask.postSart()
@@ -117,18 +114,18 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         listener?.syncVisible(Utils.ALLAPPWINDOW_VISIBLE)
         powerMenuVisible = false
         powerEntry!!.visibility = View.GONE
-        powerBtn!!.setOnClickListener(View.OnClickListener {
-            if (powerMenuVisible) {
-                hidePowerMenu()
-            } else {
-                showPowerMenu()
+        powerBtn!!.setOnClickListener(
+            View.OnClickListener {
+                if (powerMenuVisible) {
+                    hidePowerMenu()
+                } else {
+                    showPowerMenu()
+                }
             }
-        })
+        )
         screenRecordBtn!!.setOnClickListener {
-            val launcherComponent: ComponentName = ComponentName(
-                SYSUI_PACKAGE,
-                SYSUI_SCREENRECORD_LAUNCHER
-            )
+            val launcherComponent: ComponentName =
+                ComponentName(SYSUI_PACKAGE, SYSUI_SCREENRECORD_LAUNCHER)
             val intent = Intent()
             intent.component = launcherComponent
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -140,49 +137,54 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             mContext.startActivity(intent)
             listener?.syncVisible(Utils.ALL_INVISIBLE)
         }
-        imgPower!!.setOnClickListener {
-            showPowerListMenu(imgPower!!)
-        }
+        imgPower!!.setOnClickListener { showPowerListMenu(imgPower!!) }
         allAppsLayout?.setWindow(this)
         collectAppsLayout?.setWindow(this)
         searchEt?.setText("")
-        searchEt?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                if (!TextUtils.isEmpty(s.toString())) {
-                    appLoaderTask.postSart()
-                } else {
-                    appLoaderTask.postSart()
+        searchEt?.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (!TextUtils.isEmpty(s.toString())) {
+                        appLoaderTask.postSart()
+                    } else {
+                        appLoaderTask.postSart()
+                    }
+                    Log.d(TAG, "afterTextChanged() called with: " + s.toString())
                 }
-                Log.d(TAG, "afterTextChanged() called with: " + s.toString());
-            }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-//                Log.d(TAG, "beforeTextChanged() called with: s = $s, start = $start, count = $count, after = $after")
-            }
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                    //                Log.d(TAG, "beforeTextChanged() called with: s = $s, start =
+                    // $start, count = $count, after = $after")
+                }
 
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                Log.d(
-                    TAG,
-                    "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count"
-                )
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    Log.d(
+                        TAG,
+                        "onTextChanged() called with: s = $s, start = $start, before = $before, count = $count"
+                    )
+                }
             }
-        })
+        )
     }
 
     fun showPowerListMenu(anchor: View) {
-//        Thread {
-//            ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
-//            ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
-//            ParseUtils.parseGpsData(mContext);
-//        }.start()
+        //        Thread {
+        //            ParseUtils.parseGitXml(mContext, Constant.URL_GITEE_COMPATIBLE_LIST)
+        //            ParseUtils.parseGitXml(mContext,Constant.URL_GITEE_COMPATIBLE_VALUE)
+        //            ParseUtils.parseGpsData(mContext);
+        //        }.start()
 
-//        val inte = Intent()
-//        if (mContext != null) {
-//            inte.setClass(mContext, CompatibleSyncActivity::class.java)
-//        }
-//        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        mContext?.startActivity(inte)
+        //        val inte = Intent()
+        //        if (mContext != null) {
+        //            inte.setClass(mContext, CompatibleSyncActivity::class.java)
+        //        }
+        //        inte.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        //        mContext?.startActivity(inte)
 
         windowPowerView = LayoutInflater.from(mContext).inflate(R.layout.task_list, null)
         val lp: WindowManager.LayoutParams? = Utils.makeWindowParams(-2, -2, mContext!!, true)
@@ -193,9 +195,10 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         lp?.flags = focus or touch
         val location = IntArray(2)
         anchor.getLocationOnScreen(location)
-        lp?.x = 60;//location[0]
+        lp?.x = 60
+        // location[0]
         lp?.y = location[1] + Utils.dpToPx(mContext, anchor.measuredHeight / 2)
-//        lp?.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        //        lp?.width = WindowManager.LayoutParams.WRAP_CONTENT;
         windowPowerView?.setOnTouchListener { p1: View?, p2: MotionEvent ->
             if (p2.action == MotionEvent.ACTION_OUTSIDE) {
                 windowManager.removeView(windowPowerView)
@@ -206,41 +209,35 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         val actionsLv = windowPowerView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
 
-
         actions.add(
-            Action(
-                R.drawable.icon_lock_screen,
-                mContext.getString(R.string.fde_lock_screen)
-            )
+            Action(R.drawable.icon_lock_screen, mContext.getString(R.string.fde_lock_screen))
         )
         actions.add(Action(R.drawable.icon_log_off, mContext.getString(R.string.fde_log_off)))
         actions.add(Action(R.drawable.icon_restart, mContext.getString(R.string.fde_restart)))
         actions.add(Action(R.drawable.icon_shutdown, mContext.getString(R.string.fde_shutdown)))
-
 
         actionsLv?.adapter = AppActionsAdapter(mContext, actions)
         actionsLv?.onItemClickListener =
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_lock_screen))) {
-                    DeviceUtils.gotoNetWork(mContext,"lock")
-//                    DeviceUtils.lock()
+                    DeviceUtils.gotoNetWork(mContext, "lock")
+                    //                    DeviceUtils.lock()
                 } else if (action.text.equals(mContext.getString(R.string.fde_log_off))) {
-                    DeviceUtils.gotoNetWork(mContext,"logout")
-//                    DeviceUtils.logout()
+                    DeviceUtils.gotoNetWork(mContext, "logout")
+                    //                    DeviceUtils.logout()
                 } else if (action.text.equals(mContext.getString(R.string.fde_restart))) {
-                    DeviceUtils.gotoNetWork(mContext,"restart")
-//                    DeviceUtils.restart()
+                    DeviceUtils.gotoNetWork(mContext, "restart")
+                    //                    DeviceUtils.restart()
                 } else if (action.text.equals(mContext.getString(R.string.fde_shutdown))) {
-                    DeviceUtils.gotoNetWork(mContext,"poweroff")
-//                    DeviceUtils.poweroff()
+                    DeviceUtils.gotoNetWork(mContext, "poweroff")
+                    //                    DeviceUtils.poweroff()
                 }
                 windowManager.removeView(windowPowerView)
             }
         windowPowerView?.setBackground(mContext.getDrawable(R.drawable.round_rect))
         windowManager.addView(windowPowerView, lp)
     }
-
 
     private fun showPowerMenu() {
         searchEt?.setText("")
@@ -278,23 +275,22 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         val resources = context!!.resources
         val windowWidth = resources.getDimension(R.dimen.all_apps_window_width).toInt()
         val windowHeight = resources.getDimension(R.dimen.all_apps_window_height).toInt()
-        val layoutParams = WindowManager.LayoutParams(
-            windowWidth,
-            windowHeight,
-            WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-            PixelFormat.RGB_565
-        )
+        val layoutParams =
+            WindowManager.LayoutParams(
+                windowWidth,
+                windowHeight,
+                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.RGB_565
+            )
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val size = Point()
         windowManager.defaultDisplay.getRealSize(size)
-        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal)
-            .toInt()
-        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical)
-            .toInt()
+        val marginStart = resources.getDimension(R.dimen.all_apps_window_margin_horizontal).toInt()
+        val marginVertical = resources.getDimension(R.dimen.all_apps_window_margin_vertical).toInt()
         layoutParams.gravity = Gravity.TOP or Gravity.START
         layoutParams.x = marginStart
         // TODO: Looks like the heightPixels is incorrect, so we use multi margin to
@@ -315,10 +311,9 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             if (windowPowerView != null) {
                 windowManager.removeViewImmediate(windowPowerView)
             }
-        } catch (e: Exception) {
-        }
-        windowCollectView = null;
-        windowPowerView = null;
+        } catch (e: Exception) {}
+        windowCollectView = null
+        windowPowerView = null
     }
 
     fun dismiss() {
@@ -346,19 +341,20 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
     private fun refreshCollectList() {
 
         uiScope.launch {
-            var flag = SPUtils.getIntUserInfo(mContext, "finishFlag");
-//            if (flag == 0) {
-//                val list: MutableList<AppData> = withContext(Dispatchers.Default) {
-//                    val items = CollectUtils.queryListData(mContext) ?: emptyList()
-//                    val allApps = appLoaderTask.allApps ?: emptyList()
-//                    val itemPackageNames = items.map { it.packageName }.toHashSet()
-//                    allApps.filter { it.packageName in itemPackageNames }.toMutableList()
-//                }
-//                list.forEach { appData ->
-//                    SPUtils.putUserInfo(mContext, appData.packageName, "1");
-//                }
-//            }
-            SPUtils.putIntUserInfo(mContext, "finishFlag", 1);
+            var flag = SPUtils.getIntUserInfo(mContext, "finishFlag")
+            //            if (flag == 0) {
+            //                val list: MutableList<AppData> = withContext(Dispatchers.Default) {
+            //                    val items = CollectUtils.queryListData(mContext) ?: emptyList()
+            //                    val allApps = appLoaderTask.allApps ?: emptyList()
+            //                    val itemPackageNames = items.map { it.packageName }.toHashSet()
+            //                    allApps.filter { it.packageName in itemPackageNames
+            // }.toMutableList()
+            //                }
+            //                list.forEach { appData ->
+            //                    SPUtils.putUserInfo(mContext, appData.packageName, "1");
+            //                }
+            //            }
+            SPUtils.putIntUserInfo(mContext, "finishFlag", 1)
             collectAppsLayout?.setData(appLoaderTask.allApps)
         }
     }
@@ -383,9 +379,10 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         }
         val applicationInfo = mContext.packageManager.getApplicationInfo(appData.packageName!!, 0)
         val flagInfo = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
-//        val isSystem = applicationInfo.flags and flagInfo != 0
+        //        val isSystem = applicationInfo.flags and flagInfo != 0
         val isSystem =
-            applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            applicationInfo.flags and
+                (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         val actionsLv = windowCollectView?.findViewById<ListView>(R.id.tasks_lv)
         val actions = ArrayList<Action?>()
 
@@ -396,24 +393,24 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
         }
 
-//        uiScope.launch {
-//            val isAppCollected =
-//                CollectUtils.queryCollectDataByPackageName(mContext, appData.packageName);
-//            if (isAppCollected != null) {
-//                actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
-//            } else {
-//                actions.add(Action(0, mContext.getString(R.string.fde_collect)))
-//            }
-//        }
+        //        uiScope.launch {
+        //            val isAppCollected =
+        //                CollectUtils.queryCollectDataByPackageName(mContext, appData.packageName);
+        //            if (isAppCollected != null) {
+        //                actions.add(Action(0, mContext.getString(R.string.fde_uncollect)))
+        //            } else {
+        //                actions.add(Action(0, mContext.getString(R.string.fde_collect)))
+        //            }
+        //        }
 
         actions.add(Action(0, mContext.getString(R.string.todesk)))
 
-//        actions.add(
-//            Action(
-//                0,
-//                mContext.getString(R.string.compatible_config)
-//            )
-//        )
+        //        actions.add(
+        //            Action(
+        //                0,
+        //                mContext.getString(R.string.compatible_config)
+        //            )
+        //        )
         if (!isSystem) {
             actions.add(Action(0, mContext.getString(R.string.uninstall)))
         } else {
@@ -424,15 +421,16 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
             AdapterView.OnItemClickListener { p1: AdapterView<*>, p2: View?, p3: Int, p4: Long ->
                 val action = p1.getItemAtPosition(p3) as Action
                 if (action.text.equals(mContext.getString(R.string.fde_collect))) {
-//                    val packageName = appData.packageName
-//                    var appName = appData.name
-//                    var res = CollectUtils.insertCollectData(mContext, packageName, appName, "0");
-                    SPUtils.putUserInfo(mContext, appData.packageName, "1");
+                    //                    val packageName = appData.packageName
+                    //                    var appName = appData.name
+                    //                    var res = CollectUtils.insertCollectData(mContext,
+                    // packageName, appName, "0");
+                    SPUtils.putUserInfo(mContext, appData.packageName, "1")
                     refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.fde_uncollect))) {
-//                    val packageName = appData.packageName
-//                    CollectUtils.deleteCollectData(mContext,packageName)
-                    SPUtils.putUserInfo(mContext, appData.packageName, "");
+                    //                    val packageName = appData.packageName
+                    //                    CollectUtils.deleteCollectData(mContext,packageName)
+                    SPUtils.putUserInfo(mContext, appData.packageName, "")
                     refreshCollectList()
                 } else if (action.text.equals(mContext.getString(R.string.todesk))) {
                     AppUtils.createShortcut(mContext, appData)
@@ -456,27 +454,27 @@ class AllAppsWindow(private val mContext: Context?, private val sContext: Contex
         windowManager.addView(windowCollectView, lp)
     }
 
-
     private class H(allAppsWindow: AllAppsWindow?) : Handler() {
         private val allAppsWindow: WeakReference<AllAppsWindow?>
+
         override fun handleMessage(msg: Message) {
             when (msg.what) {
-                HandlerConstant.H_LOAD_SUCCEED -> runMethodSafely(
-                    object : RunAllAppsWindowMethod {
-                        override fun run(allAppsWindow: AllAppsWindow?) {
-                            allAppsWindow!!.notifyLoadSucceed()
+                HandlerConstant.H_LOAD_SUCCEED ->
+                    runMethodSafely(
+                        object : RunAllAppsWindowMethod {
+                            override fun run(allAppsWindow: AllAppsWindow?) {
+                                allAppsWindow!!.notifyLoadSucceed()
+                            }
                         }
-                    }
-                )
-
-                HandlerConstant.H_DISMISS_ALL_APPS_WINDOW -> runMethodSafely(
-                    object : RunAllAppsWindowMethod {
-                        override fun run(allAppsWindow: AllAppsWindow?) {
-                            allAppsWindow!!.dismiss()
+                    )
+                HandlerConstant.H_DISMISS_ALL_APPS_WINDOW ->
+                    runMethodSafely(
+                        object : RunAllAppsWindowMethod {
+                            override fun run(allAppsWindow: AllAppsWindow?) {
+                                allAppsWindow!!.dismiss()
+                            }
                         }
-                    }
-                )
-
+                    )
                 else -> {
                     // Do nothing
                 }

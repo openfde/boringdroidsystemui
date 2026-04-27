@@ -16,16 +16,18 @@ package com.boringdroid.systemui.utils
  */
 
 import android.os.CountDownTimer
-import android.util.Log
 
-class CountDownTimerUtils(var countDownInterface: CountDownInterface, millisInFuture: Long, countDownInterval: Long) : CountDownTimer(millisInFuture,
-    countDownInterval) {
+class CountDownTimerUtils(
+    var countDownInterface: CountDownInterface,
+    millisInFuture: Long,
+    countDownInterval: Long
+) : CountDownTimer(millisInFuture, countDownInterval) {
 
     override fun onTick(millisUntilFinished: Long) {
-        countDownInterface.onTick(millisUntilFinished);
+        countDownInterface.onTick(millisUntilFinished)
     }
 
     override fun onFinish() {
-        countDownInterface.onFinish();
+        countDownInterface.onFinish()
     }
 }

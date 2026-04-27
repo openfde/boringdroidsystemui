@@ -22,5 +22,4 @@ class LogTools {
             Log.e(TAG, msg!!)
         }
     }
-
 }

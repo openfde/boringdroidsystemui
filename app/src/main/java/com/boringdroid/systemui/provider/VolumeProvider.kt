@@ -10,7 +10,7 @@ class VolumeProvider {
 
     var audioDevice: AudioDevice? = null
 
-    fun getVolume(): Int{
+    fun getVolume(): Int {
         val streamMinVolume = 0
         val streamMaxVolume = 100
         val devices = getDevices(false)
@@ -21,7 +21,9 @@ class VolumeProvider {
     }
 
     // Returns results such as :
-    // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
+    // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI /
+    // DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback
+    // analog-output-headphones=模拟耳机=0.450000=0
     private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
         try {
             val devicesResult = AudioSystem.getDevs(type)

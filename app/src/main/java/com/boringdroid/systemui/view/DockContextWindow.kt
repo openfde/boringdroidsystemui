@@ -1,16 +1,12 @@
 package com.boringdroid.systemui.view
 
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,30 +21,28 @@ class DockContextWindow(
     gravity: Int,
     layoutResId: Int,
     typeParam: Int
-)
-    : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam),
-    View.OnClickListener {
+) : AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam), View.OnClickListener {
 
-    var divider: Int ?= -1
-    var listener: DockItemClickListener ?= null
+    var divider: Int? = -1
+    var listener: DockItemClickListener? = null
     private var mRecycleView: LoadedDockContextRecycleView? = null
-
 
     companion object {
         fun dissmissWindow(window: AbsTopPopWindow?) {
-            if(window != null && window!!.isShowing()){
+            if (window != null && window!!.isShowing()) {
                 window?.dismiss()
             }
         }
+
         const val FADE_DURATION: Long = 500
-        const val TAG:String = "DockContextWindow"
+        const val TAG: String = "DockContextWindow"
     }
 
-    override fun showPopupWindow(){
+    override fun showPopupWindow() {
         super.showPopupWindow()
         initViews()
         val imageView = enterView?.findViewById<ImageView>(R.id.app_icon_iv)
-//        imageView?.applyGrayFilter()
+        //        imageView?.applyGrayFilter()
         Log.d(TAG, "showPopupWindow() called")
         getContentView()?.doOnLayout {
             // 此时布局已完成
@@ -62,54 +56,48 @@ class DockContextWindow(
         colorFilter = ColorMatrixColorFilter(matrix)
     }
 
-
-
     override fun dismiss() {
         super.dismiss()
         val imageView = enterView?.findViewById<ImageView>(R.id.app_icon_iv)
-//        imageView?.clearColorFilter()
+        //        imageView?.clearColorFilter()
     }
 
     fun createSlideUpEnterAnimator(view: View): ObjectAnimator {
-        return ObjectAnimator.ofFloat(view, "translationY",
-            view.height.toFloat(), 0f).apply {
+        return ObjectAnimator.ofFloat(view, "translationY", view.height.toFloat(), 0f).apply {
             duration = 300
             interpolator = AccelerateDecelerateInterpolator()
         }
     }
 
     fun createSlideDownExitAnimator(view: View): ObjectAnimator {
-        return ObjectAnimator.ofFloat(view, "translationY",
-            0f, view.height.toFloat()).apply {
+        return ObjectAnimator.ofFloat(view, "translationY", 0f, view.height.toFloat()).apply {
             duration = 300
             interpolator = AccelerateDecelerateInterpolator()
         }
     }
 
-    fun initViews(){
+    fun initViews() {
         mRecycleView = mContentView?.findViewById(R.id.context_rv)
         mRecycleView?.dockContextWindow = this
     }
 
-    override fun onClick(v: View?) {
-    }
+    override fun onClick(v: View?) {}
 
-    fun setData(contextActionList: MutableList<DockContext>,
-                reverse: Boolean) {
+    fun setData(contextActionList: MutableList<DockContext>, reverse: Boolean) {
         mRecycleView?.listener = listener
         mRecycleView?.divider = divider
         mRecycleView?.setData(contextActionList)
-        if(reverse){
+        if (reverse) {
             val layoutManager = LinearLayoutManager(getContext())
-//            layoutManager.setReverseLayout(true)
+            //            layoutManager.setReverseLayout(true)
             layoutManager.setStackFromEnd(true)
             mRecycleView?.setLayoutManager(layoutManager)
         }
     }
 
-    fun setData(contextActionList: MutableList<DockContext>,
-                ) {
+    fun setData(
+        contextActionList: MutableList<DockContext>,
+    ) {
         setData(contextActionList, false)
     }
-
 }

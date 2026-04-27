@@ -9,7 +9,7 @@ import android.util.Log
 import com.boringdroid.systemui.data.MediaFile
 import java.util.Date
 
-class SearchMediaProvider (private val context: Context?, private val handler: Handler?){
+class SearchMediaProvider(private val context: Context?, private val handler: Handler?) {
 
     companion object {
         private val WORK_THREAD = HandlerThread("media-loader-thread")
@@ -19,8 +19,8 @@ class SearchMediaProvider (private val context: Context?, private val handler: H
             WORK_THREAD.start()
         }
     }
-    val uri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
+    val uri: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
     fun providerWithFilter(searchString: String): MutableList<MediaFile> {
         val resolver = context?.contentResolver
@@ -28,13 +28,13 @@ class SearchMediaProvider (private val context: Context?, private val handler: H
 
         val uri = MediaStore.Files.getContentUri("external")
 
-        val projection = arrayOf(
-            MediaStore.Files.FileColumns._ID,
-            MediaStore.Files.FileColumns.DISPLAY_NAME,
-            MediaStore.Files.FileColumns.DATA,
-            MediaStore.Files.FileColumns.MIME_TYPE,
-            MediaStore.Files.FileColumns.DATE_MODIFIED,
-
+        val projection =
+            arrayOf(
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DISPLAY_NAME,
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.MIME_TYPE,
+                MediaStore.Files.FileColumns.DATE_MODIFIED,
             )
 
         val selection = "(${MediaStore.Files.FileColumns.DISPLAY_NAME} LIKE ? COLLATE NOCASE)"
@@ -44,18 +44,15 @@ class SearchMediaProvider (private val context: Context?, private val handler: H
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_MODIFIED} DESC"
 
         if (resolver != null) {
-            resolver.query(
-                uri,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
-            )?.use { cursor ->
+            resolver.query(uri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
+                val nameColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
-                val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
-                val dateModifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
+                val mimeTypeColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
+                val dateModifiedColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
@@ -63,7 +60,7 @@ class SearchMediaProvider (private val context: Context?, private val handler: H
                     val path = cursor.getString(dataColumn)
                     var mimeType = cursor.getString(mimeTypeColumn)
                     val dateModified = cursor.getLong(dateModifiedColumn) * 1000
-                    if(mimeType == null){
+                    if (mimeType == null) {
                         mimeType = "dir"
                     }
 
@@ -82,17 +79,19 @@ class SearchMediaProvider (private val context: Context?, private val handler: H
         }
 
         resultList.forEach { file ->
-            Log.d("MediaSearch", """
+            Log.d(
+                "MediaSearch",
+                """
         Name: ${file.name}
         Path: ${file.path}
         MIME: ${file.mimeType}
         URI: ${file.uri}
         Modified: ${Date(file.lastModified)}
-    """.trimIndent())
+    """
+                    .trimIndent()
+            )
         }
 
         return resultList
     }
-
-
 }

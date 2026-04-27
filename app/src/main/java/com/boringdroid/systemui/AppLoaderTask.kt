@@ -14,14 +14,12 @@ import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.AppListResult
 import com.boringdroid.systemui.provider.DockAppsProvider.Companion.PACKAGE_X11
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
-import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
 import com.boringdroid.systemui.utils.DeviceUtils.URL_GETALLAPP
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
-import okhttp3.Call
 import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArrayList
-
+import okhttp3.Call
 
 class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
     companion object {
@@ -87,20 +85,20 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         allApps.addAll(loaderAndroidApps)
     }
 
-    private fun convertAppData(info: LauncherActivityInfo): AppData{
+    private fun convertAppData(info: LauncherActivityInfo): AppData {
         val appData = AppData()
         appData.name = info.label as String
         appData.componentName = info.componentName
         appData.packageName = info.applicationInfo.packageName
         val density: Int = context?.resources?.displayMetrics?.densityDpi ?: 0
-//        Log.d(TAG, "convertAppData density = $density")
+        //        Log.d(TAG, "convertAppData density = $density")
         appData.icon = info.getIcon(480)
-//        Log.d(TAG, "convertAppData() returned: $appData")
+        //        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 
-    private fun convertAppData(info: AppListResult.DataBeanX.DataBean): AppData{
-//        Log.d(TAG, "convertAppData info = ${info.iconPath}")
+    private fun convertAppData(info: AppListResult.DataBeanX.DataBean): AppData {
+        //        Log.d(TAG, "convertAppData info = ${info.iconPath}")
         val appData = AppData()
         appData.name = info.name as String
         val component = ComponentName("com.fde.x11", "com.fde.x11.XWindowService")
@@ -109,37 +107,41 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         appData.linuxInfo = info
         appData.iconPath = info.iconPath
         appData.fileName = info.fileName
-//        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(), context)
-//        Log.d(TAG, "convertAppData() returned: $appData")
+        //        appData.icon = ImageUtils.getImage(info.Icon, info.getIconType(), info.getName(),
+        // context)
+        //        Log.d(TAG, "convertAppData() returned: $appData")
         return appData
     }
 
-    fun getLinuxApps(forceRefresh: Boolean, page: Int){
+    fun getLinuxApps(forceRefresh: Boolean, page: Int) {
         QuietOkHttp.get(BASEURL + URL_GETALLAPP)
             .addParams("page", page.toString())
             .addParams("page_size", pageSize.toString())
             .addParams("refresh", forceRefresh.toString())
             .addParams("page_enable", "true")
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<AppListResult>() {
-                override fun onFailure(call: Call?, e: Exception?) {
-                    android.util.Log.d(TAG, "onFailure() called with: call = $call, e = $e")
-                }
+            .execute(
+                object : JsonCallBack<AppListResult>() {
+                    override fun onFailure(call: Call?, e: Exception?) {
+                        android.util.Log.d(TAG, "onFailure() called with: call = $call, e = $e")
+                    }
 
-                override fun onSuccess(call: Call?, response: AppListResult?) {
-                    val data = response?.getData()?.getData()
-                    loaderLinuxApps.clear()
-                    if (data != null) {
-                        for ( info in data){
-                            val appData = convertAppData(info)
-                            loaderLinuxApps.add(appData)
-//                            android.util.Log.d(TAG, "loaderLinuxApps: info = $info")
+                    override fun onSuccess(call: Call?, response: AppListResult?) {
+                        val data = response?.getData()?.getData()
+                        loaderLinuxApps.clear()
+                        if (data != null) {
+                            for (info in data) {
+                                val appData = convertAppData(info)
+                                loaderLinuxApps.add(appData)
+                                //                            android.util.Log.d(TAG,
+                                // "loaderLinuxApps: info = $info")
+                            }
+                            allApps.addAll(loaderLinuxApps)
+                            sendAllApps()
                         }
-                        allApps.addAll(loaderLinuxApps)
-                        sendAllApps()
                     }
                 }
-            })
+            )
     }
 
     @Synchronized
@@ -154,7 +156,6 @@ class AppLoaderTask(context: Context?, target: Handler?) : Runnable {
         // Could we remove notify() from kotlin
         // notify()
     }
-
 
     private val target: Handler?
         get() = if (loaderTarget?.get() != null) loaderTarget.get() else null

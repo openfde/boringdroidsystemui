@@ -57,17 +57,20 @@ import com.fde.x11.ICmdEntryInterface
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.log.HttpLog
 import com.xwdz.http.log.HttpLoggingInterceptor
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import java.lang.reflect.InvocationTargetException
 import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
+class SystemUIOverlay :
+    OverlayPlugin,
+    SystemStateLayout.NotificationListener,
+    TopBarNotificationWindow.WindowListener,
     UninstallReceiver.AppUninstallListener {
     private var pluginContext: Context? = null
     private var systemUIContext: Context? = null
@@ -86,25 +89,24 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var mNm: NotificationManager? = null
     private var dynamicReceiver: DynamicReceiver? = null
     private var wifiBroadcastReceiver: WifiBroadcastReceiver? = null
-    private var networkChangeReceiver: NetWorkBroadcastReceiver? =null
+    private var networkChangeReceiver: NetWorkBroadcastReceiver? = null
 
     private var dockAppsGroup: ViewGroup? = null
     private var dockAppsLayout: DockAppsLayout? = null
-    private var status: ViewGroup ?= null
-    private var navi: ViewGroup ?= null
+    private var status: ViewGroup? = null
+    private var navi: ViewGroup? = null
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
-    private var overviewProvider: AllAppsProvider ?= null
-    private var timeTickReceiver :BroadcastReceiver ?= null
-    private var batteryReceiver : BroadcastReceiver ?= null
-    private var recordHandler: Handler ?= null
+    private var overviewProvider: AllAppsProvider? = null
+    private var timeTickReceiver: BroadcastReceiver? = null
+    private var batteryReceiver: BroadcastReceiver? = null
+    private var recordHandler: Handler? = null
     private var mService: ICmdEntryInterface? = null
     private var mIsServiceBound = false
     private var mDockScaleFactor = 1.0f
-    var receiver :BroadcastReceiver?= null
-    private var mHandler : Handler = Handler(Looper.getMainLooper())
+    var receiver: BroadcastReceiver? = null
+    private var mHandler: Handler = Handler(Looper.getMainLooper())
 
-    val CONNECTIVITY_ACTION =  "com.android.systemui.CONNECTIVITY_CHANGE"
-
+    val CONNECTIVITY_ACTION = "com.android.systemui.CONNECTIVITY_CHANGE"
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun setup(
@@ -112,24 +114,25 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         navBar: View?,
     ) {
         Log.d(TAG, "setup this = $this,  statusBar tag = ${statusBar.getTag()}, navBar = ${navBar}")
-        if(statusBar.getTag() != null && statusBar.getTag() is Handler){
+        if (statusBar.getTag() != null && statusBar.getTag() is Handler) {
             recordHandler = statusBar.getTag() as Handler
         }
 
         status = statusBar as ViewGroup
         navi = navBar as ViewGroup
-        if(navi != null && navi!!.getTag() is Float){
+        if (navi != null && navi!!.getTag() is Float) {
             mDockScaleFactor = navi!!.getTag() as Float
-//            Log.d(TAG, "setup: mDockScaleFactor :${mDockScaleFactor}")
+            //            Log.d(TAG, "setup: mDockScaleFactor :${mDockScaleFactor}")
         }
-        if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
-//            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
+        if (navBarButtonGroupId > 0 && navBar != null && pluginContext != null) {
+            //            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
             updateNaviDock()
         }
         status?.visibility = View.VISIBLE
         status?.removeAllViews()
         generateTopBar()
     }
+
     private fun updateNaviDock() {
         dockAppsLayout?.onDestroy()
         val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
@@ -137,23 +140,27 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
         navi?.layoutParams = layoutParams
-        val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        val dockParams: FrameLayout.LayoutParams =
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
         navi?.removeAllViews()
         navi?.addView(dockAppsGroup, dockParams)
         dockAppsLayout?.initApps(mDockScaleFactor)
         dockAppsLayout?.status = status
         dockAppsLayout?.navi = navi
-        dockAppsGroup?.setOnClickListener{
-//            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
-//            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
-//            traverseAndPrint(navi!!, 0)
+        dockAppsGroup?.setOnClickListener {
+            //            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
+            //            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
+            //            traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
-        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
-//            Log.d(TAG, "updateNaviDock() called blur")
+        if (Utils.getProperty("fde.systemui.blurlevel", 0) == 0) {
+            //            Log.d(TAG, "updateNaviDock() called blur")
             Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
         } else {
-//            Log.d(TAG, "updateNaviDock() called not blur")
+            //            Log.d(TAG, "updateNaviDock() called not blur")
             val bgViewGroup = dockAppsGroup?.findViewById<ViewGroup>(R.id.paren_fl)
             bgViewGroup?.setBackgroundResource(R.drawable.round_rect_16dp_no_blur)
             val cardView = dockAppsGroup?.findViewById<CardView>(R.id.root_blur)
@@ -163,18 +170,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     private fun generateTopBar() {
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
-        status?.setPadding(0,0,0,0)
+        status?.setPadding(0, 0, 0, 0)
         status?.addView(topBarLayout)
         status?.setBackgroundColor(Color.TRANSPARENT)
         Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
-        if(TopBarLayout?.inited != true){
+        if (TopBarLayout?.inited != true) {
             topBarLayout?.initState()
             topBarLayout?.notificationListener = this
-            topBarLayout?.setOnClickListener{
-            }
+            topBarLayout?.setOnClickListener {}
             topBarLayout?.systemUIContext = systemUIContext
         }
-        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
+        if (Utils.getProperty("fde.systemui.blurlevel", 0) == 0) {
             Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
         }
         topBarLayout?.controlWindow?.recordHandler = recordHandler
@@ -191,7 +197,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         ImageUtils.init(sysUIContext)
         initOKhttp()
         SPUtils.pluginContext = systemUIContext
-        navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
+        navBarButtonGroupId =
+            sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
         btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
         dockAppsGroup = initializeDockAppsGroup(this.pluginContext, dockAppsGroup)
@@ -199,7 +206,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
         dockAppsGroup?.defaultFocusHighlightEnabled = false
-//        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
+        //        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
         Utils.getLinuxRootFileName(systemUIContext!!)
         Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
         overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
@@ -213,7 +220,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         dockAppsLayout!!.reloadActivityManager(systemUIContext)
         topBarLayout?.overviewProvider = overviewProvider
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
-        allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
+        allAppsWindow = AllAppsWindow(this.pluginContext, this.systemUIContext)
         btAllApps!!.setOnClickListener(allAppsWindow)
         resolver = sysUIContext.contentResolver
         initializeTuningServiceSettingKeys(resolver, tunerKeyObserver)
@@ -224,93 +231,117 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         val notificationServiceEnable = isNotificationServiceEnable()
         dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
         wifiBroadcastReceiver = WifiBroadcastReceiver(handlerWifi)
-        var intentFilter  = IntentFilter()
+        var intentFilter = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         intentFilter.addAction(INTENT_UPDATE_STATE)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
 
-        val intentFilterWifi  = IntentFilter()
+        val intentFilterWifi = IntentFilter()
         intentFilterWifi.addAction("com.android.systemui.CONNECTIVITY_CHANGE")
         pluginContext!!.registerReceiver(wifiBroadcastReceiver, intentFilterWifi, RECEIVER_EXPORTED)
 
         networkChangeReceiver = topBarLayout?.let { NetWorkBroadcastReceiver(it) }
 
-        systemUIContext!!.registerReceiver(networkChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        systemUIContext!!.registerReceiver(
+            networkChangeReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
         registPackageUpdate()
-//        XserverHelper.listenXserverStatus(pluginContext,null)
+        //        XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
         tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
         tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
-        timeTickReceiver = object : BroadcastReceiver() {
-            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-            override fun onReceive(context: Context, intent: Intent) {
-//                Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
-                if (intent.action == Intent.ACTION_TIME_TICK) {
-//                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
-                    checkXserverStatus()
+        timeTickReceiver =
+            object : BroadcastReceiver() {
+                @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+                override fun onReceive(context: Context, intent: Intent) {
+                    //                Log.d(TAG, "onReceive() called with: context = $context,
+                    // intent = $intent")
+                    if (intent.action == Intent.ACTION_TIME_TICK) {
+                        //                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " +
+                        // intent.action)
+                        checkXserverStatus()
+                    }
+                    //                else if (intent.action ==
+                    // XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON){
+                    //                    val icon: Bitmap? = intent.getParcelableExtra(KEY_ICON)
+                    //                    val window = intent.getLongExtra(KEY_WINDOW, -1)
+                    //                    val action = intent.getLongExtra(KEY_ACTION, -1)
+                    //                    val title = intent.getStringExtra(KEY_TITLE)
+                    //                    topBarLayout?.updateSystemTrayIcon(icon, window, action,
+                    // title)
+                    //                } else if(intent.action ==
+                    // XserverHelper.START_SYSTRAY_FROM_X){
+                    //                    val rect: Rect? = intent.getParcelableExtra(X_WINDOW_RECT,
+                    // Rect::class.java)
+                    //                    val index = intent.getIntExtra(X_WINDOW_INDEX, -1)
+                    //                    val pwin = intent.getLongExtra(X_WINDOW_PWIN, -1)
+                    //                    val window = intent.getLongExtra(X_WINDOW_WINDOW, -1)
+                    //                    val windowAttr = WindowAttr(rect, index, pwin, window)
+                    //                    topBarLayout?.startSystray(windowAttr)
+                    //                }
                 }
-//                else if (intent.action == XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON){
-//                    val icon: Bitmap? = intent.getParcelableExtra(KEY_ICON)
-//                    val window = intent.getLongExtra(KEY_WINDOW, -1)
-//                    val action = intent.getLongExtra(KEY_ACTION, -1)
-//                    val title = intent.getStringExtra(KEY_TITLE)
-//                    topBarLayout?.updateSystemTrayIcon(icon, window, action, title)
-//                } else if(intent.action == XserverHelper.START_SYSTRAY_FROM_X){
-//                    val rect: Rect? = intent.getParcelableExtra(X_WINDOW_RECT, Rect::class.java)
-//                    val index = intent.getIntExtra(X_WINDOW_INDEX, -1)
-//                    val pwin = intent.getLongExtra(X_WINDOW_PWIN, -1)
-//                    val window = intent.getLongExtra(X_WINDOW_WINDOW, -1)
-//                    val windowAttr = WindowAttr(rect, index, pwin, window)
-//                    topBarLayout?.startSystray(windowAttr)
-//                }
             }
-        }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
         initBattery()
 
-        systemUIContext?.contentResolver?.registerContentObserver(
-            Settings.System.getUriFor("dock_scale"),
-            false, mDockContentObserver
-        )
+        systemUIContext
+            ?.contentResolver
+            ?.registerContentObserver(
+                Settings.System.getUriFor("dock_scale"),
+                false,
+                mDockContentObserver
+            )
     }
 
-    private val mDockContentObserver: ContentObserver = object : ContentObserver(mHandler) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            val scaleFactor: Float = Settings.System.getFloat(
-                systemUIContext?.getContentResolver(),
-                "dock_scale", 1.0f)
-            Log.d(TAG, "onChange() called with: selfChange = $selfChange, scaleFactor = $scaleFactor")
-            mDockScaleFactor = scaleFactor
-            dockAppsLayout?.onDestroy()
-            updateNaviDock()
+    private val mDockContentObserver: ContentObserver =
+        object : ContentObserver(mHandler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                val scaleFactor: Float =
+                    Settings.System.getFloat(
+                        systemUIContext?.getContentResolver(),
+                        "dock_scale",
+                        1.0f
+                    )
+                Log.d(
+                    TAG,
+                    "onChange() called with: selfChange = $selfChange, scaleFactor = $scaleFactor"
+                )
+                mDockScaleFactor = scaleFactor
+                dockAppsLayout?.onDestroy()
+                updateNaviDock()
+            }
         }
-    }
 
-    val handlerWifi = object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
-            topBarLayout?.wifiStatusListen()
+    val handlerWifi =
+        object : Handler(Looper.getMainLooper()) {
+            override fun handleMessage(msg: Message) {
+                topBarLayout?.wifiStatusListen()
+            }
         }
-    }
 
     private fun initBattery() {
         val batteryLevel = BatteryUtils.getBatteryPercentage(systemUIContext)
         Log.d(TAG, "initBattery batteryLevel : $batteryLevel")
-        batteryReceiver = BatteryReceiver(topBarLayout);
-        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        systemUIContext?.registerReceiver(batteryReceiver, filter);
+        batteryReceiver = BatteryReceiver(topBarLayout)
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        systemUIContext?.registerReceiver(batteryReceiver, filter)
     }
 
     private fun checkXserverStatus() {
         if (!XserverHelper.isAppInstalled(systemUIContext, XserverHelper.X11_PACKAGE_NAME)) {
-//            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
-        } else if(XserverHelper.isXserviceRunning(systemUIContext)){
-//            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
+            //            updateState(XserverHelper.STATE_UNINTALLED, LOADING_UNDEFINED,
+            // CLIENT_NUM_UNDEFINED)
+        } else if (XserverHelper.isXserviceRunning(systemUIContext)) {
+            //            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED,
+            // CLIENT_NUM_UNDEFINED)
         } else {
-//            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED, CLIENT_NUM_UNDEFINED)
+            //            updateState(XserverHelper.STATE_INTALLED, LOADING_UNDEFINED,
+            // CLIENT_NUM_UNDEFINED)
             XserverHelper.startServer(systemUIContext)
         }
-//        Log.d(TAG, "checkXserverStatus() called {$mIsServiceBound}")
-        if(!mIsServiceBound){
+        //        Log.d(TAG, "checkXserverStatus() called {$mIsServiceBound}")
+        if (!mIsServiceBound) {
             val intent = Intent()
             intent.setPackage(X11_PACKAGE_NAME)
             intent.setAction(X11_SERVICE_ACTION)
@@ -318,41 +349,46 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
     }
 
-    private val mServiceConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            mService = ICmdEntryInterface.Stub.asInterface(service)
-            mIsServiceBound = true
-            dockAppsLayout?.xserver = mService
-//            topBarLayout?.xserverEventInputer =
-//                XserverHelper.XserverEventInputer { x, y, detail, down ->
-//                    Log.d(
-//                        TAG,
-//                        "sendMouseEvent  x = $x, y = $y, detail = $detail, down = $down"
-//                    )
-//                    mService?.sendMouseEvent(x.toFloat(), y.toFloat(), detail, down , detail > 0, detail)
-//                }
-//
-//            topBarLayout?.xserverWindowInjector =
-//                XserverHelper.XserverWindowInjector { sfc, x, y, w, h, index, p, window ->
-//                    Log.d(
-//                        TAG,
-//                        "surfaceChanged $mService: sfc = $sfc, x = $x, y = $y, w = $w, h = $h, index = $index, p = $p, window = $window"
-//                    )
-//                    mService?.windowChanged(sfc, x, y, w, h, index, p, window)
-//                }
-//            topBarLayout?.startSystray()
-            Log.d(TAG, "Service connected successfully $topBarLayout")
-        }
+    private val mServiceConnection: ServiceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                mService = ICmdEntryInterface.Stub.asInterface(service)
+                mIsServiceBound = true
+                dockAppsLayout?.xserver = mService
+                //            topBarLayout?.xserverEventInputer =
+                //                XserverHelper.XserverEventInputer { x, y, detail, down ->
+                //                    Log.d(
+                //                        TAG,
+                //                        "sendMouseEvent  x = $x, y = $y, detail = $detail, down =
+                // $down"
+                //                    )
+                //                    mService?.sendMouseEvent(x.toFloat(), y.toFloat(), detail,
+                // down , detail > 0, detail)
+                //                }
+                //
+                //            topBarLayout?.xserverWindowInjector =
+                //                XserverHelper.XserverWindowInjector { sfc, x, y, w, h, index, p,
+                // window ->
+                //                    Log.d(
+                //                        TAG,
+                //                        "surfaceChanged $mService: sfc = $sfc, x = $x, y = $y, w =
+                // $w, h = $h, index = $index, p = $p, window = $window"
+                //                    )
+                //                    mService?.windowChanged(sfc, x, y, w, h, index, p, window)
+                //                }
+                //            topBarLayout?.startSystray()
+                Log.d(TAG, "Service connected successfully $topBarLayout")
+            }
 
-        override fun onServiceDisconnected(name: ComponentName) {
-            mService = null
-            mIsServiceBound = false
-            dockAppsLayout?.xserver = mService
-//            topBarLayout?.updateSystemTrayIcon(null, -1, SYSTEM_TRAY_UNDOCK_ALL, null)
-//            Log.d(TAG, "Service disconnected")
+            override fun onServiceDisconnected(name: ComponentName) {
+                mService = null
+                mIsServiceBound = false
+                dockAppsLayout?.xserver = mService
+                //            topBarLayout?.updateSystemTrayIcon(null, -1, SYSTEM_TRAY_UNDOCK_ALL,
+                // null)
+                //            Log.d(TAG, "Service disconnected")
+            }
         }
-    }
-
 
     private fun registPackageUpdate() {
         val filter = IntentFilter()
@@ -375,22 +411,23 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             delay(500)
             checkXserverStatus()
         }
-
     }
 
     private fun initOKhttp() {
         val logInterceptor = HttpLoggingInterceptor(HttpLog("fde-systemui"))
         logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        val sOkHttpClient = OkHttpClient.Builder()
-            .readTimeout(10, TimeUnit.SECONDS)
-            .addInterceptor(logInterceptor)
-            .writeTimeout(10, TimeUnit.SECONDS).build()
+        val sOkHttpClient =
+            OkHttpClient.Builder()
+                .readTimeout(10, TimeUnit.SECONDS)
+                .addInterceptor(logInterceptor)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .build()
         QuietOkHttp.setOkHttpClient(sOkHttpClient)
     }
 
-
     private fun grantNmnPermission() {
-        val component = ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
+        val component =
+            ComponentName(pluginContext!!, NotificationService::class.qualifiedName!!.toString())
         val systemService = systemUIContext?.getSystemService(Context.NOTIFICATION_SERVICE)
         if (systemService != null) {
             val nm = systemService as NotificationManager
@@ -399,47 +436,55 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     private fun isNotificationServiceEnable(): Boolean {
-        return NotificationManagerCompat.getEnabledListenerPackages(systemUIContext!!.applicationContext).contains(systemUIContext!!.getPackageName())
+        return NotificationManagerCompat.getEnabledListenerPackages(
+                systemUIContext!!.applicationContext
+            )
+            .contains(systemUIContext!!.getPackageName())
     }
-
 
     private fun loadCustomViewsWithInflater(context: Context) {
         if (context == null) {
             throw IllegalArgumentException("Context cannot be null")
         }
         val inflater = LayoutInflater.from(context)
-        inflater.factory2 = object : LayoutInflater.Factory2 {
-            override fun onCreateView(
-                parent: View?,
-                name: String,
-                context: Context,
-                attrs: AttributeSet
-            ): View? {
-                return createCustomView(name, context, attrs)
-            }
+        inflater.factory2 =
+            object : LayoutInflater.Factory2 {
+                override fun onCreateView(
+                    parent: View?,
+                    name: String,
+                    context: Context,
+                    attrs: AttributeSet
+                ): View? {
+                    return createCustomView(name, context, attrs)
+                }
 
-            override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-                return createCustomView(name, context, attrs)
-            }
+                override fun onCreateView(
+                    name: String,
+                    context: Context,
+                    attrs: AttributeSet
+                ): View? {
+                    return createCustomView(name, context, attrs)
+                }
 
-            private fun createCustomView(name: String, context: Context, attrs: AttributeSet): View? {
-                try {
-                    if(name.contains(context.packageName)){
-                        val clazz =
-                            Class.forName(name, true, classLoader)
-                        return clazz.getConstructor(
-                            Context::class.java,
-                            AttributeSet::class.java
-                        )
-                            .newInstance(context, attrs) as View
+                private fun createCustomView(
+                    name: String,
+                    context: Context,
+                    attrs: AttributeSet
+                ): View? {
+                    try {
+                        if (name.contains(context.packageName)) {
+                            val clazz = Class.forName(name, true, classLoader)
+                            return clazz
+                                .getConstructor(Context::class.java, AttributeSet::class.java)
+                                .newInstance(context, attrs) as View
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to create view for name: $name", e)
+                        return null
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to create view for name: $name", e)
                     return null
                 }
-                return null
             }
-        }
     }
 
     override fun holdStatusBarOpen(): Boolean {
@@ -460,7 +505,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 systemUIContext!!.unregisterReceiver(timeTickReceiver)
                 systemUIContext!!.unregisterReceiver(networkChangeReceiver)
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
+                Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message)
             }
         }
 
@@ -468,7 +513,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             try {
                 pluginContext!!.unregisterReceiver(dynamicReceiver)
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "pluginContext unregisterReceiver: " + e.message )
+                Log.e(TAG, "pluginContext unregisterReceiver: " + e.message)
             }
         }
         if (resolver != null) {
@@ -501,7 +546,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             val getMethod =
                 systemPropertiesClass.getMethod("get", String::class.java, String::class.java)
             val tunerKeys = getMethod.invoke(null, "persist.sys.bd.tunerkeys", "") as String
-//            Log.d(TAG, "Got tuner keys $tunerKeys")
+            //            Log.d(TAG, "Got tuner keys $tunerKeys")
             val tunerKeyList =
                 Arrays.stream(tunerKeys.split("--").toTypedArray())
                     .map { obj: String -> obj.trim { it <= ' ' } }
@@ -550,7 +595,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     ): ViewGroup {
         return clockAndStatus
             ?: LayoutInflater.from(context).inflate(R.layout.layout_clock_and_status, null)
-                    as ViewGroup
+                as ViewGroup
     }
 
     private fun initSystemStatusLayout(
@@ -559,16 +604,12 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     ): SystemStateLayout? {
         return systemStatus
             ?: LayoutInflater.from(context).inflate(R.layout.layout_nav_panel, null)
-                    as SystemStateLayout
+                as SystemStateLayout
     }
 
-    private fun initTopBarLayout(
-        context: Context?,
-        topBarLayout: TopBarLayout?
-    ): TopBarLayout? {
+    private fun initTopBarLayout(context: Context?, topBarLayout: TopBarLayout?): TopBarLayout? {
         return topBarLayout
-            ?: LayoutInflater.from(context).inflate(R.layout.layout_topbar, null)
-                    as TopBarLayout
+            ?: LayoutInflater.from(context).inflate(R.layout.layout_topbar, null) as TopBarLayout
     }
 
     @SuppressLint("InflateParams")
@@ -578,7 +619,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     ): AppStateLayout {
         return appStateLayout
             ?: LayoutInflater.from(context).inflate(R.layout.layout_app_state, null)
-                    as AppStateLayout
+                as AppStateLayout
     }
 
     fun traverseAndPrint(view: View?, level: Int) {
@@ -604,7 +645,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
         // 获取View的ID（如果有的话）
         var id = "NO_ID"
-        if (view.id != View.NO_ID &&  view.id >=  100) {
+        if (view.id != View.NO_ID && view.id >= 100) {
             id = view.context.resources.getResourceName(view.id)
         }
         // 获取View的边界
@@ -614,13 +655,28 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         val y = location[1]
         val width = view.width
         val height = view.height
-        if(className.contains("keyguard_header")){
-        }
+        if (className.contains("keyguard_header")) {}
         // 打印信息，使用缩进表示层级
         val indent = ">-".repeat(level) // 根据层级生成缩进
-        Log.d(TAG, indent + level + " " + className + " {" + id + "} Bounds: [" + x + "," + y + "-" + (x + width) + "," + (y + height) + "] + visibility = ${view.visibility}")
+        Log.d(
+            TAG,
+            indent +
+                level +
+                " " +
+                className +
+                " {" +
+                id +
+                "} Bounds: [" +
+                x +
+                "," +
+                y +
+                "-" +
+                (x + width) +
+                "," +
+                (y + height) +
+                "] + visibility = ${view.visibility}"
+        )
     }
-
 
     private fun onTunerChange(uri: Uri) {
         val keyName = uri.lastPathSegment
@@ -654,22 +710,16 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun showNotification() {
-        Log.d("SysteUIOverlay","showNotification")
+        Log.d("SysteUIOverlay", "showNotification")
         systemUIContext?.sendBroadcast(
-            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
-                "action",
-                "SHOW_NOTIF_PANEL"
-            )
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra("action", "SHOW_NOTIF_PANEL")
         )
     }
 
     override fun hideNotification() {
-        Log.d("SysteUIOverlay","hideNotification")
+        Log.d("SysteUIOverlay", "hideNotification")
         systemUIContext?.sendBroadcast(
-            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
-                "action",
-                "HIDE_NOTIF_PANEL"
-            )
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra("action", "HIDE_NOTIF_PANEL")
         )
     }
 
@@ -686,10 +736,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS != intent.action) {
                     return
                 }
-                if(dockAppsLayout != null){
+                if (dockAppsLayout != null) {
                     dockAppsLayout?.dimissWindow()
                 }
-                if(topBarLayout != null){
+                if (topBarLayout != null) {
                     topBarLayout?.dimissWindow()
                 }
                 allAppsWindow!!.dismiss()
@@ -697,65 +747,58 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
 
     override fun syncVisible(which: Int) {
-        if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
+        if (Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0) {
             systemStateLayout?.hideControlWindow()
         }
-        if( (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
+        if ((which and Utils.NOTIFICATION_VISIBLE) == 0) {
             hideNotification()
         }
-        if(Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0  ){
+        if (Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0) {
             allAppsWindow?.dismiss()
         }
-        if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
+        if (Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0) {
             systemStateLayout?.hideWifiWindow()
         }
-        if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
+        if (Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0) {
             systemStateLayout?.hideVolumeCenterWindow()
         }
-        if(Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0 ){
+        if (Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0) {
             systemStateLayout?.hideImeSwitchWindow()
         }
     }
 
     override fun hideNotificationWindow() {
-        Log.d("SysteUIOverlay","showNotification")
+        Log.d("SysteUIOverlay", "showNotification")
         systemUIContext?.sendBroadcast(
-            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
-                "action",
-                "SHOW_NOTIF_PANEL"
-            )
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra("action", "SHOW_NOTIF_PANEL")
         )
-
     }
 
     override fun showNotificationWindow() {
-        Log.d("SysteUIOverlay","hideNotification")
+        Log.d("SysteUIOverlay", "hideNotification")
         systemUIContext?.sendBroadcast(
-            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra(
-                "action",
-                "HIDE_NOTIF_PANEL"
-            )
+            Intent("com.fde.action.NOTIFICATION_PANEL_CHANG").putExtra("action", "HIDE_NOTIF_PANEL")
         )
     }
 
-    override fun syncVisibleWindow(which: Int) {
-
-
-    }
+    override fun syncVisibleWindow(which: Int) {}
 
     class NetWorkBroadcastReceiver(val topBarLayout: TopBarLayout) : BroadcastReceiver() {
-          val SETTINGS_PACKAGE =  "com.android.settings"
-          val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
-          var lastClickTime = 0L
+        val SETTINGS_PACKAGE = "com.android.settings"
+        val Wifi_ACTION = SETTINGS_PACKAGE + ".CONNECTIVITY_CHANGE"
+        var lastClickTime = 0L
 
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             val currentTime = System.currentTimeMillis()
-            Log.d(TAG, "NetWorkBroadcastReceiver-action: "+action +",currentTime : "+currentTime)
+            Log.d(
+                TAG,
+                "NetWorkBroadcastReceiver-action: " + action + ",currentTime : " + currentTime
+            )
             if (currentTime - lastClickTime >= 2000) {
                 lastClickTime = currentTime
             } else {
-                return ;
+                return
             }
 
             val inte = Intent(Wifi_ACTION)
@@ -766,10 +809,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 }
 
-
 object GlobalSystemUIContext {
-    @Volatile
-    private lateinit var globalSystemUIContext: Context
+    @Volatile private lateinit var globalSystemUIContext: Context
 
     fun setContext(context: Context) {
         // 可选：只允许设置一次，避免覆盖

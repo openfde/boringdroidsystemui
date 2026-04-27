@@ -27,11 +27,10 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.reflect.TypeToken
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.callback.JsonCallBack
-import okhttp3.*
 import java.io.*
+import okhttp3.*
 
 object DeviceUtils {
-
 
     private val TAG: String = "DeviceUtils"
     const val BASIP = "127.0.0.1"
@@ -56,7 +55,6 @@ object DeviceUtils {
     const val URL_CHECK_VERSION = "/api/v1/version/check"
     const val URL_UPDATE_VERSION = "/api/v1/version/update "
 
-
     fun lockScreen(context: Context): Boolean {
         val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
         try {
@@ -75,24 +73,30 @@ object DeviceUtils {
     @JvmStatic
     fun sendKeyCode(keyCode: Int) {
         object : Thread() {
-            override fun run() {
-                try {
-                    val inst = Instrumentation()
-                    inst.sendKeyDownUpSync(keyCode)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                override fun run() {
+                    try {
+                        val inst = Instrumentation()
+                        inst.sendKeyDownUpSync(keyCode)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
-        }.start()
+            .start()
     }
 
     @get:Throws(IOException::class)
     val rootAccess: Process
         get() {
-            val paths = arrayOf(
-                "/sbin/su", "/system/sbin/su", "/system/bin/su", "/system/xbin/su", "/su/bin/su",
-                "/magisk/.core/bin/su"
-            )
+            val paths =
+                arrayOf(
+                    "/sbin/su",
+                    "/system/sbin/su",
+                    "/system/bin/su",
+                    "/system/xbin/su",
+                    "/su/bin/su",
+                    "/magisk/.core/bin/su"
+                )
             for (path in paths) {
                 if (File(path).exists()) return Runtime.getRuntime().exec(path)
             }
@@ -108,17 +112,20 @@ object DeviceUtils {
                 """
     $command
     
-    """.trimIndent()
+    """
+                    .trimIndent()
             )
             os.flush()
             os.close()
             val br = BufferedReader(InputStreamReader(proccess.inputStream))
             var line: String
             while (br.readLine().also { line = it } != null) {
-                output += """
+                output +=
+                    """
                     $line
                     
-                    """.trimIndent()
+                    """
+                        .trimIndent()
             }
             br.close()
         } catch (e: IOException) {
@@ -136,13 +143,14 @@ object DeviceUtils {
     }
 
     fun shutdown() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) runAsRoot("am start -a android.intent.action.ACTION_REQUEST_SHUTDOWN") else runAsRoot(
-            "am start -a com.android.internal.intent.action.REQUEST_SHUTDOWN"
-        )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            runAsRoot("am start -a android.intent.action.ACTION_REQUEST_SHUTDOWN")
+        else runAsRoot("am start -a com.android.internal.intent.action.REQUEST_SHUTDOWN")
     }
 
     fun setDisplaySize(size: Int) {
-        if (size > 0) runAsRoot("settings put secure display_density_forced $size") else runAsRoot("settings delete secure display_density_forced")
+        if (size > 0) runAsRoot("settings put secure display_density_forced $size")
+        else runAsRoot("settings delete secure display_density_forced")
     }
 
     fun toggleVolume(context: Context) {
@@ -153,7 +161,6 @@ object DeviceUtils {
             AudioManager.FLAG_SHOW_UI
         )
     }
-
 
     fun getStatusBarHeight(context: Context): Int {
         var result = 0
@@ -168,17 +175,17 @@ object DeviceUtils {
         val um = context.getSystemService(Context.USER_SERVICE) as UserManager
         try {
             return um.userName
-        } catch (e: Exception) {
-        }
+        } catch (e: Exception) {}
         return null
     }
 
     @JvmStatic
     fun hasStoragePermission(context: Context?): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || ContextCompat.checkSelfPermission(
-            context!!,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
+            ContextCompat.checkSelfPermission(
+                context!!,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun hasLocationPermission(context: Context?): Boolean {
@@ -192,8 +199,7 @@ object DeviceUtils {
     fun playEventSound(context: Context?, event: String?) {
         val soundUri =
             PreferenceManager.getDefaultSharedPreferences(context).getString(event, "default")
-        if (soundUri == "default") {
-        } else {
+        if (soundUri == "default") {} else {
             try {
                 val sound = Uri.parse(soundUri)
                 if (sound != null) {
@@ -201,8 +207,7 @@ object DeviceUtils {
                     mp.start()
                     mp.setOnCompletionListener { mp.release() }
                 }
-            } catch (e: Exception) {
-            }
+            } catch (e: Exception) {}
         }
     }
 
@@ -223,7 +228,8 @@ object DeviceUtils {
 
     @JvmStatic
     fun getDisplayContext(context: Context, secondary: Boolean): Context {
-        return if (secondary) context.createDisplayContext(getSecondaryDisplay(context)) else context
+        return if (secondary) context.createDisplayContext(getSecondaryDisplay(context))
+        else context
     }
 
     fun detectBrightness() {
@@ -232,21 +238,22 @@ object DeviceUtils {
         val json = "{}"
 
         val body = RequestBody.create(JSON, json)
-        val request = Request.Builder()
-            .url(BASEURL + URL_DETECT_BRIGHTNESS)
-            .post(body)
-            .build()
+        val request = Request.Builder().url(BASEURL + URL_DETECT_BRIGHTNESS).post(body).build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                LogTools.i("detectBrightness onFailure()" + e.toString())
-            }
+        client
+            .newCall(request)
+            .enqueue(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        LogTools.i("detectBrightness onFailure()" + e.toString())
+                    }
 
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body().string()
-            }
-        })
+                    override fun onResponse(call: Call, response: Response) {
+                        val responseData = response.body().string()
+                    }
+                }
+            )
     }
 
     fun setBrightness(brightness: Int, progress: Int, context: Context) {
@@ -255,75 +262,97 @@ object DeviceUtils {
         val jsonNumber = JsonPrimitive(progress.toString())
         val json = "{\"Brightness\":" + jsonNumber + "}"
         val body = RequestBody.create(JSON, json)
-        val request = Request.Builder()
-            .url(BASEURL + URL_SET_BRIGHTNESS)
-            .post(body)
-            .build()
+        val request = Request.Builder().url(BASEURL + URL_SET_BRIGHTNESS).post(body).build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                LogTools.i("setBrightness onFailure()" + e.toString() + ",brightness " + brightness + ",progress " + progress)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val responseData = response.body().string()
-                    LogTools.i("setBrightness responseData " + responseData + ",brightness " + brightness + ",progress " + progress)
-                    val gson = Gson()
-                    val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
-                    val tempMap: Map<String, Any> =
-                        gson.fromJson<Map<String, Any>>(responseData, mapType)
-                    val code = StringUtils.ToInt(tempMap.get("Code"));
-                    if (200 == code) {
-                        Settings.System.putInt(
-                            context?.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS,
-                            brightness
+        client
+            .newCall(request)
+            .enqueue(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                        LogTools.i(
+                            "setBrightness onFailure()" +
+                                e.toString() +
+                                ",brightness " +
+                                brightness +
+                                ",progress " +
+                                progress
                         )
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        })
-    }
 
+                    override fun onResponse(call: Call, response: Response) {
+                        try {
+                            val responseData = response.body().string()
+                            LogTools.i(
+                                "setBrightness responseData " +
+                                    responseData +
+                                    ",brightness " +
+                                    brightness +
+                                    ",progress " +
+                                    progress
+                            )
+                            val gson = Gson()
+                            val mapType = object : TypeToken<Map<String?, Any?>?>() {}.type
+                            val tempMap: Map<String, Any> =
+                                gson.fromJson<Map<String, Any>>(responseData, mapType)
+                            val code = StringUtils.ToInt(tempMap.get("Code"))
+                            if (200 == code) {
+                                Settings.System.putInt(
+                                    context?.getContentResolver(),
+                                    Settings.System.SCREEN_BRIGHTNESS,
+                                    brightness
+                                )
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            )
+    }
 
     fun logout() {
         QuietOkHttp.post(BASEURL + URL_LOGOUT)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<String>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: String) {
+                    override fun onSuccess(call: Call, response: String) {}
                 }
-            })
+            )
     }
 
-    fun checkVersion(version: String?, callback: VersionCheckCallback){
+    fun checkVersion(version: String?, callback: VersionCheckCallback) {
         android.util.Log.d(TAG, "checkVersion() called with: version = $version")
         QuietOkHttp.post(BASEURL + URL_CHECK_VERSION)
             .addParams("Version", version)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<VersionCheckResponse>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<VersionCheckResponse>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: VersionCheckResponse) {
-                    callback.onCallback(response)
-                    android.util.Log.d(
-                        TAG,
-                        "onSuccess() called with: call = $call, response = $response"
-                    )
+                    override fun onSuccess(call: Call, response: VersionCheckResponse) {
+                        callback.onCallback(response)
+                        android.util.Log.d(
+                            TAG,
+                            "onSuccess() called with: call = $call, response = $response"
+                        )
+                    }
                 }
-            })
+            )
     }
 
-    fun startInstall(version: String?, Path: String?, Policy: String?, callback: VersionCheckCallback){
+    fun startInstall(
+        version: String?,
+        Path: String?,
+        Policy: String?,
+        callback: VersionCheckCallback
+    ) {
         android.util.Log.d(
             TAG,
             "startInstall() called with: version = $version, Path = $Path, Policy = $Policy"
@@ -333,27 +362,30 @@ object DeviceUtils {
             .addParams("Path", Path)
             .addParams("Policy", Policy)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<UpdateResponse>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<UpdateResponse>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: UpdateResponse) {
-                    callback.onUpdateCallback(response)
-                    android.util.Log.d(
-                        TAG,
-                        "onSuccess() called with: call = $call, response = $response"
-                    )
+                    override fun onSuccess(call: Call, response: UpdateResponse) {
+                        callback.onUpdateCallback(response)
+                        android.util.Log.d(
+                            TAG,
+                            "onSuccess() called with: call = $call, response = $response"
+                        )
+                    }
                 }
-            })
+            )
     }
 
     fun gotoNetWork(context: Context, flag: String) {
         val intent = Intent()
-        val componentName2 = ComponentName(
-            "com.fde.fde_linux_app_launcher",
-            "com.fde.fde_linux_app_launcher.MainActivity"
-        )
+        val componentName2 =
+            ComponentName(
+                "com.fde.fde_linux_app_launcher",
+                "com.fde.fde_linux_app_launcher.MainActivity"
+            )
         intent.setComponent(componentName2)
         intent.putExtra("openParams", flag)
         intent.putExtra("fromOther", "Launcher")
@@ -365,40 +397,43 @@ object DeviceUtils {
     fun poweroff() {
         QuietOkHttp.post(BASEURL + URL_POWOFF)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<String>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: String) {
+                    override fun onSuccess(call: Call, response: String) {}
                 }
-            })
+            )
     }
 
     fun restart() {
         QuietOkHttp.post(BASEURL + URL_RESTART)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<String>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: String) {
+                    override fun onSuccess(call: Call, response: String) {}
                 }
-            })
+            )
     }
 
     fun lock() {
         QuietOkHttp.post(BASEURL + URL_LOCK)
             .setCallbackToMainUIThread(true)
-            .execute(object : JsonCallBack<String>() {
-                override fun onFailure(call: Call, e: Exception) {
-                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
-                }
+            .execute(
+                object : JsonCallBack<String>() {
+                    override fun onFailure(call: Call, e: Exception) {
+                        Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                    }
 
-                override fun onSuccess(call: Call, response: String) {
+                    override fun onSuccess(call: Call, response: String) {}
                 }
-            })
+            )
     }
 
     fun getNavBarHeight(context: Context?): Int {

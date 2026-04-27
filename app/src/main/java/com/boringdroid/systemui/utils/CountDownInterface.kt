@@ -16,6 +16,7 @@ package com.boringdroid.systemui.utils
  */
 
 interface CountDownInterface {
-    fun onTick(millisUntilFinished: Long);
-    fun onFinish();
+    fun onTick(millisUntilFinished: Long)
+
+    fun onFinish()
 }

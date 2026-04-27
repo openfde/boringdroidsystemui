@@ -1,26 +1,18 @@
 package com.boringdroid.systemui.view
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
-import android.graphics.Outline
-import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewOutlineProvider
-import android.view.animation.LinearInterpolator
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.data.UpdateResponse
 import com.boringdroid.systemui.data.VersionCheckResponse
 import com.boringdroid.systemui.utils.DeviceUtils
-import com.boringdroid.systemui.utils.Utils
 
 class TopBarPowerWindow(
     context: Context,
@@ -38,7 +30,7 @@ class TopBarPowerWindow(
         const val TAG: String = "TopBarPowerWindow"
     }
 
-    var fdeModeResult: FdeModeResult ?= null
+    var fdeModeResult: FdeModeResult? = null
     private var aboutBtn: TextView? = null
     private var settingBtn: TextView? = null
     private var sleepBtn: TextView? = null
@@ -49,23 +41,22 @@ class TopBarPowerWindow(
     private var rebootBtn: TextView? = null
     private var logoutBtn: TextView? = null
     private var lockBtn: TextView? = null
-    private var aboutWindow: AboutWindow ?= null
-    var topBarLayout: TopBarLayout ?= null
+    private var aboutWindow: AboutWindow? = null
+    var topBarLayout: TopBarLayout? = null
 
-    private val hoverListener = View.OnHoverListener { v, event ->
-        val what = event?.action
-        when (what) {
-            MotionEvent.ACTION_HOVER_ENTER -> {
-                v?.setBackgroundResource(R.drawable.round_rect_4dp)
+    private val hoverListener =
+        View.OnHoverListener { v, event ->
+            val what = event?.action
+            when (what) {
+                MotionEvent.ACTION_HOVER_ENTER -> {
+                    v?.setBackgroundResource(R.drawable.round_rect_4dp)
+                }
+                MotionEvent.ACTION_HOVER_EXIT -> {
+                    v?.setBackgroundResource(R.drawable.round_rect_4dp_null)
+                }
             }
-
-            MotionEvent.ACTION_HOVER_EXIT -> {
-                v?.setBackgroundResource(R.drawable.round_rect_4dp_null)
-            }
+            false
         }
-        false
-    }
-
 
     override fun showPopupWindow() {
         super.showPopupWindow()
@@ -101,18 +92,18 @@ class TopBarPowerWindow(
         lockBtn?.setOnHoverListener(hoverListener)
 
         Log.d(TAG, "initViews() $fdeModeResult")
-        if(!fdeModeResult?.data?.FDEMode.equals("environment")){
+        if (!fdeModeResult?.data?.FDEMode.equals("environment")) {
             sleepBtn?.visibility = View.GONE
             rebootBtn?.visibility = View.GONE
             logoutBtn?.visibility = View.GONE
             lockBtn?.visibility = View.GONE
             divider?.visibility = View.GONE
             val params = rootView?.layoutParams
-            params?.height = getContext().resources.getDimension(R.dimen.top_bar_power_height_small).toInt()
+            params?.height =
+                getContext().resources.getDimension(R.dimen.top_bar_power_height_small).toInt()
             rootView?.layoutParams = params
         }
     }
-
 
     override fun dismiss() {
         super.dismiss()
@@ -153,8 +144,8 @@ class TopBarPowerWindow(
     }
 }
 
-interface VersionCheckCallback{
+interface VersionCheckCallback {
     fun onCallback(response: VersionCheckResponse)
-    fun onUpdateCallback(response: UpdateResponse)
 
+    fun onUpdateCallback(response: UpdateResponse)
 }

@@ -1,29 +1,29 @@
 package com.boringdroid.systemui
 
-
 import android.os.Parcel
 import android.os.Parcelable
 
 class DownloadInfo : Parcelable {
 
     companion object {
-        const val STATUS_PENDING:Int  = 0
-        const val STATUS_DOWNLOADING:Int = 1
-        const val STATUS_PAUSED:Int  = 2
-        const val STATUS_COMPLETED:Int  = 3
-        const val STATUS_FAILED:Int  = 4
-        const val STATUS_CANCELLED:Int  = 5
+        const val STATUS_PENDING: Int = 0
+        const val STATUS_DOWNLOADING: Int = 1
+        const val STATUS_PAUSED: Int = 2
+        const val STATUS_COMPLETED: Int = 3
+        const val STATUS_FAILED: Int = 4
+        const val STATUS_CANCELLED: Int = 5
 
         @JvmField
-        val CREATOR = object : Parcelable.Creator<DownloadInfo> {
-            override fun createFromParcel(parcel: Parcel): DownloadInfo {
-                return DownloadInfo(parcel)
-            }
+        val CREATOR =
+            object : Parcelable.Creator<DownloadInfo> {
+                override fun createFromParcel(parcel: Parcel): DownloadInfo {
+                    return DownloadInfo(parcel)
+                }
 
-            override fun newArray(size: Int): Array<DownloadInfo?> {
-                return arrayOfNulls(size)
+                override fun newArray(size: Int): Array<DownloadInfo?> {
+                    return arrayOfNulls(size)
+                }
             }
-        }
     }
 
     var url: String = ""
@@ -42,15 +42,19 @@ class DownloadInfo : Parcelable {
         this.fileName = fileName
     }
 
-    constructor(url: String, fileName: String? = null, downloadId:String, savePath:String, status:Int) {
+    constructor(
+        url: String,
+        fileName: String? = null,
+        downloadId: String,
+        savePath: String,
+        status: Int
+    ) {
         this.url = url
         this.fileName = fileName
         this.downloadId = downloadId
         this.savePath = savePath
         this.status = status
-
     }
-
 
     constructor(parcel: Parcel) {
         url = parcel.readString() ?: ""
@@ -91,9 +95,13 @@ class DownloadInfo : Parcelable {
     }
 
     fun isDownloading(): Boolean = status == STATUS_DOWNLOADING
+
     fun isPaused(): Boolean = status == STATUS_PAUSED
+
     fun isCompleted(): Boolean = status == STATUS_COMPLETED
+
     fun isFailed(): Boolean = status == STATUS_FAILED
+
     fun isCancelled(): Boolean = status == STATUS_CANCELLED
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -111,16 +119,16 @@ class DownloadInfo : Parcelable {
 
     override fun toString(): String {
         return "DownloadInfo(url='$url', fileName=$fileName, downloadId='$downloadId', " +
-                "totalSize=$totalSize, downloadedSize=$downloadedSize, status=$status, " +
-                "savePath='$savePath', errorMessage=$errorMessage), progress=$progress"
+            "totalSize=$totalSize, downloadedSize=$downloadedSize, status=$status, " +
+            "savePath='$savePath', errorMessage=$errorMessage), progress=$progress"
     }
 }
 
 sealed class DownloadStatus(val value: Int) {
-    val Pending:Int  = 0
-    val DOWNLOADING:Int  = 1
-    val Paused:Int  = 2
-    val Completed:Int  = 3
-    val Failed:Int  = 4
-    val Cancelled:Int  = 5
+    val Pending: Int = 0
+    val DOWNLOADING: Int = 1
+    val Paused: Int = 2
+    val Completed: Int = 3
+    val Failed: Int = 4
+    val Cancelled: Int = 5
 }
