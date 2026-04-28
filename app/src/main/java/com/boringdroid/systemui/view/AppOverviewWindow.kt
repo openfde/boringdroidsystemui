@@ -121,10 +121,7 @@ class AppOverviewWindow(
         val availableHeight = max(0, screenHeight - dimensionPixelSize1 - dimensionPixelSize2)
         div = calculateRowsPerPage(availableHeight, dimensionPixelSize, minRowSpacing)
         rowSpacingPx = calculateRowSpacing(availableHeight, dimensionPixelSize, div, minRowSpacing)
-        Log.d(
-            TAG,
-            "initViews: top=$dimensionPixelSize1 bottom=$dimensionPixelSize2 screen=$screenHeight itemHeight=$dimensionPixelSize rows=$div rowSpacing=$rowSpacingPx"
-        )
+        Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div $rowSpacingPx")
         appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
