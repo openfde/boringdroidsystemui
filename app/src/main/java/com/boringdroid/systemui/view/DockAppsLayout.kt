@@ -132,8 +132,10 @@ constructor(
             overviewApps.clear()
             overviewApps.addAll(provideApps)
         }
+        dockProvider.providePersistApps();
+        dockProvider.mayFillPersistTaskInfo()
         tasks.clear()
-        tasks.addAll(dockProvider.providePersistApps())
+        tasks.addAll(dockProvider.persistDockApps)
         itemDecoration = DockAppItemDecoration(this)
         addItemDecoration(itemDecoration!!)
         dockAppAdapter?.dockScaleFactor = dockScaleFactor
@@ -468,6 +470,8 @@ constructor(
         overviewApps.addAll(list)
         dockProvider.mayFillPersistTaskInfo()
         appOverviewWindow?.updateAppList(overviewApps)
+        dockAppAdapter?.notifyDataSetChangedWapper()
+        Log.d(TAG, "onAppListUpdated() $dockAppAdapter overviewApps:$overviewApps : list = $list $dockAppAdapter")
     }
 
     override fun onUninstall(packageName: String) {

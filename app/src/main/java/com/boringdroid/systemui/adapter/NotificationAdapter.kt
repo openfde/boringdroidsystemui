@@ -67,14 +67,14 @@ class NotificationAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-//        Log.w("NotificationAdapter", "onBindViewHolder")
+//        Log.d("NotificationAdapter", "onBindViewHolder")
         val sbn = notifications[position]
         val notification = sbn.notification
         val actions = notification.actions
         val extras = notification.extras
         viewHolder.notifActionsLayout.removeAllViews()
         val contentView = notification.contentView
-//        Log.w("fde", "NotificationAdapter onBindViewHolder contentView: $contentView")
+//        Log.d("fde", "NotificationAdapter onBindViewHolder contentView: $contentView")
         if(contentView != null){
             try {
                 val apply = contentView.apply(context, viewHolder.notifActionsLayout) as View

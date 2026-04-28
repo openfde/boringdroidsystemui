@@ -60,6 +60,10 @@ class AboutWindow(
         const val TIMING_NOW_INSTALL  = 0
         const val TIMING_LATER_INSTALL  = 1
         const val TIMING_NOT_YET_INSTALL  = -1
+        const val TIMING_KEY = "timing_install"
+        const val DEBPATH_KEY = "fde_deb_path"
+
+
         const val ACTION_UPDATE_NOW = "com.boringdroid.systemui.ACTION_UPDATE_NOW"
         const val ACTION_DEFER_UPDATE = "com.boringdroid.systemui.ACTION_DEFER_UPDATE"
 
@@ -76,6 +80,7 @@ class AboutWindow(
     private var latestedTv: TextView? = null
     private var installNowTv: TextView? = null
     private var installLaterTv: TextView? = null
+    private var installPatchTv: TextView?= null
 
     private var updateLl: LinearLayout? = null
     private var updateBt: Button? = null
@@ -109,6 +114,7 @@ class AboutWindow(
         deviceTv = contentView?.findViewById(R.id.device_tv)
         downloadLl = contentView?.findViewById(R.id.download_ll)
         installLl = contentView?.findViewById(R.id.install_ll)
+        installPatchTv = contentView?.findViewById(R.id.install_path)
         val openfde = getContext().resources.getString(R.string.openfde_version)
         version = Utils.getProperty("ro.openfde.version", "2.0.1")
         versionTv?.text = "$openfde $version"
@@ -139,10 +145,10 @@ class AboutWindow(
     }
 
     private fun initUI() {
-        val deb_path = SPUtils.getUserInfo(SPUtils.pluginContext, "fde_deb_path")
+        val deb_path = SPUtils.getUserInfo(SPUtils.pluginContext, DEBPATH_KEY)
         Log.d(TAG, "initUI: $deb_path")
         if (!TextUtils.isEmpty(deb_path) && File(deb_path).exists()) {
-            val timing = SPUtils.getIntUserInfo(SPUtils.pluginContext, "timing_install")
+            val timing = SPUtils.getIntUserInfo(SPUtils.pluginContext, TIMING_KEY)
             showInstallUI(timing)
             path = deb_path
         }
@@ -199,7 +205,8 @@ class AboutWindow(
                     "${info?.fileName} ${context.getString(R.string.download_complete)}",
                     Toast.LENGTH_LONG
                 ).show()
-                SPUtils.putUserInfo(SPUtils.pluginContext, "fde_deb_path", info?.savePath)
+                SPUtils.putUserInfo(SPUtils.pluginContext, DEBPATH_KEY, info?.savePath)
+                SPUtils.putIntUserInfo(SPUtils.pluginContext, TIMING_KEY, TIMING_NOT_YET_INSTALL)
                 showInstallUI()
                 createNotification()
             }
@@ -261,6 +268,7 @@ class AboutWindow(
         latestedTv?.visibility = View.GONE
         updateLl?.visibility = View.GONE
         downloadLl?.visibility = View.GONE
+        installPatchTv?.visibility = View.GONE
         if(timing == TIMING_NOW_INSTALL) {
             installNowTv?.visibility = View.VISIBLE
             installLaterTv?.visibility = View.GONE
@@ -276,6 +284,8 @@ class AboutWindow(
             installLaterTv?.visibility = View.GONE
             updateNowBt?.visibility = View.VISIBLE
             updateLaterBt?.visibility = View.VISIBLE
+            installPatchTv?.visibility = View.VISIBLE
+            installPatchTv?.text = path
         }
     }
 
@@ -428,21 +438,29 @@ class AboutWindow(
     fun onAction(action: String) {
         var policy :String ?= null
         if(action.equals(ACTION_UPDATE_NOW)){
-            policy = "immediatly"
-            SPUtils.putIntUserInfo(SPUtils.pluginContext, "timing_install", TIMING_NOW_INSTALL)
+            policy = "Immediately"
+            SPUtils.putIntUserInfo(SPUtils.pluginContext, TIMING_KEY, TIMING_NOW_INSTALL)
         }else if(action.equals(ACTION_DEFER_UPDATE)){
             policy = "PreStart"
-            SPUtils.putIntUserInfo(SPUtils.pluginContext, "timing_install", TIMING_LATER_INSTALL)
+            SPUtils.putIntUserInfo(SPUtils.pluginContext, TIMING_KEY, TIMING_LATER_INSTALL)
         }
+        if(TextUtils.isEmpty(path)){
+            SPUtils.putIntUserInfo(SPUtils.pluginContext, TIMING_KEY, TIMING_NOT_YET_INSTALL - 1)
+            SPUtils.putUserInfo(SPUtils.pluginContext, DEBPATH_KEY, "")
+        }
+
         DeviceUtils.startInstall(version,path, policy, object : VersionCheckCallback {
             override fun onCallback(response: VersionCheckResponse) {
                 Log.d(TAG, "onCallback() called with: response = $response")
+                SPUtils.putIntUserInfo(SPUtils.pluginContext, TIMING_KEY, TIMING_NOT_YET_INSTALL - 1)
+                SPUtils.putUserInfo(SPUtils.pluginContext, DEBPATH_KEY, "")
             }
 
             override fun onUpdateCallback(response: UpdateResponse) {
                 Log.d(TAG, "onUpdateCallback() called with: response = $response")
             }
         })
+
         initUI()
     }
 }

@@ -10,7 +10,7 @@ import com.boringdroid.systemui.constant.HandlerConstant
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.utils.Utils
 
-class AllAppsProvider (context: Context, updater: OverviewAppsUpdater?) : AppProvider{
+class AllAppsProvider (context: Context, val updater: OverviewAppsUpdater?) : AppProvider{
 
     lateinit var systemUIContext: Context
     private val appLoaderTask: AppLoaderTask
@@ -28,6 +28,10 @@ class AllAppsProvider (context: Context, updater: OverviewAppsUpdater?) : AppPro
     }
 
     override fun provideAppsWithFilterSync(type: Int, name: String?): MutableList<AppData> {
+        Log.d(TAG, "provideAppsWithFilterSync() returned: $apps")
+        if(apps.size != 0){
+            updater?.onAppListUpdated(apps)
+        }
         return apps
     }
 

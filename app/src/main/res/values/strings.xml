@@ -137,8 +137,8 @@
     <string name="check_verson">Check version</string>
     <string name="already_latest">Already latested</string>
     <string name="update_to_version">Update to version</string>
-    <string name="pause">pause</string>
-    <string name="update_now">Update now</string>
+    <string name="pause">Pause Download</string>
+    <string name="update_now">Restart to pdate now</string>
     <string name="update_next">Update on next startup</string>
     <string name="download_complete">Download complete</string>
     <string name="update">update</string>

@@ -171,7 +171,7 @@ class TopBarControlWindow(
         val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         val streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         val streamMinVolume = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
-        com.boringdroid.systemui.Log.w(
+        com.boringdroid.systemui.Log.d(
             TAG,
             "currentVolume: $currentVolume streamMaxVolume:$streamMaxVolume streamMinVolume:$streamMinVolume"
         )
@@ -187,7 +187,7 @@ class TopBarControlWindow(
             if(!fromUser){
                 return
             }
-            Log.w(TAG, "progress: $progress ")
+            Log.d(TAG, "progress: $progress ")
 //            val am = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
             if (progress == 0) {
@@ -351,7 +351,7 @@ class TopBarControlWindow(
             tvWifiName?.apply {
                 setText(if (wifiStatus == 1) wifiName else context.getString(R.string.close_wifi))
             }
-            Log.w(TAG, "bsystemui-wifiStatus $wifiStatus  -wifiName: $wifiName")
+            Log.d(TAG, "bsystemui-wifiStatus $wifiStatus  -wifiName: $wifiName")
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -15,7 +15,7 @@ class LogTools {
         }
 
         fun w(msg: String?) {
-            Log.w(TAG, msg!!)
+            Log.d(TAG, msg!!)
         }
 
         fun e(msg: String?) {

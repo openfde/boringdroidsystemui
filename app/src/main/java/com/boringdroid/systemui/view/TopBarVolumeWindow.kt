@@ -162,7 +162,7 @@ class TopBarVolumeWindow(
                 return
             }
 
-            Log.w(TopBarControlWindow.TAG, "progress: $progress ")
+            Log.d(TopBarControlWindow.TAG, "progress: $progress ")
 //            val am = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
             if (progress == 0) {

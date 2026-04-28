@@ -167,13 +167,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         status?.addView(topBarLayout)
         status?.setBackgroundColor(Color.TRANSPARENT)
         Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
-        if(TopBarLayout?.inited != true){
+//        if(TopBarLayout?.inited != true){
             topBarLayout?.initState()
             topBarLayout?.notificationListener = this
             topBarLayout?.setOnClickListener{
             }
             topBarLayout?.systemUIContext = systemUIContext
-        }
+//        }
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
             Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
         }

@@ -39,7 +39,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     private val appstateListener: AppStateListener
     private val launchApps: LauncherApps
     private val userManager: UserManager
-    private val persistDockApps: MutableList<TaskInfo> = ArrayList()
+    val persistDockApps: MutableList<TaskInfo> = ArrayList()
     private val activeDockApps: MutableList<TaskInfo> = ArrayList()
     private val persisApps: MutableList<PersistApp> = ArrayList()
 
@@ -78,6 +78,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         val list = apps.toMutableSet().toList()
         persistDockApps.clear()
         persistDockApps.addAll(list)
+        Log.d(TAG, "providePersistApps() called $persistDockApps")
         return persistDockApps
     }
 
@@ -289,6 +290,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     private fun getTaskInfoFromPersist(packageName: String):TaskInfo? {
+        Log.d(TAG, "getTaskInfoFromPersist() called with: packageName = $packageName")
         persistDockApps.forEach{ app->
             if(TextUtils.equals(app.packageName, packageName)){
                 mayFillTaskInfo(app)
@@ -299,12 +301,13 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     private fun mayFillTaskInfo(app: TaskInfo) {
+        Log.d(TAG, "mayFillTaskInfo app = $app")
         val packageName = app.packageName
         if(packageName.contains("#")){
             val names = packageName.split("#")
             val overviewAppData = updater.getOverviewAppData()
             val appData = overviewAppData.firstOrNull{
-                it.fileName?.contains(names[1]) ?: false
+                it.packageName?.equals(packageName) ?: false
             }
             if(appData == null){
                 return
@@ -318,8 +321,8 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
             app.linuxInfo = linuxInfo
             app.icon = appData.icon
             app.platformType = PLATFORM_TYPE_X11
-//            Log.d(TAG, "mayFillTaskInfo : $app")
-        } else {
+            Log.d(TAG, "mayFillTaskInfo get x11app :$app")
+        } else if(!packageName.equals("com.android.allapp")){
             try {
                 val packageInfo =
                     packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
@@ -344,6 +347,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     private fun getTaskInfoFromActive(packageName: String):TaskInfo? {
+        Log.d(TAG, "getTaskInfoFromActive: ")
         activeDockApps.forEach{ app->
             if(TextUtils.equals(app.packageName, packageName)){
                 mayFillTaskInfo(app)
@@ -400,6 +404,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
     }
 
     fun pin(taskInfo: TaskInfo) {
+        Log.d(TAG, "pin() called with: taskInfo = $taskInfo")
         taskInfo.dockType = DOCK_TYPE_PERSISIT
         activeDockApps.removeIf { info->
             if(TextUtils.equals(info.packageName, taskInfo.packageName)){
@@ -426,9 +431,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         persistDockApps.removeIf {
                 info-> TextUtils.equals(info.packageName, taskInfo.packageName)
         }
-        val arrayToString = SPUtils.arrayToString(persistDockApps)
-//        persistDockApps.forEach {
-//                info -> Log.d(TAG, "unpin: info:${info.packageName}") }
         SPUtils.updatePersistDockApp(persistDockApps)
         val apps: MutableList<TaskInfo> = ArrayList()
         apps.addAll(persistDockApps)
@@ -438,7 +440,6 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
 
     fun isPersistDockApp(packageName: String): Boolean {
         persistDockApps.forEach {info ->
-//            Log.d(TAG, "isPersistDockApp: ${info.packageName}")
             if(TextUtils.equals(info.packageName, packageName)){return true}}
         return false
     }
@@ -450,6 +451,7 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         val apps: MutableList<TaskInfo> = ArrayList()
         apps.addAll(persistDockApps)
         apps.addAll(activeDockApps)
+        Log.d(TAG, "mayFillPersistTaskInfo() called $persistDockApps")
         updater.notifyDockAapp(apps)
     }
 

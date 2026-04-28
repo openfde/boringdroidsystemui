@@ -100,7 +100,7 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
 //        volumeCenterWindow = VolumeCenterWindow(context, volumeBtn)
 //        notificationWindow = NotificationWindow(context, activeNotifications)
         notificationBtn?.setOnClickListener {
-            Log.w(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
+            Log.d(TAG, "notificationPanelVisible: ${Utils.notificationPanelVisible}")
             if (Utils.notificationPanelVisible) {
                 listener?.hideNotification()
                 Utils.notificationPanelVisible = false
@@ -372,12 +372,12 @@ class SystemStateLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun hideVolumeCenterWindow() {
-//        Log.w(TAG, "hideVolumeCenterWindow")
+//        Log.d(TAG, "hideVolumeCenterWindow")
 //        volumeCenterWindow?.dismiss()
     }
 
     fun hideImeSwitchWindow() {
-//        Log.w(TAG, "hideVolumeCenterWindow")
+//        Log.d(TAG, "hideVolumeCenterWindow")
 //        imeSwitchWindow?.dismiss()
     }
 

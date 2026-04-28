@@ -26,6 +26,7 @@ constructor(
     private var mIsHorizontalScroll = false
     val TAG = "LoadedViewPager"
     var blockScroll : Boolean = false
+    var mIsTouching : Boolean = false
 
     init {
         setOnTouchListener { v, event -> handleTouchEvent(event) }
@@ -54,6 +55,7 @@ constructor(
         Log.d(TAG, "onInterceptTouchEvent() called with: ev = $ev")
         when (ev!!.action) {
             MotionEvent.ACTION_DOWN -> {
+                mIsTouching = true;
                 mStartX = ev!!.x
                 mStartY = ev!!.y
                 lastInterceptX = -1f
@@ -89,6 +91,7 @@ constructor(
                 }
             }
             MotionEvent.ACTION_UP -> {
+                mIsTouching = false
                 if(mStartX == ev.x && mStartY == ev.y && ev.source == 0x1002){
                     postDelayed({ overviewWindow?.dismiss() }, 50)
                 }
@@ -108,9 +111,10 @@ constructor(
     }
 
     private fun handleTouchEvent(event: MotionEvent): Boolean {
-//        Log.d(TAG, "handleTouchEvent() called with: event = $event")
+        Log.d(TAG, "handleTouchEvent() called with: event = $event")
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                mIsTouching = true
                 mStartX = event.x
                 mStartY = event.y
                 mIsHorizontalScroll = false
@@ -122,6 +126,7 @@ constructor(
 //                mIsHorizontalScroll = dx > dy && dx > ViewConfiguration.get(context).scaledTouchSlop
                 Log.d(TAG, "handleTouchEvent: dx:$dx dy:$dy $blockScroll")
                 if(!blockScroll ) {
+                    blockScroll = true
                     if(dx < 0){
                         goToNextPage()
                     } else {
@@ -134,9 +139,10 @@ constructor(
 
 //                if (mIsHorizontalScroll) {
             {
+                mIsTouching = false
                 val dx = event.x - mStartX
-//                Log.d(TAG, "handleTouchEvent() called with: dx = $dx")
-//                if (abs(dx.toDouble()) > mTriggerDistance) {
+                Log.d(TAG, "handleTouchEvent() called with: dx = $dx")
+                if (abs(dx.toDouble()) > mTriggerDistance) {
 //                    val current = currentItem
 //                    val next = if (dx > 0) current - 1 else current + 1
 //
@@ -147,12 +153,13 @@ constructor(
 //                    )
 //                    return true // 已处理滑动
 //                }
-            }
+                }
 
-//                }
+            }
         }
         return super.onTouchEvent(event)
     }
+
 
 
 
