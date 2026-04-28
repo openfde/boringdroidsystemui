@@ -99,7 +99,6 @@
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/version_tv"
                 android:orientation="horizontal"
-                android:visibility="gone"
                 android:gravity="center_vertical">
                 <Button
                     android:layout_weight="1"
@@ -131,6 +130,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/install_path"
+                android:layout_below="@id/install_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"
+                android:layout_marginHorizontal="50dp"
+                />
 
 
             <LinearLayout

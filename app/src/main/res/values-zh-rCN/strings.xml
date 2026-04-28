@@ -138,9 +138,9 @@
     <string name="check_verson">检查版本更新</string>
     <string name="already_latest">已经是最新版本</string>
     <string name="update_to_version">更新版本到</string>
-    <string name="pause">暂停</string>
+    <string name="pause">暂停下载</string>
     <string name="resume_todownload">继续下载</string>
-    <string name="update_now">立即更新</string>
+    <string name="update_now">立即重启更新</string>
     <string name="update_next">下一次开机自动更新</string>
     <string name="download_complete">下载成功</string>
     <string name="update">更新</string>

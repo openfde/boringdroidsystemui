@@ -164,7 +164,7 @@ class NotificationService : NotificationListenerService(),
             count++
             if (notification.isClearable) cancelableCount++
         }
-        Log.w(TAG,"updateNotificationCount count: $count")
+        Log.d(TAG,"updateNotificationCount count: $count")
         sendBroadcast(
             Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY)
                 .putExtra("count", count)

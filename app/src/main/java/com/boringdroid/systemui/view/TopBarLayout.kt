@@ -632,6 +632,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         AbsTopPopWindow.dissmissWindow(powerWindow)
         AbsTopPopWindow.dissmissWindow(controlWindow)
         AbsTopPopWindow.dissmissWindow(volumeWindow)
+        AbsTopPopWindow.dissmissWindow(aboutWindow)
     }
 
     fun updateSystemTrayIcon(icon: Bitmap?, window: Long, action: Long, title: String?) {
