@@ -43,7 +43,7 @@ import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.LoadedOverviewRecycleView.Companion.NUMBER_OF_COLUMNS
-
+import kotlin.math.max
 
 class AppOverviewWindow(
     context: Context,
@@ -75,6 +75,7 @@ class AppOverviewWindow(
     var wallpaperBitmap : Bitmap ?= null
     var blurWallPaperRadius : Float ?= 0.0f
     var div : Int  = 1
+    var rowSpacingPx: Int = 0
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -115,8 +116,15 @@ class AppOverviewWindow(
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
         val dimensionPixelSize =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
-        div = (screenHeight - dimensionPixelSize1 - dimensionPixelSize2 + 30 ).div(dimensionPixelSize)
-        Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div")
+        val minRowSpacing =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_row_spacing_min)
+        val availableHeight = max(0, screenHeight - dimensionPixelSize1 - dimensionPixelSize2)
+        div = calculateRowsPerPage(availableHeight, dimensionPixelSize, minRowSpacing)
+        rowSpacingPx = calculateRowSpacing(availableHeight, dimensionPixelSize, div, minRowSpacing)
+        Log.d(
+            TAG,
+            "initViews: top=$dimensionPixelSize1 bottom=$dimensionPixelSize2 screen=$screenHeight itemHeight=$dimensionPixelSize rows=$div rowSpacing=$rowSpacingPx"
+        )
         appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
@@ -348,6 +356,35 @@ class AppOverviewWindow(
         appsVp?.adapter?.notifyDataSetChanged()
         updateChannel()
     }
+
+    private fun calculateRowsPerPage(
+        availableHeight: Int,
+        itemHeight: Int,
+        minRowSpacing: Int
+    ): Int {
+        var rows = max(1, availableHeight / max(1, itemHeight))
+        while (rows > 1) {
+            val requiredHeight = rows * itemHeight + (rows - 1) * minRowSpacing
+            if (requiredHeight <= availableHeight) {
+                break
+            }
+            rows--
+        }
+        return max(1, rows)
+    }
+
+    private fun calculateRowSpacing(
+        availableHeight: Int,
+        itemHeight: Int,
+        rows: Int,
+        minRowSpacing: Int
+    ): Int {
+        if (rows <= 1) {
+            return 0
+        }
+        val remainingHeight = max(0, availableHeight - rows * itemHeight)
+        return max(minRowSpacing, remainingHeight / (rows - 1))
+    }
 }
 
 class AppsPagerAdapter(
@@ -372,6 +409,7 @@ class AppsPagerAdapter(
         val recycleView = view.findViewById<LoadedOverviewRecycleView>(R.id.loaded_overview_recycle_view) as LoadedOverviewRecycleView
 //        val recycleView = LoadedOverviewRecycleView(container.context)
         recycleView.overviewWindow = appOverviewWindow
+        recycleView.setGridConfig(appOverviewWindow.div, appOverviewWindow.rowSpacingPx)
         recycleView.setData(appPages[position])
         val params = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         container.addView(view, params)
