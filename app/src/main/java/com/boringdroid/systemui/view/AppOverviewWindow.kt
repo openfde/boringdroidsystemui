@@ -89,6 +89,7 @@ class AppOverviewWindow(
 
     override fun showPopupWindow() {
         super.showPopupWindow()
+        ImageUtils.set("fde.click_as_touch", "true")
         initViews()
 //        runFadeAnimationWithTransition(true, null, null)
         appsVp?.doOnLayout {
@@ -315,6 +316,7 @@ class AppOverviewWindow(
 
     override fun dismiss() {
         destroy()
+        ImageUtils.set("fde.click_as_touch", "false")
     }
 
     fun destroy(){
