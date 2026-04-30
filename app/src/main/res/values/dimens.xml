@@ -157,8 +157,10 @@
     <dimen name="dock_divide_padding">8dp</dimen>
     <dimen name="overview_app_height">190dp</dimen>
     <dimen name="overview_app_width">188dp</dimen>
-    <dimen name="overview_row_spacing_min">20dp</dimen>
+    <dimen name="overview_row_spacing_min">1dp</dimen>
     <dimen name="overview_margin_top">105dp</dimen>
     <dimen name="overview_margin_bottom">135dp</dimen>
     <dimen name="overview_indicator_margin">100dp</dimen>
+    <dimen name="overview_indicator_middle_gap">20dp</dimen>
+    <dimen name="overview_indicator_height">16dp</dimen>
 </resources>

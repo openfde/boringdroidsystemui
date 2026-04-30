@@ -9,10 +9,8 @@
 <!--    height = 1080 x 1.1-->
     <ImageView
         android:id="@+id/bg_iv"
-        android:layout_width="2112dp"
-        android:layout_height="1188dp"
-        android:layout_marginTop="-54dp"
-        android:layout_marginLeft="-96dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="centerCrop"
         />
     <LinearLayout

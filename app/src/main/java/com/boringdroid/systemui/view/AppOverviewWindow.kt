@@ -28,6 +28,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.core.view.doOnLayout
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
@@ -76,6 +77,14 @@ class AppOverviewWindow(
     var blurWallPaperRadius : Float ?= 0.0f
     var div : Int  = 1
     var rowSpacingPx: Int = 0
+    var dockScaleFactor: Float = 1.0f
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            refreshOverviewLayout()
+        }
 
     companion object {
         const val WINDOW_PADDING = 100
@@ -108,20 +117,9 @@ class AppOverviewWindow(
         appsVp?.overviewWindow = this
         bgView = mContentView?.findViewById(R.id.bg_view)
         indicatorMi = mContentView?.findViewById(R.id.indicator_mi)
+        updateIndicatorBottomMargin()
 
-        val screenHeight = ScreenSizeUtils.getInstance(getContext()).screenHeight
-        val dimensionPixelSize1 =
-            getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_top)
-        val dimensionPixelSize2 =
-            getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_bottom)
-        val dimensionPixelSize =
-            getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
-        val minRowSpacing =
-            getContext().resources.getDimensionPixelSize(R.dimen.overview_row_spacing_min)
-        val availableHeight = max(0, screenHeight - dimensionPixelSize1 - dimensionPixelSize2)
-        div = calculateRowsPerPage(availableHeight, dimensionPixelSize, minRowSpacing)
-        rowSpacingPx = calculateRowSpacing(availableHeight, dimensionPixelSize, div, minRowSpacing)
-        Log.d(TAG, "initViews: $dimensionPixelSize1 $dimensionPixelSize2   $screenHeight $dimensionPixelSize $div $rowSpacingPx")
+        updateGridMetrics()
         appPages = apps.chunked(NUMBER_OF_COLUMNS * div) as MutableList<MutableList<AppData>>
         appsPagerAdapter = AppsPagerAdapter(appPages, this)
         appsVp?.adapter = appsPagerAdapter
@@ -381,6 +379,57 @@ class AppOverviewWindow(
         }
         val remainingHeight = max(0, availableHeight - rows * itemHeight)
         return max(minRowSpacing, remainingHeight / (rows - 1))
+    }
+
+    private fun updateGridMetrics() {
+        val screenHeight = ScreenSizeUtils.getInstance(getContext()).screenHeight
+        val topInset =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_top)
+        val bottomInset = getOverviewContentBottomInset()
+        val itemHeight =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_app_height)
+        val minRowSpacing =
+            getContext().resources.getDimensionPixelSize(R.dimen.overview_row_spacing_min)
+        val availableHeight = max(0, screenHeight - topInset - bottomInset)
+        div = calculateRowsPerPage(availableHeight, itemHeight, minRowSpacing)
+        rowSpacingPx = calculateRowSpacing(availableHeight, itemHeight, div, minRowSpacing)
+        Log.d(TAG, "updateGridMetrics: $topInset $bottomInset $screenHeight $itemHeight $div $rowSpacingPx")
+    }
+
+    private fun getOverviewContentBottomInset(): Int {
+        val resources = getContext().resources
+        val dockHeight = resources.getDimensionPixelSize(R.dimen.dock_app_layout_height)
+        val middleGap = resources.getDimensionPixelSize(R.dimen.overview_indicator_middle_gap)
+        val indicatorHeight = resources.getDimensionPixelSize(R.dimen.overview_indicator_height)
+        val dockOffset = (dockHeight * dockScaleFactor + 0.5f).toInt()
+        return dockOffset + middleGap + indicatorHeight + middleGap
+    }
+
+    private fun updateIndicatorBottomMargin() {
+        val indicatorView = indicatorMi ?: return
+        val params = indicatorView.layoutParams as? RelativeLayout.LayoutParams ?: return
+        val appsView = appsVp ?: return
+        val appsParams = appsView.layoutParams as? RelativeLayout.LayoutParams ?: return
+        val resources = getContext().resources
+        val dockHeight = resources.getDimensionPixelSize(R.dimen.dock_app_layout_height)
+        val middleGap = resources.getDimensionPixelSize(R.dimen.overview_indicator_middle_gap)
+        val indicatorHeight = resources.getDimensionPixelSize(R.dimen.overview_indicator_height)
+        val dockOffset = (dockHeight * dockScaleFactor + 0.5f).toInt()
+        params.bottomMargin = dockOffset + middleGap
+        indicatorView.layoutParams = params
+        appsParams.bottomMargin = dockOffset + middleGap + indicatorHeight + middleGap
+        appsView.layoutParams = appsParams
+    }
+
+    private fun refreshOverviewLayout() {
+        updateIndicatorBottomMargin()
+        if (appsVp == null) {
+            return
+        }
+        updateGridMetrics()
+        if (apps.isNotEmpty()) {
+            updateAppList(apps.toMutableList())
+        }
     }
 }
 
