@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
+import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.text.TextUtils
@@ -47,6 +48,7 @@ constructor(
     private var appListAdapter: AppListAdapter
     var overviewWindow: AppOverviewWindow ?= null
     var list: MutableList<AppData> ?= null
+    private var rowSpacingDecoration: RowSpacingDecoration? = null
 
     companion object {
         public const val NUMBER_OF_COLUMNS = 7
@@ -65,6 +67,37 @@ constructor(
         this.list = apps
         appListAdapter.setWindow(overviewWindow)
         appListAdapter.setData(apps)
+    }
+
+    fun setGridConfig(rowsPerPage: Int, rowSpacingPx: Int) {
+        rowSpacingDecoration?.let { removeItemDecoration(it) }
+        if (rowsPerPage > 1 && rowSpacingPx > 0) {
+            rowSpacingDecoration = RowSpacingDecoration(NUMBER_OF_COLUMNS, rowSpacingPx)
+            addItemDecoration(rowSpacingDecoration!!)
+        } else {
+            rowSpacingDecoration = null
+        }
+    }
+
+    private class RowSpacingDecoration(private val columns: Int, private val rowSpacingPx: Int) :
+        RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+            if (position == NO_POSITION) {
+                return
+            }
+            val itemCount = state.itemCount
+            val totalRows = (itemCount + columns - 1) / columns
+            val rowIndex = position / columns
+            if (rowIndex < totalRows - 1) {
+                outRect.bottom = rowSpacingPx
+            }
+        }
     }
 
 

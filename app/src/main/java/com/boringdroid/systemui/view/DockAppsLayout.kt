@@ -440,6 +440,7 @@ constructor(
                 .provider(null)
                 .paramType(TYPE_SEARCH_BAR)
                 .build(AbsTopPopWindow.WindowType.Overview) as AppOverviewWindow
+            appOverviewWindow?.dockScaleFactor = dockScaleFactor
             appOverviewWindow?.updateAppList(overviewApps)
             appOverviewWindow?.dismissListener = object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
@@ -462,6 +463,8 @@ constructor(
             }
             appOverviewWindow?.appProvider = overviewProvider
             appOverviewWindow?.dockProvider = dockProvider
+        } else {
+            appOverviewWindow?.dockScaleFactor = dockScaleFactor
         }
     }
 
