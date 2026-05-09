@@ -327,7 +327,7 @@ class AboutWindow(
             override fun onCallback(response: VersionCheckResponse) {
                 val newer = response.data?.isNewer
                 this@AboutWindow.response = response
-                if (newer == 0) {
+                if (newer != 1 ) {
                     showLatestUI()
                 } else if (newer == 1) {
                     latestedTv?.visibility = View.GONE
