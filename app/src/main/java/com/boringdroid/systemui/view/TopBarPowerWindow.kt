@@ -132,6 +132,8 @@ class TopBarPowerWindow(
             DeviceUtils.logout()
         } else if (v == lockBtn) {
             DeviceUtils.lock()
+        } else if (v == sleepBtn) {
+            DeviceUtils.sleep()
         }
     }
 

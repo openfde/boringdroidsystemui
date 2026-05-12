@@ -48,7 +48,7 @@ object DeviceUtils {
     const val URL_POWOFF = "/api/v1/power/off"
     const val URL_RESTART = "/api/v1/power/restart"
     const val URL_LOCK = "/api/v1/power/lock"
-
+    const val URL_SLEEP = "/api/v1/power/sleep"
     const val URL_GET_BRIGHTNESS = "/api/v1/brightness"
     const val URL_SET_BRIGHTNESS = "/api/v1/brightness"
     const val URL_DETECT_BRIGHTNESS = "/api/v1/brightness/detect"
@@ -397,6 +397,23 @@ object DeviceUtils {
                 }
 
                 override fun onSuccess(call: Call, response: String) {
+                }
+            })
+    }
+
+    fun sleep() {
+        QuietOkHttp.post(BASEURL + URL_SLEEP)
+            .setCallbackToMainUIThread(true)
+            .execute(object : JsonCallBack<String>() {
+                override fun onFailure(call: Call, e: Exception) {
+                    Log.d("fde", "onFailure() called with: call = [$call], e = [$e]")
+                }
+
+                override fun onSuccess(call: Call, response: String) {
+                    Log.d(
+                        TAG,
+                        "onSuccess() called with: call = $call, response = $response"
+                    )
                 }
             })
     }
