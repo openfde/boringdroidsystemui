@@ -18,7 +18,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.os.Message
 import android.provider.Settings
 import android.util.AttributeSet
 import android.util.Log
@@ -39,7 +38,6 @@ import com.boringdroid.systemui.receiver.DynamicReceiver
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.INTENT_UPDATE_STATE
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SERVICE_ACTION
 import com.boringdroid.systemui.receiver.UninstallReceiver
-import com.boringdroid.systemui.receiver.WifiBroadcastReceiver
 import com.boringdroid.systemui.receiver.XserverHelper
 import com.boringdroid.systemui.receiver.XserverHelper.X11_PACKAGE_NAME
 import com.boringdroid.systemui.receiver.XserverHelper.X11_SERVICE_ACTION
@@ -85,7 +83,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val classLoader = SystemUIOverlay::class.java.classLoader
     private var mNm: NotificationManager? = null
     private var dynamicReceiver: DynamicReceiver? = null
-    private var wifiBroadcastReceiver: WifiBroadcastReceiver? = null
     private var networkChangeReceiver: NetWorkBroadcastReceiver? =null
 
     private var dockAppsGroup: ViewGroup? = null
@@ -223,15 +220,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         grantNmnPermission()
         val notificationServiceEnable = isNotificationServiceEnable()
         dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
-        wifiBroadcastReceiver = WifiBroadcastReceiver(handlerWifi)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         intentFilter.addAction(INTENT_UPDATE_STATE)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
-
-        val intentFilterWifi  = IntentFilter()
-        intentFilterWifi.addAction("com.android.systemui.CONNECTIVITY_CHANGE")
-        pluginContext!!.registerReceiver(wifiBroadcastReceiver, intentFilterWifi, RECEIVER_EXPORTED)
 
         networkChangeReceiver = topBarLayout?.let { NetWorkBroadcastReceiver(it) }
 
@@ -272,6 +264,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             Settings.System.getUriFor("dock_scale"),
             false, mDockContentObserver
         )
+
+        systemUIContext?.contentResolver?.registerContentObserver(
+            Settings.System.getUriFor("NetState"),
+            false,mNetStateContentObserver
+        )
+    }
+
+    private val mNetStateContentObserver: ContentObserver = object : ContentObserver(mHandler) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            topBarLayout?.netStatusLister()
+        }
     }
 
     private val mDockContentObserver: ContentObserver = object : ContentObserver(mHandler) {
@@ -286,11 +289,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
     }
 
-    val handlerWifi = object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
-            topBarLayout?.wifiStatusListen()
-        }
-    }
 
     private fun initBattery() {
         val batteryLevel = BatteryUtils.getBatteryPercentage(systemUIContext)
