@@ -205,6 +205,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         initVolume()
         getFdeMode()
+
+        wifiStatusListen();
     }
 
     fun getFdeMode(){
@@ -254,6 +256,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     fun wifiStatusListen(){
         controlWindow?.wifiStatusListen()
         val netStatus = Utils.isNetworkAvailable(getContext());
+        Log.d(TAG, "wifiStatusListen() called with: netStatus = $netStatus")
         wifiBtn?.apply {
             setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
         }
