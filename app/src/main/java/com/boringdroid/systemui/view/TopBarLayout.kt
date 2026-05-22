@@ -256,14 +256,18 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     fun netStatusLister(){
-        val netState: String = Settings.System.getString(
-            systemUIContext?.getContentResolver(),
-            "NetState")
-        Log.d(TAG, "onChange() called with netState = $netState")
-        wifiBtn?.apply {
-            setImageResource(if (netState == "60" || netState == "70") R.drawable.icon_wifi else R.drawable.icon_wifi_un)
+        try {
+            val netState: String = Settings.System.getString(
+                systemUIContext?.getContentResolver(),
+                "NetState")
+            Log.d(TAG, "onChange() called with netState = $netState")
+            wifiBtn?.apply {
+                setImageResource(if (netState == "60" || netState == "70") R.drawable.icon_wifi else R.drawable.icon_wifi_un)
+            }
+            controlWindow?.wifiStatusListen()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        controlWindow?.wifiStatusListen()
     }
 
     fun wifiStatusListen(){

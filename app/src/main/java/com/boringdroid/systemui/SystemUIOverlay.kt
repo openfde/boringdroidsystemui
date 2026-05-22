@@ -457,7 +457,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
                 systemUIContext!!.unregisterReceiver(timeTickReceiver)
                 systemUIContext!!.unregisterReceiver(networkChangeReceiver)
-            } catch (e: IllegalArgumentException) {
+                systemUIContext?.contentResolver?.unregisterContentObserver(mNetStateContentObserver)
+            } catch (e: Exception) {
                 Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
             }
         }
