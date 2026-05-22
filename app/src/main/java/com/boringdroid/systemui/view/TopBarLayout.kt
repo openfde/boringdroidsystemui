@@ -207,6 +207,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getFdeMode()
 
         wifiStatusListen();
+
+
     }
 
     fun getFdeMode(){
@@ -251,6 +253,17 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                 globalSearchWindow?.showPopupWindow()
             }
         }
+    }
+
+    fun netStatusLister(){
+        val netState: String = Settings.System.getString(
+            systemUIContext?.getContentResolver(),
+            "NetState")
+        Log.d(TAG, "onChange() called with netState = $netState")
+        wifiBtn?.apply {
+            setImageResource(if (netState == "60" || netState == "70") R.drawable.icon_wifi else R.drawable.icon_wifi_un)
+        }
+        controlWindow?.wifiStatusListen()
     }
 
     fun wifiStatusListen(){
