@@ -69,7 +69,7 @@ constructor(
     private val userManager: UserManager
     private val windowManager:WindowManager
     private val tasks: MutableList<TaskInfo> = ArrayList()
-    val overviewApps: MutableList<AppData> = ArrayList()
+    val overviewApps: MutableList<AppData> = java.util.concurrent.CopyOnWriteArrayList()
     private val dockAppAdapter: DockAppAdapter?
     private val dockProvider: DockAppsProvider
     var overviewProvider: AllAppsProvider ?= null
