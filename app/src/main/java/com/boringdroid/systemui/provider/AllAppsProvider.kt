@@ -37,13 +37,15 @@ class AllAppsProvider (context: Context, val updater: OverviewAppsUpdater?) : Ap
 
     override fun provideAppsWithFilterAsync(type: Int, name: String?) {
         Log.d(TAG, "provideAppsWithFilterAsync() called with: type = $type, name = $name")
-        handler.fitler = name
+        if (name != null) {
+            handler.filter = name
+        }
         appLoaderTask.postSart()
     }
 
 
     class H(private val updater: OverviewAppsUpdater?, private val providerResult: MutableList<AppData>) : Handler(){
-        var fitler:String ?= null
+        var filter:String = ""
         val apps: MutableList<AppData> = ArrayList()
 
         override fun handleMessage(msg: Message) {
@@ -53,11 +55,12 @@ class AllAppsProvider (context: Context, val updater: OverviewAppsUpdater?) : Ap
                     providerResult.clear()
                     providerResult.addAll(appData)
                     apps.clear()
-                    if(!TextUtils.isEmpty(fitler)){
+                    if (!TextUtils.isEmpty(filter)) {
                         val filteredAppData: List<AppData> = appData.filter { app ->
-                            fitler?.let { app.name?.contains(it, ignoreCase = true) } == true
-                                    || fitler?.let { app.name?.let { it1 -> Utils.getPinyin(it1)
-                                .contains(it, ignoreCase = true) } } == true
+                            val keyword: String = filter
+                            app.name?.contains(keyword, ignoreCase = true) == true
+                                    || app.name?.let { Utils.getPinyin(it).contains(keyword, ignoreCase = true) } == true
+                                    || app.linuxInfo?.zhName?.let { Utils.getPinyin(it).contains(keyword, ignoreCase = true) } == true
                         }
                         apps.addAll(filteredAppData)
                     } else {

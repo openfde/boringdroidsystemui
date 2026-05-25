@@ -210,7 +210,7 @@ object Utils {
             }
         }
         val toString = pinyin.toString()
-//        Log.d(TAG, "getPinyin() called with: chinese = $chinese  返回:${toString}")
+        Log.d(TAG, "getPinyin() called with: chinese = $chinese  返回:${toString}")
         return toString
     }
 

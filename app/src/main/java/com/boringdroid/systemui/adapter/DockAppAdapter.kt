@@ -82,7 +82,7 @@ class DockAppAdapter(private val context: Context) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
         val info = app.linuxInfo
-        Log.d(TAG, "onBindViewHolder: ${app.program}  ${app.linuxInfo} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
+        Log.d(TAG, "onBindViewHolder: ${app.program}  ${app.packageName} ${info != null && info.iconType.equals(ImageUtils.SURFFIX_PNG)}")
         if(app.program.equals("Apps")){
             holder.iconIV.setImageResource(R.drawable.icon_menu)
         } else if( !app.isLinux()){
