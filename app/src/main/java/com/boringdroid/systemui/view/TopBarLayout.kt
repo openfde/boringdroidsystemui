@@ -92,6 +92,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var windowAttr: WindowAttr? = null
     private val TAG: String = "TopBarLayout"
     val SYSTEM_ALL_APP_ACTION = "system_all_app_action"
+    val NET_RESTRICTED_CONNECTED = "60"
+    val NETCONNECTED = "70"
     var systemUIContext: Context ? = null
     var notificationListener : TopBarNotificationWindow.WindowListener? = null
     var accessibilityManager: AccessibilityManager? = null
@@ -255,15 +257,16 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun netStatusLister(){
-        val netState: String = Settings.System.getString(
-            systemUIContext?.getContentResolver(),
-            "NetState")
-        Log.d(TAG, "onChange() called with netState = $netState")
-        wifiBtn?.apply {
-            setImageResource(if (netState == "60" || netState == "70") R.drawable.icon_wifi else R.drawable.icon_wifi_un)
+    fun netStatusLister(netState : String){
+        try {
+            Log.d(TAG, "onChange() called with netState = $netState")
+            wifiBtn?.apply {
+                setImageResource(if (netState == NET_RESTRICTED_CONNECTED || netState == NETCONNECTED) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
+            }
+            controlWindow?.wifiStatusListen()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        controlWindow?.wifiStatusListen()
     }
 
     fun wifiStatusListen(){

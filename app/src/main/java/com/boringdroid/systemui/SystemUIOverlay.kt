@@ -273,7 +273,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     private val mNetStateContentObserver: ContentObserver = object : ContentObserver(mHandler) {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
-            topBarLayout?.netStatusLister()
+            try {
+                val netState: String = Settings.System.getString(
+                    systemUIContext?.getContentResolver(),
+                    "NetState")
+                topBarLayout?.netStatusLister(netState)
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
         }
     }
 
@@ -457,7 +464,8 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
                 systemUIContext!!.unregisterReceiver(timeTickReceiver)
                 systemUIContext!!.unregisterReceiver(networkChangeReceiver)
-            } catch (e: IllegalArgumentException) {
+                systemUIContext?.contentResolver?.unregisterContentObserver(mNetStateContentObserver)
+            } catch (e: Exception) {
                 Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
             }
         }
