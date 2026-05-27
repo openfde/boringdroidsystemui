@@ -255,11 +255,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun netStatusLister(){
+    fun netStatusLister(netState : String){
         try {
-            val netState: String = Settings.System.getString(
-                systemUIContext?.getContentResolver(),
-                "NetState")
             Log.d(TAG, "onChange() called with netState = $netState")
             wifiBtn?.apply {
                 setImageResource(if (netState == "60" || netState == "70") R.drawable.icon_wifi else R.drawable.icon_wifi_un)
