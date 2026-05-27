@@ -273,10 +273,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     private val mNetStateContentObserver: ContentObserver = object : ContentObserver(mHandler) {
         override fun onChange(selfChange: Boolean, uri: Uri?) {
-            val netState: String = Settings.System.getString(
-                systemUIContext?.getContentResolver(),
-                "NetState")
-            topBarLayout?.netStatusLister(netState)
+            try {
+                val netState: String = Settings.System.getString(
+                    systemUIContext?.getContentResolver(),
+                    "NetState")
+                topBarLayout?.netStatusLister(netState)
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
         }
     }
 
