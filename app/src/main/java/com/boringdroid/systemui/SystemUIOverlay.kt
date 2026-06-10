@@ -174,7 +174,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
             Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
         }
-        topBarLayout?.controlWindow?.recordHandler = recordHandler
+        topBarLayout?.controlWindow?.statusBar = status
     }
 
     override fun onCreate(

@@ -82,6 +82,8 @@ class TopBarControlWindow(
     var formUser: Boolean = false
     var recordHandler: Handler ?= null
 
+    var statusBar: View ?= null
+
     var wifiStatus :Int ? = 0 ;
 
 
@@ -378,6 +380,7 @@ class TopBarControlWindow(
             }, 300)
         } else if(v == recordBtn){
             dismiss()
+            recordHandler = statusBar?.getTag() as Handler
             recordHandler?.obtainMessage(2, 0, 0, null)?.sendToTarget()
         } else if(v == volumeCenterIv){
             dismiss()
