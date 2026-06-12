@@ -59,6 +59,7 @@ class AllAppsProvider (context: Context, val updater: OverviewAppsUpdater?) : Ap
                         val filteredAppData: List<AppData> = appData.filter { app ->
                             val keyword: String = filter
                             app.name?.contains(keyword, ignoreCase = true) == true
+                                    || app.linuxInfo?.zhName?.contains(keyword, ignoreCase = true) == true
                                     || app.name?.let { Utils.getPinyin(it).contains(keyword, ignoreCase = true) } == true
                                     || app.linuxInfo?.zhName?.let { Utils.getPinyin(it).contains(keyword, ignoreCase = true) } == true
                         }
