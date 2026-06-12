@@ -229,13 +229,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun initVolume() {
         val volume = VolumeProvider().getVolume()
         if (volume == 0) {
-            volumeBtn?.setImageResource(R.drawable.icon_volume_mute)
+            volumeBtn?.setImageResource(R.drawable.icon_volume_top_mute)
         } else if (volume < 100.div(3)) {
-            volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+            volumeBtn?.setImageResource(R.drawable.icon_volume_top_min)
         } else if (volume < (100.div(3) * 2)) {
-            volumeBtn?.setImageResource(R.drawable.icon_volume_middle)
+            volumeBtn?.setImageResource(R.drawable.icon_volume_top_middle)
         } else {
-            volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+            volumeBtn?.setImageResource(R.drawable.icon_volume_top_max)
         }
     }
 

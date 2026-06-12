@@ -105,19 +105,19 @@ class TopBarVolumeWindow(
         volumeTv?.text = "$currentVolume"
         if (currentVolume == 0) {
             volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_mute)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
         } else if (currentVolume < volumeSeekBar?.max!!.div(3)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
             volumeImage?.setImageResource(R.drawable.icon_volume_min)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_min)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
         } else if (currentVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
             volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_middle)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
         } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
             volumeImage?.setImageResource(R.drawable.icon_volume_max)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_max)
+            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
         }
     }
 
@@ -167,19 +167,19 @@ class TopBarVolumeWindow(
 //            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
             if (progress == 0) {
                 volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
             } else if (progress < volumeSeekBar?.max!!.div(3)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
                 volumeImage?.setImageResource(R.drawable.icon_volume_min)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_min)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
             } else if (progress < (volumeSeekBar?.max!!.div(3) * 2)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
                 volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
             } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
                 volumeImage?.setImageResource(R.drawable.icon_volume_max)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_max)
+                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
             }
 
             if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){
