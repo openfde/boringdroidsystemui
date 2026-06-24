@@ -39,6 +39,8 @@ class AllAppsProvider (context: Context, val updater: OverviewAppsUpdater?) : Ap
         Log.d(TAG, "provideAppsWithFilterAsync() called with: type = $type, name = $name")
         if (name != null) {
             handler.filter = name
+        } else {
+            handler.filter = ""
         }
         appLoaderTask.postSart()
     }
