@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.database.ContentObserver
 import android.graphics.Color
+import android.graphics.PixelFormat
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -25,6 +26,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
@@ -45,6 +47,7 @@ import com.boringdroid.systemui.utils.BatteryUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.Utils
+import com.boringdroid.systemui.utils.ViewTreePrinter
 import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
 import com.boringdroid.systemui.view.DockAppsLayout
@@ -59,10 +62,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import java.lang.reflect.InvocationTargetException
-import java.util.Arrays
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
@@ -108,26 +108,32 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         statusBar: View,
         navBar: View?,
     ) {
-        Log.d(TAG, "setup this = $this,  statusBar tag = ${statusBar.getTag()}, navBar = ${navBar}")
+        Log.d(TAG, "setup this = $this,  statusBar = ${statusBar}, navBar = ${navBar}")
+        if(statusBar == null || navBar == null){
+            return
+        }
+
         if(statusBar.getTag() != null && statusBar.getTag() is Handler){
             recordHandler = statusBar.getTag() as Handler
         }
 
         status = statusBar as ViewGroup
         navi = navBar as ViewGroup
+        ViewTreePrinter.printViewTree(navi!!)
         if(navi != null && navi!!.getTag() is Float){
             mDockScaleFactor = navi!!.getTag() as Float
-//            Log.d(TAG, "setup: mDockScaleFactor :${mDockScaleFactor}")
         }
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
-//            navBar.setBackgroundColor(pluginContext!!.getColor(R.color.fde_navbar_bg))
             updateNaviDock()
         }
-        status?.visibility = View.VISIBLE
-        status?.removeAllViews()
         generateTopBar()
     }
     private fun updateNaviDock() {
+        val childCount:Int = navi!!.childCount
+        for (i in 0 until childCount) {
+            val child = navi?.getChildAt(i)
+            child?.visibility = View.GONE
+        }
         dockAppsLayout?.onDestroy()
         val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
@@ -135,14 +141,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
         navi?.layoutParams = layoutParams
         val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
-        navi?.removeAllViews()
+//        navi?.removeAllViews()
         navi?.addView(dockAppsGroup, dockParams)
         dockAppsLayout?.initApps(mDockScaleFactor)
         dockAppsLayout?.status = status
         dockAppsLayout?.navi = navi
         dockAppsGroup?.setOnClickListener{
-//            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
-//            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
+            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
+            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
 //            traverseAndPrint(navi!!, 0)
             navi?.background = null
         }
@@ -159,18 +165,29 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     private fun generateTopBar() {
+        status?.visibility = View.VISIBLE
+//        status?.removeAllViews()
+
+        val childCount:Int = status!!.childCount
+
+        for (i in 0 until childCount) {
+            val child = status?.getChildAt(i)
+            child?.visibility = View.GONE
+        }
+
+        ViewTreePrinter.printViewTree(status!!)
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
         status?.setPadding(0,0,0,0)
+//        val layoutParams = FrameLayout.LayoutParams(
+//            FrameLayout.LayoutParams.MATCH_PARENT,
+//            30
+//        )
         status?.addView(topBarLayout)
         status?.setBackgroundColor(Color.TRANSPARENT)
         Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
-//        if(TopBarLayout?.inited != true){
-            topBarLayout?.initState()
-            topBarLayout?.notificationListener = this
-            topBarLayout?.setOnClickListener{
-            }
-            topBarLayout?.systemUIContext = systemUIContext
-//        }
+        topBarLayout?.initState()
+        topBarLayout?.notificationListener = this
+        topBarLayout?.systemUIContext = systemUIContext
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
             Utils.setBackgroundBlurRadius(topBarLayout?.findViewById(R.id.root_blur), 100, 0f)
         }
@@ -181,6 +198,10 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         sysUIContext: Context,
         sysPluginContext: Context,
     ) {
+        Log.d(
+            TAG,
+            "onCreate() called with: sysUIContext = $sysUIContext, sysPluginContext = $sysPluginContext"
+        )
         systemUIContext = sysUIContext
         pluginContext = sysPluginContext
         GlobalSystemUIContext.setContext(sysUIContext)
@@ -196,9 +217,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
         dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
         dockAppsGroup?.defaultFocusHighlightEnabled = false
-//        Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_ll), 30)
-        Utils.getLinuxRootFileName(systemUIContext!!)
-        Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
         overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
         dockAppsLayout?.overviewProvider = overviewProvider
         appStateLayout?.listener = this
@@ -212,49 +230,35 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
         allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
         btAllApps!!.setOnClickListener(allAppsWindow)
-        resolver = sysUIContext.contentResolver
-        initializeTuningServiceSettingKeys(resolver, tunerKeyObserver)
+
+
+//        Utils.getLinuxRootFileName(systemUIContext!!)
+//        Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
+//        registerAll()
+    }
+
+    private fun registerAll() {
+        resolver = systemUIContext!!.contentResolver
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
-        grantNmnPermission()
-        val notificationServiceEnable = isNotificationServiceEnable()
         dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
         intentFilter.addAction(INTENT_UPDATE_STATE)
         pluginContext?.registerReceiver(dynamicReceiver, intentFilter, RECEIVER_EXPORTED)
-
         networkChangeReceiver = topBarLayout?.let { NetWorkBroadcastReceiver(it) }
-
         systemUIContext!!.registerReceiver(networkChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         registPackageUpdate()
-//        XserverHelper.listenXserverStatus(pluginContext,null)
         val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
         tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
         tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
         timeTickReceiver = object : BroadcastReceiver() {
             @RequiresApi(Build.VERSION_CODES.TIRAMISU)
             override fun onReceive(context: Context, intent: Intent) {
-//                Log.d(TAG, "onReceive() called with: context = $context, intent = $intent")
                 if (intent.action == Intent.ACTION_TIME_TICK) {
-//                    com.boringdroid.systemui.Log.e(TAG, "onReceive: " + intent.action)
                     checkXserverStatus()
                 }
-//                else if (intent.action == XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON){
-//                    val icon: Bitmap? = intent.getParcelableExtra(KEY_ICON)
-//                    val window = intent.getLongExtra(KEY_WINDOW, -1)
-//                    val action = intent.getLongExtra(KEY_ACTION, -1)
-//                    val title = intent.getStringExtra(KEY_TITLE)
-//                    topBarLayout?.updateSystemTrayIcon(icon, window, action, title)
-//                } else if(intent.action == XserverHelper.START_SYSTRAY_FROM_X){
-//                    val rect: Rect? = intent.getParcelableExtra(X_WINDOW_RECT, Rect::class.java)
-//                    val index = intent.getIntExtra(X_WINDOW_INDEX, -1)
-//                    val pwin = intent.getLongExtra(X_WINDOW_PWIN, -1)
-//                    val window = intent.getLongExtra(X_WINDOW_WINDOW, -1)
-//                    val windowAttr = WindowAttr(rect, index, pwin, window)
-//                    topBarLayout?.startSystray(windowAttr)
-//                }
             }
         }
         systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
@@ -459,76 +463,42 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     override fun onDestroy() {
         Log.d(TAG, "onDestroy() status:$status")
-        if (systemUIContext != null) {
-            try {
-                systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
-                systemUIContext!!.unregisterReceiver(timeTickReceiver)
-                systemUIContext!!.unregisterReceiver(networkChangeReceiver)
-                systemUIContext?.contentResolver?.unregisterContentObserver(mNetStateContentObserver)
-            } catch (e: Exception) {
-                Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
-            }
-        }
+//        if (systemUIContext != null) {
+//            try {
+//                systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
+//                systemUIContext!!.unregisterReceiver(timeTickReceiver)
+//                systemUIContext!!.unregisterReceiver(networkChangeReceiver)
+//                systemUIContext?.contentResolver?.unregisterContentObserver(mNetStateContentObserver)
+//            } catch (e: Exception) {
+//                Log.e(TAG, "systemUIContext unregisterReceiver: " + e.message )
+//            }
+//        }
+//
+//        if (pluginContext != null) {
+//            try {
+//                pluginContext!!.unregisterReceiver(dynamicReceiver)
+//            } catch (e: IllegalArgumentException) {
+//                Log.e(TAG, "pluginContext unregisterReceiver: " + e.message )
+//            }
+//        }
+//        if (resolver != null) {
+//            resolver!!.unregisterContentObserver(tunerKeyObserver)
+//        }
+//        btAllAppsGroup!!.post {
+//            btAllAppsGroup!!.setOnClickListener(null)
+//            btAllApps!!.setOnClickListener(null)
+//            if (navBarButtonGroup is ViewGroup) {
+//                (navBarButtonGroup as ViewGroup).removeView(btAllAppsGroup)
+//                (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
+//            }
+//        }
+//        dockAppsLayout?.onDestroy()
+//        topBarLayout?.unregisterNotification()
+//        pluginContext = null
+//        status?.removeAllViews()
+//        pluginContext?.unregisterReceiver(receiver)
 
-        if (pluginContext != null) {
-            try {
-                pluginContext!!.unregisterReceiver(dynamicReceiver)
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "pluginContext unregisterReceiver: " + e.message )
-            }
-        }
-        if (resolver != null) {
-            resolver!!.unregisterContentObserver(tunerKeyObserver)
-        }
-        btAllAppsGroup!!.post {
-            btAllAppsGroup!!.setOnClickListener(null)
-            btAllApps!!.setOnClickListener(null)
-            if (navBarButtonGroup is ViewGroup) {
-                (navBarButtonGroup as ViewGroup).removeView(btAllAppsGroup)
-                (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
-            }
-        }
-        dockAppsLayout?.onDestroy()
-        topBarLayout?.unregisterNotification()
-        pluginContext = null
-        status?.removeAllViews()
-        pluginContext?.unregisterReceiver(receiver)
-
-        systemUIContext?.contentResolver?.unregisterContentObserver(mDockContentObserver)
-    }
-
-    @SuppressLint("PrivateApi")
-    private fun initializeTuningServiceSettingKeys(
-        resolver: ContentResolver?,
-        observer: ContentObserver
-    ) {
-        try {
-            val systemPropertiesClass = Class.forName("android.os.SystemProperties")
-            val getMethod =
-                systemPropertiesClass.getMethod("get", String::class.java, String::class.java)
-            val tunerKeys = getMethod.invoke(null, "persist.sys.bd.tunerkeys", "") as String
-//            Log.d(TAG, "Got tuner keys $tunerKeys")
-            val tunerKeyList =
-                Arrays.stream(tunerKeys.split("--").toTypedArray())
-                    .map { obj: String -> obj.trim { it <= ' ' } }
-                    .filter { key: String -> !key.isEmpty() }
-                    .collect(Collectors.toList())
-            this.tunerKeys.clear()
-            this.tunerKeys.addAll(tunerKeyList)
-            for (key in this.tunerKeys) {
-                Log.d(TAG, "Got key $key")
-                val uri = Settings.Secure.getUriFor(key)
-                resolver!!.registerContentObserver(uri, false, observer)
-            }
-        } catch (e: ClassNotFoundException) {
-            Log.e(TAG, "Failed to get tuner keys from properties, so fallback to default")
-        } catch (e: NoSuchMethodException) {
-            Log.e(TAG, "Failed to get tuner keys from properties, so fallback to default")
-        } catch (e: IllegalAccessException) {
-            Log.e(TAG, "Failed to get tuner keys from properties, so fallback to default")
-        } catch (e: InvocationTargetException) {
-            Log.e(TAG, "Failed to get tuner keys from properties, so fallback to default")
-        }
+//        systemUIContext?.contentResolver?.unregisterContentObserver(mDockContentObserver)
     }
 
     @SuppressLint("InflateParams")
@@ -698,7 +668,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 if(topBarLayout != null){
                     topBarLayout?.dimissWindow()
                 }
-                allAppsWindow!!.dismiss()
+                allAppsWindow?.dismiss()
             }
         }
 
@@ -750,9 +720,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     class NetWorkBroadcastReceiver(val topBarLayout: TopBarLayout) : BroadcastReceiver() {
-          val SETTINGS_PACKAGE =  "com.android.settings"
-          val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
-          var lastClickTime = 0L
+        val SETTINGS_PACKAGE =  "com.android.settings"
+        val Wifi_ACTION =  SETTINGS_PACKAGE+".CONNECTIVITY_CHANGE"
+        var lastClickTime = 0L
 
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action

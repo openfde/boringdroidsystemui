@@ -205,7 +205,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         if(needUpdateBattery){
             onBatteryChanged(percentage, status, plugged)
         }
-        initVolume()
+//        initVolume()
         getFdeMode()
 
         wifiStatusListen();
