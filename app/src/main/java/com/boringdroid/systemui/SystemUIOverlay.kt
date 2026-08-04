@@ -115,6 +115,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
         if(statusBar.getTag() != null && statusBar.getTag() is Handler){
             recordHandler = statusBar.getTag() as Handler
+            Log.d(TAG, "setup: $recordHandler")
         }
 
         status = statusBar as ViewGroup
@@ -234,7 +235,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
 //        Utils.getLinuxRootFileName(systemUIContext!!)
 //        Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
-//        registerAll()
+        registerAll()
     }
 
     private fun registerAll() {
@@ -242,6 +243,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         systemUIContext!!.registerReceiver(closeSystemDialogsReceiver, filter, RECEIVER_EXPORTED)
+        grantNmnPermission()
+        val notificationServiceEnable = isNotificationServiceEnable()
+        Log.d(TAG, "notificationServiceEnable: $notificationServiceEnable")
         dynamicReceiver = DynamicReceiver(topBarLayout, topBarLayout)
         var intentFilter  = IntentFilter()
         intentFilter.addAction(SERVICE_ACTION)
@@ -250,29 +254,29 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         networkChangeReceiver = topBarLayout?.let { NetWorkBroadcastReceiver(it) }
         systemUIContext!!.registerReceiver(networkChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         registPackageUpdate()
-        val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
-        tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
-        tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
-        timeTickReceiver = object : BroadcastReceiver() {
-            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.action == Intent.ACTION_TIME_TICK) {
-                    checkXserverStatus()
-                }
-            }
-        }
-        systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
-        initBattery()
+//        val tickFilter = IntentFilter(Intent.ACTION_TIME_TICK)
+//        tickFilter.addAction(XserverHelper.ACTION_X_UPDATE_SYSTEMTRAY_ICON)
+//        tickFilter.addAction(XserverHelper.START_SYSTRAY_FROM_X)
+//        timeTickReceiver = object : BroadcastReceiver() {
+//            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+//            override fun onReceive(context: Context, intent: Intent) {
+//                if (intent.action == Intent.ACTION_TIME_TICK) {
+//                    checkXserverStatus()
+//                }
+//            }
+//        }
+//        systemUIContext?.registerReceiver(timeTickReceiver, tickFilter, RECEIVER_EXPORTED)
+//        initBattery()
 
-        systemUIContext?.contentResolver?.registerContentObserver(
-            Settings.System.getUriFor("dock_scale"),
-            false, mDockContentObserver
-        )
+//        systemUIContext?.contentResolver?.registerContentObserver(
+//            Settings.System.getUriFor("dock_scale"),
+//            false, mDockContentObserver
+//        )
 
-        systemUIContext?.contentResolver?.registerContentObserver(
-            Settings.System.getUriFor("NetState"),
-            false,mNetStateContentObserver
-        )
+//        systemUIContext?.contentResolver?.registerContentObserver(
+//            Settings.System.getUriFor("NetState"),
+//            false,mNetStateContentObserver
+//        )
     }
 
     private val mNetStateContentObserver: ContentObserver = object : ContentObserver(mHandler) {

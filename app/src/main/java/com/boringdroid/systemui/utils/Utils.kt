@@ -313,6 +313,32 @@ object Utils {
         }.start()
     }
 
+    @JvmStatic
+    fun sendKeyWithModifiers(keyCode: Int, metaState: Int) {
+        object : Thread() {
+            override fun run() {
+                try {
+                    sleep(400)
+                    try {
+                        val inst = Instrumentation()
+                        val eventTime = SystemClock.uptimeMillis()
+
+                        val downEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyCode, 0, metaState)
+                        val upEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyCode, 0, metaState)
+
+                        inst.sendKeySync(downEvent)
+                        inst.sendKeySync(upEvent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }.start()
+
+    }
+
     @JvmStatic fun parseAudioDevice(result:String, typeInput:Boolean): ArrayList<AudioDevice>{
         val devicesResult = AudioSystem.getDevs(typeInput)
         val audioDeviceList = ArrayList<AudioDevice>()

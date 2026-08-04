@@ -3,6 +3,7 @@ package com.boringdroid.systemui.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.boringdroid.systemui.Log
 import com.boringdroid.systemui.view.TopBarLayout
 
 
@@ -10,10 +11,10 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
 
 
     override fun onReceive(context: Context, intent: Intent) {
-//        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
+        Log.d(TAG, "DynamicReceiver onReceive context = $context, intent = ${intent.action}")
         if(intent.action.equals(SERVICE_ACTION)){
             val type = intent.getIntExtra("type",-1)
-//        Log.d(TAG, "onReceive() called with: type = $type")
+        Log.d(TAG, "onReceive() called with: type = $type")
             when(type){
                 TYEP_COUNT_NOTIFY ->{
                     notificationListener?.onNotifyCount(intent.getIntExtra("count",0))
@@ -67,6 +68,11 @@ class DynamicReceiver (private val notificationListener: NotificationListener?, 
          val NOTIF_BASE_ID: Int = 4273
          val PROGRESS_NOTIF_ID: Int = 4274
          val ERROR_NOTIF_ID: Int = 4275
+
+        val RECORDING_NOTIF_ID = 87051754  // 录制中的通知ID
+        val SUMMARY_NOTIF_ID = 4274        // 分组摘要ID
+        val SAVED_NOTIF_ID = 87051754      // 保存完成的通知ID（可能复用）
+
     }
 
 }

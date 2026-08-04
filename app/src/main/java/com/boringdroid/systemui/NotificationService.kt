@@ -58,7 +58,7 @@ class NotificationService : NotificationListenerService(),
     private var preferLastDisplay = false
     private var y = 0
     private var x = 0
-    private val TAG: String = "NotificationService"
+    private val TAG: String = "SysUINMService"
     private val SYSUI_PACKAGE = "com.android.systemui"
     private val SYSUI_SCREENRECORD_LAUNCHER = "com.android.systemui.screenrecord.ScreenRecordDialog"
 

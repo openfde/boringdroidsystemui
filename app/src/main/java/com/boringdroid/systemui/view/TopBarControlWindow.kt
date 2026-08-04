@@ -36,6 +36,8 @@ import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.ERROR_NOTIF_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIF_BASE_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.PROGRESS_NOTIF_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.RECORDING_NOTIF_ID
+import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SUMMARY_NOTIF_ID
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -125,7 +127,7 @@ class TopBarControlWindow(
         runWindowAnim(WindowGravity.top, true)
         initViews()
         wifiStatusListen()
-        initVolumes()
+//        initVolumes()
         initBrightnessSeekbar()
         initBle()
     }
@@ -371,17 +373,21 @@ class TopBarControlWindow(
             getContext().startActivity(intent)
         }else if(v == regionshotBtn){
             dismiss()
-            handler.postDelayed({
-                val screenshotHelper = ScreenshotHelper(getContext())
-                screenshotHelper.takeScreenshot(
-                    2,
-                    2, handler, null
-                )
-            }, 300)
+            Utils.sendKeyWithModifiers(KeyEvent.KEYCODE_S, KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)  // Meta + Ctrl + S
+
+//            handler.postDelayed({
+//                val screenshotHelper = ScreenshotHelper(getContext())
+//                screenshotHelper.takeScreenshot(
+//                    2,
+//                    2, handler, null
+//                )
+//            }, 300)
+
         } else if(v == recordBtn){
+            Log.d(TAG, "onClick isRecording:$isRecording")
             dismiss()
             recordHandler = statusBar?.getTag() as Handler
-            recordHandler?.obtainMessage(2, 0, 0, null)?.sendToTarget()
+            recordHandler?.sendEmptyMessage(if (isRecording) 1002 else 1001)
         } else if(v == volumeCenterIv){
             dismiss()
             topbarController?.showVolumeWindow()
@@ -494,23 +500,52 @@ class TopBarControlWindow(
         }
     }
 
-    fun onScreenRecordStateChange(state: Int, groupKey: String?) {
-        Log.d(TAG, "onScreenRecordStateChange() called with: groupKey = $groupKey state = $state  ${groupKey?.contains("screen_record_saved")}")
-        if(state == NOTIF_BASE_ID || state == PROGRESS_NOTIF_ID){
-            isRecording = true
-            recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
-        } else if(isRecording && recordTextView != null
-            && groupKey?.contains("screen_record_saved") == true
-        ){
-//            Log.d(TAG, "onScreenRecordStateChange: show finish toast")
-            isRecording = false
-            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
-            Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()
-        } else if (state == ERROR_NOTIF_ID) {
-            isRecording = false
-            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+
+    fun onScreenRecordStateChange(notificationId: Int, groupKey: String?) {
+        Log.d(TAG, "onScreenRecordStateChange() called with: groupKey = $groupKey, notificationId = $notificationId")
+
+        val isRecordingGroup = groupKey?.contains("screen_record_saved") != true
+
+        if (isRecordingGroup) {
+            // 录制开始/进行中
+            if (!isRecording) {
+                isRecording = true
+                recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
+                Log.d(TAG, "Screen recording started")
+            }
+        } else {
+            // 录制结束（包含 screen_record_saved 的所有通知）
+            if (isRecording) {
+                isRecording = false
+                recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+
+                // 只在第一次收到 "已保存" 通知时弹 Toast
+                // 可以通过 notificationId 是否为 4274（摘要通知）来判断
+                if (notificationId == 4274) {
+                    Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "Screen recording saved successfully")
+                }
+            }
         }
     }
+
+//    fun onScreenRecordStateChange(state: Int, groupKey: String?) {
+//        Log.d(TAG, "onScreenRecordStateChange() called with: groupKey = $groupKey state = $state  ${groupKey?.contains("screen_record_saved")}")
+//        if(state == NOTIF_BASE_ID || state == PROGRESS_NOTIF_ID){
+//            isRecording = true
+//            recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
+//        } else if(isRecording && recordTextView != null
+//            && groupKey?.contains("screen_record_saved") == true
+//        ){
+////            Log.d(TAG, "onScreenRecordStateChange: show finish toast")
+//            isRecording = false
+//            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+//            Toast.makeText(getContext(), R.string.success_recordscreen_string, Toast.LENGTH_SHORT).show()
+//        } else if (state == ERROR_NOTIF_ID) {
+//            isRecording = false
+//            recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+//        }
+//    }
 
 //    private val aclReceiver = object : BroadcastReceiver() {
 //        override fun onReceive(context: Context, intent: Intent) {
@@ -528,6 +563,8 @@ class TopBarControlWindow(
 //            }
 //        }
 //    }
+
+
 
 
     interface TopbarLayoutController {
