@@ -32,7 +32,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 style="@style/style_55"
-                android:text="快捷控制" />
+                android:text="@string/shortcut_control" />
 
             <LinearLayout
                 android:layout_below="@id/shortcut_tv"

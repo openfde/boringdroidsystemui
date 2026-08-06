@@ -145,5 +145,6 @@
     <string name="download_complete">下载成功</string>
     <string name="update">更新</string>
     <string name="version_update">版本更新</string>
+    <string name="shortcut_control">快捷控制</string>
 
 </resources>
