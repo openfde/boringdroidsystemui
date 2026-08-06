@@ -146,5 +146,6 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="not_open">Not enabled</string>
     <string name="enabled">Enabled</string>
+    <string name="shortcut_control">Control center</string>
 
 </resources>
