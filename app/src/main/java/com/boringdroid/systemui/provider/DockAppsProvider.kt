@@ -384,6 +384,18 @@ class DockAppsProvider(private val context: Context, private val updater: DockTa
         return persistDockApps.size
     }
 
+    fun movePersistItem(from: Int, to: Int) {
+        if (from < 0 || to < 0 || from >= persistDockApps.size || to >= persistDockApps.size || from == to) {
+            return
+        }
+        val item = persistDockApps.removeAt(from)
+        persistDockApps.add(to, item)
+    }
+
+    fun savePersistOrder() {
+        SPUtils.updatePersistDockApp(persistDockApps)
+    }
+
     fun getActiveSize(): Int {
         return activeDockApps.size
     }

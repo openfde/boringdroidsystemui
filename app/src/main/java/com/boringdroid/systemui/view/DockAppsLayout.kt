@@ -15,6 +15,8 @@ import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.os.UserManager
 import android.text.TextUtils
 import android.util.AttributeSet
@@ -22,10 +24,13 @@ import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import android.view.accessibility.AccessibilityManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
@@ -45,6 +50,7 @@ import com.boringdroid.systemui.view.AppOverviewWindow.Companion.TYPE_ALL
 import com.boringdroid.systemui.view.AppOverviewWindow.Companion.WINDOW_PADDING
 import com.boringdroid.systemui.view.LoadedDockContextRecycleView.Companion.TYPE_APP
 import com.fde.x11.ICmdEntryInterface;
+import kotlin.math.abs
 
 
 class DockAppsLayout
@@ -87,9 +93,20 @@ constructor(
     var filter: IntentFilter ?= null
     var broadcast :PendingIntent ?= null
 
+    private var itemTouchHelper: ItemTouchHelper? = null
+    private var pressX = 0f
+    private var pressY = 0f
+    private val longPressHandler = Handler(Looper.getMainLooper())
+    private val longPressRunnable = Runnable {
+        val child = findChildViewUnder(pressX, pressY)
+        val holder = child?.let { getChildViewHolder(it) }
+        holder?.let { itemTouchHelper?.startDrag(it) }
+    }
+
     companion object {
         private const val TAG = "DockAppsLayout"
         private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
+        private const val DRAG_LONG_PRESS_TIMEOUT = 100L
     }
 
     init {
@@ -103,6 +120,101 @@ constructor(
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         dockProvider = DockAppsProvider(context, this)
 //        overviewProvider = AllAppsProvider(context, this)
+        setupDragHelper()
+    }
+
+    private fun setupDragHelper() {
+        val callback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+            0,
+        ) {
+            override fun getMovementFlags(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+            ): Int {
+                val pos = viewHolder.adapterPosition
+                if (pos == RecyclerView.NO_POSITION || pos <= 0 || pos >= dockProvider.getPersistSize()) {
+                    return makeMovementFlags(0, 0)
+                }
+                return makeMovementFlags(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0)
+            }
+
+            override fun isLongPressDragEnabled(): Boolean = false
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean {
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) {
+                    return false
+                }
+                val persistSize = dockProvider.getPersistSize()
+                if (from <= 0 || to <= 0 || from >= persistSize || to >= persistSize) {
+                    return false
+                }
+                dockProvider.movePersistItem(from, to)
+                tasks.add(to, tasks.removeAt(from))
+                dockAppAdapter?.moveItem(from, to)
+                return true
+            }
+
+            override fun onSwiped(
+                viewHolder: RecyclerView.ViewHolder,
+                direction: Int,
+            ) {
+            }
+
+            override fun clearView(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+            ) {
+                super.clearView(recyclerView, viewHolder)
+                dockProvider.savePersistOrder()
+            }
+        }
+        itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper?.attachToRecyclerView(this)
+        setupCustomLongPress()
+    }
+
+    private fun setupCustomLongPress() {
+        addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        pressX = e.x
+                        pressY = e.y
+                        longPressHandler.removeCallbacks(longPressRunnable)
+                        longPressHandler.postDelayed(longPressRunnable, DRAG_LONG_PRESS_TIMEOUT)
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        val slop = ViewConfiguration.get(context).scaledTouchSlop
+                        if (abs(e.x - pressX) > slop || abs(e.y - pressY) > slop) {
+                            longPressHandler.removeCallbacks(longPressRunnable)
+                        }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        longPressHandler.removeCallbacks(longPressRunnable)
+                    }
+                }
+                return false
+            }
+        })
+    }
+
+    fun updateNaviWindowFlags() {
+        val windowRoot = navi?.parent as? View ?: return
+        val params = windowRoot.layoutParams as? WindowManager.LayoutParams ?: return
+        params.flags = params.flags and (
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                or WindowManager.LayoutParams.FLAG_SLIPPERY
+            ).inv()
+        if (windowRoot.isAttachedToWindow) {
+            windowManager.updateViewLayout(windowRoot, params)
+        }
     }
 
     override fun onTouchEvent(e: MotionEvent?): Boolean {
@@ -119,6 +231,19 @@ constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        disableClipForUnboundedDrag()
+    }
+
+    private fun disableClipForUnboundedDrag() {
+        var p: android.view.ViewParent? = parent
+        while (p != null) {
+            if (p is ViewGroup) {
+                p.clipChildren = false
+                p.clipToPadding = false
+                p.clipToOutline = false
+            }
+            p = p.parent
+        }
     }
 
     override fun onDetachedFromWindow() {

@@ -476,6 +476,15 @@ class DockAppAdapter(private val context: Context) :
         this.apps.addAll(tasks)
     }
 
+    fun moveItem(from: Int, to: Int) {
+        if (from < 0 || to < 0 || from >= apps.size || to >= apps.size || from == to) {
+            return
+        }
+        val item = apps.removeAt(from)
+        apps.add(to, item)
+        notifyItemMoved(from, to)
+    }
+
     fun reloadActivityManager(context: Context?) {
         systemUIActivityManager =
             context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

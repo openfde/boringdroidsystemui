@@ -59,6 +59,7 @@ import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.log.HttpLog
 import com.xwdz.http.log.HttpLoggingInterceptor
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -152,7 +153,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
 //            traverseAndPrint(navi!!, 0)
             navi?.background = null
+            dockAppsLayout?.updateNaviWindowFlags()
         }
+        val mainHandler = Handler(Looper.getMainLooper())
+        mainHandler.postDelayed(object : Runnable {
+            override fun run() {
+                dockAppsLayout?.updateNaviWindowFlags()
+            }
+        }, 1000)
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
 //            Log.d(TAG, "updateNaviDock() called blur")
             Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
