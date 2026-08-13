@@ -18,13 +18,13 @@ import android.transition.Scene
 import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.Log
-import android.util.Property
 import android.view.*
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
@@ -48,6 +48,13 @@ open class AbsTopPopWindow(
         const val POPUP_WINDOW_RADIUS = 12f
         const val FADE_DURATION: Long = 120
         const val TAG:String = "AbsTopPopWindow"
+
+        // Launcher-style popup animation timings.
+        private const val OPEN_DURATION = 200L
+        private const val OPEN_FADE_DURATION = 83L
+        private const val CLOSE_DURATION = 233L
+        private const val CLOSE_FADE_DURATION = 83L
+        private const val CLOSE_FADE_START_DELAY = 150L
     }
 
     sealed class WindowType {
@@ -80,6 +87,11 @@ open class AbsTopPopWindow(
     var dismissListener: WindowDismissListener ?= null
     private var params :WindowManager.LayoutParams?= null
     private var windowGravity: WindowGravity ?= null
+
+    // Material Motion emphasized easing curves, matching Launcher popup animations.
+    private val emphasizedDecelerate = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
+    private val emphasizedAccelerate = PathInterpolator(0.3f, 0f, 0.8f, 0.15f)
+
     open fun showPopupWindow() {
         shown = true
         Log.d(TAG, "showPopupWindow: ${mContentView?.isAttachedToWindow} $this isshowing: ${isShowing()}")
@@ -140,6 +152,13 @@ open class AbsTopPopWindow(
         }
     }
 
+    fun dismissImmediately() {
+        shown = false
+        windowGravity = null
+        removeViews()
+        dismissListener?.onWindowDismiss()
+    }
+
     private fun generateLayoutParams(context: Context, windowManager: WindowManager): WindowManager.LayoutParams {
         return WindowManager.LayoutParams(
             width,
@@ -161,62 +180,79 @@ open class AbsTopPopWindow(
         object right : WindowGravity()
         object bottom : WindowGravity()
         object left : WindowGravity()
+        object topLeft : WindowGravity()
         object overview : WindowGravity()
 
     }
 
     fun runWindowAnim(gravity: WindowGravity, isEnter: Boolean) {
         this.windowGravity = gravity
-        val translation: Property<View, Float>
-        val startValue: Float
-        val endValue: Float
+        val targetView = mContentView ?: return // 如果为 null 直接返回，不执行动画
 
-        val padding = getContext().resources.getDimension(R.dimen.control_window_padding)
-
-        val actualHeight = getHeight().toFloat()
-        val actualWidth = getWidth().toFloat()
-
-        val measuredHeight = getContentView()?.measuredHeight?.toFloat() ?: 0f
-        val measuredWidth = getContentView()?.measuredWidth?.toFloat() ?: 0f
-
-        val h = if (actualHeight > 0) actualHeight else measuredHeight
-        val w = if (actualWidth > 0) actualWidth else measuredWidth
-
-        when (gravity) {
-            WindowGravity.top -> {
-                translation = View.TRANSLATION_Y
-                startValue = if (isEnter) -h + padding else 0f
-                endValue = if (isEnter) 0f else -h
-            }
-            WindowGravity.bottom -> {
-                translation = View.TRANSLATION_Y
-                startValue = if (isEnter)  h - padding else 0f
-                endValue = if (isEnter) 0f else h
-            }
-            WindowGravity.left -> {
-                translation = View.TRANSLATION_X
-                startValue = if (isEnter) -w + padding else 0f
-                endValue = if (isEnter) 0f else -w
-            }
-            WindowGravity.right -> {
-                translation = View.TRANSLATION_X
-                startValue = if (isEnter)  w - padding else 0f
-                endValue = if (isEnter) 0f else w
-            }
-            WindowGravity.overview -> {
-                translation = View.ALPHA
-                startValue = if (isEnter) 0f else 1f
-                endValue = if (isEnter) 1f else 0f
-            }
+        if (isEnter) {
+            // Set the initial state synchronously so the popup does not flash at full size before
+            // the deferred animation runs on the next frame.
+            targetView.scaleX = 0.5f
+            targetView.scaleY = 0.5f
+            targetView.alpha = 0f
         }
 
-        Log.d(TAG, "runWindowAnim() called with: startValue = $startValue, endValue = $endValue  , isEnter = $isEnter")
-        val targetView = mContentView ?: return // 如果为 null 直接返回，不执行动画
-        ObjectAnimator.ofFloat(targetView, translation, startValue, endValue).apply {
-            duration = FADE_DURATION
-            interpolator = LinearInterpolator()
-            if(!isEnter){
-                addListener(object : Animator.AnimatorListener {
+        val runAnim = {
+            val w = targetView.width.toFloat()
+            val h = targetView.height.toFloat()
+            when (gravity) {
+                WindowGravity.top -> {
+                    targetView.pivotX = w / 2f
+                    targetView.pivotY = 0f
+                }
+                WindowGravity.bottom -> {
+                    targetView.pivotX = w / 2f
+                    targetView.pivotY = h
+                }
+                WindowGravity.left -> {
+                    targetView.pivotX = 0f
+                    targetView.pivotY = h / 2f
+                }
+                WindowGravity.topLeft -> {
+                    targetView.pivotX = 0f
+                    targetView.pivotY = 0f
+                }
+                WindowGravity.right -> {
+                    targetView.pivotX = w
+                    targetView.pivotY = h / 2f
+                }
+                WindowGravity.overview -> {
+                    targetView.pivotX = w / 2f
+                    targetView.pivotY = h / 2f
+                }
+            }
+
+            val fromScale = if (isEnter) 0.5f else 1f
+            val toScale = if (isEnter) 1f else 0.5f
+            val fromAlpha = if (isEnter) 0f else 1f
+            val toAlpha = if (isEnter) 1f else 0f
+
+            val scaleX = ObjectAnimator.ofFloat(targetView, View.SCALE_X, fromScale, toScale)
+            val scaleY = ObjectAnimator.ofFloat(targetView, View.SCALE_Y, fromScale, toScale)
+            val alpha = ObjectAnimator.ofFloat(targetView, View.ALPHA, fromAlpha, toAlpha)
+
+            val scaleInterpolator =
+                if (isEnter) emphasizedDecelerate else emphasizedAccelerate
+            scaleX.duration = if (isEnter) OPEN_DURATION else CLOSE_DURATION
+            scaleY.duration = if (isEnter) OPEN_DURATION else CLOSE_DURATION
+            scaleX.interpolator = scaleInterpolator
+            scaleY.interpolator = scaleInterpolator
+
+            alpha.duration = if (isEnter) OPEN_FADE_DURATION else CLOSE_FADE_DURATION
+            alpha.interpolator = LinearInterpolator()
+            if (!isEnter) {
+                alpha.startDelay = CLOSE_FADE_START_DELAY
+            }
+
+            val animatorSet = AnimatorSet()
+            animatorSet.playTogether(scaleX, scaleY, alpha)
+            if (!isEnter) {
+                animatorSet.addListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
                     }
                     override fun onAnimationEnd(animation: Animator) {
@@ -227,7 +263,14 @@ open class AbsTopPopWindow(
                     override fun onAnimationRepeat(animation: Animator) {}
                 })
             }
-            start()
+            animatorSet.start()
+        }
+
+        if (isEnter) {
+            // Wait for the first layout pass so the pivot is computed with real dimensions.
+            targetView.post(runAnim)
+        } else {
+            runAnim()
         }
     }
 

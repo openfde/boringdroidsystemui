@@ -328,7 +328,7 @@ class AppOverviewWindow(
         super.dismiss()
         filterApps(null, 0)
         focusView = null
-        contextWindow?.dismiss()
+        contextWindow?.dismissImmediately()
         contextWindow = null
     }
 

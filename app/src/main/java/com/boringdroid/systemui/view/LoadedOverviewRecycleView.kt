@@ -244,6 +244,7 @@ constructor(
                     .locate( x , y)
                     .build(AbsTopPopWindow.WindowType.Default)
                 contextWindow?.showPopupWindow()
+                contextWindow?.runWindowAnim(AbsTopPopWindow.WindowGravity.topLeft, true)
                 Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
             } else {
                 if(contextWindow?.isShowing() == true && x == contextWindow?.offsetX
@@ -253,6 +254,7 @@ constructor(
                     contextWindow?.updateLayoutParams(WRAP_CONTENT, WRAP_CONTENT, x, y,
                         Gravity.TOP or Gravity.START)
                     contextWindow?.showPopupWindow()
+                    contextWindow?.runWindowAnim(AbsTopPopWindow.WindowGravity.topLeft, true)
                     Utils.setBackgroundBlurRadius(contextWindow?.getContentView()?.findViewById(R.id.root_blur), 40, 8f)
                 }
             }
