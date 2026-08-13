@@ -2,12 +2,18 @@ package com.boringdroid.systemui.view
 
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.text.TextUtils
@@ -20,6 +26,7 @@ import android.view.KeyEvent.KEYCODE_TAB
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.DRAG_FLAG_GLOBAL
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -54,6 +61,7 @@ constructor(
         public const val NUMBER_OF_COLUMNS = 7
         private const val TAG = "LoadedRecycleView"
         private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
+        const val MIME_APP_LAUNCH = "com.boringdroid.systemui/app-launch"
     }
 
     init {
@@ -163,6 +171,12 @@ constructor(
                     makeAndFillContextWindow(appData, v)
                 }
                 true
+            }
+            if (appData != null && appData.linuxInfo == null) {
+                holder.clickView?.setOnLongClickListener {
+                    startDragToLauncher(appData, holder.iconIV)
+                    true
+                }
             }
             holder.itemView.isFocusable = true
             holder.itemView.isClickable = true
@@ -403,6 +417,46 @@ constructor(
 //                )
 //                shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.intentSender)
 //            }
+        }
+
+        private fun startDragToLauncher(appData: AppData, iconView: ImageView?) {
+            val view = iconView ?: return
+            val intent = Intent().apply {
+                action = Intent.ACTION_MAIN
+                setPackage(appData.packageName)
+            }
+            val clipData = ClipData(
+                "",
+                arrayOf(MIME_APP_LAUNCH),
+                ClipData.Item(intent)
+            )
+            view.startDragAndDrop(clipData, AppIconDragShadowBuilder(view), null, DRAG_FLAG_GLOBAL)
+            appOverviewWindow?.dismiss()
+        }
+
+        private class AppIconDragShadowBuilder(v: View?) : View.DragShadowBuilder(v) {
+            private var shadow: Drawable? = null
+
+            init {
+                shadow = if (v is ImageView && v.drawable != null) {
+                    v.drawable.mutate().constantState?.newDrawable()
+                } else {
+                    ColorDrawable(Color.LTGRAY)
+                }
+            }
+
+            override fun onProvideShadowMetrics(outShadowSize: Point, outShadowTouchPoint: Point) {
+                val v = view ?: return
+                val width = v.width
+                val height = v.height
+                shadow?.setBounds(0, 0, width, height)
+                outShadowSize.set(width, height)
+                outShadowTouchPoint.set(width / 2, height / 2)
+            }
+
+            override fun onDrawShadow(canvas: Canvas) {
+                shadow?.draw(canvas)
+            }
         }
 
     }

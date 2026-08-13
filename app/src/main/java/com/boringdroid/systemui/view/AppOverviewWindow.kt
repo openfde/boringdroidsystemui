@@ -59,6 +59,7 @@ class AppOverviewWindow(
 
     var contextWindow: AbsTopPopWindow ?= null
     var focusView: View ?= null
+    private var dismissing = false
     private val apps: MutableList<AppData> = ArrayList()
     private var appPages: MutableList<MutableList<AppData>> = ArrayList()
     var wallpaperView: ImageView ?= null
@@ -98,6 +99,7 @@ class AppOverviewWindow(
     }
 
     override fun showPopupWindow() {
+        dismissing = false
         super.showPopupWindow()
         ImageUtils.set("fde.click_as_touch", "true")
         initViews()
