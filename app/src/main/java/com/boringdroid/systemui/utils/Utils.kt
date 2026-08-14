@@ -62,6 +62,21 @@ object Utils {
     const val TAG = "Utils"
     const val CLASS_NAME: String = "android.os.SystemProperties"
 
+    // Broadcast to notify the launcher that the app list / global search overlay visibility changed.
+    const val ACTION_OVERLAY_VISIBLE = "com.android.launcher3.action.APP_OVERLAY_VISIBLE"
+    const val EXTRA_OVERLAY_VISIBLE = "visible"
+
+    @JvmStatic fun notifyOverlayVisible(context: Context, visible: Boolean) {
+        try {
+            val intent = Intent(ACTION_OVERLAY_VISIBLE)
+            intent.setPackage("com.android.launcher3")
+            intent.putExtra(EXTRA_OVERLAY_VISIBLE, visible)
+            context.sendBroadcast(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     @JvmStatic fun makeWindowParams(
         width: Int, height: Int, context: Context,
         preferLastDisplay: Boolean

@@ -72,8 +72,14 @@ class TopBarGlobalSearchWindow(
     override fun showPopupWindow() {
         Log.d(TAG, "showPopupWindow() called")
         super.showPopupWindow()
+        Utils.notifyOverlayVisible(getContext(), true)
         initFilterAction()
         initViews()
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+        Utils.notifyOverlayVisible(getContext(), false)
     }
 
     private fun initViews() {

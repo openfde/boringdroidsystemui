@@ -101,6 +101,7 @@ class AppOverviewWindow(
     override fun showPopupWindow() {
         dismissing = false
         super.showPopupWindow()
+        Utils.notifyOverlayVisible(getContext(), true)
         ImageUtils.set("fde.click_as_touch", "true")
         initViews()
 //        runFadeAnimationWithTransition(true, null, null)
@@ -326,6 +327,7 @@ class AppOverviewWindow(
 
     fun destroy(){
         super.dismiss()
+        Utils.notifyOverlayVisible(getContext(), false)
         filterApps(null, 0)
         focusView = null
         contextWindow?.dismissImmediately()
