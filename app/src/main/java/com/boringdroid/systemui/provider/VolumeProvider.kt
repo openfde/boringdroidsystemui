@@ -1,7 +1,7 @@
 package com.boringdroid.systemui.provider
 
-import android.media.AudioSystem
 import com.boringdroid.systemui.data.AudioDevice
+import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.TAG
 import kotlin.text.isEmpty
 import kotlin.text.split
@@ -16,7 +16,7 @@ class VolumeProvider {
         val devices = getDevices(false)
         if (devices.isNotEmpty()) audioDevice = devices[0]
         val curVolume = audioDevice?.volume ?: 0F
-        val currentVolume = (curVolume * streamMaxVolume).toInt()
+        val currentVolume = if (audioDevice?.isMuted ?: false) streamMinVolume else (curVolume * streamMaxVolume).toInt()
         return currentVolume
     }
 
@@ -24,7 +24,7 @@ class VolumeProvider {
     // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
     private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
         try {
-            val devicesResult = AudioSystem.getDevs(type)
+            val devicesResult = AudioHelper.getDevs(type)
             val audioDeviceList = ArrayList<AudioDevice>()
 
             // When there is no device, the result is empty,
