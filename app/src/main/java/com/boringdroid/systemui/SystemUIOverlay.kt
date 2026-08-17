@@ -205,6 +205,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
+        topBarLayout?.registerAudioListener()
         topBarLayout?.defaultFocusHighlightEnabled = false
         appStateLayout!!.reloadActivityManager(systemUIContext)
         dockAppsLayout!!.reloadActivityManager(systemUIContext)
@@ -490,6 +491,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         dockAppsLayout?.onDestroy()
         topBarLayout?.unregisterNotification()
+        topBarLayout?.unregisterAudioListener()
         pluginContext = null
         status?.removeAllViews()
         pluginContext?.unregisterReceiver(receiver)

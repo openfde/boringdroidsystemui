@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
-import android.media.AudioSystem
 import android.os.Handler
 import android.provider.Settings
 import android.providers.settings.GlobalSettingsProto
@@ -37,6 +36,7 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.ERROR_NOTIF_I
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.NOTIF_BASE_ID
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.PROGRESS_NOTIF_ID
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -142,29 +142,26 @@ class TopBarControlWindow(
     private fun initVolumes() {
         val streamMinVolume = 0
         val streamMaxVolume = 100
+        AudioHelper.registerListener(audioListener)
         val devices = getDevices(false)
         if (devices.isNotEmpty()) audioDevice = devices[0]
         var curVolume = audioDevice?.volume ?: 0F
-        val currentVolume = (curVolume * streamMaxVolume).toInt()
+        val currentVolume = if (audioDevice?.isMuted ?: false) streamMinVolume else (curVolume * streamMaxVolume).toInt()
         volumeSeekBar?.min = streamMinVolume
         volumeSeekBar?.max = streamMaxVolume
         volumeSeekBar?.progress = currentVolume
         volumeSeekBar?.setOnSeekBarChangeListener(volumeChangeListener)
         if (currentVolume == 0) {
             volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
         } else if (currentVolume < volumeSeekBar?.max!!.div(3)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
             volumeImage?.setImageResource(R.drawable.icon_volume_min)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
         } else if (currentVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
             volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
         } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
             volumeImage?.setImageResource(R.drawable.icon_volume_max)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
         }
     }
 
@@ -190,33 +187,14 @@ class TopBarControlWindow(
                 return
             }
             Log.d(TAG, "progress: $progress ")
-//            val am = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
-            if (progress == 0) {
-                volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
-            } else if (progress < volumeSeekBar?.max!!.div(3)) {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
-                volumeImage?.setImageResource(R.drawable.icon_volume_min)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
-            } else if (progress < (volumeSeekBar?.max!!.div(3) * 2)) {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
-                volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
-            } else {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
-                volumeImage?.setImageResource(R.drawable.icon_volume_max)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
-            }
-
             if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){
                 Toast.makeText(context, context.getString(R.string.no_device), Toast.LENGTH_SHORT)
                 return;
             }
 
-            val devVolume = AudioSystem.setDevVolume(
+            val devVolume = AudioHelper.setDevVolume(
                 false,
-                audioDevice?.physicalName,
+                audioDevice?.physicalName ?: "",
                 (progress.div(100.0)).toFloat()
             )
         }
@@ -260,7 +238,7 @@ class TopBarControlWindow(
     // alsa_output.pci-0000_04_00.1.hdmi-stereo hdmi-output-0=HDMI / DisplayPort=0.440000=0;alsa_output.platform-PHYT0006_00.stereo-fallback analog-output-headphones=模拟耳机=0.450000=0
     private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
         try {
-            val devicesResult = AudioSystem.getDevs(type)
+            val devicesResult = AudioHelper.getDevs(type)
             val audioDeviceList = ArrayList<AudioDevice>()
 
             // When there is no device, the result is empty,
@@ -551,5 +529,48 @@ class TopBarControlWindow(
 //            getContext().unregisterReceiver(aclReceiver)
             bleRegisted = false
         }
+    }
+
+    private val audioListener = object : AudioHelper.OnAudioChangeListener {
+        override fun onVolumeChanged(streamType: Int, newVolume: Int) {
+            if (streamType == AudioManager.STREAM_MUSIC) {
+                if (newVolume == 0) {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                } else if (newVolume < volumeSeekBar?.max!!.div(3)) {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                } else if (newVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                } else {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                }
+                volumeSeekBar?.progress = newVolume
+            }
+        }
+
+        override fun onMuteChanged(streamType: Int, isMuted: Boolean) {
+            if (streamType == AudioManager.STREAM_MUSIC) {
+                if (isMuted) {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                    volumeSeekBar?.progress = 0
+                } else {
+                    var volume = AudioHelper.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    if (volume == 0) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                    } else if (volume < volumeSeekBar?.max!!.div(3)) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                    } else if (volume < (volumeSeekBar?.max!!.div(3) * 2)) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                    } else {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                    }
+                    volumeSeekBar?.progress = volume
+                }
+            }
+        }
+    }
+
+    override fun dismiss() {
+        AudioHelper.unregisterListener(audioListener)
+        super.dismiss()
     }
 }
