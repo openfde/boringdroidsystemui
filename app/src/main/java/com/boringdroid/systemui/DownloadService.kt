@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class DownloadService : Service(), CoroutineScope {
+class DownloadService :  android.app.Service(), CoroutineScope {
 
     companion object {
         private const val CHANNEL_ID = "download_service_channel"

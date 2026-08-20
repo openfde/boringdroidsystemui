@@ -62,6 +62,7 @@ import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_REQUEST_DOCK
 import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK
 import com.boringdroid.systemui.receiver.XserverHelper.SYSTEM_TRAY_UNDOCK_ALL
 import com.boringdroid.systemui.utils.AppUtils
+import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
 import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
@@ -78,7 +79,8 @@ import okhttp3.Call
 
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
-    TopBarControlWindow.TopbarLayoutController, NotificationListener, BatteryReceiver.BatteryListener {
+    TopBarControlWindow.TopbarLayoutController, NotificationListener, BatteryReceiver.BatteryListener,
+    AudioHelper.OnAudioChangeListener {
 
     companion object {
         var inited: Boolean = false
@@ -111,7 +113,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var dateBtn: TextClock? = null
     private var windowManager: WindowManager? = null
     private var activityManager: ActivityManager? = null
-    private var audioManager: AudioManager? = null
     private var notificationWindow:SingleNotificationWindow ? = null
     private var notificationsWindow:TopBarNotificationWindow? = null
     private var imeSwitchWindow:TopBarImeSwitchWindow? = null
@@ -139,7 +140,6 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
@@ -205,7 +205,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         if(needUpdateBattery){
             onBatteryChanged(percentage, status, plugged)
         }
-//        initVolume()
+        initVolume()
         getFdeMode()
 
         wifiStatusListen();
@@ -888,5 +888,46 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             batteryBtn?.setImageResource(R.drawable.icon_battery_chargeing_100)
         }
         batteryBtn?.tooltipText = tips
+    }
+
+    override fun onVolumeChanged(streamType: Int, newVolume: Int) {
+        if (streamType == AudioManager.STREAM_MUSIC) {
+            if (newVolume == 0) {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_top_mute)
+            } else if (newVolume < 100.div(3)) {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_top_min)
+            } else if (newVolume < (100.div(3) * 2)) {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_top_middle)
+            } else {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_top_max)
+            }
+        }
+    }
+
+    override fun onMuteChanged(streamType: Int, isMuted: Boolean) {
+        if (streamType == AudioManager.STREAM_MUSIC) {
+            if (isMuted) {
+                volumeBtn?.setImageResource(R.drawable.icon_volume_top_mute)
+            } else {
+                var volume = AudioHelper.getStreamVolume(AudioManager.STREAM_MUSIC)
+                if (volume == 0) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_top_mute)
+                } else if (volume < 100.div(3)) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_top_min)
+                } else if (volume < (100.div(3) * 2)) {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_top_middle)
+                } else {
+                    volumeBtn?.setImageResource(R.drawable.icon_volume_top_max)
+                }
+            }
+        }
+    }
+
+    fun registerAudioListener() {
+        AudioHelper.registerListener(this)
+    }
+
+    fun unregisterAudioListener() {
+        AudioHelper.unregisterListener(this)
     }
 }

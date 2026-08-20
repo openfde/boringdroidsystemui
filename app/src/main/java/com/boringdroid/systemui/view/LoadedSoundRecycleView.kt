@@ -1,7 +1,6 @@
 package com.boringdroid.systemui.view
 
 import android.content.Context
-import android.media.AudioSystem
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -13,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AppData
 import com.boringdroid.systemui.data.AudioDevice
+import com.boringdroid.systemui.utils.AudioHelper
 
 class LoadedSoundRecycleView
 @JvmOverloads
@@ -100,9 +100,9 @@ constructor(
                 }
             }
             holder.itemLl?.setOnClickListener{
-                val result = AudioSystem.setDefaultDev(
+                val result = AudioHelper.setDefaultDev(
                     isInput,
-                    device?.physicalName,
+                    device?.physicalName ?: "",
                     device!!.needInfo
                 )
                 itemClicker?.onDevicesUpdate(result, isInput)

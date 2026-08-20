@@ -2,7 +2,7 @@ package com.boringdroid.systemui.view
 
 import android.content.Context
 import android.content.Intent
-import android.media.AudioSystem
+import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
+import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.Utils
 
 
@@ -52,6 +53,7 @@ class TopBarVolumeWindow(
     }
 
     override fun showPopupWindow() {
+        AudioHelper.registerListener(audioListener)
         super.showPopupWindow()
         runWindowAnim(WindowGravity.top, true)
         initViews()
@@ -98,32 +100,28 @@ class TopBarVolumeWindow(
         val streamMinVolume = 0
         val streamMaxVolume = 100
         var curVolume = audioDevice?.volume ?: 0F
-        val currentVolume = (curVolume * streamMaxVolume).toInt()
+        val currentVolume = if (audioDevice?.isMuted ?: false) streamMinVolume else (curVolume * streamMaxVolume).toInt()
         volumeSeekBar?.min = streamMinVolume
         volumeSeekBar?.max = streamMaxVolume
         volumeSeekBar?.progress = currentVolume
         volumeTv?.text = "$currentVolume"
         if (currentVolume == 0) {
             volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
         } else if (currentVolume < volumeSeekBar?.max!!.div(3)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
             volumeImage?.setImageResource(R.drawable.icon_volume_min)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
         } else if (currentVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
             volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
         } else {
 //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
             volumeImage?.setImageResource(R.drawable.icon_volume_max)
-            topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
         }
     }
 
 
     private fun getDevices(type: Boolean): ArrayList<AudioDevice> {
-        val devicesResult = AudioSystem.getDevs(type)
+        val devicesResult = AudioHelper.getDevs(type)
         val audioDeviceList = ArrayList<AudioDevice>()
 
         // When there is no device, the result is empty,
@@ -163,23 +161,20 @@ class TopBarVolumeWindow(
             }
 
             Log.d(TopBarControlWindow.TAG, "progress: $progress ")
-//            val am = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//            am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
-            if (progress == 0) {
-                volumeImage?.setImageResource(R.drawable.icon_volume_mute)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_mute)
-            } else if (progress < volumeSeekBar?.max!!.div(3)) {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
-                volumeImage?.setImageResource(R.drawable.icon_volume_min)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_min)
-            } else if (progress < (volumeSeekBar?.max!!.div(3) * 2)) {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
-                volumeImage?.setImageResource(R.drawable.icon_volume_middle)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_middle)
-            } else {
-//                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
-                volumeImage?.setImageResource(R.drawable.icon_volume_max)
-                topBarVolumeImage?.setImageResource(R.drawable.icon_volume_top_max)
+            if (isInput) {
+                if (progress == 0) {
+                    volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                } else if (progress < volumeSeekBar?.max!!.div(3)) {
+    //                volumeBtn?.setImageResource(R.drawable.icon_volume_min)
+                    volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                } else if (progress < (volumeSeekBar?.max!!.div(3) * 2)) {
+    //                volumeBtn?.setImageResource(R.drawable.icon_volume_mid)
+                    volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                } else {
+    //                volumeBtn?.setImageResource(R.drawable.icon_volume_max)
+                    volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                }
+                volumeTv?.setText("$progress")
             }
 
             if(audioDevice == null || TextUtils.isEmpty(audioDevice?.physicalName )){
@@ -189,15 +184,11 @@ class TopBarVolumeWindow(
 
             Log.d(TAG, "onProgressChanged: isInput:$isInput name:${audioDevice?.physicalName}" +
                     " $progress")
-            val devVolume = AudioSystem.setDevVolume(
+            val devVolume = AudioHelper.setDevVolume(
                 isInput,
-                audioDevice?.physicalName,
+                audioDevice?.physicalName ?: "",
                 (progress.div(100.0)).toFloat()
             )
-//            val result = AudioSystem.setMasterVolume(
-//                (progress.div(100.0)).toFloat()
-//            )
-            volumeTv?.setText("$progress")
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -221,8 +212,6 @@ class TopBarVolumeWindow(
             isInput = false
             val devices = getDevices(isInput)
             updateVolume(devices, isInput)
-//            audioDevice = outRv?.currentDevice
-//            updateSeekBar(audioDevice)
         } else if (v == inputBt){
             inputBt?.setBackgroundResource(R.drawable.round_rect_4dp_ff)
             outputBt?.background = null
@@ -231,8 +220,6 @@ class TopBarVolumeWindow(
             isInput = true
             val devices = getDevices(isInput)
             updateVolume(devices, isInput)
-//            audioDevice = inRv?.currentDevice
-//            updateSeekBar(audioDevice)
         } else if (v == moreTv){
             dismiss()
             val intent = Intent()
@@ -245,6 +232,62 @@ class TopBarVolumeWindow(
     override fun onDevicesUpdate(result: String, isInput: Boolean) {
         Log.d(TAG, "onDevicesUpdate() called with: result = $result, isInput = $isInput")
         val audioDevices = Utils.parseAudioDevice(result, isInput)
-        updateVolume(audioDevices, isInput)
+        if(isInput){
+            if (audioDevices.isNotEmpty()) audioDevice = audioDevices[0]
+            updateSeekBar(audioDevice)
+            inRv?.updateDevices(audioDevices)
+        } else {
+            outRv?.updateDevices(audioDevices)
+        }
+    }
+
+    private val audioListener = object : AudioHelper.OnAudioChangeListener {
+        override fun onVolumeChanged(streamType: Int, newVolume: Int) {
+            if (streamType == AudioManager.STREAM_MUSIC) {
+                if (!isInput) {
+                    volumeSeekBar?.progress = newVolume
+                    volumeTv?.setText("$newVolume")
+                    if (newVolume == 0) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                    } else if (newVolume < volumeSeekBar?.max!!.div(3)) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                    } else if (newVolume < (volumeSeekBar?.max!!.div(3) * 2)) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                    } else {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                    }
+                }
+            }
+        }
+
+        override fun onMuteChanged(streamType: Int, isMuted: Boolean) {
+            if (streamType == AudioManager.STREAM_MUSIC) {
+                if (!isInput) {
+                    if (isMuted) {
+                        volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                        volumeSeekBar?.progress = 0
+                        volumeTv?.setText("0")
+                    } else {
+                        var volume = AudioHelper.getStreamVolume(AudioManager.STREAM_MUSIC)
+                        if (volume == 0) {
+                            volumeImage?.setImageResource(R.drawable.icon_volume_mute)
+                        } else if (volume < volumeSeekBar?.max!!.div(3)) {
+                            volumeImage?.setImageResource(R.drawable.icon_volume_min)
+                        } else if (volume < (volumeSeekBar?.max!!.div(3) * 2)) {
+                            volumeImage?.setImageResource(R.drawable.icon_volume_middle)
+                        } else {
+                            volumeImage?.setImageResource(R.drawable.icon_volume_max)
+                        }
+                        volumeSeekBar?.progress = volume
+                        volumeTv?.setText("$volume")
+                    }
+                }
+            }
+        }
+    }
+
+    override fun dismiss() {
+        AudioHelper.unregisterListener(audioListener)
+        super.dismiss()
     }
 }

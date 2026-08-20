@@ -232,6 +232,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
         systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
+        topBarLayout?.registerAudioListener()
         topBarLayout?.defaultFocusHighlightEnabled = false
         appStateLayout!!.reloadActivityManager(systemUIContext)
         dockAppsLayout!!.reloadActivityManager(systemUIContext)
@@ -511,6 +512,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //        pluginContext?.unregisterReceiver(receiver)
 
 //        systemUIContext?.contentResolver?.unregisterContentObserver(mDockContentObserver)
+        topBarLayout?.unregisterAudioListener()
     }
 
     @SuppressLint("InflateParams")
