@@ -19,6 +19,8 @@ interface ICmdEntryInterface {
 
     void configureWindow(long winPtr, long window, int x, int y, int w, int h);
 
+    void setWindowingMode(long frame, long window, int mode);
+
     void moveWindow(long winPtr, long window, int x, int y);
 
     void resizeWindow(long window, int w, int h);
@@ -38,5 +40,8 @@ interface ICmdEntryInterface {
     void unregisterActivityCallback(long window, IActivityCallback callback);
 
     void updateSystemViewVisible(boolean visible);
+
+//unused  interface
+    void onWindowFocusChanged(long window, boolean hasFocus);
 
 }
