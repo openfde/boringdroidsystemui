@@ -110,7 +110,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         navBar: View?,
     ) {
         Log.d(TAG, "setup this = $this,  statusBar = ${statusBar}, navBar = ${navBar}")
-        if(statusBar == null || navBar == null){
+        if(statusBar == null ){
             return
         }
 
@@ -120,13 +120,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
 
         status = statusBar as ViewGroup
-        navi = navBar as ViewGroup
-        ViewTreePrinter.printViewTree(navi!!)
+//        navi = navBar as ViewGroup
+//        ViewTreePrinter.printViewTree(navi!!)
         if(navi != null && navi!!.getTag() is Float){
             mDockScaleFactor = navi!!.getTag() as Float
         }
         if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
-            updateNaviDock()
+//            updateNaviDock()
         }
         generateTopBar()
     }
