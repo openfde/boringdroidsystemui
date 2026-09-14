@@ -68,7 +68,7 @@ constructor(
 {
 
     var dockScaleFactor: Float = 1.0f
-    var xserver: ICmdEntryInterface? = null
+//    var xserver: ICmdEntryInterface? = null
     private var launcherResumeFlag: Boolean ?= false
     private val activityManager: ActivityManager
     private val launchApps: LauncherApps
@@ -533,11 +533,11 @@ constructor(
         makeOverviewWinow()
         if(appOverviewWindow?.isShowing() != true){
             appOverviewWindow?.showPopupWindow()
-            try {
-                xserver?.updateSystemViewVisible(false)
-            } catch (e: Exception){
-                Log.e(TAG, "showAppsOverview: $e")
-            }
+//            try {
+//                xserver?.updateSystemViewVisible(false)
+//            } catch (e: Exception){
+//                Log.e(TAG, "showAppsOverview: $e")
+//            }
             if (dockAppAdapter?.getTopTaskId() != -1){
                 launcherResumeFlag = true
 //                val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
@@ -570,11 +570,11 @@ constructor(
             appOverviewWindow?.dismissListener = object : AbsTopPopWindow.WindowDismissListener{
                 override fun onWindowDismiss() {
                     status?.visibility = View.VISIBLE
-                    try {
-                        xserver?.updateSystemViewVisible(true)
-                    } catch (e: Exception){
-                        Log.e(TAG, "showAppsOverview: $e")
-                    }
+//                    try {
+//                        xserver?.updateSystemViewVisible(true)
+//                    } catch (e: Exception){
+//                        Log.e(TAG, "showAppsOverview: $e")
+//                    }
 //                    val runningTasks = activityManager?.getRunningTasks(MAX_RUNNING_TASKS)
 //                    if (runningTasks != null && launcherResumeFlag == true) {
 //                        for (runningTask in runningTasks){

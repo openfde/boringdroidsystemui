@@ -95,7 +95,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var timeTickReceiver :BroadcastReceiver ?= null
     private var batteryReceiver : BroadcastReceiver ?= null
     private var recordHandler: Handler ?= null
-    private var mService: ICmdEntryInterface? = null
+//    private var mService: ICmdEntryInterface? = null
     private var mIsServiceBound = false
     private var mDockScaleFactor = 1.0f
     var receiver :BroadcastReceiver?= null
@@ -342,9 +342,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
     private val mServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            mService = ICmdEntryInterface.Stub.asInterface(service)
+//            mService = ICmdEntryInterface.Stub.asInterface(service)
             mIsServiceBound = true
-            dockAppsLayout?.xserver = mService
+//            dockAppsLayout?.xserver = mService
 //            topBarLayout?.xserverEventInputer =
 //                XserverHelper.XserverEventInputer { x, y, detail, down ->
 //                    Log.d(
@@ -367,9 +367,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            mService = null
+//            mService = null
             mIsServiceBound = false
-            dockAppsLayout?.xserver = mService
+//            dockAppsLayout?.xserver = mService
 //            topBarLayout?.updateSystemTrayIcon(null, -1, SYSTEM_TRAY_UNDOCK_ALL, null)
 //            Log.d(TAG, "Service disconnected")
         }
