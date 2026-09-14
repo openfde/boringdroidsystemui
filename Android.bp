@@ -85,9 +85,18 @@ android_library_import {
 // device tree used to install.
 // ---------------------------------------------------------------------------
 
+// The Gradle build takes the package from build.gradle (namespace) and AGP 8
+// rejects a package attribute in the source manifest, while the Soong manifest
+// merger requires one. Inject it into a build-time copy of the manifest.
+genrule {
+    name: "fdesystemui-manifest",
+    srcs: ["app/src/main/AndroidManifest.xml"],
+    out: ["AndroidManifest.xml"],
+    cmd: "sed 's|<manifest |<manifest package=\"com.boringdroid.systemui\" |' $(in) > $(out)",
+}
+
 android_app {
     name: "FdeSystemUI",
-    package_name: "com.boringdroid.systemui",
 
     srcs: [
         "app/src/main/java/**/*.java",
@@ -98,7 +107,7 @@ android_app {
         local_include_dirs: ["app/src/main/aidl"],
     },
 
-    manifest: "app/src/main/AndroidManifest.xml",
+    manifest: ":fdesystemui-manifest",
     // app/src/main/SystemUISharedRes is only used by the Gradle build. Its
     // content (SystemUI shared attrs) is provided by SystemUISharedLib here,
     // including both dirs would define the same attrs twice.
