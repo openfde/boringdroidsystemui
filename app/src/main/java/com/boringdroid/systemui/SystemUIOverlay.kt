@@ -54,7 +54,7 @@ import com.boringdroid.systemui.view.DockAppsLayout
 import com.boringdroid.systemui.view.SystemStateLayout
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
-import com.fde.x11.ICmdEntryInterface
+//import com.fde.x11.ICmdEntryInterface
 import com.xwdz.http.QuietOkHttp
 import com.xwdz.http.log.HttpLog
 import com.xwdz.http.log.HttpLoggingInterceptor

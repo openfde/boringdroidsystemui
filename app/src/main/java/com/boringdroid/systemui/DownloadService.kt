@@ -532,7 +532,7 @@ class DownloadService :  android.app.Service(), CoroutineScope {
     }
 
     private fun getMimeType(file: File): String {
-        return when (file.extension.toLowerCase()) {
+        return when (file.extension.lowercase()) {
             "pdf" -> "application/pdf"
             "jpg", "jpeg" -> "image/jpeg"
             "png" -> "image/png"
