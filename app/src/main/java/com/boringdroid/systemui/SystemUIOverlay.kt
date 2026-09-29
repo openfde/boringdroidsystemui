@@ -130,6 +130,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         generateTopBar()
     }
+
+    // fde start: 跟随系统状态栏的深浅色（0 = 浅色前景，1 = 深色前景）。
+    private var darkIntensity = 1f
+
+    override fun onDarkIntensityChanged(displayId: Int, darkIntensity: Float) {
+        Log.d(TAG, "onDarkIntensityChanged: displayId = $displayId, darkIntensity = $darkIntensity")
+        this.darkIntensity = darkIntensity
+        topBarLayout?.applyDarkIntensity(darkIntensity)
+    }
+    // fde end
+
     private fun updateNaviDock() {
         val childCount:Int = navi!!.childCount
         for (i in 0 until childCount) {
@@ -195,6 +206,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         status?.setBackgroundColor(Color.TRANSPARENT)
         Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
         topBarLayout?.initState()
+        topBarLayout?.applyDarkIntensity(darkIntensity)
         topBarLayout?.notificationListener = this
         topBarLayout?.systemUIContext = systemUIContext
         if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){

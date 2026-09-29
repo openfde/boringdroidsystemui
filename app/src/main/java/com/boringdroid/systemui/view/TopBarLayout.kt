@@ -1,6 +1,7 @@
 package com.boringdroid.systemui.view
 
 import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS
+import android.animation.ArgbEvaluator
 import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.RemoteAction
@@ -10,6 +11,7 @@ import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Outline
 import android.graphics.Point
@@ -180,6 +182,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             imageView?.setOnHoverListener(hoverListener)
             imageView?.setOnClickListener(this)
         }
+        applyDarkIntensity(darkIntensity)
         inited = true
         context.sendBroadcast(Intent(NOTIFI_AQUIRE_ACTION))
 //        val globalSearchRecevier = GlobalSearchRecevier()
@@ -930,4 +933,21 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     fun unregisterAudioListener() {
         AudioHelper.unregisterListener(this)
     }
+
+    // fde start: 根据系统给的状态栏深浅色强度给 bar 的前景（图标/时钟）上色。
+    /** 0 = 浅色前景（背景偏暗），1 = 深色前景（背景偏亮）。 */
+    private var darkIntensity = 1f
+
+    /**
+     * 由 [SystemUIOverlay] 在系统状态栏深浅色变化时调用，可按需要扩展到自己新增的控件上。
+     */
+    fun applyDarkIntensity(intensity: Float) {
+        darkIntensity = intensity
+        val fraction = intensity.coerceIn(0f, 1f)
+        val foreground =
+            ArgbEvaluator().evaluate(fraction, 0xFFFFFFFF.toInt(), 0xFF000000.toInt()) as Int
+        btnList?.forEach { it?.imageTintList = ColorStateList.valueOf(foreground) }
+        dateBtn?.setTextColor(foreground)
+    }
+    // fde end
 }
