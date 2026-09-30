@@ -46,6 +46,7 @@ import com.boringdroid.systemui.receiver.XserverHelper.X11_SERVICE_ACTION
 import com.boringdroid.systemui.utils.BatteryUtils
 import com.boringdroid.systemui.utils.ImageUtils
 import com.boringdroid.systemui.utils.SPUtils
+import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.ViewTreePrinter
 import com.boringdroid.systemui.view.AllAppsWindow
@@ -100,6 +101,11 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var mDockScaleFactor = 1.0f
     var receiver :BroadcastReceiver?= null
     private var mHandler : Handler = Handler(Looper.getMainLooper())
+
+    // 系统 size/density/字体缩放变化的监听与去抖
+    private var displayConfigObserver: ContentObserver? = null
+    private var displayConfigReceiver: BroadcastReceiver? = null
+    private val displayConfigRunnable = Runnable { onDisplayConfigChanged() }
 
     val CONNECTIVITY_ACTION =  "com.android.systemui.CONNECTIVITY_CHANGE"
 
@@ -244,7 +250,94 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 
 //        Utils.getLinuxRootFileName(systemUIContext!!)
 //        Log.d(TAG, "onCreate linuxRootPath: ${Utils.linuxRootPath}")
+        mDockScaleFactor = readDockScale()
         registerAll()
+        registerDisplayConfigListeners()
+    }
+
+    private fun readDockScale(): Float {
+        val context = systemUIContext ?: pluginContext ?: return DEFAULT_DOCK_SCALE
+        return try {
+            Settings.System.getFloat(context.contentResolver, KEY_DOCK_SCALE, DEFAULT_DOCK_SCALE)
+                .coerceIn(MIN_DOCK_SCALE, MAX_DOCK_SCALE)
+        } catch (e: Exception) {
+            Log.w(TAG, "readDockScale failed: ${e.message}")
+            DEFAULT_DOCK_SCALE
+        }
+    }
+
+    /**
+     * 监听系统“显示大小”（density）、“字体大小”（font_scale）以及 FDE dock 缩放（dock_scale）。
+     * 设置 App 中调整后，配置会通过 ContentObserver / ACTION_CONFIGURATION_CHANGED 通知到这里。
+     */
+    private fun registerDisplayConfigListeners() {
+        val context = systemUIContext ?: return
+        if (displayConfigObserver == null) {
+            val observer = object : ContentObserver(mHandler) {
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    Log.d(TAG, "display config changed: $uri")
+                    scheduleDisplayConfigChanged()
+                }
+            }
+            val resolver = context.contentResolver
+            resolver.registerContentObserver(
+                Settings.System.getUriFor(KEY_FONT_SCALE), false, observer)
+            resolver.registerContentObserver(
+                Settings.Secure.getUriFor(KEY_DISPLAY_DENSITY_FORCED), false, observer)
+            resolver.registerContentObserver(
+                Settings.System.getUriFor(KEY_DOCK_SCALE), false, observer)
+            displayConfigObserver = observer
+        }
+        if (displayConfigReceiver == null) {
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    if (Intent.ACTION_CONFIGURATION_CHANGED == intent?.action) {
+                        Log.d(TAG, "ACTION_CONFIGURATION_CHANGED")
+                        scheduleDisplayConfigChanged()
+                    }
+                }
+            }
+            context.registerReceiver(
+                receiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED))
+            displayConfigReceiver = receiver
+        }
+    }
+
+    private fun scheduleDisplayConfigChanged() {
+        mHandler.removeCallbacks(displayConfigRunnable)
+        mHandler.postDelayed(displayConfigRunnable, CONFIG_CHANGE_DEBOUNCE_MS)
+    }
+
+    /**
+     * 运行时适配：重新读取显示配置 -> 重建顶栏弹窗与 dock（让 dp/sp 按新 density/fontScale
+     * 重新解析）-> 刷新窗口尺寸，设置里改过之后无需重启 SystemUI。
+     */
+    private fun onDisplayConfigChanged() {
+        val context = systemUIContext ?: pluginContext ?: return
+        val screen = ScreenSizeUtils.getInstance(context)
+        screen.refresh(context)
+        mDockScaleFactor = readDockScale()
+        Log.d(TAG, "onDisplayConfigChanged dockScale=$mDockScaleFactor" +
+                " screen=${screen.screenWidth}x${screen.screenHeight}" +
+                " density=${screen.density} densityDpi=${screen.densityDpi}" +
+                " fontScale=${screen.fontScale}")
+
+        // 收起正在显示的弹窗，避免继续使用旧尺寸
+        allAppsWindow?.dismiss()
+
+        // 顶栏：重建所有弹窗，让窗口尺寸按新 density/fontScale 计算
+        topBarLayout?.onConfigChanged()
+        // 顶栏 View 是一次性 inflate 的，图标等 dp 尺寸需要按新 density 重新解析
+        topBarLayout?.refreshDensityDependentSizes()
+        topBarLayout?.controlWindow?.statusBar = status
+        topBarLayout?.requestLayout()
+
+        // dock（部分版本 navBar 接进来才需要）
+        if (navi != null) {
+            dockAppsLayout?.dismissAllPopups()
+            dockAppsLayout?.onDestroy()
+            updateNaviDock()
+        }
     }
 
     private fun registerAll() {
@@ -512,6 +605,23 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //        pluginContext?.unregisterReceiver(receiver)
 
 //        systemUIContext?.contentResolver?.unregisterContentObserver(mDockContentObserver)
+        mHandler.removeCallbacksAndMessages(null)
+        displayConfigObserver?.let {
+            try {
+                systemUIContext?.contentResolver?.unregisterContentObserver(it)
+            } catch (e: Exception) {
+                Log.w(TAG, "unregisterContentObserver failed: ${e.message}")
+            }
+        }
+        displayConfigObserver = null
+        displayConfigReceiver?.let {
+            try {
+                systemUIContext?.unregisterReceiver(it)
+            } catch (e: Exception) {
+                Log.w(TAG, "unregisterReceiver failed: ${e.message}")
+            }
+        }
+        displayConfigReceiver = null
         topBarLayout?.unregisterAudioListener()
     }
 
@@ -641,6 +751,17 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         private const val TAG_CLOCK_AND_STATUS_GROUP = "tag-clock-and-status-group"
         private const val TAG_SYSTEM_STATUS_GROUP = "tag-system-status-group"
         private const val TAG_APP_STATE_LAYOUT = "tag-app-state-layout"
+
+        /** FDE 设置-显示-字体大小对应 Settings.System 的 key（0.85 / 1.0 / 1.15 / 1.3 / 1.5 / 1.8 / 2.0） */
+        private const val KEY_FONT_SCALE = "font_scale"
+        /** FDE 设置-显示-显示大小（densityDpi）对应 Settings.Secure 的 key */
+        private const val KEY_DISPLAY_DENSITY_FORCED = "display_density_forced"
+        /** FDE 任务栏 dock 缩放对应 Settings.System 的 key（0.5 / 0.75 / 1.0 / 1.5 / 2.0） */
+        private const val KEY_DOCK_SCALE = "dock_scale"
+        private const val DEFAULT_DOCK_SCALE = 1.0f
+        private const val MIN_DOCK_SCALE = 0.5f
+        private const val MAX_DOCK_SCALE = 2.0f
+        private const val CONFIG_CHANGE_DEBOUNCE_MS = 300L
     }
 
     override fun showNotification() {

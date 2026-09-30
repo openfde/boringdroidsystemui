@@ -494,6 +494,12 @@ class DockAppAdapter(private val context: Context) :
         return topTaskId
     }
 
+    /** 收起右键菜单窗口（系统 size/density/字体缩放变化时使用）。 */
+    fun dismissContextWindow() {
+        contextWindow?.dismiss()
+        contextWindow = null
+    }
+
 
     class ViewHolder(viewGroup: ViewGroup) :
         RecyclerView.ViewHolder(viewGroup) {

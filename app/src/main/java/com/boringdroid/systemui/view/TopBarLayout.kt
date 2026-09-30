@@ -22,6 +22,7 @@ import android.service.notification.StatusBarNotification
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -66,6 +67,7 @@ import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
 import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
+import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
@@ -228,6 +230,85 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             })
     }
 
+    /**
+     * 系统 size / density / 字体缩放变化后重建所有弹窗，
+     * 让窗口尺寸与 dp/sp 按新配置重新解析；顶栏宽度已随父容器 match_parent 自适应。
+     */
+    fun onConfigChanged() {
+        Log.d(TAG, "onConfigChanged: recreate popup windows")
+        windowList.forEach { window ->
+            try {
+                window.dismiss()
+            } catch (e: Exception) {
+                Log.w(TAG, "dismiss window failed: ${e.message}")
+            }
+        }
+        windowList.clear()
+        try {
+            notificationWindow?.dismiss()
+        } catch (e: Exception) {
+            Log.w(TAG, "dismiss notificationWindow failed: ${e.message}")
+        }
+        makePowerWindow(powerBtn)
+        makeControlWindow(controlBtn)
+        makeNotificationWindow(notificationBtn)
+        makeImeSwitchWindow(imeBtn)
+        makeSingleNotiWinodw()
+        makeGlobalSearchWindow(searchBtn)
+        makeVolumeWindow(volumeBtn)
+    }
+
+    /**
+     * 系统“显示大小”（density）变化后，按新 density 重新解析顶栏自身和图标的 dp 尺寸。
+     * 顶栏 View 是一次性 inflate 的，XML 里的 dp 值不会自动跟随 density 更新，
+     * 这里原地刷新，避免整体重建导致 X11 托盘等状态丢失。
+     */
+    fun refreshDensityDependentSizes() {
+        // 注意：R.dimen 是插件包自己的资源，必须用插件 context 解析，
+        // 用 systemUIContext 会抛 Resources$NotFoundException。
+        val res = context?.resources ?: return
+        try {
+            val density = res.displayMetrics.density
+            val iconSize = res.getDimension(R.dimen.topbar_icon_size).toInt()
+            val iconPadding = res.getDimension(R.dimen.topbar_icon_padding).toInt()
+            btnList?.forEach { iv ->
+                if (iv != null) {
+                    val lp = iv.layoutParams
+                    lp.width = iconSize
+                    lp.height = iconSize
+                    iv.layoutParams = lp
+                    iv.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+                }
+            }
+            // 顶栏整体高度
+            layoutParams?.let { lp ->
+                lp.height = res.getDimension(R.dimen.top_bar_layout_height).toInt()
+                layoutParams = lp
+            }
+            // 桌面按钮（XML 中固定 14dp x 24dp）
+            desktopBtn?.layoutParams?.let { lp ->
+                lp.width = (14 * density).toInt()
+                lp.height = (24 * density).toInt()
+                desktopBtn?.layoutParams = lp
+            }
+            // X11 系统托盘图标（添加时按 30dp 计算，density 变化后同步刷新）
+            val traySize = (30 * density).toInt()
+            x11TrayImageViesList.forEach { iv ->
+                iv.layoutParams?.let { lp ->
+                    lp.width = traySize
+                    lp.height = traySize
+                    iv.layoutParams = lp
+                }
+            }
+            // 时钟字号（sp 会按新的 scaledDensity 重新解析，autoSize 上限随之生效）
+            dateBtn?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            requestLayout()
+            Log.d(TAG, "refreshDensityDependentSizes: density=$density iconSize=$iconSize")
+        } catch (e: Exception) {
+            Log.e(TAG, "refreshDensityDependentSizes failed", e)
+        }
+    }
+
     private fun initVolume() {
         val volume = VolumeProvider().getVolume()
         if (volume == 0) {
@@ -281,7 +362,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private fun makeVolumeWindow(imageView: ImageView?) {
         getInputMethods()
         val width = resources.getDimension(R.dimen.volume_window_width_expand).toInt()
-        val height = resources.getDimension(R.dimen.volume_window_height_expand).toInt()
+        val height = scaledWindowHeight(R.dimen.volume_window_height_expand)
         volumeWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_volume)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(0 , 0)
@@ -348,8 +429,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         notificationsWindow?.systemUIContext = systemUIContext
         notificationsWindow?.enterView = imageView
-        notificationsWindow?.setNotifications(notifications)
         notificationsWindow?.topBarLayout = this
+        notificationsWindow?.setNotifications(notifications)
         windowList.add(notificationsWindow!!)
     }
 
@@ -404,13 +485,34 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    private fun calculateNotificationHeight(): Int {
+    /** 弹窗尺寸随系统字体缩放放大的系数（大字体下给文字留出空间，上限 1.8 倍）。 */
+    private fun fontScaleFactor(): Float {
+        val ctx = context ?: return 1f
+        val screen = ScreenSizeUtils.getInstance(ctx)
+        screen.refresh(ctx)
+        return screen.fontScale.coerceIn(1f, 1.8f)
+    }
+
+    /** 按字体缩放放大后的窗口高度：base 维度 * fontScaleFactor，并限制在屏幕高度的 90% 以内。 */
+    private fun scaledWindowHeight(dimenResId: Int): Int {
+        val ctx = context ?: return 0
+        val screen = ScreenSizeUtils.getInstance(ctx)
+        screen.refresh(ctx)
+        val base = ctx.resources.getDimension(dimenResId)
+        val scaled = base * screen.fontScale.coerceIn(1f, 1.8f)
+        val maxHeight = screen.screenHeight * 0.9f
+        return minOf(scaled, maxHeight).toInt()
+    }
+
+    /** 通知窗口总高度：按字体缩放放大单条高度，避免大字体下通知被裁剪/重叠。 */
+    fun calculateNotificationHeight(): Int {
         val displayMetrics = DisplayMetrics()
         windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         val size = Point()
         windowManager?.defaultDisplay?.getRealSize(size)
-        val height_reverse = 48 + context.resources.getDimension(R.dimen.top_bar_notification_margin_vert).toInt()
-        val height_item = context.resources.getDimension(R.dimen.top_bar_notification_height_item).toInt()
+        val fontFactor = fontScaleFactor()
+        val height_reverse = ((48 + context.resources.getDimension(R.dimen.top_bar_notification_margin_vert).toInt()) * fontFactor).toInt()
+        val height_item = (context.resources.getDimension(R.dimen.top_bar_notification_height_item) * fontFactor).toInt()
         val height_devide = context.resources.getDimension(R.dimen.top_bar_notification_height_devide).toInt()
         val notificationSize =  if (notifications.isNullOrEmpty()) 1 else notifications!!.size
         var height = notificationSize * height_item + (notificationSize - 1 ) * height_devide + height_reverse + height_reverse
@@ -422,9 +524,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun makePowerWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_power_width).toInt() + 32
-        var height = context.resources.getDimension(R.dimen.top_bar_power_height).toInt() + 32
+        var height = scaledWindowHeight(R.dimen.top_bar_power_height) + 32
         if(!fdeModeResult?.data?.FDEMode.equals("environment")){
-            height = context.resources.getDimension(R.dimen.top_bar_power_height_small).toInt() + 32
+            height = scaledWindowHeight(R.dimen.top_bar_power_height_small) + 32
         }
         powerWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_power)
             .gravity(Gravity.TOP or Gravity.RIGHT)
@@ -448,7 +550,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun makeControlWindow(imageView: ImageView?) {
         val width = context.resources.getDimension(R.dimen.top_bar_control_width_expand).toInt()
-        val height = context.resources.getDimension(R.dimen.top_bar_control_height_expand).toInt()
+        val height = scaledWindowHeight(R.dimen.top_bar_control_height_expand)
         controlWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_control)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(0 , 0)
@@ -613,7 +715,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     fun makeSingleNotiWinodw() {
         val width = context.resources.getDimension(R.dimen.top_bar_single_notification_width).toInt()
-        val height = context.resources.getDimension(R.dimen.top_bar_single_notification_height).toInt()
+        val height = scaledWindowHeight(R.dimen.top_bar_single_notification_height)
         notificationWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.layout_notification_single)
             .gravity(Gravity.TOP or Gravity.RIGHT)
             .locate(
