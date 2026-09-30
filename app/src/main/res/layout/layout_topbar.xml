@@ -2,7 +2,7 @@
 <com.boringdroid.systemui.view.TopBarLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="@dimen/top_bar_layout_height"
-    android:layout_width="@dimen/top_bar_layout_width"
+    android:layout_width="match_parent"
     android:gravity="center_vertical"
     android:background="#00000000"
     >
@@ -30,6 +30,10 @@
                 android:format24Hour="MM/dd HH:mm"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="10sp"
+                android:autoSizeMaxTextSize="16sp"
+                android:autoSizeStepGranularity="1sp"
                 style="@style/style_35"
                 />
             <LinearLayout

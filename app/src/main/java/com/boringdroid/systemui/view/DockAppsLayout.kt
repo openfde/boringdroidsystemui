@@ -67,6 +67,7 @@ constructor(
     UninstallReceiver.AppUninstallListener
 {
 
+    var requestedDockScaleFactor: Float = 1.0f
     var dockScaleFactor: Float = 1.0f
 //    var xserver: ICmdEntryInterface? = null
     private var launcherResumeFlag: Boolean ?= false
@@ -107,6 +108,8 @@ constructor(
         private const val TAG = "DockAppsLayout"
         private const val ACTION_SHORT_CUT = "com.android.launcher3.action.ADD_SHORT_CUT"
         private const val DRAG_LONG_PRESS_TIMEOUT = 100L
+        /** dock 自动缩小的下限（与 FDE 设置里 dock 缩放的最小值 0.5 一致） */
+        private const val MIN_DOCK_SCALE = 0.5f
     }
 
     init {
@@ -251,6 +254,7 @@ constructor(
         dockProvider.unregisterTaskStackListener()
     }
     fun initApps(dockScaleFactor: Float) {
+        requestedDockScaleFactor = dockScaleFactor
         this.dockScaleFactor = dockScaleFactor
         val provideApps = overviewProvider?.provideAppsWithFilterSync(TYPE_ALL, null)
         if (provideApps != null) {
@@ -340,38 +344,61 @@ constructor(
 
 
     fun updateNaviWidth(count :Int){
-        val parentView = navi?.parent as? View
+        val parentView = navi?.parent as? View ?: navi as? View
         parentView?.let { view ->
+            val res = context?.resources ?: return
             val windowManager = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val params = view.layoutParams as? WindowManager.LayoutParams
             if (params != null) {
 
-                val dock_height = context?.resources?.getDimension(R.dimen.dock_app_layout_height)
-                var dock_height_scaled = dock_height?.times(dockScaleFactor)?.plus(0.5f)
+                // 每次按当前系统 size/density/字体缩放刷新，设置里改过之后这里能拿到最新值。
+                val screen = ScreenSizeUtils.getInstance(context)
+                screen.refresh(context)
+                val maxWidth = (screen.screenWidth * 0.98f).toInt()
+                val maxHeight = screen.screenHeight
 
-                params.height = dock_height_scaled!!.toInt()
-                val dock_item_width = context?.resources?.getDimension(R.dimen.dock_icon_width)
-                val dock_item_width_scaled = dock_item_width?.times(dockScaleFactor)?.plus(0.5f)
-                val itemWidth = dock_item_width_scaled!!.toInt()
-                val itemMargin =
-                    context?.resources?.getDimension(R.dimen.dock_icon_margin)?.toInt()!! * 4
-                val groupMargin =
-                    context?.resources?.getDimension(R.dimen.dock_group_margin)?.toInt()!! * 2
-                params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-                var width = count * (itemWidth + itemMargin ) + groupMargin + context?.resources?.getDimension(R.dimen.dock_width_margin)?.toInt()!!
-                val px = Utils.dpToPx(context, width)
-                Log.d(TAG, "$this updateNaviWidth: px:$px width:$width")
-                if(ScreenSizeUtils.getInstance( context).screenWidth < width){
-                    width = ScreenSizeUtils.getInstance( context).screenWidth
+                val baseItemWidth = res.getDimension(R.dimen.dock_icon_width)
+                val itemMargin = res.getDimension(R.dimen.dock_icon_margin).toInt() * 4
+                val groupMargin = res.getDimension(R.dimen.dock_group_margin).toInt() * 2
+                val dockWidthMargin = res.getDimension(R.dimen.dock_width_margin).toInt()
+
+                // 图标太多时自动缩小，保证整条 dock 都处于屏幕范围内。
+                var scale = requestedDockScaleFactor
+                if (count > 0 && baseItemWidth > 0f) {
+                    val fitScale = (maxWidth - groupMargin - dockWidthMargin - count * itemMargin)
+                        .toFloat() / count / baseItemWidth
+                    if (fitScale < scale) {
+                        scale = fitScale
+                    }
+                }
+                scale = scale.coerceAtLeast(MIN_DOCK_SCALE)
+                if (scale != dockScaleFactor) {
+                    dockScaleFactor = scale
+                    dockAppAdapter?.dockScaleFactor = scale
+                    dockAppAdapter?.notifyDataSetChangedWapper()
                 }
 
+                val itemWidth = (baseItemWidth * scale + 0.5f).toInt()
+                val width = (count * (itemWidth + itemMargin) + groupMargin + dockWidthMargin)
+                    .coerceIn(0, maxWidth)
+                val height = (res.getDimension(R.dimen.dock_app_layout_height) * scale + 0.5f)
+                    .toInt().coerceIn(0, maxHeight)
+
+                params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 params.width = width
-                if(view.isAttachedToWindow){
+                params.height = height
+                Log.d(TAG, "$this updateNaviWidth: count=$count width=$width height=$height scale=$scale")
+                if (view.isAttachedToWindow) {
                     windowManager.updateViewLayout(view, params)
                 }
-
             }
         }
+    }
+
+    /** 系统显示配置变化前收掉所有已弹出的窗口，避免继续使用旧尺寸。 */
+    fun dismissAllPopups() {
+        appOverviewWindow?.dismiss()
+        dockAppAdapter?.dismissContextWindow()
     }
 
 

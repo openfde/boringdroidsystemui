@@ -72,6 +72,12 @@ class TopBarNotificationWindow(
         notificationAdapter?.itemClickListener = this
         mRecyclerView?.adapter = notificationAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(getContext())
+        // 显示时按当前通知数量/字体缩放再校准一次窗口高度
+        topBarLayout?.let { layout ->
+            if (getWidth() > 0) {
+                updateLayoutParams(getWidth(), layout.calculateNotificationHeight())
+            }
+        }
     }
 
     override fun onItemClick(sbn: DesktopNotification, item: View?) {
@@ -147,6 +153,12 @@ class TopBarNotificationWindow(
                 .toInt())
         } else {
             mRecyclerView?.setFadingEdgeLength(0)
+        }
+        // 通知数量或系统字体缩放变化后同步窗口高度，避免大字体下内容被裁剪/重叠。
+        topBarLayout?.let { layout ->
+            if (getWidth() > 0) {
+                updateLayoutParams(getWidth(), layout.calculateNotificationHeight())
+            }
         }
     }
 

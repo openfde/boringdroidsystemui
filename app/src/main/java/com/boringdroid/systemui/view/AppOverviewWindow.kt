@@ -388,7 +388,10 @@ class AppOverviewWindow(
     }
 
     private fun updateGridMetrics() {
-        val screenHeight = ScreenSizeUtils.getInstance(getContext()).screenHeight
+        // 刷新一次，确保分辨率/密度在运行时变化后这里拿到的是最新值
+        val screen = ScreenSizeUtils.getInstance(getContext())
+        screen.refresh(getContext())
+        val screenHeight = screen.screenHeight
         val topInset =
             getContext().resources.getDimensionPixelSize(R.dimen.overview_margin_top)
         val bottomInset = getOverviewContentBottomInset()
