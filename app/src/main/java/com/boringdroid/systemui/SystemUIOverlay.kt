@@ -2,6 +2,7 @@ package com.boringdroid.systemui
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.app.StatusBarManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -218,6 +219,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             "onCreate() called with: sysUIContext = $sysUIContext, sysPluginContext = $sysPluginContext"
         )
         systemUIContext = sysUIContext
+        setNativeShadeExpandDisabled(true)
         pluginContext = sysPluginContext
         GlobalSystemUIContext.setContext(sysUIContext)
         SystemDataHolder.initialize(sysUIContext).initSystemData()
@@ -567,8 +569,24 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         // Do nothing
     }
 
+    /**
+     * FDE 桌面模式下不显示系统原生控制中心：禁用原生通知面板展开（见 issue #493）。
+     * 插件销毁时恢复系统默认行为。
+     */
+    private fun setNativeShadeExpandDisabled(disabled: Boolean) {
+        val ctx = systemUIContext ?: return
+        try {
+            ctx.getSystemService(StatusBarManager::class.java)?.disable(
+                if (disabled) StatusBarManager.DISABLE_EXPAND else 0
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "setNativeShadeExpandDisabled($disabled) failed: ${e.message}")
+        }
+    }
+
     override fun onDestroy() {
         Log.d(TAG, "onDestroy() status:$status")
+        setNativeShadeExpandDisabled(false)
 //        if (systemUIContext != null) {
 //            try {
 //                systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
