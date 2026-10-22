@@ -105,6 +105,8 @@
     <string name="system_setting_string">Setting</string>
     <string name="sleep_string">Sleep</string>
     <string name="message_count">%d Messages</string>
+    <string name="message_count_ongoing">%d ongoing notifications (cannot be cleared)</string>
+    <string name="notification_none_clearable">No clearable notifications</string>
     <string name="app_list">app list</string>
 
     <string name="unpin">Unpin</string>

@@ -71,6 +71,10 @@ class SlideNotificationAdapter(
                 itemClickListener?.onItemCancelClick(sbn, holder.closeIv)
             }
         }
+        // 只有可清除的通知才展示关闭按钮，常驻/前台服务通知无法通过监听器清除
+        val clearable = sbn?.isClearable == true
+        holder.closeIv.tag = clearable
+        holder.closeIv.visibility = if (clearable) View.VISIBLE else View.GONE
         holder.root.setOnGenericMotionListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_HOVER_EXIT -> {
@@ -195,7 +199,8 @@ class SlideNotificationAdapter(
         v?.setBackgroundResource(R.drawable.round_rect_10dp_fa)
         val close = v?.findViewById<ImageView>(R.id.iv_close)
         val elapsed = v?.findViewById<View>(R.id.tv_elapsed)
-        close?.visibility = View.VISIBLE
+        // 不可清除的通知即使 hover 也不展示关闭按钮
+        close?.visibility = if (close.tag == true) View.VISIBLE else View.GONE
         elapsed?.visibility = View.GONE
     }
 
@@ -259,6 +264,12 @@ class SlideNotificationAdapter(
     }
 
     fun notifyData(notifications: Array<DesktopNotification>?) {
+        if(notifications.isNullOrEmpty()){
+            // 通知被全部清空时必须同时清空列表并刷新，否则会残留已删除的行
+            notificationList?.clear()
+            notifyDataSetChanged()
+            return
+        }
         if(!notifications.isNullOrEmpty()){
             val toMutableList = notifications?.toMutableList()
             notificationList?.clear()
