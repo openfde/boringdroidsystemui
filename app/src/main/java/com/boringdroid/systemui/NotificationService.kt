@@ -41,8 +41,10 @@ import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_A
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_TYPE_KEY
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_ACTION_UPDATE_COUNT
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_AQUIRE_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ALL_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CLICK_ACTION
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_SBN_KEY
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.Utils
@@ -75,6 +77,7 @@ class NotificationService : NotificationListenerService(),
         filter.addAction(NOTIFI_AQUIRE_ACTION)
         filter.addAction(NOTIFI_CLICK_ACTION)
         filter.addAction(NOTIFI_CANCEL_ALL_ACTION)
+        filter.addAction(NOTIFI_CANCEL_ACTION)
         registerReceiver(dockReceiver, filter, RECEIVER_EXPORTED)
         Log.d(TAG, "activeNotifications:" + activeNotifications.size)
         broadcastNotifications(NOTIFI_ACTION_CREATE)
@@ -102,6 +105,7 @@ class NotificationService : NotificationListenerService(),
         }
         return DesktopNotification().apply {
             id = sbn.id
+            key = sbn.key
             packageName = sbn.packageName
             name = AppUtils.getPackageLabel(context, packageName) ?: "default"
             title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
@@ -164,10 +168,11 @@ class NotificationService : NotificationListenerService(),
             count++
             if (notification.isClearable) cancelableCount++
         }
-        Log.d(TAG,"updateNotificationCount count: $count")
+        Log.d(TAG,"updateNotificationCount count: $count cancelableCount: $cancelableCount")
         sendBroadcast(
             Intent(SERVICE_ACTION).putExtra("type", TYEP_COUNT_NOTIFY)
                 .putExtra("count", count)
+                .putExtra("cancelable_count", cancelableCount)
         )
         broadcastNotifications(NOTIFI_ACTION_UPDATE_COUNT)
     }
@@ -198,6 +203,11 @@ class NotificationService : NotificationListenerService(),
                 }
             } else if(intent.action.equals(NOTIFI_CANCEL_ALL_ACTION)){
                 cancelAllNotifications()
+            } else if(intent.action.equals(NOTIFI_CANCEL_ACTION)){
+                val sbnKey = intent.getStringExtra(NOTIFICATION_SBN_KEY)
+                if(!sbnKey.isNullOrEmpty()){
+                    cancelNotification(sbnKey)
+                }
             }
         }
     }

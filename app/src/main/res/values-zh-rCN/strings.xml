@@ -102,6 +102,8 @@
     <string name="system_setting_string">系统设置</string>
     <string name="sleep_string">睡眠</string>
     <string name="message_count">共 %d 条消息</string>
+    <string name="message_count_ongoing">共 %d 条常驻通知（不可清除）</string>
+    <string name="notification_none_clearable">没有可清除的通知</string>
     <string name="app_list">所有应用</string>
 
     <string name="pin">固定在任务栏</string>

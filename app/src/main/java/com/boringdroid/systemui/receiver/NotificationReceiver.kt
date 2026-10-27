@@ -57,9 +57,11 @@ class NotificationReceiver(private val listener: NotificationUpdater)
         const val NOTIFI_AQUIRE_ACTION = "notifi_aquire_action"
         const val NOTIFI_CLICK_ACTION = "notifi_click_action"
         const val NOTIFI_CANCEL_ALL_ACTION = "notifi_cancel_all_action"
+        const val NOTIFI_CANCEL_ACTION = "notifi_cancel_action"
         const val NOTIFI_ACTION_TYPE_KEY = "type"
         const val NOTIFICATION_LIST_KEY = "notification_list_key"
         const val NOTIFICATION_KEY = "notification_key"
+        const val NOTIFICATION_SBN_KEY = "notification_sbn_key"
         const val NOTIFICATION_ID = "notification_ID"
         const val NOTIFI_ACTION_CREATE = 1
         const val NOTIFI_ACTION_CONNECT = 2

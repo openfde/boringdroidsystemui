@@ -14,6 +14,7 @@ public class DesktopNotification implements Parcelable {
     public String packageName;
     public String computeElapsedTime;
     public String notificationText;
+    public String key;
     public PendingIntent contentIntent;
     public boolean isClearable;
     public long postTime;
@@ -30,6 +31,7 @@ public class DesktopNotification implements Parcelable {
         packageName = in.readString();
         computeElapsedTime = in.readString();
         notificationText = in.readString();
+        key = in.readString();
         contentIntent = in.readParcelable(PendingIntent.class.getClassLoader());
         isClearable = in.readBoolean();
         postTime = in.readLong();
@@ -45,6 +47,7 @@ public class DesktopNotification implements Parcelable {
         dest.writeString(packageName);
         dest.writeString(computeElapsedTime);
         dest.writeString(notificationText);
+        dest.writeString(key);
         dest.writeParcelable(contentIntent, flags);
         dest.writeBoolean(isClearable);
         dest.writeLong(postTime);
@@ -78,6 +81,7 @@ public class DesktopNotification implements Parcelable {
                 ", packageName='" + packageName + '\'' +
                 ", computeElapsedTime='" + computeElapsedTime + '\'' +
                 ", notificationText='" + notificationText + '\'' +
+                ", key='" + key + '\'' +
                 ", contentIntent=" + contentIntent +
                 ", isClearable=" + isClearable +
                 ", postTime=" + postTime +

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.GlobalSystemUIContext
@@ -15,6 +16,8 @@ import com.boringdroid.systemui.adapter.OnNotificationItemClickListener
 import com.boringdroid.systemui.adapter.SlideNotificationAdapter
 import com.boringdroid.systemui.data.DesktopNotification
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_ID
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFICATION_SBN_KEY
+import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CANCEL_ALL_ACTION
 import com.boringdroid.systemui.receiver.NotificationReceiver.Companion.NOTIFI_CLICK_ACTION
 import com.boringdroid.systemui.view.AboutWindow.Companion.ACTION_DEFER_UPDATE
@@ -48,6 +51,7 @@ class TopBarNotificationWindow(
     var topBarLayout: TopBarLayout? = null
 
     private var notifications: Array<DesktopNotification> ? = null
+    private var clearableCount: Int = 0
     private var rootRl:RelativeLayout ? = null
     private var nm: NotificationManager ? = null
 
@@ -129,12 +133,23 @@ class TopBarNotificationWindow(
 
     override fun onItemCancelClick(sbn: DesktopNotification, item: View?) {
         dismiss()
-        nm?.cancel(sbn.id)
+        // 按 key 交给 NotificationListenerService 取消，nm.cancel(id) 只能取消本包持有的通知
+        val key = sbn.key
+        if (!key.isNullOrEmpty()) {
+            getContext().sendBroadcast(Intent(NOTIFI_CANCEL_ACTION).putExtra(NOTIFICATION_SBN_KEY, key))
+        } else {
+            nm?.cancel(sbn.id)
+        }
     }
 
 
     override fun onClick(v: View?) {
         if(clearTv == v){
+            if(clearableCount <= 0){
+                // 全是常驻/不可清除通知时，框架清空接口命中 0 条，必须给出明确提示
+                Toast.makeText(getContext(), getContext().getString(R.string.notification_none_clearable), Toast.LENGTH_SHORT).show()
+                return
+            }
             dismiss()
 //            nm?.cancelAll()
             val intent = Intent(NOTIFI_CANCEL_ALL_ACTION)
@@ -145,9 +160,15 @@ class TopBarNotificationWindow(
     fun setNotifications(notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
         notificationAdapter?.notifyData(notifications)
-        var notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size
-//        notificationSize = 5
-        countTv?.text = String.format(getContext().getString(R.string.message_count), notificationSize)
+        val notificationSize = if (notifications.isNullOrEmpty()) 0 else notifications.size
+        clearableCount = notifications?.count { it.isClearable } ?: 0
+        countTv?.text = if (notificationSize > 0 && clearableCount == 0) {
+            String.format(getContext().getString(R.string.message_count_ongoing), notificationSize)
+        } else {
+            String.format(getContext().getString(R.string.message_count), notificationSize)
+        }
+        // 无可清除通知时置灰清空按钮，避免用户以为清空失败
+        clearTv?.alpha = if (clearableCount > 0) 1f else 0.5f
         if(notificationSize >= MAX_NOTIFICATIONS_ONE_SCREEN){
             mRecyclerView?.setFadingEdgeLength(getContext().resources.getDimension(R.dimen.top_bar_notification_fade_length)
                 .toInt())
