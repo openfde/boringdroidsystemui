@@ -20,6 +20,7 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.view.Display
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewParent
@@ -330,6 +331,16 @@ object Utils {
 
     @JvmStatic
     fun sendKeyWithModifiers(keyCode: Int, metaState: Int) {
+        sendKeyWithModifiers(keyCode, metaState, Display.DEFAULT_DISPLAY)
+    }
+
+    /**
+     * Inject a modified key event and tag it with the display that should handle it. Used by
+     * the secondary top bar's region-screenshot shortcut so the SystemUI shortcut receiver
+     * opens the selection UI on that display instead of the focused/default one.
+     */
+    @JvmStatic
+    fun sendKeyWithModifiers(keyCode: Int, metaState: Int, displayId: Int) {
         object : Thread() {
             override fun run() {
                 try {
@@ -340,6 +351,8 @@ object Utils {
 
                         val downEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyCode, 0, metaState)
                         val upEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyCode, 0, metaState)
+                        downEvent.setDisplayId(displayId)
+                        upEvent.setDisplayId(displayId)
 
                         inst.sendKeySync(downEvent)
                         inst.sendKeySync(upEvent)

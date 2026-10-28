@@ -12,14 +12,17 @@ import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.providers.settings.GlobalSettingsProto
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
+import android.view.Display
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -30,6 +33,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat.registerReceiver
 import com.android.internal.util.ScreenshotHelper
+import com.android.internal.util.ScreenshotRequest
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.ERROR_NOTIF_ID
@@ -339,11 +343,42 @@ class TopBarControlWindow(
         }
     }
 
+    /**
+     * Display that owns this control window. Prefer the status bar's display (the bar that
+     * opened the control center) and fall back to the window context.
+     */
+    private fun currentDisplayId(): Int {
+        return statusBar?.display?.displayId
+            ?: getContext().display?.displayId
+            ?: Display.DEFAULT_DISPLAY
+    }
+
+    /**
+     * Take a full screenshot on [currentDisplayId]. The SysRq key event is intentionally not
+     * used here: it is processed by the focused display and would capture the primary screen
+     * when the control center was opened from a secondary top bar.
+     */
+    private fun takeScreenshot() {
+        val displayId = currentDisplayId()
+        val request = ScreenshotRequest.Builder(
+            WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+            WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS,
+        )
+            .setDisplayId(displayId)
+            .build()
+        Log.d(TAG, "takeScreenshot display=$displayId")
+        ScreenshotHelper(getContext()).takeScreenshot(
+            request,
+            Handler(Looper.getMainLooper()),
+            null,
+        )
+    }
+
     override fun onClick(v: View?) {
 
         if( v == screenshotBtn){
             dismiss()
-            Utils.sendKeyCode(KeyEvent.KEYCODE_SYSRQ)
+            takeScreenshot()
         }else if(v == settingBtn){
             dismiss()
             val intent = Intent(Settings.ACTION_SETTINGS)
@@ -351,7 +386,11 @@ class TopBarControlWindow(
             getContext().startActivity(intent)
         }else if(v == regionshotBtn){
             dismiss()
-            Utils.sendKeyWithModifiers(KeyEvent.KEYCODE_S, KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)  // Meta + Ctrl + S
+            Utils.sendKeyWithModifiers(
+                KeyEvent.KEYCODE_S,
+                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                currentDisplayId(),
+            )
 
 //            handler.postDelayed({
 //                val screenshotHelper = ScreenshotHelper(getContext())
