@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
@@ -23,6 +24,8 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.AttributeSet
 import android.util.Log
+import android.util.SparseArray
+import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -67,6 +70,23 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
+/**
+ * FDE overlay plugin that replaces the AOSP status-bar content with the custom top bar.
+ *
+ * <p>Multi-display contract:
+ * <ul>
+ *     <li>SystemUI calls [setup] once per display's status bar. The default display keeps using
+ *         the original singleton [topBarLayout]; every other display gets an independent
+ *         [TopBarLayout] created with that display's Context (resources/WindowManager), so
+ *         control/search/notification popups stay on the same display.</li>
+ *     <li>Battery, network and notification-state receivers are registered per secondary top
+ *         bar. Without the per-display DynamicReceiver the record button text never updates on
+ *         the secondary display.</li>
+ *     <li>Plugin reconnects can create a second OverlayPlugin instance; stale TopBarLayout
+ *         children are removed by class name (not `is`, because plugin instances may use
+ *         different ClassLoaders) before a new bar is attached.</li>
+ * </ul>
+ */
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
 class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
     UninstallReceiver.AppUninstallListener {
@@ -77,6 +97,11 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var clockAndStatus: ViewGroup? = null
     private var systemStateLayout: SystemStateLayout? = null
     private var topBarLayout: TopBarLayout? = null
+    /** FDE: one top bar copy for every non-default status bar. */
+    private val secondaryTopBars = SparseArray<TopBarLayout>()
+    private val secondaryBatteryReceivers = ArrayList<BatteryReceiver>()
+    private val secondaryNetworkReceivers = ArrayList<BroadcastReceiver>()
+    private val secondaryDynamicReceivers = ArrayList<BroadcastReceiver>()
     private var appStateLayout: AppStateLayout? = null
     private var btAllApps: View? = null
     private var allAppsWindow: AllAppsWindow? = null
@@ -121,6 +146,19 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             return
         }
 
+        // FDE: duplicate the top bar on every display that owns a status bar.
+        val statusBarDisplayId = try {
+            statusBar.display?.displayId
+                ?: statusBar.context.display?.displayId
+                ?: Display.DEFAULT_DISPLAY
+        } catch (t: Throwable) {
+            Display.DEFAULT_DISPLAY
+        }
+        if (statusBarDisplayId != Display.DEFAULT_DISPLAY) {
+            setupSecondaryTopBar(statusBar, statusBarDisplayId)
+            return
+        }
+
         if(statusBar.getTag() != null && statusBar.getTag() is Handler){
             recordHandler = statusBar.getTag() as Handler
             Log.d(TAG, "setup: $recordHandler")
@@ -136,6 +174,138 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //            updateNaviDock()
         }
         generateTopBar()
+    }
+
+    /**
+     * Creates an independent top bar for a secondary display. Resources and WindowManager come
+     * from that display, so every popup/control window opened from this bar stays on the same
+     * display.
+     */
+    private fun setupSecondaryTopBar(statusBar: View, displayId: Int) {
+        val display = statusBar.display ?: return
+        val existing = secondaryTopBars.get(displayId)
+        if (existing != null) {
+            (existing.parent as? ViewGroup)?.removeView(existing)
+            secondaryTopBars.remove(displayId)
+        }
+        val context = createPluginDisplayContext(display)
+        val topBar = LayoutInflater.from(context).inflate(R.layout.layout_topbar, null)
+                as TopBarLayout
+        topBar.defaultFocusHighlightEnabled = false
+        topBar.notificationListener = this
+        topBar.systemUIContext = systemUIContext
+        topBar.overviewProvider = overviewProvider
+        topBar.initState()
+        topBar.registerAudioListener()
+        topBar.controlWindow?.statusBar = statusBar as? ViewGroup
+
+        val statusGroup = statusBar as ViewGroup
+        for (i in 0 until statusGroup.childCount) {
+            statusGroup.getChildAt(i).visibility = View.GONE
+        }
+        for (i in statusGroup.childCount - 1 downTo 0) {
+            if (statusGroup.getChildAt(i).javaClass.name == TopBarLayout::class.java.name) {
+                statusGroup.removeViewAt(i)
+            }
+        }
+        statusGroup.setPadding(0, 0, 0, 0)
+        statusGroup.setBackgroundColor(Color.TRANSPARENT)
+        statusGroup.addView(
+            topBar,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        secondaryTopBars.put(displayId, topBar)
+
+        systemUIContext?.let { sysui ->
+            val battery = BatteryReceiver(topBar)
+            sysui.registerReceiver(
+                battery,
+                IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+                RECEIVER_EXPORTED,
+            )
+            secondaryBatteryReceivers.add(battery)
+
+            val network = NetWorkBroadcastReceiver(topBar)
+            sysui.registerReceiver(
+                network,
+                IntentFilter(CONNECTIVITY_ACTION),
+                RECEIVER_EXPORTED,
+            )
+            secondaryNetworkReceivers.add(network)
+
+            // The default top bar registers this receiver in registerAll(). Secondary copies need
+            // their own receiver so record/notification state updates their control window too.
+            val dynamic = DynamicReceiver(topBar, topBar)
+            val dynamicFilter = IntentFilter().apply {
+                addAction(SERVICE_ACTION)
+                addAction(INTENT_UPDATE_STATE)
+            }
+            sysui.registerReceiver(dynamic, dynamicFilter, RECEIVER_EXPORTED)
+            secondaryDynamicReceivers.add(dynamic)
+        }
+        Log.d(TAG, "setupSecondaryTopBar display=$displayId topBar=$topBar")
+    }
+
+    /**
+     * Display-adjusted context for a secondary top bar. createDisplayContext() alone loses the
+     * plugin ClassLoader, so wrap it and expose a plugin-aware inflater; otherwise
+     * com.boringdroid.systemui.view.* children cannot be inflated on the secondary display.
+     */
+    private fun createPluginDisplayContext(display: Display): Context {
+        val plugin = pluginContext ?: return systemUIContext!!
+        val displayContext = plugin.createDisplayContext(display)
+        return object : ContextWrapper(displayContext) {
+            private val pluginInflater: LayoutInflater by lazy {
+                createPluginInflater(this, displayContext)
+            }
+
+            override fun getClassLoader(): ClassLoader = plugin.classLoader
+
+            override fun getSystemService(name: String): Any? {
+                if (Context.LAYOUT_INFLATER_SERVICE == name) {
+                    return pluginInflater
+                }
+                return super.getSystemService(name)
+            }
+        }
+    }
+
+    /** Clone the display inflater but keep the plugin's Factory2 for custom view classes. */
+    private fun createPluginInflater(context: Context, base: Context): LayoutInflater {
+        val inflater = LayoutInflater.from(base).cloneInContext(context)
+        inflater.factory2 = object : LayoutInflater.Factory2 {
+            override fun onCreateView(
+                parent: View?,
+                name: String,
+                context: Context,
+                attrs: AttributeSet,
+            ): View? = createCustomView(name, context, attrs)
+
+            override fun onCreateView(
+                name: String,
+                context: Context,
+                attrs: AttributeSet,
+            ): View? = createCustomView(name, context, attrs)
+        }
+        return inflater
+    }
+
+    private fun createCustomView(name: String, context: Context, attrs: AttributeSet): View? {
+        return try {
+            if (name.contains(context.packageName)) {
+                val clazz = Class.forName(name, true, classLoader)
+                clazz.getConstructor(Context::class.java, AttributeSet::class.java)
+                    .newInstance(context, attrs) as View
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create view for name: $name", e)
+            null
+        }
     }
     private fun updateNaviDock() {
         val childCount:Int = navi!!.childCount
@@ -190,6 +360,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             val child = status?.getChildAt(i)
             child?.visibility = View.GONE
         }
+        // A plugin reconnect can leave a stale TopBarLayout from a previous plugin instance.
+        for (i in status!!.childCount - 1 downTo 0) {
+            val child = status!!.getChildAt(i)
+            if (child.javaClass.name == TopBarLayout::class.java.name) {
+                status!!.removeViewAt(i)
+            }
+        }
 
         ViewTreePrinter.printViewTree(status!!)
         pluginContext?.getColor(R.color.white_50p)?.let { status?.setBackgroundColor(it) }
@@ -198,6 +375,9 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //            FrameLayout.LayoutParams.MATCH_PARENT,
 //            30
 //        )
+        // A status bar view can be recreated (configuration/display changes); detach the
+        // previous copy before attaching it to the new root.
+        (topBarLayout?.parent as? ViewGroup)?.removeView(topBarLayout)
         status?.addView(topBarLayout)
         status?.setBackgroundColor(Color.TRANSPARENT)
         Log.d(TAG, "generateTopBar() ${TopBarLayout.inited}")
@@ -333,6 +513,14 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         topBarLayout?.refreshDensityDependentSizes()
         topBarLayout?.controlWindow?.statusBar = status
         topBarLayout?.requestLayout()
+
+        for (i in 0 until secondaryTopBars.size()) {
+            val secondary = secondaryTopBars.valueAt(i)
+            secondary.onConfigChanged()
+            secondary.refreshDensityDependentSizes()
+            secondary.controlWindow?.statusBar = secondary.parent as? ViewGroup
+            secondary.requestLayout()
+        }
 
         // dock（部分版本 navBar 接进来才需要）
         if (navi != null) {
@@ -587,6 +775,13 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     override fun onDestroy() {
         Log.d(TAG, "onDestroy() status:$status")
         setNativeShadeExpandDisabled(false)
+        // Plugin reconnects create a new OverlayPlugin instance; remove the views owned by this
+        // instance so the previous top bar does not stay stacked on the status bar.
+        (topBarLayout?.parent as? ViewGroup)?.removeView(topBarLayout)
+        for (i in 0 until secondaryTopBars.size()) {
+            val bar = secondaryTopBars.valueAt(i)
+            (bar.parent as? ViewGroup)?.removeView(bar)
+        }
 //        if (systemUIContext != null) {
 //            try {
 //                systemUIContext!!.unregisterReceiver(closeSystemDialogsReceiver)
@@ -641,6 +836,32 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
         displayConfigReceiver = null
         topBarLayout?.unregisterAudioListener()
+        topBarLayout?.unregisterNotification()
+
+        for (i in 0 until secondaryTopBars.size()) {
+            try {
+                secondaryTopBars.valueAt(i).unregisterAudioListener()
+                secondaryTopBars.valueAt(i).unregisterNotification()
+            } catch (t: Throwable) {
+                Log.w(TAG, "secondary topbar unregister failed", t)
+            }
+        }
+        secondaryTopBars.clear()
+        systemUIContext?.let { sysui ->
+            secondaryBatteryReceivers.forEach {
+                try { sysui.unregisterReceiver(it) } catch (_: Throwable) {}
+            }
+            secondaryNetworkReceivers.forEach {
+                try { sysui.unregisterReceiver(it) } catch (_: Throwable) {}
+            }
+            secondaryDynamicReceivers.forEach {
+                try { sysui.unregisterReceiver(it) } catch (_: Throwable) {}
+            }
+        }
+        secondaryBatteryReceivers.clear()
+        secondaryNetworkReceivers.clear()
+        secondaryDynamicReceivers.clear()
+        topBarLayout = null
     }
 
     @SuppressLint("InflateParams")
