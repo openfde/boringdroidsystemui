@@ -100,5 +100,8 @@
     <color name="notification_text_color">#E6000000</color>
     <color name="topbar_window_bg">#d1F5F7FA</color>
 
+    <color name="external_display_connected_tint">#FF1D1D1F</color>
+    <color name="external_display_enabled_tint">#FF0A84FF</color>
+
 
 </resources>

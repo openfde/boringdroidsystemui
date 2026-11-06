@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Outline
 import android.graphics.Point
@@ -67,12 +68,15 @@ import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
 import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
+import com.boringdroid.systemui.utils.ExternalDisplayHelper
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
 import com.boringdroid.systemui.view.SingleNotificationWindow.Companion.SINGLE_NOTIFICATION_WINDOW_PADDING
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_RADIUS
 import com.boringdroid.systemui.view.TopBarControlWindow.Companion.CONTROL_WINDOW_SHADOW
+import com.boringdroid.systemui.view.TopBarDisplayWindow.Companion.DISPLAY_WINDOW_RADIUS
+import com.boringdroid.systemui.view.TopBarDisplayWindow.Companion.DISPLAY_WINDOW_SHADOW
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_RADIUS
 import com.boringdroid.systemui.view.TopBarPowerWindow.Companion.POWER_OUTLINE_SHADOW
 import com.xwdz.http.QuietOkHttp
@@ -106,6 +110,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var volumeBtn: ImageView? = null
     private var batteryBtn: ImageView? = null
     private var controlBtn: ImageView? = null
+    private var displayStatusBtn: ImageView? = null
     private var searchBtn: ImageView? = null
     private var homeBtn: LinearLayout? = null
     private var powerBtn: ImageView? = null
@@ -127,6 +132,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     var fdeModeResult: FdeModeResult ?= null
     private var powerWindow:TopBarPowerWindow? = null
     var controlWindow:TopBarControlWindow? = null
+    private var displayWindow:TopBarDisplayWindow? = null
     private var notificationReceiver: NotificationReceiver? = null
     private var notifications: Array<DesktopNotification>? = null
     private var launcherResumeFlag: Boolean ?= false
@@ -158,6 +164,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn = findViewById(R.id.battery_btn)
         controlBtn = findViewById(R.id.control_btn)
         controlBtn?.tooltipText = context.resources.getString(R.string.top_control)
+        displayStatusBtn = findViewById(R.id.display_status_btn)
         notificationBtn = findViewById(R.id.notifications_btn)
         notificationBtn?.tooltipText = context.resources.getString(R.string.top_message)
         powerBtn = findViewById(R.id.about_btn)
@@ -167,11 +174,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         searchBtn = findViewById(R.id.search_btn)
         searchBtn?.tooltipText = context.resources.getString(R.string.top_search)
         systemTray = findViewById(R.id.system_tray)
-        btnList = mutableListOf(imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
+        btnList = mutableListOf(displayStatusBtn, imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
         registerNotification()
         registInputMethodChange()
         makePowerWindow(powerBtn)
         makeControlWindow(controlBtn)
+        makeDisplayWindow()
         makeNotificationWindow(notificationBtn)
         makeImeSwitchWindow(imeBtn)
         makeSingleNotiWinodw()
@@ -211,8 +219,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         getFdeMode()
 
         wifiStatusListen();
-
-
+        refreshExternalDisplayStatus()
     }
 
     fun getFdeMode(){
@@ -251,11 +258,13 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }
         makePowerWindow(powerBtn)
         makeControlWindow(controlBtn)
+        makeDisplayWindow()
         makeNotificationWindow(notificationBtn)
         makeImeSwitchWindow(imeBtn)
         makeSingleNotiWinodw()
         makeGlobalSearchWindow(searchBtn)
         makeVolumeWindow(volumeBtn)
+        refreshExternalDisplayStatus()
     }
 
     /**
@@ -566,6 +575,27 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         windowList.add(controlWindow!!)
     }
 
+    private fun makeDisplayWindow() {
+        val width = context.resources.getDimension(R.dimen.top_bar_display_width_expand).toInt()
+        val height = scaledWindowHeight(R.dimen.top_bar_display_height_expand)
+        displayWindow = AbsTopPopWindow.Builder(context, width, height, R.layout.window_topbar_display)
+            .gravity(Gravity.TOP or Gravity.RIGHT)
+            .locate(0, 0)
+            .build(AbsTopPopWindow.WindowType.Display) as TopBarDisplayWindow
+        displayWindow?.dismissListener = object : WindowDismissListener {
+            override fun onWindowDismiss() {
+                this@TopBarLayout.controlBtn?.background = null
+                this@TopBarLayout.displayStatusBtn?.background = null
+                this@TopBarLayout.refreshExternalDisplayStatus()
+            }
+        }
+        displayWindow?.onDisplayStatusChanged = {
+            refreshExternalDisplayStatus()
+        }
+        displayWindow?.enterView = controlBtn
+        windowList.add(displayWindow!!)
+    }
+
     private val touchListener = OnTouchListener { v, event ->
         if (event?.getAction() == MotionEvent.ACTION_DOWN) {
             v?.setBackgroundResource(R.drawable.top_oval_click);
@@ -597,9 +627,17 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun controlBtnClick() {
+        refreshExternalDisplayStatus()
         controlWindow?.showPopupWindow()
         Utils.setBackgroundBlurRadius(controlWindow?.getContentView()?.findViewById(R.id.root_blur), CONTROL_WINDOW_SHADOW, CONTROL_WINDOW_RADIUS)
         controlBtn?.background  = context!!.resources.getDrawable(R.drawable.top_oval_click)
+    }
+
+    private fun displayStatusBtnClick() {
+        if (!refreshExternalDisplayStatus()) {
+            return
+        }
+        showDisplayWindowInternal(displayStatusBtn)
     }
 
     private fun notificationBtnClick() {
@@ -654,6 +692,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             powerBtnClick()
         } else if( v == controlBtn){
             controlBtnClick()
+        } else if( v == displayStatusBtn){
+            displayStatusBtnClick()
         } else if( v == notificationBtn){
             notificationBtnClick()
         } else if( v == imeBtn){
@@ -728,6 +768,66 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         volumeBtnClick()
     }
 
+    override fun showDisplayWindow() {
+        showDisplayWindowInternal(controlBtn)
+    }
+
+    private fun showDisplayWindowInternal(highlight: ImageView?) {
+        displayWindow?.showPopupWindow()
+        Utils.setBackgroundBlurRadius(
+            displayWindow?.getContentView()?.findViewById(R.id.root_blur),
+            DISPLAY_WINDOW_SHADOW,
+            DISPLAY_WINDOW_RADIUS
+        )
+        highlight?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
+    }
+
+    /**
+     * Refreshes the top-bar indicator from the current service state. Once the display
+     * state broadcast is defined, its receiver can call this method directly.
+     */
+    fun refreshExternalDisplayStatus(): Boolean {
+        val button = displayStatusBtn ?: return false
+        val ctx = context ?: return false
+        val status = ExternalDisplayHelper.queryStatus()
+        Log.d(
+            TAG,
+            "refreshExternalDisplayStatus serviceReady=${status.serviceReady} " +
+                "supported=${status.supported} enabled=${status.enabled}"
+        )
+        if (!status.available) {
+            button.apply {
+                visibility = View.GONE
+                isClickable = false
+            }
+            return false
+        }
+
+        val stateRes = if (status.enabled) {
+            R.string.external_display_status_enabled
+        } else {
+            R.string.external_display_status_connected
+        }
+        val tooltip = ctx.getString(
+            R.string.external_display_topbar_tooltip,
+            ctx.getString(stateRes)
+        )
+        button.apply {
+            visibility = View.VISIBLE
+            imageTintList = ColorStateList.valueOf(
+                ctx.getColor(
+                    if (status.enabled) R.color.external_display_enabled_tint
+                    else R.color.external_display_connected_tint
+                )
+            )
+            isClickable = true
+            alpha = 1f
+            tooltipText = tooltip
+            contentDescription = tooltip
+        }
+        return true
+    }
+
     override fun onNotifyCount(count: Int) {
         if(count > 0){
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
@@ -752,6 +852,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         AbsTopPopWindow.dissmissWindow(globalSearchWindow)
         AbsTopPopWindow.dissmissWindow(powerWindow)
         AbsTopPopWindow.dissmissWindow(controlWindow)
+        AbsTopPopWindow.dissmissWindow(displayWindow)
         AbsTopPopWindow.dissmissWindow(volumeWindow)
         AbsTopPopWindow.dissmissWindow(aboutWindow)
     }

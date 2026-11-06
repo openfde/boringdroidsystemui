@@ -53,6 +53,16 @@
                 >
 
                 <ImageView
+                    android:id="@+id/display_status_btn"
+                    android:layout_width="@dimen/topbar_icon_size"
+                    android:layout_height="@dimen/topbar_icon_size"
+                    android:padding="@dimen/topbar_icon_padding"
+                    android:src="@drawable/ic_external_display"
+                    android:visibility="gone"
+                    android:contentDescription="@string/external_display_status_none"
+                    />
+
+                <ImageView
                     android:id="@+id/imeswitch_btn"
                     android:layout_width="@dimen/topbar_icon_size"
                     android:layout_height="@dimen/topbar_icon_size"

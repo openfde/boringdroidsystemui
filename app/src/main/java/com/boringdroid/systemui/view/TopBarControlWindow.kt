@@ -43,6 +43,7 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.RECORDING_NOT
 import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SUMMARY_NOTIF_ID
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.AudioHelper
+import com.boringdroid.systemui.utils.ExternalDisplayHelper
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,8 @@ class TopBarControlWindow(
     private var regionshotBtn: ImageView?= null
     private var recordBtn: ImageView?= null
     private var settingBtn: ImageView?= null
+    private var displayBtn: ImageView?= null
+    private var displayTv: TextView?= null
     private var volumeImage: ImageView?= null
     private var wifiImage: ImageView?= null
     private var tvWifiName: TextView?= null
@@ -285,6 +288,8 @@ class TopBarControlWindow(
         recordTextView = mContentView?.findViewById(R.id.record_tv)
         recordBtn = mContentView?.findViewById(R.id.record_iv)
         settingBtn = mContentView?.findViewById(R.id.setting_iv)
+        displayBtn = mContentView?.findViewById(R.id.display_iv)
+        displayTv = mContentView?.findViewById(R.id.display_tv)
         volumeSeekBar = mContentView?.findViewById(R.id.volume_seekbar)
         brightnessSeekBar = mContentView?.findViewById(R.id.brightness_seekbar)
         volumeImage = mContentView?.findViewById(R.id.volume_iv)
@@ -318,11 +323,39 @@ class TopBarControlWindow(
         settingBtn?.setOnTouchListener(touchListener)
         settingBtn?.setOnHoverListener(hoverListener)
         settingBtn?.setOnClickListener(this)
+
+        displayBtn?.setOnTouchListener(touchListener)
+        displayBtn?.setOnHoverListener(hoverListener)
+        displayBtn?.setOnClickListener(this)
 //        Log.d(TAG, "initViews() called isRecording: ${isRecording} ${this}")
         if(isRecording){
             recordTextView?.text = getContext().resources.getString(R.string.finish_recordscreen_string)
         } else {
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
+        }
+        updateDisplayTooltip()
+    }
+
+    private fun updateDisplayTooltip() {
+        val status = ExternalDisplayHelper.queryStatus()
+        val state = when {
+            !status.serviceReady ->
+                getContext().getString(R.string.external_display_status_unavailable)
+            !status.supported && !status.enabled ->
+                getContext().getString(R.string.external_display_status_none)
+            status.enabled ->
+                getContext().getString(R.string.external_display_status_enabled)
+            else ->
+                getContext().getString(R.string.external_display_status_connected)
+        }
+        val tooltip = getContext().getString(R.string.external_display_control_tooltip, state)
+        displayBtn?.apply {
+            tooltipText = tooltip
+            contentDescription = tooltip
+        }
+        displayTv?.apply {
+            tooltipText = tooltip
+            contentDescription = tooltip
         }
     }
 
@@ -408,6 +441,9 @@ class TopBarControlWindow(
         } else if(v == volumeCenterIv){
             dismiss()
             topbarController?.showVolumeWindow()
+        } else if(v == displayBtn){
+            dismiss()
+            topbarController?.showDisplayWindow()
         }else if(v ==wifiCv){
             val intent = Intent(Wifi_ACTION)
             intent.putExtra("wifiStatus", 1 - wifiStatus!!)
@@ -586,6 +622,7 @@ class TopBarControlWindow(
 
     interface TopbarLayoutController {
         fun showVolumeWindow();
+        fun showDisplayWindow();
     }
 
     override fun onLongClick(v: View?): Boolean {

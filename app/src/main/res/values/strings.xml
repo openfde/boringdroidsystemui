@@ -88,6 +88,27 @@
     <string name="finish_recordscreen_string">Finish Record</string>
     <string name="savepower_string">PowerSave</string>
     <string name="setting_string">Setting</string>
+    <string name="external_display_string">Display</string>
+    <string name="external_display_title">External display</string>
+    <string name="external_display_toggle">Enable external display</string>
+    <string name="external_display_state_on">Enabled</string>
+    <string name="external_display_state_off">Off</string>
+    <string name="external_display_status_connected">Connected</string>
+    <string name="external_display_status_enabled">Enabled</string>
+    <string name="external_display_status_none">Not connected</string>
+    <string name="external_display_status_unavailable">Service not ready</string>
+    <string name="external_display_service_unavailable">External display service is not ready</string>
+    <string name="external_display_not_connected">No external display detected</string>
+    <string name="external_display_open_failed">Unable to enable the external display. Check the connection.</string>
+    <string name="external_display_close_failed">Unable to disable the external display</string>
+    <string name="external_display_topbar_tooltip">External display: %1$s. Click to open.</string>
+    <string name="external_display_control_tooltip">Display: %1$s. Click to view.</string>
+    <string name="external_display_toggle_tooltip_connected">External display connected. Click to enable.</string>
+    <string name="external_display_toggle_tooltip_enabled">External display enabled. Click to disable.</string>
+    <string name="external_display_settings_tooltip">Open external display settings</string>
+    <string name="external_display_settings_tooltip_disabled">Enable the external display first</string>
+    <string name="external_display_settings">Display settings…</string>
+    <string name="external_display_settings_unavailable">Unable to open display settings</string>
 
     <string name="cleartext">Clear</string>
     <string name="no_notification">No Notification</string>
