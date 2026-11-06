@@ -85,6 +85,27 @@
     <string name="success_recordscreen_string">录屏成功保存到图库</string>
     <string name="savepower_string">省电模式</string>
     <string name="setting_string">设置</string>
+    <string name="external_display_string">显示器</string>
+    <string name="external_display_title">外部显示器</string>
+    <string name="external_display_toggle">启用外部显示器</string>
+    <string name="external_display_state_on">已启用</string>
+    <string name="external_display_state_off">已关闭</string>
+    <string name="external_display_status_connected">已连接</string>
+    <string name="external_display_status_enabled">已启用</string>
+    <string name="external_display_status_none">未连接</string>
+    <string name="external_display_status_unavailable">服务未就绪</string>
+    <string name="external_display_service_unavailable">外部显示器服务未就绪</string>
+    <string name="external_display_not_connected">未检测到外部显示器连接</string>
+    <string name="external_display_open_failed">无法开启外部显示器，请检查连接</string>
+    <string name="external_display_close_failed">无法关闭外部显示器</string>
+    <string name="external_display_topbar_tooltip">外部显示器：%1$s，点击打开</string>
+    <string name="external_display_control_tooltip">显示器：%1$s，点击查看</string>
+    <string name="external_display_toggle_tooltip_connected">外部显示器：已连接，点击启用</string>
+    <string name="external_display_toggle_tooltip_enabled">外部显示器：已启用，点击关闭</string>
+    <string name="external_display_settings_tooltip">打开外部显示器设置</string>
+    <string name="external_display_settings_tooltip_disabled">请先启用外部显示器</string>
+    <string name="external_display_settings">显示器设置…</string>
+    <string name="external_display_settings_unavailable">无法打开显示器设置</string>
 
     <string name="cleartext">清空</string>
     <string name="no_notification">暂无新通知</string>

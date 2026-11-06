@@ -66,6 +66,7 @@ open class AbsTopPopWindow(
         object Notification : WindowType()
         object Power : WindowType()
         object Control : WindowType()
+        object Display : WindowType()
         object DockContext : WindowType()
         object About : WindowType()
 
@@ -375,6 +376,7 @@ open class AbsTopPopWindow(
                 is WindowType.Notification -> TopBarNotificationWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Power -> TopBarPowerWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Control -> TopBarControlWindow(context, width, height, gravity, layoutResId, typeParam)
+                is WindowType.Display -> TopBarDisplayWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.DockContext -> DockContextWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.About -> AboutWindow(context, width, height, gravity, layoutResId, typeParam)
                 is WindowType.Default -> AbsTopPopWindow(context, width, height, gravity, layoutResId, typeParam)
