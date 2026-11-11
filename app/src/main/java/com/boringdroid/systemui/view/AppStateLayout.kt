@@ -57,7 +57,7 @@ constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : RecyclerView(context, attrs, defStyleAttr) {
-    lateinit var listener: SystemStateLayout.NotificationListener
+    lateinit var listener: SystemStateListener
     private val activityManager: ActivityManager
     private val appStateListener = AppStateListener()
     private val launchApps: LauncherApps
@@ -279,7 +279,7 @@ constructor(
         private val packageManager: PackageManager
         private var topTaskId = -1
         private val dragCloseThreshold: Int
-        lateinit var listener: SystemStateLayout.NotificationListener
+        lateinit var listener: SystemStateListener
         val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         override fun onCreateViewHolder(
@@ -340,6 +340,10 @@ constructor(
 
             holder.iconIV?.tag = taskInfo.id
             holder.iconIV?.tooltipText = label
+            // 无障碍 / 自动化：任务条只有图标，用应用名做 desc
+            holder.layoutTask.contentDescription = label
+            holder.layoutTask.isSelected = taskInfo.id == topTaskId
+            holder.iconIV?.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             val contextListener = object : OnContextClickListener {
                 override fun onContextClick(v: View?): Boolean {
                     listener?.syncVisible(Utils.ALL_INVISIBLE)

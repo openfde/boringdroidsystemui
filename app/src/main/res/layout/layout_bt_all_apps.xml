@@ -16,6 +16,7 @@
         >
         <ImageButton
             android:id="@+id/bt_all_apps"
+            android:contentDescription="@string/a11y_all_apps"
             android:layout_width="@dimen/nav_button_size"
             android:layout_height="@dimen/nav_button_size"
             android:layout_gravity="center_vertical"

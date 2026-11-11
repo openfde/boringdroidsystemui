@@ -169,4 +169,9 @@
     <string name="update">更新</string>
     <string name="version_update">版本更新</string>
 
+    <string name="a11y_move_left">左移</string>
+    <string name="a11y_move_right">右移</string>
+    <string name="a11y_all_apps">所有应用</string>
+    <string name="a11y_expand">展开</string>
+    <string name="a11y_brightness">亮度</string>
 </resources>

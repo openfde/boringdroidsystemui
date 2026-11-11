@@ -170,4 +170,9 @@
     <string name="not_open">Not enabled</string>
     <string name="enabled">Enabled</string>
 
+    <string name="a11y_move_left">Move left</string>
+    <string name="a11y_move_right">Move right</string>
+    <string name="a11y_all_apps">All apps</string>
+    <string name="a11y_expand">Expand</string>
+    <string name="a11y_brightness">Brightness</string>
 </resources>

@@ -123,6 +123,7 @@
                             />
                         <ImageView
                             android:id="@+id/expand_file_iv"
+                            android:contentDescription="@string/a11y_expand"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:padding="7dp"
@@ -169,6 +170,7 @@
                             />
                         <ImageView
                             android:id="@+id/expand_app_iv"
+                            android:contentDescription="@string/a11y_expand"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:padding="7dp"

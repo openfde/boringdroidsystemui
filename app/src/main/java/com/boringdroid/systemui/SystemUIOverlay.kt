@@ -26,14 +26,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.SparseArray
 import android.view.Display
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
-import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationManagerCompat
 import com.android.systemui.plugins.OverlayPlugin
 import com.android.systemui.plugins.annotations.Requires
@@ -53,10 +51,8 @@ import com.boringdroid.systemui.utils.SPUtils
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.utils.ViewTreePrinter
-import com.boringdroid.systemui.view.AllAppsWindow
 import com.boringdroid.systemui.view.AppStateLayout
-import com.boringdroid.systemui.view.DockAppsLayout
-import com.boringdroid.systemui.view.SystemStateLayout
+import com.boringdroid.systemui.view.SystemStateListener
 import com.boringdroid.systemui.view.TopBarLayout
 import com.boringdroid.systemui.view.TopBarNotificationWindow
 //import com.fde.x11.ICmdEntryInterface
@@ -88,14 +84,10 @@ import java.util.concurrent.TimeUnit
  * </ul>
  */
 @Requires(target = OverlayPlugin::class, version = OverlayPlugin.VERSION)
-class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, TopBarNotificationWindow.WindowListener,
+class SystemUIOverlay : OverlayPlugin, SystemStateListener, TopBarNotificationWindow.WindowListener,
     UninstallReceiver.AppUninstallListener {
     private var pluginContext: Context? = null
     private var systemUIContext: Context? = null
-    private var navBarButtonGroup: View? = null
-    private var btAllAppsGroup: ViewGroup? = null
-    private var clockAndStatus: ViewGroup? = null
-    private var systemStateLayout: SystemStateLayout? = null
     private var topBarLayout: TopBarLayout? = null
     /** FDE: one top bar copy for every non-default status bar. */
     private val secondaryTopBars = SparseArray<TopBarLayout>()
@@ -103,9 +95,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private val secondaryNetworkReceivers = ArrayList<BroadcastReceiver>()
     private val secondaryDynamicReceivers = ArrayList<BroadcastReceiver>()
     private var appStateLayout: AppStateLayout? = null
-    private var btAllApps: View? = null
-    private var allAppsWindow: AllAppsWindow? = null
-    private var navBarButtonGroupId = -1
     private var resolver: ContentResolver? = null
     private val tunerKeys: MutableList<String> = ArrayList()
     private val classLoader = SystemUIOverlay::class.java.classLoader
@@ -113,10 +102,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     private var dynamicReceiver: DynamicReceiver? = null
     private var networkChangeReceiver: NetWorkBroadcastReceiver? =null
 
-    private var dockAppsGroup: ViewGroup? = null
-    private var dockAppsLayout: DockAppsLayout? = null
     private var status: ViewGroup ?= null
-    private var navi: ViewGroup ?= null
     private val tunerKeyObserver: ContentObserver = TunerKeyObserver()
     private var overviewProvider: AllAppsProvider ?= null
     private var timeTickReceiver :BroadcastReceiver ?= null
@@ -165,14 +151,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         }
 
         status = statusBar as ViewGroup
-//        navi = navBar as ViewGroup
-//        ViewTreePrinter.printViewTree(navi!!)
-        if(navi != null && navi!!.getTag() is Float){
-            mDockScaleFactor = navi!!.getTag() as Float
-        }
-        if (navBarButtonGroupId > 0 && navBar != null && pluginContext !=null) {
-//            updateNaviDock()
-        }
         generateTopBar()
     }
 
@@ -307,49 +285,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             null
         }
     }
-    private fun updateNaviDock() {
-        val childCount:Int = navi!!.childCount
-        for (i in 0 until childCount) {
-            val child = navi?.getChildAt(i)
-            child?.visibility = View.GONE
-        }
-        dockAppsLayout?.onDestroy()
-        val layoutParams = navi?.layoutParams as FrameLayout.LayoutParams
-        layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
-        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
-        layoutParams.gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
-        navi?.layoutParams = layoutParams
-        val dockParams :FrameLayout.LayoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT)
-//        navi?.removeAllViews()
-        navi?.addView(dockAppsGroup, dockParams)
-        dockAppsLayout?.initApps(mDockScaleFactor)
-        dockAppsLayout?.status = status
-        dockAppsLayout?.navi = navi
-        dockAppsGroup?.setOnClickListener{
-            Log.d(TAG, "updateNaviDock() called ${navi?.parent}")
-            Log.d(TAG, "updateNaviDock() called ${navi?.parent?.parent}")
-//            traverseAndPrint(navi!!, 0)
-            navi?.background = null
-            dockAppsLayout?.updateNaviWindowFlags()
-        }
-        val mainHandler = Handler(Looper.getMainLooper())
-        mainHandler.postDelayed(object : Runnable {
-            override fun run() {
-                dockAppsLayout?.updateNaviWindowFlags()
-            }
-        }, 1000)
-        if(Utils.getProperty("fde.systemui.blurlevel", 0) == 0){
-//            Log.d(TAG, "updateNaviDock() called blur")
-            Utils.setBackgroundBlurRadius(dockAppsGroup?.findViewById(R.id.root_blur), 70, 16f)
-        } else {
-//            Log.d(TAG, "updateNaviDock() called not blur")
-            val bgViewGroup = dockAppsGroup?.findViewById<ViewGroup>(R.id.paren_fl)
-            bgViewGroup?.setBackgroundResource(R.drawable.round_rect_16dp_no_blur)
-            val cardView = dockAppsGroup?.findViewById<CardView>(R.id.root_blur)
-            cardView?.setCardBackgroundColor(Color.parseColor("#aaF2F6FA"))
-        }
-    }
-
     private fun generateTopBar() {
         status?.visibility = View.VISIBLE
 //        status?.removeAllViews()
@@ -406,28 +341,15 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         ImageUtils.init(sysUIContext)
         initOKhttp()
         SPUtils.pluginContext = systemUIContext
-        navBarButtonGroupId =  sysUIContext.resources.getIdentifier("ends_group", "id", "com.android.systemui")
         loadCustomViewsWithInflater(pluginContext!!)
-        btAllAppsGroup = initializeAllAppsButton(this.pluginContext, btAllAppsGroup)
-        dockAppsGroup = initializeDockAppsGroup(this.pluginContext, dockAppsGroup)
-        clockAndStatus = initializeClockAndStatus(this.pluginContext, clockAndStatus)
         appStateLayout = initializeAppStateLayout(this.pluginContext, appStateLayout)
-        dockAppsLayout = dockAppsGroup?.findViewById(R.id.apps_rv)
-        dockAppsGroup?.defaultFocusHighlightEnabled = false
-        overviewProvider = AllAppsProvider(pluginContext!!, dockAppsLayout)
-        dockAppsLayout?.overviewProvider = overviewProvider
+        overviewProvider = AllAppsProvider(pluginContext!!, null)
         appStateLayout?.listener = this
-        systemStateLayout = initSystemStatusLayout(this.pluginContext, systemStateLayout)
-        systemStateLayout?.listener = this
         topBarLayout = initTopBarLayout(this.pluginContext, topBarLayout)
         topBarLayout?.registerAudioListener()
         topBarLayout?.defaultFocusHighlightEnabled = false
         appStateLayout!!.reloadActivityManager(systemUIContext)
-        dockAppsLayout!!.reloadActivityManager(systemUIContext)
         topBarLayout?.overviewProvider = overviewProvider
-        btAllApps = btAllAppsGroup!!.findViewById(R.id.bt_all_apps)
-        allAppsWindow = AllAppsWindow(this.pluginContext,this.systemUIContext)
-        btAllApps!!.setOnClickListener(allAppsWindow)
 
 
 //        Utils.getLinuxRootFileName(systemUIContext!!)
@@ -504,9 +426,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 " density=${screen.density} densityDpi=${screen.densityDpi}" +
                 " fontScale=${screen.fontScale}")
 
-        // 收起正在显示的弹窗，避免继续使用旧尺寸
-        allAppsWindow?.dismiss()
-
         // 顶栏：重建所有弹窗，让窗口尺寸按新 density/fontScale 计算
         topBarLayout?.onConfigChanged()
         // 顶栏 View 是一次性 inflate 的，图标等 dp 尺寸需要按新 density 重新解析
@@ -522,12 +441,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             secondary.requestLayout()
         }
 
-        // dock（部分版本 navBar 接进来才需要）
-        if (navi != null) {
-            dockAppsLayout?.dismissAllPopups()
-            dockAppsLayout?.onDestroy()
-            updateNaviDock()
-        }
     }
 
     private fun registerAll() {
@@ -581,18 +494,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
             }catch (e: Exception){
                 e.printStackTrace()
             }
-        }
-    }
-
-    private val mDockContentObserver: ContentObserver = object : ContentObserver(mHandler) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            val scaleFactor: Float = Settings.System.getFloat(
-                systemUIContext?.getContentResolver(),
-                "dock_scale", 1.0f)
-            Log.d(TAG, "onChange() called with: selfChange = $selfChange, scaleFactor = $scaleFactor")
-            mDockScaleFactor = scaleFactor
-            dockAppsLayout?.onDestroy()
-            updateNaviDock()
         }
     }
 
@@ -671,7 +572,7 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
     }
 
     override fun onUninstall(packageName: String) {
-        dockAppsLayout?.onUninstall(packageName)
+//        dockAppsLayout?.onUninstall(packageName)
     }
 
     override fun onInstall(packageName: String?) {
@@ -803,15 +704,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
 //        if (resolver != null) {
 //            resolver!!.unregisterContentObserver(tunerKeyObserver)
 //        }
-//        btAllAppsGroup!!.post {
-//            btAllAppsGroup!!.setOnClickListener(null)
-//            btAllApps!!.setOnClickListener(null)
-//            if (navBarButtonGroup is ViewGroup) {
-//                (navBarButtonGroup as ViewGroup).removeView(btAllAppsGroup)
-//                (navBarButtonGroup as ViewGroup).removeView(appStateLayout)
-//            }
-//        }
-//        dockAppsLayout?.onDestroy()
 //        topBarLayout?.unregisterNotification()
 //        pluginContext = null
 //        status?.removeAllViews()
@@ -862,43 +754,6 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
         secondaryNetworkReceivers.clear()
         secondaryDynamicReceivers.clear()
         topBarLayout = null
-    }
-
-    @SuppressLint("InflateParams")
-    private fun initializeAllAppsButton(
-        context: Context?,
-        btAllAppsGroup: ViewGroup?,
-    ): ViewGroup {
-        return btAllAppsGroup
-            ?: LayoutInflater.from(context).inflate(R.layout.layout_bt_all_apps, null) as ViewGroup
-    }
-
-    @SuppressLint("InflateParams")
-    private fun initializeDockAppsGroup(
-        context: Context?,
-        dockAppsGroup: ViewGroup?,
-    ): ViewGroup {
-        return dockAppsGroup
-            ?: LayoutInflater.from(context).inflate(R.layout.dock_apps_layout, null) as ViewGroup
-    }
-
-    @SuppressLint("InflateParams")
-    private fun initializeClockAndStatus(
-        context: Context?,
-        clockAndStatus: ViewGroup?,
-    ): ViewGroup {
-        return clockAndStatus
-            ?: LayoutInflater.from(context).inflate(R.layout.layout_clock_and_status, null)
-                    as ViewGroup
-    }
-
-    private fun initSystemStatusLayout(
-        context: Context?,
-        systemStatus: SystemStateLayout?
-    ): SystemStateLayout? {
-        return systemStatus
-            ?: LayoutInflater.from(context).inflate(R.layout.layout_nav_panel, null)
-                    as SystemStateLayout
     }
 
     private fun initTopBarLayout(
@@ -1030,40 +885,18 @@ class SystemUIOverlay : OverlayPlugin, SystemStateLayout.NotificationListener, T
                 intent: Intent,
             ) {
                 Log.d(TAG, "receive intent $intent")
-                if (allAppsWindow == null) {
-                    return
-                }
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS != intent.action) {
                     return
-                }
-                if(dockAppsLayout != null){
-                    dockAppsLayout?.dimissWindow()
                 }
                 if(topBarLayout != null){
                     topBarLayout?.dimissWindow()
                 }
-                allAppsWindow?.dismiss()
             }
         }
 
     override fun syncVisible(which: Int) {
-        if(Utils.controlCenterWindoVisible && (which and Utils.CONTROLCENTERWINDOW_VISIBLE) == 0 ){
-            systemStateLayout?.hideControlWindow()
-        }
         if( (which and Utils.NOTIFICATION_VISIBLE) == 0  ){
             hideNotification()
-        }
-        if(Utils.allAppsWindowVisible && (which and Utils.ALLAPPWINDOW_VISIBLE) == 0  ){
-            allAppsWindow?.dismiss()
-        }
-        if(Utils.wifiWindowVisible && (which and Utils.WIFIWINDOW_VISIBLE) == 0  ){
-            systemStateLayout?.hideWifiWindow()
-        }
-        if(Utils.volumeCenterWindowVisible && (which and Utils.VOLUMECENTERWINDOW_VISIBLE) == 0 ){
-            systemStateLayout?.hideVolumeCenterWindow()
-        }
-        if(Utils.imeSwitchWindoVisible && (which and Utils.IMESWITCHWINDOW_VISIBLE) == 0 ){
-            systemStateLayout?.hideImeSwitchWindow()
         }
     }
 
