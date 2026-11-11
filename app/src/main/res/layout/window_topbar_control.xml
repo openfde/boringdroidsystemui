@@ -37,6 +37,7 @@
             <LinearLayout
                 android:layout_below="@id/shortcut_tv"
                 android:id="@+id/wifi_cv"
+                android:contentDescription="@string/top_wifi"
                 android:layout_width="166dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -90,6 +91,7 @@
 
             <LinearLayout
                 android:id="@+id/bleLl"
+                android:contentDescription="@string/bluetooth"
                 android:layout_below="@id/shortcut_tv"
                 android:layout_width="166dp"
                 android:layout_height="wrap_content"
@@ -167,6 +169,7 @@
                     >
                     <ImageView
                         android:id="@+id/screenshot_iv"
+                        android:contentDescription="@string/printscreen_string"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:padding="14dp"
@@ -198,6 +201,7 @@
                     >
                     <ImageView
                         android:id="@+id/regionshot_iv"
+                        android:contentDescription="@string/printscreen_region_string"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:layout_gravity="center_horizontal"
@@ -230,6 +234,7 @@
                     >
                     <ImageView
                         android:id="@+id/record_iv"
+                        android:contentDescription="@string/recordscreen_string"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:padding="14dp"
@@ -263,6 +268,7 @@
                     >
                     <ImageView
                         android:id="@+id/setting_iv"
+                        android:contentDescription="@string/setting_string"
                         android:layout_width="52dp"
                         android:layout_height="52dp"
                         android:layout_gravity="center_horizontal"
@@ -337,6 +343,7 @@
 
                 <SeekBar
                     android:id="@+id/volume_seekbar"
+                    android:contentDescription="@string/top_volume"
                     android:layout_width="262dp"
                     android:layout_height="15dp"
                     android:layout_marginLeft="8dp"
@@ -346,6 +353,7 @@
                     />
                 <ImageView
                     android:id="@+id/volume_go_iv"
+                    android:contentDescription="@string/sound_more_set"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginLeft="3dp"
@@ -375,6 +383,7 @@
 
                 <SeekBar
                     android:id="@+id/brightness_seekbar"
+                    android:contentDescription="@string/a11y_brightness"
                     android:layout_width="262dp"
                     android:layout_height="15dp"
                     android:layout_marginLeft="8dp"

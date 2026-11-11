@@ -91,6 +91,7 @@
                 />
             <ImageView
                 android:id="@+id/iv_close"
+                android:contentDescription="@string/close"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_marginEnd="8dp"

@@ -39,6 +39,7 @@
 
 			<ImageView
 				android:id="@+id/notif_w_close_btn"
+				android:contentDescription="@string/close"
 				android:layout_height="22dp"
 				android:layout_width="22dp"
 				android:src="@android:drawable/ic_menu_close_clear_cancel"

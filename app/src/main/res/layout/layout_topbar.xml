@@ -68,6 +68,7 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/input_delete"
+                    android:contentDescription="@string/top_ime"
                     android:layout_toLeftOf="@id/wifi_btn"
                     />
 
@@ -77,6 +78,7 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_wifi_unselect_full"
+                    android:contentDescription="@string/top_wifi"
                     />
 
                 <ImageView
@@ -85,6 +87,7 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_volume_top_max"
+                    android:contentDescription="@string/top_volume"
                     />
 
                 <ImageView
@@ -93,6 +96,7 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_battery_chargeing_100"
+                    android:contentDescription="@string/top_battery"
                     />
                 <ImageView
                     android:id="@+id/search_btn"
@@ -100,6 +104,7 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_search"
+                    android:contentDescription="@string/top_search"
                     />
                 <ImageView
                     android:id="@+id/control_btn"
@@ -108,6 +113,7 @@
                     android:scaleType="fitXY"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_control"
+                    android:contentDescription="@string/top_control"
                     />
 
                 <ImageView
@@ -117,6 +123,7 @@
                     android:scaleType="fitXY"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_notification_red"
+                    android:contentDescription="@string/top_message"
                     />
                 <ImageView
                     android:id="@+id/about_btn"
@@ -124,12 +131,14 @@
                     android:layout_height="@dimen/topbar_icon_size"
                     android:padding="@dimen/topbar_icon_padding"
                     android:src="@drawable/icon_power"
+                    android:contentDescription="@string/top_power"
                     />
 
                 <LinearLayout
                     android:id="@+id/desktop_btn"
                     android:layout_width="14dp"
-                    android:layout_height="24dp">
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/top_home">
                     <View
                         android:layout_width="1dp"
                         android:layout_height="match_parent"

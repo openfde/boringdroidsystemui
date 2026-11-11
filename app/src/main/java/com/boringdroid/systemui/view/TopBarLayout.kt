@@ -36,6 +36,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
@@ -145,10 +146,44 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
 
     private var btnList: MutableList<ImageView?> ?= null
+
+    // --- 无障碍 / 自动化状态 ---
+    // contentDescription 在 layout_topbar.xml 里静态配置；
+    // 这里只维护会变化的状态，由 delegate 在生成节点时读取。
+    private var wifiConnected = false
+    private var hasUnreadNotification = false
+    private var batteryPercent = -1
+    private var volumePercent = -1
+    private var currentImeLabel: String? = null
+
     init {
         windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         activityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    }
+
+    /**
+     * 给状态栏控件补机器可读的状态。
+     *
+     * - contentDescription：静态标识，在 layout_topbar.xml 里配置（走 strings.xml，多语言）
+     * - checkable/checked：二态（Wi-Fi 是否连通、是否有未读通知），Appium 读 checked
+     * - stateDescription：文本状态（电量 / 音量 / 当前输入法），TalkBack 会念出来
+     */
+    private fun View.bindA11yState(
+        checkable: Boolean = false,
+        checkedProvider: (() -> Boolean)? = null,
+        stateProvider: (() -> CharSequence?)? = null,
+    ) {
+        accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                if (checkable) {
+                    info.isCheckable = true
+                    info.isChecked = checkedProvider?.invoke() == true
+                }
+                stateProvider?.invoke()?.let { info.stateDescription = it }
+            }
+        }
     }
 
     fun initState() {
@@ -175,6 +210,14 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         searchBtn?.tooltipText = context.resources.getString(R.string.top_search)
         systemTray = findViewById(R.id.system_tray)
         btnList = mutableListOf(displayStatusBtn, imeBtn, wifiBtn, volumeBtn, batteryBtn, controlBtn, powerBtn, searchBtn, notificationBtn)
+
+        // 自动化 / 无障碍语义：二态用 checked，数值状态用 stateDescription
+        wifiBtn?.bindA11yState(checkable = true, checkedProvider = { wifiConnected })
+        notificationBtn?.bindA11yState(checkable = true, checkedProvider = { hasUnreadNotification })
+        batteryBtn?.bindA11yState(stateProvider = { if (batteryPercent >= 0) "$batteryPercent%" else null })
+        volumeBtn?.bindA11yState(stateProvider = { if (volumePercent >= 0) "$volumePercent%" else null })
+        imeBtn?.bindA11yState(stateProvider = { currentImeLabel })
+
         registerNotification()
         registInputMethodChange()
         makePowerWindow(powerBtn)
@@ -320,6 +363,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
     private fun initVolume() {
         val volume = VolumeProvider().getVolume()
+        volumePercent = volume
         if (volume == 0) {
             volumeBtn?.setImageResource(R.drawable.icon_volume_top_mute)
         } else if (volume < 100.div(3)) {
@@ -350,6 +394,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     fun netStatusLister(netState : String){
         try {
             Log.d(TAG, "onChange() called with netState = $netState")
+            wifiConnected = netState == NETCONNECTED || netState == NET_RESTRICTED_CONNECTED
             wifiBtn?.apply {
                 setImageResource(if (netState == NET_RESTRICTED_CONNECTED || netState == NETCONNECTED) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
             }
@@ -363,6 +408,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         controlWindow?.wifiStatusListen()
         val netStatus = Utils.isNetworkAvailable(getContext());
         Log.d(TAG, "wifiStatusListen() called with: netStatus = $netStatus")
+        wifiConnected = netStatus
         wifiBtn?.apply {
             setImageResource(if (netStatus) R.drawable.icon_wifi else R.drawable.icon_wifi_un)
         }
@@ -473,6 +519,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             if (currentInputMethod == it.id) {
                 imeBtn?.visibility = VISIBLE
                 imeBtn?.setImageDrawable(it.loadIcon(context!!.packageManager))
+                currentImeLabel = it.loadLabel(context!!.packageManager).toString()
             }
         }
         imeSwitchWindow?.setInputMethodList(inputMethodList)
@@ -730,6 +777,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     override fun updateCount(type: NotificationReceiver.ACTIONTYPE, notifications: Array<DesktopNotification>?) {
         this.notifications = notifications
         val count =  if (notifications.isNullOrEmpty()) 0 else notifications!!.size
+        hasUnreadNotification = count > 0
 //        Log.d(TAG, "updateCount: $count")
         if(count > 0){
             notificationBtn?.setImageResource(R.drawable.icon_notification_red)
@@ -1000,6 +1048,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         this.percentage = percentage
         this.status = status
         this.plugged = plugged
+        batteryPercent = percentage.toInt()
 
         if(batteryBtn == null){
             needUpdateBattery = true

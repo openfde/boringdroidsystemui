@@ -48,6 +48,7 @@
             android:layout_width="32dp"
             android:src="@drawable/ic_arrow_back"
             android:id="@+id/pin_entry_left"
+            android:contentDescription="@string/a11y_move_left"
 			android:visibility="gone"
             android:background="@drawable/circle"
 			android:padding="5dp"/>
@@ -67,6 +68,7 @@
 			android:visibility="gone"
             android:src="@drawable/ic_arrow_right"
             android:id="@+id/pin_entry_right"
+            android:contentDescription="@string/a11y_move_right"
             android:background="@drawable/circle"
 			android:padding="5dp"/>
 
