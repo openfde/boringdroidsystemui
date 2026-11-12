@@ -333,10 +333,10 @@ class TopBarControlWindow(
         } else {
             recordTextView?.text = getContext().resources.getString(R.string.recordscreen_string)
         }
-        updateDisplayTooltip()
+        refreshDisplayTooltip()
     }
 
-    private fun updateDisplayTooltip() {
+    fun refreshDisplayTooltip() {
         val status = ExternalDisplayHelper.queryStatus()
         val state = when {
             !status.serviceReady ->
