@@ -15,16 +15,20 @@
  */
 package vendor.openfde.display;
 
+import vendor.openfde.display.IOpenfdeDisplayCallback;
+
 /**
- * Java client view of vendor.openfde.display.IOpenfdeDisplay V2.
+ * Java client view of vendor.openfde.display.IOpenfdeDisplay V3.
  *
  * The vendor interface is declared with @VintfStability. That annotation is
  * intentionally omitted here because the plugin is built as an app instead of
- * an aidl_interface module, but the method order must stay identical to V2.
+ * an aidl_interface module, but the method order must stay identical to V3:
+ * the first four methods, then registerCallback.
  */
 interface IOpenfdeDisplay {
     boolean openExternalDisplay();
     boolean closeExternalDisplay();
     boolean getExternalDisplayState();
     boolean isExternalDisplaySupported();
+    void registerCallback(IOpenfdeDisplayCallback callback);
 }

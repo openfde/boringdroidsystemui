@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -70,6 +71,7 @@ import com.boringdroid.systemui.utils.DeviceUtils
 import com.boringdroid.systemui.utils.DeviceUtils.BASEURL
 import com.boringdroid.systemui.utils.DeviceUtils.URL_FDEMODE
 import com.boringdroid.systemui.utils.ExternalDisplayHelper
+import com.boringdroid.systemui.utils.ExternalDisplayStatus
 import com.boringdroid.systemui.utils.ScreenSizeUtils
 import com.boringdroid.systemui.utils.Utils
 import com.boringdroid.systemui.view.AbsTopPopWindow.WindowDismissListener
@@ -87,10 +89,11 @@ import okhttp3.Call
 class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     RelativeLayout(context, attrs), View.OnClickListener, NotificationUpdater,
     TopBarControlWindow.TopbarLayoutController, NotificationListener, BatteryReceiver.BatteryListener,
-    AudioHelper.OnAudioChangeListener {
+    AudioHelper.OnAudioChangeListener, ExternalDisplayHelper.OnExternalDisplayEventListener {
 
     companion object {
         var inited: Boolean = false
+        private const val EXTERNAL_DISPLAY_POLL_INTERVAL_MS = 5000L
     }
 
     var aboutWindow: AboutWindow ?= null
@@ -111,7 +114,10 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     private var volumeBtn: ImageView? = null
     private var batteryBtn: ImageView? = null
     private var controlBtn: ImageView? = null
+    private var displayStatusContainer: FrameLayout? = null
     private var displayStatusBtn: ImageView? = null
+    private var displayStatusDot: View? = null
+    private var lastExternalDisplayStatus: ExternalDisplayStatus? = null
     private var searchBtn: ImageView? = null
     private var homeBtn: LinearLayout? = null
     private var powerBtn: ImageView? = null
@@ -143,6 +149,12 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
     private var volumeWindow:TopBarVolumeWindow? = null
     private val x11TrayImageViesList: MutableList<ImageView> = ArrayList()
+    private val externalDisplayPollRunnable = object : Runnable {
+        override fun run() {
+            refreshExternalDisplayStatus()
+            postDelayed(this, EXTERNAL_DISPLAY_POLL_INTERVAL_MS)
+        }
+    }
 
 
     private var btnList: MutableList<ImageView?> ?= null
@@ -199,7 +211,9 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         batteryBtn = findViewById(R.id.battery_btn)
         controlBtn = findViewById(R.id.control_btn)
         controlBtn?.tooltipText = context.resources.getString(R.string.top_control)
+        displayStatusContainer = findViewById(R.id.display_status_container)
         displayStatusBtn = findViewById(R.id.display_status_btn)
+        displayStatusDot = findViewById(R.id.display_status_dot)
         notificationBtn = findViewById(R.id.notifications_btn)
         notificationBtn?.tooltipText = context.resources.getString(R.string.top_message)
         powerBtn = findViewById(R.id.about_btn)
@@ -263,6 +277,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
 
         wifiStatusListen();
         refreshExternalDisplayStatus()
+        ExternalDisplayHelper.addListener(this)
+        // Callback events are the primary update path. Poll as a safety net for HAL
+        // builds that do not emit the supported/unsupported events on hotplug.
+        removeCallbacks(externalDisplayPollRunnable)
+        postDelayed(externalDisplayPollRunnable, EXTERNAL_DISPLAY_POLL_INTERVAL_MS)
     }
 
     fun getFdeMode(){
@@ -331,6 +350,22 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                     iv.layoutParams = lp
                     iv.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
                 }
+            }
+            displayStatusContainer?.layoutParams?.let { lp ->
+                lp.width = iconSize
+                lp.height = iconSize
+                displayStatusContainer?.layoutParams = lp
+            }
+            displayStatusDot?.layoutParams?.let { lp ->
+                val dotSize = (7 * density).toInt()
+                lp.width = dotSize
+                lp.height = dotSize
+                if (lp is FrameLayout.LayoutParams) {
+                    val margin = (3 * density).toInt()
+                    lp.topMargin = margin
+                    lp.marginEnd = margin
+                }
+                displayStatusDot?.layoutParams = lp
             }
             // 顶栏整体高度
             layoutParams?.let { lp ->
@@ -461,6 +496,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     public fun unregisterNotification() {
+        removeCallbacks(externalDisplayPollRunnable)
+        ExternalDisplayHelper.removeListener(this)
         try {
             context.unregisterReceiver(notificationReceiver)
         } catch (e: IllegalArgumentException) {
@@ -830,24 +867,32 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         highlight?.background = context!!.resources.getDrawable(R.drawable.top_oval_click)
     }
 
+    override fun onExternalDisplayEvent(event: Int) {
+        Log.d(TAG, "onExternalDisplayEvent event=$event")
+        refreshExternalDisplayStatus()
+        controlWindow?.refreshDisplayTooltip()
+    }
+
     /**
-     * Refreshes the top-bar indicator from the current service state. Once the display
-     * state broadcast is defined, its receiver can call this method directly.
+     * Refreshes the top-bar indicator from the current service state.
      */
     fun refreshExternalDisplayStatus(): Boolean {
+        val container = displayStatusContainer ?: return false
         val button = displayStatusBtn ?: return false
         val ctx = context ?: return false
         val status = ExternalDisplayHelper.queryStatus()
-        Log.d(
-            TAG,
-            "refreshExternalDisplayStatus serviceReady=${status.serviceReady} " +
-                "supported=${status.supported} enabled=${status.enabled}"
-        )
+        if (status != lastExternalDisplayStatus) {
+            lastExternalDisplayStatus = status
+            Log.d(
+                TAG,
+                "refreshExternalDisplayStatus serviceReady=${status.serviceReady} " +
+                    "supported=${status.supported} enabled=${status.enabled}"
+            )
+        }
         if (!status.available) {
-            button.apply {
-                visibility = View.GONE
-                isClickable = false
-            }
+            container.visibility = View.GONE
+            button.isClickable = false
+            displayStatusDot?.visibility = View.GONE
             return false
         }
 
@@ -860,19 +905,20 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
             R.string.external_display_topbar_tooltip,
             ctx.getString(stateRes)
         )
+        container.visibility = View.VISIBLE
         button.apply {
             visibility = View.VISIBLE
+            // Keep the monitor glyph the same dark color as the other status icons;
+            // the state is shown by the blue dot so it stays visible on blue wallpapers.
             imageTintList = ColorStateList.valueOf(
-                ctx.getColor(
-                    if (status.enabled) R.color.external_display_enabled_tint
-                    else R.color.external_display_connected_tint
-                )
+                ctx.getColor(R.color.external_display_connected_tint)
             )
             isClickable = true
             alpha = 1f
             tooltipText = tooltip
             contentDescription = tooltip
         }
+        displayStatusDot?.visibility = if (status.enabled) View.VISIBLE else View.GONE
         return true
     }
 
