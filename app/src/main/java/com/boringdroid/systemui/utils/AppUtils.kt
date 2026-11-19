@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -13,6 +12,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
+import android.provider.Settings
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -368,28 +368,38 @@ object AppUtils {
     }
 
     public fun toConpatiblePage(mContext: Context, packageName: String, appName: String) {
-        val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$PrivacyDashboardActivity")
-        intent.component = cn;
+        // Settings$PrivacyDashboardActivity 的 action（FDE 把这一页实现成「应用兼容设置」）
+        val intent = Intent(Settings.ACTION_PRIVACY_SETTINGS)
         intent.putExtra("appName", appName)
         intent.putExtra("packageName",packageName)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        mContext.startActivity(intent)
+        SettingsLauncher.open(mContext, intent)
     }
 
 
     public fun toWifiPage(mContext: Context) {
-        val intent = Intent()
-        val cn: ComponentName? = ComponentName.unflattenFromString("com.android.settings/.Settings\$NetworkDashboardActivity")
-        intent.component = cn;
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        mContext.startActivity(intent)
+        // 设备实测：WIFI_SETTINGS → Settings$WifiSettingsActivity（NetworkProviderSettings）
+        SettingsLauncher.openFirst(
+            mContext,
+            Intent(Settings.ACTION_WIFI_SETTINGS),
+            // 兜底：Settings$NetworkDashboardActivity（FDE 自制的网络面板）
+            Intent(Settings.ACTION_WIRELESS_SETTINGS),
+        )
+    }
+
+    public fun toPowerPage(mContext: Context) {
+        // 电池用量页在这台机器上被 PackageManager 禁用了（无电池），所以按顺序退：
+        // POWER_USAGE_SUMMARY → BATTERY_SAVER_SETTINGS → Settings 首页
+        SettingsLauncher.openFirst(
+            mContext,
+            Intent(Intent.ACTION_POWER_USAGE_SUMMARY),
+            Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS),
+            Intent(Settings.ACTION_SETTINGS),
+        )
     }
 
     fun toBlePage(mContext: Context) {
-        val intent = Intent("android.settings.BLUETOOTH_PAIRING_SETTINGS")
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        mContext.startActivity(intent)
+        // Settings$BlueToothPairingActivity 的 action
+        SettingsLauncher.open(mContext, Intent("android.settings.BLUETOOTH_PAIRING_SETTINGS"))
     }
 
 }

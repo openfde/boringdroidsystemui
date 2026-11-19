@@ -44,6 +44,7 @@ import com.boringdroid.systemui.receiver.DynamicReceiver.Companion.SUMMARY_NOTIF
 import com.boringdroid.systemui.utils.AppUtils
 import com.boringdroid.systemui.utils.AudioHelper
 import com.boringdroid.systemui.utils.ExternalDisplayHelper
+import com.boringdroid.systemui.utils.SettingsLauncher
 import com.boringdroid.systemui.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -414,9 +415,7 @@ class TopBarControlWindow(
             takeScreenshot()
         }else if(v == settingBtn){
             dismiss()
-            val intent = Intent(Settings.ACTION_SETTINGS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            getContext().startActivity(intent)
+            SettingsLauncher.open(getContext(), Intent(Settings.ACTION_SETTINGS))
         }else if(v == regionshotBtn){
             dismiss()
             Utils.sendKeyWithModifiers(

@@ -8,12 +8,12 @@ import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.InputMethodInfo
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.adapter.ImeAdapter
 import com.boringdroid.systemui.adapter.OnItemClickListener
+import com.boringdroid.systemui.utils.SettingsLauncher
 
 
 class TopBarImeSwitchWindow(
@@ -68,9 +68,7 @@ class TopBarImeSwitchWindow(
         })
         settingTv?.setOnClickListener{
             dismiss()
-            val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            getContext().startActivity(intent)
+            SettingsLauncher.open(getContext(), Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
     }
 

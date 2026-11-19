@@ -1,6 +1,5 @@
 package com.boringdroid.systemui.view
 
-import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -16,6 +15,7 @@ import android.widget.Toast
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.utils.ExternalDisplayHelper
 import com.boringdroid.systemui.utils.ExternalDisplayStatus
+import com.boringdroid.systemui.utils.SettingsLauncher
 
 /**
  * Compact external-display panel opened from the control center or the top-bar status icon.
@@ -214,48 +214,28 @@ class TopBarDisplayWindow(
      * be launched on a particular build.
      */
     private fun openExternalDisplaySettings() {
-        val opened = try {
-            val intent = Intent(Intent.ACTION_MAIN).apply {
-                component = ComponentName(SETTINGS_PACKAGE, SETTINGS_SUB_SETTINGS)
-                putExtra(EXTRA_SHOW_FRAGMENT, EXTERNAL_DISPLAY_FRAGMENT)
-                putExtra(
-                    EXTRA_SHOW_FRAGMENT_TITLE,
-                    getContext().getString(R.string.external_display_title)
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            getContext().startActivity(intent)
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open external display settings page", e)
-            false
-        }
-
-        if (!opened) {
             openConnectedDevicesSettings()
-        }
     }
 
     /**
      * Fallback: AOSP Settings maps ACTION_BLUETOOTH_SETTINGS to
      * Settings$ConnectedDeviceDashboardActivity, i.e. the "Connected devices" page.
      */
+    /**
+     * 外接显示器页（TabbedDisplayPreferenceFragment）在 Settings 里没有导出入口，
+     * SubSettings 本身也是 exported=false，从插件里起不来。所以按顺序退：
+     * 显示设置页 → 连接设备页（带 highlight）。
+     */
     private fun openConnectedDevicesSettings() {
-        try {
-            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val connectedDevices = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
             // Highlight/scroll to the External display entry when the page opens.
-            intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, EXTERNAL_DISPLAY_PREFERENCE_KEY)
-            getContext().startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            Log.e(TAG, "Connected devices settings activity not found", e)
-            Toast.makeText(
-                getContext(),
-                R.string.external_display_settings_unavailable,
-                Toast.LENGTH_SHORT
-            ).show()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open connected devices settings", e)
+            .putExtra(EXTRA_FRAGMENT_ARG_KEY, EXTERNAL_DISPLAY_PREFERENCE_KEY)
+        val opened = SettingsLauncher.openFirst(
+            getContext(),
+            Intent("android.settings.EXTERNAL_DISPLAY_SETTINGS"),
+            connectedDevices,
+        )
+        if (!opened) {
             Toast.makeText(
                 getContext(),
                 R.string.external_display_settings_unavailable,
