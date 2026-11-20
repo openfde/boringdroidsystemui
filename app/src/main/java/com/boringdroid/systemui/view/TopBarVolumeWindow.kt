@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.boringdroid.systemui.R
 import com.boringdroid.systemui.data.AudioDevice
 import com.boringdroid.systemui.utils.AudioHelper
+import com.boringdroid.systemui.utils.SettingsLauncher
 import com.boringdroid.systemui.utils.Utils
 
 
@@ -222,10 +223,14 @@ class TopBarVolumeWindow(
             updateVolume(devices, isInput)
         } else if (v == moreTv){
             dismiss()
-            val intent = Intent()
-            intent.setAction(Settings.ACTION_SOUND_SETTINGS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            getContext().startActivity(intent)
+            // 设备实测：android.settings.SOUND_SETTINGS 在这台机器的 Settings 里没有 handler
+            // （manifest 里 Settings$SoundSettingsActivity 被注释掉了，只有首页磁贴能进),
+            // 所以解析不到就退回 Settings 首页，别再抛 ActivityNotFoundException。
+            SettingsLauncher.openFirst(
+                getContext(),
+                Intent(Settings.ACTION_SOUND_SETTINGS),
+                Intent(Settings.ACTION_SETTINGS),
+            )
         }
     }
 

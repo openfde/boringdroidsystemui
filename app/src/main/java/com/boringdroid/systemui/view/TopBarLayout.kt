@@ -5,7 +5,6 @@ import android.app.ActivityManager
 import android.app.PendingIntent
 import android.app.RemoteAction
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
@@ -791,12 +790,7 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
         }else if(v == wifiBtn){
             AppUtils.toWifiPage(context)
         } else if(v == batteryBtn){
-//            val intent = Intent()
-//            val cn: ComponentName? =
-//                ComponentName.unflattenFromString("com.android.settings/.Settings\$PowerUsageSummaryActivity")
-//            intent.component = cn;
-//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//            context.startActivity(intent)
+            AppUtils.toPowerPage(context)
         }
     }
 

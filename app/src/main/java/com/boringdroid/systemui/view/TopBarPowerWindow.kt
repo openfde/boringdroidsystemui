@@ -20,6 +20,7 @@ import com.boringdroid.systemui.data.FdeModeResult
 import com.boringdroid.systemui.data.UpdateResponse
 import com.boringdroid.systemui.data.VersionCheckResponse
 import com.boringdroid.systemui.utils.DeviceUtils
+import com.boringdroid.systemui.utils.SettingsLauncher
 import com.boringdroid.systemui.utils.Utils
 
 class TopBarPowerWindow(
@@ -149,9 +150,7 @@ class TopBarPowerWindow(
     }
 
     private fun showSetting() {
-        val intent = Intent(Settings.ACTION_SETTINGS)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        getContext().startActivity(intent)
+        SettingsLauncher.open(getContext(), Intent(Settings.ACTION_SETTINGS))
     }
 }
 
