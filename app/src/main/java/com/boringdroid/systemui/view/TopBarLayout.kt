@@ -93,6 +93,11 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     companion object {
         var inited: Boolean = false
         private const val EXTERNAL_DISPLAY_POLL_INTERVAL_MS = 5000L
+        // 与 layout_topbar.xml 中 date_btn 的 autoSize* 属性保持一致；
+        // 配置变化后按新的 scaledDensity 重新换算成 px。
+        private const val CLOCK_AUTO_SIZE_MIN_SP = 10
+        private const val CLOCK_AUTO_SIZE_MAX_SP = 16
+        private const val CLOCK_AUTO_SIZE_STEP_SP = 1
     }
 
     var aboutWindow: AboutWindow ?= null
@@ -329,8 +334,8 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
     }
 
     /**
-     * 系统“显示大小”（density）变化后，按新 density 重新解析顶栏自身和图标的 dp 尺寸。
-     * 顶栏 View 是一次性 inflate 的，XML 里的 dp 值不会自动跟随 density 更新，
+     * 系统“显示大小”（density）或“字体大小”（fontScale）变化后，按新配置重新解析顶栏自身、
+     * 图标和时钟的尺寸。顶栏 View 是一次性 inflate 的，XML 里的 dp/sp 值不会自动跟随新配置，
      * 这里原地刷新，避免整体重建导致 X11 托盘等状态丢失。
      */
     fun refreshDensityDependentSizes() {
@@ -386,8 +391,17 @@ class TopBarLayout(context: Context?, attrs: AttributeSet?) :
                     iv.layoutParams = lp
                 }
             }
-            // 时钟字号（sp 会按新的 scaledDensity 重新解析，autoSize 上限随之生效）
-            dateBtn?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            // 时钟开了 autoSizeTextType="uniform" 时，TextView.setTextSize() 是空实现；
+            // 而且 autoSize 的 min/max 是 inflate 时按当时的 scaledDensity 换算成 px 缓存的，
+            // 不随 Configuration 更新。必须按当前密度重新下发 sp 配置，否则字号会一直
+            // 停留在启动时的值，只有重启（重新 inflate）才生效。
+            dateBtn?.setAutoSizeTextTypeUniformWithConfiguration(
+                CLOCK_AUTO_SIZE_MIN_SP,
+                CLOCK_AUTO_SIZE_MAX_SP,
+                CLOCK_AUTO_SIZE_STEP_SP,
+                TypedValue.COMPLEX_UNIT_SP
+            )
+            dateBtn?.requestLayout()
             requestLayout()
             Log.d(TAG, "refreshDensityDependentSizes: density=$density iconSize=$iconSize")
         } catch (e: Exception) {
